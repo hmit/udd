@@ -1,0 +1,19 @@
+dbname: udd
+types:
+        sources: echo
+        packages: python packages-gatherer.py
+
+archs:
+ [alpha, amd64, arm, armeb, armel, hppa, hurd-i386,
+  i386, i486, ia64, kfreebsd-amd64, kfreebsd-i386, m68k, mips,
+  mipsel, powerpc, ppc64, s390, sparc, all, any]       
+
+debian-lenny:
+        archs: [alpha, amd64, arm, armeb, armel, hppa, hurd-i386,
+                i386, i486, ia64, kfreebsd-amd64, kfreebsd-i386, m68k, mips,
+                mipsel, powerpc, ppc64, s390, sparc]       
+        directory: /org/ftp.debian.org/dists/lenny/
+        parts: [main, contrib, non-free]
+        distribution: debian-lenny
+        type: packages
+
