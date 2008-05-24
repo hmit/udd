@@ -1,79 +1,112 @@
 #/usr/bin/env python
-# Last-Modified: <Fri 23 May 2008 19:33:11 CEST>
+# Last-Modified: <Sat May 24 11:34:28 2008>
 
 from psycopg2 import connect
-from debian_bundle.deb822 import Packages
-import os
-import syck
-import sys
+import debian_bundle.deb822
 import gzip
+import os
+import sys
+import aux
+from aux import ConfigException
 
-archs = []
+# A mapping from the architecture names to architecture IDs
+archs = {}
+# A mapping from <package-name><version> to 1
+# If <package-name><version> is included in this dictionary, this means,
+# that we've already added this package with this version for architecture 'all'
+# to the database. Needed because different architectures include packages
+# for architecture 'all' with the same version, and we don't want these duplicate
+# entries
+imported_all_pkgs = {}
+# The ID for the distribution we want to include
 distr_id = None
 
-def get_archs(conn):
-  c = conn.cursor();
-  c.execute("SELECT * from arch_ids")
-  result = {}
-  for row in c.fetchall():
-    result[row[1]] = row[0]
-  return result
+def import_packages(conn, sequence):
+  """Import the packages from the sequence into the database-connection conn.
 
-def get_distr_id(conn, distr):
-  c = conn.cursor();
-  c.execute("SELECT distr_id from distr_ids WHERE name = '" + distr + "'")
-  rows = c.fetchall()
-  if len(rows) == 0:
-    return None
-  elif len(rows) > 1:
-    print "Warning: Distribution %s exists more than once in distr_ids" % distr
-  else:
-    return rows[0][0]
-  
+  Sequence has to have an iterator interface, that yields a line every time it
+  is called.The Format of the sequence is expected to be that of a debian
+  packages file."""
+  global imported_all_pkgs
+  # The fields that are to be read. Other fields are ignored
+  fields = ('Architecture', 'Package', 'Version')
+  for control in debian_bundle.deb822.Packages.iter_paragraphs(sequence, fields):
+    # Check whether packages with architectue 'all' have already been
+    # imported
+    if control['Architecture'] == 'all':
+      t = control['Package'] + control['Version']
+      if t in imported_all_pkgs:
+	continue
+      imported_all_pkgs[t] = 1
 
-def import_pkgs(file, conn):
-  "Import file specified by file into database"
-  try:
-    for control in Packages(gzip.open(file)):
-      c = conn.cursor()
-      c.execute("INSERT INTO pkgs (name, distr_id, arch_id, version, src_id) VALUES ('%s', %d, %d, '%s', 0)" % (control["Package"], distr_id, archs[control["Architecture"]], control["Version"]))
-  except Exception, message:
-    print "Could not parse %s: %s" % (file, message)
+    cur = conn.cursor()
+    query = "INSERT INTO pkgs (name, distr_id, arch_id, version, src_id)\
+    VALUES ('%s', %d, %d, '%s', 0)" % (control["Package"], distr_id, archs[control["Architecture"]], control["Version"])
+    cur.execute(query)
 
-if __name__ == '__main__':
+def main():
+  global distr_id
+  global archs
   if len(sys.argv) != 3:
-    print "Usage: %s <config> <source>" % (sys.argv[0])
+    print "Usage: %s <config> <source>" % sys.argv[0]
     sys.exit(1)
 
-  cfg_file = sys.argv[1]
-  config = syck.load(open(cfg_file))
-  if not 'dbname' in config:
-    print "dbname not specified in " + cfg_file
-    sys.exit(1)
+  src_name = sys.argv[2]
+  cfg_path = sys.argv[1]
+  config = None
+  try:
+    config = aux.load_config(open(cfg_path).read())
+  except ConfigException, e:
+    raise ConfigException, "Configuration error in " + cfg_path +": " + e.message
 
-  source_name = sys.argv[2]
-  if not source_name in config:
-    print "%s not specified in %s" % (source_name, cfg_file)
-    sys.exit(1)
+  if not src_name in config:
+    raise ConfigException, "Source %s not specified in " + cfg_path
+  src_cfg = config[src_name]
 
-  source_config = config[source_name]
+  if not 'directory' in src_cfg:
+    raise ConfigException('directory not specified for source %s in file %s' %
+	(src_name, cfg_path))
+
+  if not 'archs' in src_cfg:
+    raise ConfigException('archs not specified for source %s in file %s' %
+	(src_name, cfg_path))
+
+  if not 'parts' in src_cfg:
+    raise ConfigException('parts not specified for source %s in file %s' %
+	(src_name, cfg_path))
+
+  if not 'distribution' in src_cfg:
+    raise ConfigException('distribution not specified for source %s in file %s' %
+	(src_name, cfg_path))
+
+  aux.debug = config['debug']
+
   conn = connect('dbname=' + config['dbname'])
-  archs = get_archs(conn)
-  
-  dir = source_config['directory']
-  distr = source_config['distribution']
-  distr_id = get_distr_id(conn, distr)
-  if distr_id is None:
-    c = conn.cursor()
-    c.execute("INSERT INTO distr_ids (name) VALUES ('%s')" % (distr))
-    distr_id = get_distr_id(conn, distr)
-    if distr_id is None:
-      print "Error: Could not create distr_id"
-      sys.exit(1)
 
-  for part in source_config['parts']:
-    for arch in source_config['archs']:
-      import_pkgs(os.path.join(dir, part, 'binary-' + arch, 'Packages.gz'), conn)
+  # Get distribution ID. If it does not exist, create it
+  distr_ids = aux.get_distrs(conn)
+  if src_cfg['distribution'] not in distr_ids:
+    aux.insert_distr(conn, src_cfg['distribution'])
+    distr_ids = aux.get_distrs(conn)
+  distr_id = distr_ids[src_cfg['distribution']]
+
+  archs = aux.get_archs(conn)
+
+  # For every part and every architecture, import the packages into the DB
+  for part in src_cfg['parts']:
+    for arch in src_cfg['archs']:
+      path = os.path.join(src_cfg['directory'], part, 'binary-' + arch, 'Packages.gz')
+      try:
+	aux.print_debug("Reading file " + path)
+	file = gzip.open(path)
+	lines = aux.BufferedLineReader(file, 1024*1024*4)
+	aux.print_debug("Importing from " + path)
+	import_packages(conn, lines)
+	file.close()
+      except IOError, (e, message):
+	print "Could not read packages from %s: %s" % (path, message)
 
   conn.commit()
 
+if __name__ == '__main__':
+  main()

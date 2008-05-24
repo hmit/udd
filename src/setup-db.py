@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Last-Modified: <Fri 23 May 2008 18:19:25 CEST>
+# Last-Modified: <Sat May 24 11:29:22 2008>
 # Starting from an empty database, create the necessary tables
 
 from psycopg2 import connect
@@ -12,7 +12,7 @@ if __name__ == '__main__':
     sys.exit(1)
 
   # Load configuration
-  config = syck.load(open(sys.argv[1]))
+  config = syck.load(open(sys.argv[1]).read())
   # Check configuration
   if not 'dbname' in config:
     print "dbname not specified in" + sys.argv[1]

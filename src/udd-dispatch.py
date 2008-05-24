@@ -1,14 +1,13 @@
 #!/usr/bin/env python
-# Last-Modified: <Fri 23 May 2008 19:31:29 CEST>
+# Last-Modified: <Sat May 24 11:57:17 2008>
 
 """Dispatch udd gatherers
 
 This script is used to dispatch the source gatherers of the UDD project."""
 
-import syck
-from psycopg2 import connect
 import sys
 from os import system
+import aux
 
 def print_help():
   print "Usage: " + sys.argv[0] + " <configuration> <source1> [source2 source3 ...]"
@@ -19,29 +18,18 @@ if __name__ == '__main__':
     sys.exit(1)
 
   # Check the configuration
-  config = syck.load(open(sys.argv[1]))
-  if not 'dbname' in config:
-    print "dbname not specified in configuration file " + sys.argv[1]
-    sys.exit(1)
-
-  if not 'types' in config:
-    print "types not specified in configuration file " + sys.argv[1]
-    sys.exit(1)
+  config = aux.load_config(open(sys.argv[1]).read())
 
   types = config['types']
 
-  # Process the sources
   for src in sys.argv[2:]:
     if not src in config:
-      print src + " is no data source according to " + sys.argv[1]
-      sys.exit(1)
+      raise aux.ConfigException("%s is not specified in %s" % (src, sys.argv[1]))
 
+  # Process the sources
+  for src in sys.argv[2:]:
     src_config = config[src]
-    if not 'type' in src_config:
-      print "Type of " + src + " not specified in " + sys.argv[1]
-      sys.exit(1)
     type = src_config['type']
-
     if not type in types:
       print "No script specified for type " + src['type']
       sys.exit(1)

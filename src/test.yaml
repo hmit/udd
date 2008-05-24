@@ -2,6 +2,7 @@ dbname: udd
 types:
         sources: echo
         packages: python packages-gatherer.py
+debug: 1
 
 archs:
  [alpha, amd64, arm, armeb, armel, hppa, hurd-i386,
@@ -9,11 +10,64 @@ archs:
   mipsel, powerpc, ppc64, s390, sparc, all, any]       
 
 debian-lenny:
-        archs: [alpha, amd64, arm, armeb, armel, hppa, hurd-i386,
-                i386, i486, ia64, kfreebsd-amd64, kfreebsd-i386, m68k, mips,
-                mipsel, powerpc, ppc64, s390, sparc]       
+        archs: [alpha, amd64, arm, armel, hppa,
+                i386, ia64, mips,
+                mipsel, powerpc, s390, sparc]       
         directory: /org/ftp.debian.org/dists/lenny/
         parts: [main, contrib, non-free]
         distribution: debian-lenny
         type: packages
 
+debian-sid:
+        archs: [alpha, amd64, arm, armel, hppa, hurd-i386,
+                i386, i486, ia64, kfreebsd-amd64, kfreebsd-i386, m68k, mips,
+                mipsel, powerpc, ppc64, s390, sparc]       
+        directory: /org/ftp.debian.org/dists/sid/
+        parts: [main, contrib, non-free]
+        distribution: debian-sid
+        type: packages
+
+debian-sarge:
+        archs: [alpha, amd64, arm, armel, hppa, hurd-i386,
+                i386, i486, ia64, kfreebsd-amd64, kfreebsd-i386, m68k, mips,
+                mipsel, powerpc, ppc64, s390, sparc]       
+        directory: /org/ftp.debian.org/dists/sarge/
+        parts: [main, contrib, non-free]
+        distribution: debian-sarge
+        type: packages
+
+debian-backports-etch:
+        archs: [alpha, amd64, arm, armel, hppa, hurd-i386,
+                i386, i486, ia64, kfreebsd-amd64, kfreebsd-i386, m68k, mips,
+                mipsel, powerpc, ppc64, s390, sparc]       
+        directory: /org/ftp.backports.org/dists/etch-backports/
+        parts: [main, contrib, non-free]
+        distribution: debian-backports-etch
+        type: packages
+
+debian-backports-sarge:
+        archs: [alpha, amd64, arm, armel, hppa, hurd-i386,
+                i386, i486, ia64, kfreebsd-amd64, kfreebsd-i386, m68k, mips,
+                mipsel, powerpc, ppc64, s390, sparc]       
+        directory: /org/ftp.backports.org/dists/sarge-backports/
+        parts: [main, contrib, non-free]
+        distribution: debian-backports-sarge
+        type: packages
+
+debian-volatile-etch:
+        archs: [alpha, amd64, arm, armel, hppa, hurd-i386,
+                i386, i486, ia64, kfreebsd-amd64, kfreebsd-i386, m68k, mips,
+                mipsel, powerpc, ppc64, s390, sparc]       
+        directory: /org/volatile.debian.org/dists/etch/volatile/
+        parts: [main, contrib, non-free]
+        distribution: debian-volatile-etch
+        type: packages
+
+debian-volatile-sarge:
+        archs: [alpha, amd64, arm, armel, hppa, hurd-i386,
+                i386, i486, ia64, kfreebsd-amd64, kfreebsd-i386, m68k, mips,
+                mipsel, powerpc, ppc64, s390, sparc]       
+        directory: /org/volatile.debian.org/dists/sarge/volatile/
+        parts: [main, contrib, non-free]
+        distribution: debian-volatile-sarge
+        type: packages
