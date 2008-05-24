@@ -1,0 +1,14 @@
+The configuration file is in YAML format.
+
+On the toplevel, dbname maps to the name of the database.
+
+Then there is a nested map called types. This maps to a map, which
+map types of data-sources to the scripts to execute to update these sources.
+
+archs maps to a sequence containing the possible architectures.
+
+The other entries all describe a data source. These are maps
+from source names to mappings. These nested mappings are required
+to have a filed that maps type to the type of the data source.
+How the other entries in the nested maps are interpreted depends on the
+type of the source. See the matching gatherer script for information.
