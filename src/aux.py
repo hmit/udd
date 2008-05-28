@@ -3,7 +3,7 @@
 import syck
 import sys
 
-# If debug is something that evaluates to True, then print_debug actually prints something :)
+# If debug is something that evaluates to True, then print_debug actually prints something
 debug = 0
 
 def get_archs(conn):
@@ -37,7 +37,9 @@ class ConfigException(Exception):
     return "ConfigException: " + self.message
 
 def load_config(seq):
-  """Load and check configuration from seq"""
+  """Load and check configuration from seq.
+
+  seq has to be a sequence type, containings strings (see syck.load)"""
   config = syck.load(seq)
   if not 'dbname' in config:
     raise ConfigException('dbname not specified')
