@@ -1,11 +1,12 @@
 #/usr/bin/env python
-# Last-Modified: <Thu May 29 21:00:51 2008>
+# Last-Modified: <Fri May 30 15:03:14 2008>
 
 import debian_bundle.deb822
 import gzip
 import os
 import sys
 import aux
+import tempfile
 from aux import ConfigException
 
 # A mapping from the architecture names to architecture IDs
@@ -59,7 +60,7 @@ def main():
     raise ConfigException, "Configuration error in " + cfg_path +": " + e.message
 
   if not src_name in config:
-    raise ConfigException, "Source %s not specified in " + cfg_path
+    raise ConfigException, "Source %s not specified in %s" %(src_name, cfg_path)
   src_cfg = config[src_name]
 
   if not 'directory' in src_cfg:
@@ -101,11 +102,16 @@ def main():
       path = os.path.join(src_cfg['directory'], part, 'binary-' + arch, 'Packages.gz')
       try:
 	aux.print_debug("Reading file " + path)
+	# Copy content from gzipped file to temporary file, so that apt_pkg is
+	# used by debian_bundle
+	tmp = tempfile.NamedTemporaryFile()
 	file = gzip.open(path)
-	lines = aux.BufferedLineReader(file, 1024*1024*4)
-	aux.print_debug("Importing from " + path)
-	import_packages(conn, lines)
+	tmp.write(file.read())
 	file.close()
+	tmp.seek(0)
+	aux.print_debug("Importing from " + path)
+	import_packages(conn, open(tmp.name))
+	tmp.close()
       except IOError, (e, message):
 	print "Could not read packages from %s: %s" % (path, message)
 
