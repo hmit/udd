@@ -17,11 +17,14 @@ def delete(conn):
     c.execute("DROP TABLE " + t)
 
 def setup(conn, config):
+  if 'script' not in config['setup']:
+    raise aux.ConfigException('Script not specified in setup')
+
   c = conn.cursor()
-  c.execute("CREATE TABLE pkgs (pkg_id serial, name text, distr_id int, arch_id int, version text, src_id int);")
-  c.execute("CREATE TABLE sources (src_id serial, name text, upload_date timestamp, uploader_key int, maintainer int, build_archs int, version text, distr_id int);")
-  c.execute("CREATE TABLE distr_ids (distr_id serial, name text);")
-  c.execute("CREATE TABLE arch_ids (arch_id serial, name text);")
+  for line in open(config['setup']['script']).readlines():
+    line = line.strip()
+    if line:
+      c.execute(line)
 
   #Setup architecture table
   for arch in config['general']['archs']:

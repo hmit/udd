@@ -17,6 +17,7 @@ delete:
 
 setup:
         type: setup
+        script: setup-db.sql
 
 debian-lenny:
   type: packages
