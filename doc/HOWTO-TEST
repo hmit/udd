@@ -1,0 +1,23 @@
+Howto test UDD on your site:
+
+You need a postgres-db, and access to the sources you want to import into your DB.
+
+The next step is to put the scripts and configuration somewhere. It doesn't
+really matter where.
+
+There is one file you have to edit/create new: a configuration file. This file
+has to be in YAML format. See config.README for information about this file,
+and have a look at test.yaml in the src directory.
+
+For all things you do, you run udd-dispatch.py <config-path> source1 [source2
+source3 ...]. config-path has to be the path of the configuration file you
+want to use. source1 through sourceN have to be sources specified in the
+configuration file.
+
+Before doing anything else, you have to run "udd-dispatch.py <config> setup",
+which will create the necessary tables in your database.
+
+From here, you can start importing source into your database. For each SOURCE,
+you run udd-dispatch.py <config> SOURCE.
+
+Now your sources should be included in your db.

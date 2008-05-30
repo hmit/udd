@@ -1,14 +1,31 @@
-The configuration file is in YAML format.
+OVERVIEW:
+  The configuration file is in YAML format.
 
-On the toplevel, dbname maps to the name of the database.
+  There are two types of stanzas: general, and source names.
 
-Then there is a nested map called types. This maps to a map, which
-map types of data-sources to the scripts to execute to update these sources.
+GENERAL:
+  In the 'general' part, you specify:
+    - dbname: The name of the database you will access
+    - debug: 0 if you want no debug output, 1 otherwise
+    - archs: The list of possible architectures we're going to handle
+    - types:
+      The list of possible source types. This consists of a mapping
+      from source names, to commands. These commands will be executed
+      when udd-dispatch.py is told to gather the matching type of source.
+      The command-line executed consists of the string specified for this
+      source type, with the configuration file path and the source name
+      appended
 
-archs maps to a sequence containing the possible architectures.
+SOURCES:
+  As said before, all other parts are sources.
+  For each source, you have to specify a type, which has to have
+  a corresponding entry in general->types. The rest of the entries depend on
+  the type of the source (see Below)
 
-The other entries all describe a data source. These are maps
-from source names to mappings. These nested mappings are required
-to have a filed that maps type to the type of the data source.
-How the other entries in the nested maps are interpreted depends on the
-type of the source. See the matching gatherer script for information.
+SOURCE TYPE packages:
+  Each of these sources correspond to a directory in the "dists" directory
+  of a Packages mirror. Required specification are:
+  * archs: List of architectures you want to read
+  * directory: The directory of the release you want to include
+  * parts: The parts you want to include
+  * distribution: The name of the distribution
