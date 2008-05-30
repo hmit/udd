@@ -2,6 +2,7 @@
 
 import syck
 import sys
+import psycopg2
 
 # If debug is something that evaluates to True, then print_debug actually prints something
 debug = 0
@@ -36,32 +37,39 @@ class ConfigException(Exception):
   def __str__(self):
     return "ConfigException: " + self.message
 
-def load_config(seq):
-  """Load and check configuration from seq.
+def open_connection(config):
+  """Open the connection to the database and return it"""
+  return psycopg2.connect("dbname=" + config['general']['dbname'])
 
-  seq has to be a sequence type, containings strings (see syck.load)"""
-  config = syck.load(seq)
-  if not 'dbname' in config:
+def load_config(str):
+  """Load and check configuration from the string"""
+  config = syck.load(str)
+  if not 'general' in config:
+    raise ConfigException('general section not specified')
+  
+  general = config['general']
+
+  if not 'dbname' in general:
     raise ConfigException('dbname not specified')
 
-  if not 'archs' in config:
+  if not 'archs' in general:
     raise ConfigException('archs not specified')
 
-  if not 'types' in config:
+  if not 'types' in general:
     raise ConfigException('types not specified')
 
-  if not 'debug' in config:
-    config['debug'] = 0
+  if not 'debug' in general:
+    general['debug'] = 0
 
   # Check that the source-entries are well-formed
   for name in config:
-    if name in ('dbname', 'archs', 'types', 'debug'):
+    if name == 'general':
       continue
 
     src = config[name]
     if not 'type' in src:
       raise ConfigException('type not specified for "%s"' % name)
-    if src['type'] not in config['types']:
+    if src['type'] not in general['types']:
       raise ConfigException('Type of %s not specified in types' % name)
 
   return config

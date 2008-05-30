@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Last-Modified: <Sat May 24 11:29:22 2008>
+# Last-Modified: <Thu May 29 20:47:58 2008>
 # Starting from an empty database, create the necessary tables
 
 from psycopg2 import connect
@@ -7,7 +7,7 @@ import syck
 import sys
 
 if __name__ == '__main__':
-  if len(sys.argv) != 2:
+  if len(sys.argv) < 2:
     print "Usage: %s <udd config file>" % (sys.argv[0])
     sys.exit(1)
 

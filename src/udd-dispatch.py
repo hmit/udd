@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Last-Modified: <Sat May 24 11:57:17 2008>
+# Last-Modified: <Thu May 29 21:02:10 2008>
 
 """Dispatch udd gatherers
 
@@ -20,7 +20,7 @@ if __name__ == '__main__':
   # Check the configuration
   config = aux.load_config(open(sys.argv[1]).read())
 
-  types = config['types']
+  types = config['general']['types']
 
   for src in sys.argv[2:]:
     if not src in config:

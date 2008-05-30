@@ -1,7 +1,6 @@
 #/usr/bin/env python
-# Last-Modified: <Sat May 24 11:34:28 2008>
+# Last-Modified: <Thu May 29 21:00:51 2008>
 
-from psycopg2 import connect
 import debian_bundle.deb822
 import gzip
 import os
@@ -79,9 +78,13 @@ def main():
     raise ConfigException('distribution not specified for source %s in file %s' %
 	(src_name, cfg_path))
 
-  aux.debug = config['debug']
+  #if not 'release' in src_cfg:
+  #  raise ConfigException('release not specified for source %s in file %s' %
+  #     (src_name, cfg_path))
 
-  conn = connect('dbname=' + config['dbname'])
+  aux.debug = config['general']['debug']
+
+  conn = aux.open_connection(config)
 
   # Get distribution ID. If it does not exist, create it
   distr_ids = aux.get_distrs(conn)
