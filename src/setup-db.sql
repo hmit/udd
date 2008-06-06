@@ -8,6 +8,8 @@ CREATE INDEX pkgs_id_idx ON pkgs (pkg_id);
 CREATE INDEX pkgs_name_idx ON pkgs (name);
 CREATE INDEX sources_id_idx ON sources (src_id);
 CREATE INDEX sources_name_idx ON sources (name);
+CREATE INDEX arch_id_idx ON arch_ids using btree (arch_id);
+CREATE INDEX pkgs_src_id_idx ON pkgs USING btree (srd_id);
 
 GRANT SELECT ON pkgs TO PUBLIC;
 GRANT SELECT ON sources TO PUBLIC;
