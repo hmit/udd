@@ -1,10 +1,11 @@
 general:
-  dbname: udd
+  dbname: udd-test
   types:
     sources: python sources_gatherer.py
     packages: python packages_gatherer.py
     setup: python db_manager.py
     delete: python db_manager.py
+    src-pkg: python srcs_and_pkgs.py
   debug: 1
 
   archs:
@@ -13,7 +14,7 @@ general:
     mipsel, powerpc, ppc64, s390, sparc, all, any, lpia, m32r, s390x, sh3,
     sh3eb, sh4, sh4eb, sh, knetbsd-i386, netbsd-alpha, sparc64,
     netbsd-i386, hurd-powerpc, kfreebsd-powerpc, netbsd-powerpc, hurd-sparc,
-    kfreebsd-sparc, netbsd-sparc]
+    kfreebsd-sparc, netbsd-sparc, darwin-i386, freebsd-i386, openbsd-i386, darwin-powerpc]
 
 
 delete:
@@ -24,7 +25,7 @@ setup:
         script: setup-db.sql
 
 debian-lenny:
-  type: packages
+  type: src-pkg
   archs: [alpha, amd64, arm, armel, hppa,
           i386, ia64, mips,
           mipsel, powerpc, s390, sparc]       
@@ -33,7 +34,7 @@ debian-lenny:
   distribution: debian-lenny
 
 debian-sid:
-  type: packages
+  type: src-pkg
   archs: [alpha, amd64, arm, armel, hppa, hurd-i386,
           i386, i486, ia64, kfreebsd-amd64, kfreebsd-i386, m68k, mips,
           mipsel, powerpc, ppc64, s390, sparc]       
@@ -42,7 +43,7 @@ debian-sid:
   distribution: debian-sid
 
 debian-sarge:
-  type: packages
+  type: src-pkg
   archs: [alpha, amd64, arm, armel, hppa, hurd-i386,
           i386, i486, ia64, kfreebsd-amd64, kfreebsd-i386, m68k, mips,
           mipsel, powerpc, ppc64, s390, sparc]       
@@ -51,7 +52,7 @@ debian-sarge:
   distribution: debian-sarge
 
 debian-backports-etch:
-  type: packages
+  type: src-pkg
   archs: [alpha, amd64, arm, armel, hppa, hurd-i386,
           i386, i486, ia64, kfreebsd-amd64, kfreebsd-i386, m68k, mips,
           mipsel, powerpc, ppc64, s390, sparc]       
@@ -60,7 +61,7 @@ debian-backports-etch:
   distribution: debian-backports-etch
 
 debian-backports-sarge:
-  type: packages
+  type: src-pkg
   archs: [alpha, amd64, arm, armel, hppa, hurd-i386,
           i386, i486, ia64, kfreebsd-amd64, kfreebsd-i386, m68k, mips,
           mipsel, powerpc, ppc64, s390, sparc]       
@@ -69,7 +70,7 @@ debian-backports-sarge:
   distribution: debian-backports-sarge
 
 debian-volatile-etch:
-  type: packages
+  type: src-pkg
   archs: [alpha, amd64, arm, armel, hppa, hurd-i386,
           i386, i486, ia64, kfreebsd-amd64, kfreebsd-i386, m68k, mips,
           mipsel, powerpc, ppc64, s390, sparc]       
@@ -78,7 +79,7 @@ debian-volatile-etch:
   distribution: debian-volatile-etch
 
 debian-volatile-sarge:
-  type: packages
+  type: src-pkg
   archs: [alpha, amd64, arm, armel, hppa, hurd-i386,
           i386, i486, ia64, kfreebsd-amd64, kfreebsd-i386, m68k, mips,
           mipsel, powerpc, ppc64, s390, sparc]       
