@@ -1,7 +1,7 @@
 general:
   dbname: udd
   types:
-    sources: echo
+    sources: python sources_gatherer.py
     packages: python packages_gatherer.py
     setup: python db_manager.py
     delete: python db_manager.py
@@ -10,7 +10,11 @@ general:
   archs:
    [alpha, amd64, arm, armeb, armel, hppa, hurd-i386,
     i386, i486, ia64, kfreebsd-amd64, kfreebsd-i386, m68k, mips,
-    mipsel, powerpc, ppc64, s390, sparc, all, any]       
+    mipsel, powerpc, ppc64, s390, sparc, all, any, lpia, m32r, s390x, sh3,
+    sh3eb, sh4, sh4eb, sh, knetbsd-i386, netbsd-alpha, sparc64,
+    netbsd-i386, hurd-powerpc, kfreebsd-powerpc, netbsd-powerpc, hurd-sparc,
+    kfreebsd-sparc, netbsd-sparc]
+
 
 delete:
   type: delete
@@ -81,3 +85,19 @@ debian-volatile-sarge:
   directory: /org/volatile.debian.org/dists/sarge/volatile/
   parts: [main, contrib, non-free]
   distribution: debian-volatile-sarge
+
+test-src:
+  type: sources
+  directory: /org/ftp.debian.org/dists/lenny/
+  parts: [main, contrib, non-free]
+  distribution: test
+
+test-pkg:
+  type: packages
+  directory: /org/ftp.debian.org/dists/lenny/
+  parts: [main, contrib, non-free]
+  distribution: test
+  archs:
+   [alpha, amd64, arm, armeb, armel, hppa, hurd-i386,
+    i386, i486, ia64, kfreebsd-amd64, kfreebsd-i386, m68k, mips,
+    mipsel, powerpc, ppc64, s390, sparc, all, any]       

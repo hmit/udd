@@ -1,5 +1,5 @@
 #/usr/bin/env python
-# Last-Modified: <Fri May 30 15:03:14 2008>
+# Last-Modified: <Fri Jun  6 09:23:59 2008>
 
 import debian_bundle.deb822
 import gzip
@@ -30,6 +30,7 @@ def import_packages(conn, sequence):
   global imported_all_pkgs
   # The fields that are to be read. Other fields are ignored
   fields = ('Architecture', 'Package', 'Version')
+  cur = conn.cursor()
   for control in debian_bundle.deb822.Packages.iter_paragraphs(sequence, fields):
     # Check whether packages with architectue 'all' have already been
     # imported
@@ -39,9 +40,9 @@ def import_packages(conn, sequence):
 	continue
       imported_all_pkgs[t] = 1
 
-    cur = conn.cursor()
-    query = "INSERT INTO pkgs (name, distr_id, arch_id, version, src_id)\
-    VALUES ('%s', %d, %d, '%s', 0)" % (control["Package"], distr_id, archs[control["Architecture"]], control["Version"])
+    #query = "INSERT INTO pkgs (name, distr_id, arch_id, version, src_id)\
+    #VALUES ('%s', %d, %d, '%s', 0);" % (control["Package"], distr_id, archs[control["Architecture"]], control["Version"])
+    query = "EXECUTE pkg_insert('%s', %d, %d, '%s')" % (control["Package"], distr_id, archs[control["Architecture"]], control["Version"])
     cur.execute(query)
 
 def main():
@@ -96,6 +97,9 @@ def main():
 
   archs = aux.get_archs(conn)
 
+  cur = conn.cursor()
+  cur.execute("PREPARE pkg_insert AS INSERT INTO pkgs (name, distr_id, arch_id, version) VALUES ($1, $2, $3, $4);")
+
   # For every part and every architecture, import the packages into the DB
   for part in src_cfg['parts']:
     for arch in src_cfg['archs']:
@@ -115,6 +119,7 @@ def main():
       except IOError, (e, message):
 	print "Could not read packages from %s: %s" % (path, message)
 
+  cur.execute("DEALLOCATE pkg_insert")
   conn.commit()
 
 if __name__ == '__main__':
