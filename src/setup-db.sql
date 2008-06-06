@@ -1,5 +1,5 @@
-CREATE TABLE pkgs (pkg_id serial, name text, distr_id int, arch_id int, version text, src_id int);
-CREATE TABLE sources (src_id serial, name text, upload_date timestamp, uploader_key int, maintainer text, version text, distr_id int);
+CREATE TABLE pkgs (pkg_id serial, name text, distr_id int, arch_id int, version text, src_id int, UNIQUE (name, distr_id, arch_id, version));
+CREATE TABLE sources (src_id serial, name text, upload_date timestamp, uploader_key int, maintainer text, version text, distr_id int, UNIQUE (name, version, distr_id));
 CREATE TABLE distr_ids (distr_id serial, name text);
 CREATE TABLE arch_ids (arch_id serial, name text);
 CREATE TABLE build_archs (src_id int, arch_id int);

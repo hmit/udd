@@ -1,5 +1,5 @@
 #/usr/bin/env python
-# Last-Modified: <Fri Jun  6 10:07:50 2008>
+# Last-Modified: <Fri Jun  6 12:31:10 2008>
 
 import debian_bundle.deb822
 import gzip
@@ -40,11 +40,6 @@ def import_sources(conn, file):
       for arch in control['Architecture'].split():
 	query = "EXECUTE build_archs_insert(%d, %d)" % (src_id, archs[arch])
 	cur.execute(query)
-
-    # Set the source_ids for the binaries
-    for binary in control['Binary'].split(", "):
-      query = "EXECUTE pkgs_update_src_id(%d, '%s', %d)" % (src_id, binary, distr_id)
-      cur.execute(query)
 
 def main():
   global distr_id
@@ -93,7 +88,6 @@ def main():
   cur = conn.cursor()
   cur.execute("PREPARE source_insert AS INSERT INTO sources (name, maintainer, version, distr_id) VALUES ($1,$2,$3,$4)")
   cur.execute("PREPARE build_archs_insert AS INSERT INTO build_archs (src_id, arch_id) VALUES ($1,$2)")
-  cur.execute("PREPARE pkgs_update_src_id AS UPDATE pkgs SET src_id = $1 WHERE name = $2 AND distr_id = $3")
   cur.execute("PREPARE select_src_id AS SELECT src_id FROM sources WHERE name = $1 AND version = $2")
 
   for part in src_cfg['parts']:
@@ -116,7 +110,6 @@ def main():
   cur.execute("DEALLOCATE source_insert")
   cur.execute("DEALLOCATE build_archs_insert")
   cur.execute("DEALLOCATE select_src_id")
-  cur.execute("DEALLOCATE pkgs_update_src_id")
   conn.commit()
 
 if __name__ == '__main__':

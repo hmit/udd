@@ -1,5 +1,5 @@
 #/usr/bin/env python
-# Last-Modified: <Fri Jun  6 09:23:59 2008>
+# Last-Modified: <Fri Jun  6 13:38:47 2008>
 
 import debian_bundle.deb822
 import gzip
@@ -21,6 +21,9 @@ imported_all_pkgs = {}
 # The ID for the distribution we want to include
 distr_id = None
 
+# A mapping from source names to source ids
+srcs = {}
+
 def import_packages(conn, sequence):
   """Import the packages from the sequence into the database-connection conn.
 
@@ -29,7 +32,7 @@ def import_packages(conn, sequence):
   packages file."""
   global imported_all_pkgs
   # The fields that are to be read. Other fields are ignored
-  fields = ('Architecture', 'Package', 'Version')
+  fields = ('Architecture', 'Package', 'Version', 'Source')
   cur = conn.cursor()
   for control in debian_bundle.deb822.Packages.iter_paragraphs(sequence, fields):
     # Check whether packages with architectue 'all' have already been
@@ -40,9 +43,16 @@ def import_packages(conn, sequence):
 	continue
       imported_all_pkgs[t] = 1
 
-    #query = "INSERT INTO pkgs (name, distr_id, arch_id, version, src_id)\
-    #VALUES ('%s', %d, %d, '%s', 0);" % (control["Package"], distr_id, archs[control["Architecture"]], control["Version"])
-    query = "EXECUTE pkg_insert('%s', %d, %d, '%s')" % (control["Package"], distr_id, archs[control["Architecture"]], control["Version"])
+    if 'Source' not in control:
+      control['Source'] = control['Package']
+    else:
+      control['Source'] = control['Source'].split()[0]
+
+    if control['Source'] not in srcs:
+      print "Warning: Source " + control['Source'] + " for package " + control['Package'] + " not found!"
+      query = "EXECUTE pkg_insert('%s', %d, %d, '%s', NULL)" % (control["Package"], distr_id, archs[control["Architecture"]], control["Version"])
+    else:
+      query = "EXECUTE pkg_insert('%s', %d, %d, '%s', %d)" % (control["Package"], distr_id, archs[control["Architecture"]], control["Version"], srcs[control["Source"]])
     cur.execute(query)
 
 def main():
@@ -98,7 +108,11 @@ def main():
   archs = aux.get_archs(conn)
 
   cur = conn.cursor()
-  cur.execute("PREPARE pkg_insert AS INSERT INTO pkgs (name, distr_id, arch_id, version) VALUES ($1, $2, $3, $4);")
+  cur.execute("PREPARE pkg_insert AS INSERT INTO pkgs (name, distr_id, arch_id, version, src_id) VALUES ($1, $2, $3, $4, $5);")
+
+  cur.execute("SELECT name, src_id FROM sources WHERE distr_id = " + str(distr_id))
+  for src in cur.fetchall():
+    srcs[src[0]] = src[1]
 
   # For every part and every architecture, import the packages into the DB
   for part in src_cfg['parts']:

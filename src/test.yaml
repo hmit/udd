@@ -1,5 +1,5 @@
 general:
-  dbname: udd-test
+  dbname: udd
   types:
     sources: python sources_gatherer.py
     packages: python packages_gatherer.py
@@ -41,15 +41,15 @@ debian-sid:
   directory: /org/ftp.debian.org/dists/sid/
   parts: [main, contrib, non-free]
   distribution: debian-sid
-
-debian-sarge:
+  
+debian-etch:
   type: src-pkg
   archs: [alpha, amd64, arm, armel, hppa, hurd-i386,
           i386, i486, ia64, kfreebsd-amd64, kfreebsd-i386, m68k, mips,
           mipsel, powerpc, ppc64, s390, sparc]       
-  directory: /org/ftp.debian.org/dists/sarge/
+  directory: /org/ftp.debian.org/dists/etch/
   parts: [main, contrib, non-free]
-  distribution: debian-sarge
+  distribution: debian-etch
 
 debian-backports-etch:
   type: src-pkg
@@ -60,15 +60,6 @@ debian-backports-etch:
   parts: [main, contrib, non-free]
   distribution: debian-backports-etch
 
-debian-backports-sarge:
-  type: src-pkg
-  archs: [alpha, amd64, arm, armel, hppa, hurd-i386,
-          i386, i486, ia64, kfreebsd-amd64, kfreebsd-i386, m68k, mips,
-          mipsel, powerpc, ppc64, s390, sparc]       
-  directory: /org/ftp.backports.org/dists/sarge-backports/
-  parts: [main, contrib, non-free]
-  distribution: debian-backports-sarge
-
 debian-volatile-etch:
   type: src-pkg
   archs: [alpha, amd64, arm, armel, hppa, hurd-i386,
@@ -77,15 +68,6 @@ debian-volatile-etch:
   directory: /org/volatile.debian.org/dists/etch/volatile/
   parts: [main, contrib, non-free]
   distribution: debian-volatile-etch
-
-debian-volatile-sarge:
-  type: src-pkg
-  archs: [alpha, amd64, arm, armel, hppa, hurd-i386,
-          i386, i486, ia64, kfreebsd-amd64, kfreebsd-i386, m68k, mips,
-          mipsel, powerpc, ppc64, s390, sparc]       
-  directory: /org/volatile.debian.org/dists/sarge/volatile/
-  parts: [main, contrib, non-free]
-  distribution: debian-volatile-sarge
 
 test-src:
   type: sources
