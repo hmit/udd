@@ -1,8 +1,9 @@
 CREATE TABLE Packages
   (Package text, Version text, Architecture text, Maintainer text, Description
-    text, Source text, Essential text, Depends text, Recommends text, Suggests
-    text, Enhances text, Pre_Depends text, Installed_Size int, Homepage text,
-    Size int, MD5Sum text, Distribution text, Release text, Component text,
+    text, Source text, Source_version text, Essential text, Depends text,
+    Recommends text, Suggests text, Enhances text, Pre_Depends text,
+    Installed_Size int, Homepage text, Size int, MD5Sum text, Distribution
+    text, Release text, Component text,
   UNIQUE (Package, Version, Architecture, Distribution, Release, Component));
 
 CREATE TABLE sources

@@ -1,5 +1,5 @@
 #/usr/bin/env python
-# Last-Modified: <Sun Jun 15 13:16:19 2008>
+# Last-Modified: <Tue Jun 17 10:58:01 2008>
 
 import debian_bundle.deb822
 import gzip
@@ -26,9 +26,12 @@ non_mandatory = ('Source', 'Essential', 'Depends', 'Recommends', 'Suggests',
     'Enhances', 'Pre-Depends', 'Installed-Size', 'Homepage', 'Size', 'MD5Sum')
 ignorable = ()
 
+def quote(s):
+  return "'" + s.replace("'", "\\'") + "'"
+
 def null_or_quote(dict, key):
   if key in dict:
-    return "'" + dict[key].replace("'", "\\'") + "'"
+    return quote(dict[key])
   else:
     return 'NULL'
 
@@ -73,33 +76,37 @@ def import_packages(conn, sequence):
 
     d = build_dict(control)
 
-#    if 'Source' not in control:
-#      d['Source'] = d['Package']
-#      d['Source_Version'] = d['Version']
-#    else:
-#      split = control['Source'].split()
-#      d['Source'] = split[0]
-#      if len(split) > 1:
-#	d['Source_Version'] = split[1].strip('()')
-#      else:
-#	d['Source_Version'] = d['Version']
-
+    # These are integer values - we don't need quotes for them
     if d['Installed-Size'] != 'NULL':
       d['Installed-Size'] = d['Installed-Size'].strip("'")
     if d['Size'] != 'NULL':
       d['Size'] = d['Size'].strip("'")
 
+    # We just use the first line of the description
     if d['Description'] != "NULL":
       d['Description'] = d['Description'].split("\n")[0]
       # This problem appears, if the description was a one-liner
       if d['Description'][-1] != "'" or d['Description'][-2] == '\\':
 	d['Description'] += "'"
+    
+    # Source is non-mandatory
+    if d['Source'] == "NULL":
+      d['Source'] = d['Package']
+      d['Source_Version'] = d['Version']
+    else:
+      split = d['Source'].strip("'").split()
+      if len(split) == 1:
+	d['Source_Version'] = d['Version']
+      else:
+	d['Source'] = quote(split[0])
+	d['Source_Version'] = quote(split[1].strip("()"))
 
     query = """EXECUTE package_insert
 	(%(Package)s, %(Version)s, %(Architecture)s, %(Maintainer)s,
-	  %(Description)s, %(Source)s, %(Essential)s, %(Depends)s,
-	  %(Recommends)s, %(Suggests)s, %(Enhances)s, %(Pre-Depends)s,
-	  %(Installed-Size)s, %(Homepage)s, %(Size)s, %(MD5Sum)s)""" % d
+	%(Description)s, %(Source)s, %(Source_Version)s, %(Essential)s,
+	%(Depends)s, %(Recommends)s, %(Suggests)s, %(Enhances)s,
+	%(Pre-Depends)s, %(Installed-Size)s, %(Homepage)s, %(Size)s,
+	%(MD5Sum)s)""" % d
     try:
       cur.execute(query)
     except psycopg2.ProgrammingError:
@@ -164,12 +171,13 @@ def main():
       path = os.path.join(src_cfg['directory'], comp, 'binary-' + arch, 'Packages.gz')
       try:
 	cur.execute("""PREPARE package_insert AS INSERT INTO Packages
-	  (Package, Version, Architecture, Maintainer, Description, Source, Essential,
-	  Depends, Recommends, Suggests, Enhances, Pre_Depends, Installed_Size,
-	  Homepage, Size, MD5Sum, Distribution, Release, Component)
+	  (Package, Version, Architecture, Maintainer, Description, Source,
+	  Source_Version, Essential, Depends, Recommends, Suggests, Enhances,
+	  Pre_Depends, Installed_Size, Homepage, Size, MD5Sum, Distribution,
+	  Release, Component)
 	VALUES
 	  ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15,
-	    $16, '%s', '%s', '%s')
+	    $16, $17, '%s', '%s', '%s')
 	  """ %  (distr, src_cfg['release'], comp))
 	aux.print_debug("Reading file " + path)
 	# Copy content from gzipped file to temporary file, so that apt_pkg is
