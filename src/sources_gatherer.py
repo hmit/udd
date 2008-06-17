@@ -1,5 +1,5 @@
 #/usr/bin/env python
-# Last-Modified: <Fri Jun  6 12:31:10 2008>
+# Last-Modified: <Sun Jun 15 13:15:10 2008>
 
 import debian_bundle.deb822
 import gzip
@@ -9,10 +9,43 @@ import aux
 import tempfile
 from aux import ConfigException
 
-# A mapping from the architecture names to architecture IDs
-archs = {}
-# The ID for the distribution we want to include
-distr_id = None
+distr = None
+
+mandatory = ('Format', 'Maintainer', 'Package', 'Version', 'Files')
+non_mandatory = ('Uploaders', 'Binary', 'Architecture', 'Standards-Version',
+		 'Homepage', 'Build-Depends', 'Build-Depends-Indep',
+		 'Build-Conflicts', 'Build-Conflicts-Indep', 'Priority',
+		 'Section', 'Vcs-Arch', 'Vcs-Browser', 'Vcs-Bzr', 'Vcs-Cvs',
+		 'Vcs-Darcs', 'Vcs-Git', 'Vcs-Hg', 'Vcs-Svn', 'X-Vcs-Browser',
+		 'X-Vcs-Bzr', 'X-Vcs-Darcs', 'X-Vcs-Svn')
+
+ignorable = ()
+
+def null_or_quote(dict, key):
+  if key in dict:
+    return "'" + dict[key].replace("'", "\\'") + "'"
+  else:
+    return 'NULL'
+
+warned_about = []
+def build_dict(control):
+  """Build a dictionary from the control dictionary.
+
+  Influenced by global variables mandatory, non_mandatory and ignorable"""
+  global mandatory, non_mandatory
+  d = {}
+  for k in mandatory:
+    if k not in control:
+      raise "Mandatory field %s not specified" % k
+    d[k] = "'" + control[k].replace("\\", "\\\\").replace("'", "\\'") + "'"
+  for k in non_mandatory:
+    d[k] = null_or_quote(control, k)
+  for k in control.keys():
+    if k not in mandatory and k not in non_mandatory and k not in ignorable:
+      if k not in warned_about:
+	print("Unknown key: " + k)
+	warned_about.append(k)
+  return d
 
 def import_sources(conn, file):
   """Import the sources from the file into the database-connection conn.
@@ -20,30 +53,22 @@ def import_sources(conn, file):
   Sequence has to have an iterator interface, that yields a line every time it
   is called.The Format of the file is expected to be that of a debian
   source file."""
-  # The fields that are to be read. Other fields are ignored
-  fields = ('Package', 'Version', 'Architecture', 'Maintainer', 'Uploaders', 'Binary')
   cur = conn.cursor()
-  for control in debian_bundle.deb822.Packages.iter_paragraphs(file, fields):
-    # Put the source package into the DB
-    query = "EXECUTE source_insert('%s', '%s', '%s', %d)" % (control["Package"], control['Maintainer'].replace("'", "\\'"), control["Version"],
-	distr_id)
+  for control in debian_bundle.deb822.Packages.iter_paragraphs(file):
+    d = build_dict(control)
+    query = """EXECUTE source_insert
+	(%(Package)s, %(Version)s, %(Maintainer)s, %(Format)s, %(Files)s,
+	%(Uploaders)s, %(Binary)s, %(Architecture)s, %(Standards-Version)s,
+	%(Homepage)s, %(Build-Depends)s, %(Build-Depends-Indep)s,
+	%(Build-Conflicts)s, %(Build-Conflicts-Indep)s, %(Priority)s,
+	%(Section)s, %(Vcs-Arch)s, %(Vcs-Browser)s, %(Vcs-Bzr)s, %(Vcs-Cvs)s,
+	%(Vcs-Darcs)s, %(Vcs-Git)s, %(Vcs-Hg)s, %(Vcs-Svn)s, %(X-Vcs-Browser)s,
+	%(X-Vcs-Bzr)s, %(X-Vcs-Darcs)s, %(X-Vcs-Svn)s)
+	"""  % d
     cur.execute(query)
-    # Get the src_id of the source
-    #cur.execute("SELECT src_id FROM sources WHERE name = '%(Package)s' AND version = '%(Version)s'" % control)
-    cur.execute("EXECUTE select_src_id('%(Package)s', '%(Version)s')" % control)
-    src_id = int(cur.fetchone()[0])
-    # Fill the build_archs table for this source package
-    if control['Architecture'] == 'all' or control['Architecture'] == 'any':
-      query = "EXECUTE build_archs_insert(%d, %d)" % (src_id, archs[control['Architecture']])
-      cur.execute(query)
-    else:
-      for arch in control['Architecture'].split():
-	query = "EXECUTE build_archs_insert(%d, %d)" % (src_id, archs[arch])
-	cur.execute(query)
 
 def main():
-  global distr_id
-  global archs
+  global distr
   if len(sys.argv) != 3:
     print "Usage: %s <config> <source>" % sys.argv[0]
     sys.exit(1)
@@ -64,7 +89,7 @@ def main():
     raise ConfigException('directory not specified for source %s in file %s' %
 	(src_name, cfg_path))
 
-  if not 'parts' in src_cfg:
+  if not 'components' in src_cfg:
     raise ConfigException('parts not specified for source %s in file %s' %
 	(src_name, cfg_path))
 
@@ -72,27 +97,33 @@ def main():
     raise ConfigException('distribution not specified for source %s in file %s' %
 	(src_name, cfg_path))
 
+  if not 'release' in src_cfg:
+    raise ConfigException('release not specified for source %s in file %s' %
+	(src_name, cfg_path))
+
   aux.debug = config['general']['debug']
 
   conn = aux.open_connection(config)
 
-  # Get distribution ID. If it does not exist, create it
-  distr_ids = aux.get_distrs(conn)
-  if src_cfg['distribution'] not in distr_ids:
-    aux.insert_distr(conn, src_cfg['distribution'])
-    distr_ids = aux.get_distrs(conn)
-  distr_id = distr_ids[src_cfg['distribution']]
-
-  archs = aux.get_archs(conn)
-
   cur = conn.cursor()
-  cur.execute("PREPARE source_insert AS INSERT INTO sources (name, maintainer, version, distr_id) VALUES ($1,$2,$3,$4)")
-  cur.execute("PREPARE build_archs_insert AS INSERT INTO build_archs (src_id, arch_id) VALUES ($1,$2)")
-  cur.execute("PREPARE select_src_id AS SELECT src_id FROM sources WHERE name = $1 AND version = $2")
 
-  for part in src_cfg['parts']:
-    path = os.path.join(src_cfg['directory'], part, 'source', 'Sources.gz')
+  for comp in src_cfg['components']:
+    path = os.path.join(src_cfg['directory'], comp, 'source', 'Sources.gz')
     try:
+      query = """PREPARE source_insert as INSERT INTO sources
+	(Package, Version, Maintainer, Format, Files, Uploaders, Bin,
+	Architecture, Standards_Version, Homepage, Build_Depends,
+	Build_Depends_Indep, Build_Conflicts, Build_Conflicts_Indep, Priority,
+	Section, Vcs_Arch, Vcs_Browser, Vcs_Bzr, Vcs_Cvs, Vcs_Darcs, Vcs_Git,
+	Vcs_Hg, Vcs_Svn, X_Vcs_Browser, X_Vcs_Bzr, X_Vcs_Darcs, X_Vcs_Svn,
+	Distribution, Release, Component)
+      VALUES
+	($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
+	$17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, '%s', '%s',
+	'%s')"""\
+	% (src_cfg['distribution'], comp, src_cfg['release'])
+      cur.execute(query)
+
       aux.print_debug("Reading file " + path)
       # Copy content from gzipped file to temporary file, so that apt_pkg is
       # used by debian_bundle
@@ -104,12 +135,10 @@ def main():
       aux.print_debug("Importing from " + path)
       import_sources(conn, open(tmp.name))
       tmp.close()
+      cur.execute("DEALLOCATE source_insert")
     except IOError, (e, message):
       print "Could not read packages from %s: %s" % (path, message)
 
-  cur.execute("DEALLOCATE source_insert")
-  cur.execute("DEALLOCATE build_archs_insert")
-  cur.execute("DEALLOCATE select_src_id")
   conn.commit()
 
 if __name__ == '__main__':

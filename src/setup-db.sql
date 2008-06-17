@@ -1,18 +1,24 @@
-CREATE TABLE pkgs (pkg_id serial, name text, distr_id int, arch_id int, version text, src_id int, UNIQUE (name, distr_id, arch_id, version));
-CREATE TABLE sources (src_id serial, name text, upload_date timestamp, uploader_key int, maintainer text, version text, distr_id int, UNIQUE (name, version, distr_id));
-CREATE TABLE distr_ids (distr_id serial, name text);
-CREATE TABLE arch_ids (arch_id serial, name text);
-CREATE TABLE build_archs (src_id int, arch_id int);
+CREATE TABLE Packages
+  (Package text, Version text, Architecture text, Maintainer text, Description
+    text, Source text, Essential text, Depends text, Recommends text, Suggests
+    text, Enhances text, Pre_Depends text, Installed_Size int, Homepage text,
+    Size int, MD5Sum text, Distribution text, Release text, Component text,
+  UNIQUE (Package, Version, Architecture, Distribution, Release, Component));
 
-CREATE INDEX pkgs_id_idx ON pkgs (pkg_id);
-CREATE INDEX pkgs_name_idx ON pkgs (name);
-CREATE INDEX sources_id_idx ON sources (src_id);
-CREATE INDEX sources_name_idx ON sources (name);
-CREATE INDEX arch_id_idx ON arch_ids using btree (arch_id);
-CREATE INDEX pkgs_src_id_idx ON pkgs USING btree (srd_id);
+CREATE TABLE sources
+  (Package text, Version text, Maintainer text, Format text, Files text,
+    Uploaders text, Bin text, Architecture text, Standards_Version text,
+    Homepage text, Build_Depends text, Build_Depends_Indep text,
+    Build_Conflicts text, Build_Conflicts_Indep text, Priority text, Section
+    text, Distribution text, Release text, Component text, Vcs_Arch text,
+    Vcs_Browser text, Vcs_Bzr text, Vcs_Cvs text, Vcs_Darcs text, Vcs_Git text,
+    Vcs_Hg text, Vcs_Svn text, X_Vcs_Browser text, X_Vcs_Bzr text, X_Vcs_Darcs
+    text, X_Vcs_Svn text,
+    UNIQUE (package, version, distribution, release, component));
 
-GRANT SELECT ON pkgs TO PUBLIC;
+CREATE INDEX pkgs_name_idx ON Packages (Package);
+CREATE INDEX sources_id_idx ON sources (Package);
+CREATE INDEX pkgs_src_id_idx ON Packages USING btree (Source);
+
+GRANT SELECT ON Packages TO PUBLIC;
 GRANT SELECT ON sources TO PUBLIC;
-GRANT SELECT ON distr_ids TO PUBLIC;
-GRANT SELECT ON arch_ids TO PUBLIC;
-GRANT SELECT ON build_archs TO PUBLIC;

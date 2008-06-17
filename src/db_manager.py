@@ -2,10 +2,11 @@
 
 import aux
 import sys
+import os
 
 """This scripts sets up and deletes the tables of the database"""
 
-TABLES = ('sources', 'pkgs', 'distr_ids', 'arch_ids', 'build_archs')
+TABLES = ('sources', 'packages')
 
 def print_help():
   print "Usage: %s <config> <delete|setup>" % sys.argv[0]
@@ -20,15 +21,8 @@ def setup(conn, config):
   if 'script' not in config['setup']:
     raise aux.ConfigException('Script not specified in setup')
 
-  c = conn.cursor()
-  for line in open(config['setup']['script']).readlines():
-    line = line.strip()
-    if line:
-      c.execute(line)
-
-  #Setup architecture table
-  for arch in config['general']['archs']:
-    c.execute("INSERT INTO arch_ids (name) VALUES ('%s');" % (arch))
+  os.system("psql %s < %s" % (config['general']['dbname'],
+                              config['setup']['script']))
 
 def main():
   if len(sys.argv) != 3:
