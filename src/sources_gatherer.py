@@ -1,5 +1,5 @@
 #/usr/bin/env python
-# Last-Modified: <Sun Jun 15 13:15:10 2008>
+# Last-Modified: <Sun Jun 22 20:43:14 2008>
 
 import debian_bundle.deb822
 import gzip
@@ -11,15 +11,15 @@ from aux import ConfigException
 
 distr = None
 
-mandatory = ('Format', 'Maintainer', 'Package', 'Version', 'Files')
-non_mandatory = ('Uploaders', 'Binary', 'Architecture', 'Standards-Version',
-		 'Homepage', 'Build-Depends', 'Build-Depends-Indep',
-		 'Build-Conflicts', 'Build-Conflicts-Indep', 'Priority',
-		 'Section', 'Vcs-Arch', 'Vcs-Browser', 'Vcs-Bzr', 'Vcs-Cvs',
-		 'Vcs-Darcs', 'Vcs-Git', 'Vcs-Hg', 'Vcs-Svn', 'X-Vcs-Browser',
-		 'X-Vcs-Bzr', 'X-Vcs-Darcs', 'X-Vcs-Svn')
+mandatory = {'Format': 0, 'Maintainer': 0, 'Package': 0, 'Version': 0, 'Files': 0}
+non_mandatory = {'Uploaders': 0, 'Binary': 0, 'Architecture': 0,
+    'Standards-Version': 0, 'Homepage': 0, 'Build-Depends': 0,
+    'Build-Depends-Indep': 0, 'Build-Conflicts': 0, 'Build-Conflicts-Indep': 0,
+    'Priority': 0, 'Section': 0, 'Vcs-Arch': 0, 'Vcs-Browser': 0, 'Vcs-Bzr': 0,
+    'Vcs-Cvs': 0, 'Vcs-Darcs': 0, 'Vcs-Git': 0, 'Vcs-Hg': 0, 'Vcs-Svn': 0,
+    'X-Vcs-Browser': 0, 'X-Vcs-Bzr': 0, 'X-Vcs-Darcs': 0, 'X-Vcs-Svn': 0}
 
-ignorable = ()
+ignorable = {}
 
 def null_or_quote(dict, key):
   if key in dict:
@@ -27,7 +27,7 @@ def null_or_quote(dict, key):
   else:
     return 'NULL'
 
-warned_about = []
+warned_about = {}
 def build_dict(control):
   """Build a dictionary from the control dictionary.
 
@@ -43,8 +43,9 @@ def build_dict(control):
   for k in control.keys():
     if k not in mandatory and k not in non_mandatory and k not in ignorable:
       if k not in warned_about:
-	print("Unknown key: " + k)
-	warned_about.append(k)
+	warned_about[k] = 1
+      else:
+	warned_about[k] += 1
   return d
 
 def import_sources(conn, file):
@@ -140,6 +141,9 @@ def main():
       print "Could not read packages from %s: %s" % (path, message)
 
   conn.commit()
+
+  for key in warned_about:
+    print "Unknowen key %s appeared %d times" % (key, warned_about[key])
 
 if __name__ == '__main__':
   main()

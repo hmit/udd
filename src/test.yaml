@@ -6,6 +6,7 @@ general:
     setup: python db_manager.py
     delete: python db_manager.py
     src-pkg: python srcs_and_pkgs.py
+    popcon: python popcon_gatherer.py
     # src-pkg: python sources_gatherer.py
   debug: 1
 
@@ -91,3 +92,7 @@ test-pkg:
    [alpha, amd64, arm, armeb, armel, hppa, hurd-i386,
     i386, i486, ia64, kfreebsd-amd64, kfreebsd-i386, m68k, mips,
     mipsel, powerpc, ppc64, s390, sparc, all, any]       
+
+popcon:
+  type: popcon
+  path: /tmp/all-popcon-results.txt.gz

@@ -1,5 +1,5 @@
 #/usr/bin/env python
-# Last-Modified: <Tue Jun 17 10:58:01 2008>
+# Last-Modified: <Sun Jun 22 17:16:49 2008>
 
 import debian_bundle.deb822
 import gzip
@@ -20,10 +20,12 @@ imported_all_pkgs = {}
 # The ID for the distribution we want to include
 distr = None
 
-mandatory = ('Package', 'Version', 'Architecture', 'Maintainer',
-	     'Description')
-non_mandatory = ('Source', 'Essential', 'Depends', 'Recommends', 'Suggests',
-    'Enhances', 'Pre-Depends', 'Installed-Size', 'Homepage', 'Size', 'MD5Sum')
+# For efficiency, these are dictionaries
+mandatory = {'Package': 0, 'Version': 0, 'Architecture': 0, 'Maintainer': 0,
+    'Description': 0}
+non_mandatory = {'Source': 0, 'Essential': 0, 'Depends': 0, 'Recommends': 0,
+    'Suggests': 0, 'Enhances': 0, 'Pre-Depends': 0, 'Installed-Size': 0,
+    'Homepage': 0, 'Size': 0, 'MD5Sum': 0}
 ignorable = ()
 
 def quote(s):
@@ -35,7 +37,7 @@ def null_or_quote(dict, key):
   else:
     return 'NULL'
 
-warned_about = []
+warned_about = {}
 
 def build_dict(control):
   """Build a dictionary from the control dictionary.
@@ -52,8 +54,9 @@ def build_dict(control):
   for k in control.keys():
     if k not in mandatory and k not in non_mandatory and k not in ignorable:
       if k not in warned_about:
-	print("Unknown key: " + k)
-	warned_about.append(k)
+	warned_about[k] = 1
+      else:
+	warned_about[k] += 1
   return d
 
 def import_packages(conn, sequence):
@@ -84,12 +87,13 @@ def import_packages(conn, sequence):
 
     # We just use the first line of the description
     if d['Description'] != "NULL":
-      d['Description'] = d['Description'].split("\n")[0]
-      # This problem appears, if the description was a one-liner
+      d['Description'] = d['Description'].split("\n",1)[0]
+      # If the description was a one-liner only, we don't need to add
+      # a quote
       if d['Description'][-1] != "'" or d['Description'][-2] == '\\':
 	d['Description'] += "'"
     
-    # Source is non-mandatory
+    # Source is non-mandatory, but we don't want it to be zero
     if d['Source'] == "NULL":
       d['Source'] = d['Package']
       d['Source_Version'] = d['Version']
@@ -195,6 +199,9 @@ def main():
       cur.execute("DEALLOCATE package_insert")
 
   conn.commit()
+
+  for key in warned_about:
+    print("Unknown key: %s appeared %d times" % (key, warned_about[key]))
 
 if __name__ == '__main__':
   main()

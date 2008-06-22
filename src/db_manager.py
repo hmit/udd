@@ -6,7 +6,7 @@ import os
 
 """This scripts sets up and deletes the tables of the database"""
 
-TABLES = ('sources', 'packages')
+TABLES = ('sources', 'packages', 'popcon')
 
 def print_help():
   print "Usage: %s <config> <delete|setup>" % sys.argv[0]

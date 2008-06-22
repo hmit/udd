@@ -17,9 +17,13 @@ CREATE TABLE sources
     text, X_Vcs_Svn text,
     UNIQUE (package, version, distribution, release, component));
 
+CREATE TABLE popcon
+  (Name text, vote int, olde int, recent int, nofiles int, UNIQUE (Name));
+
 CREATE INDEX pkgs_name_idx ON Packages (Package);
 CREATE INDEX sources_id_idx ON sources (Package);
 CREATE INDEX pkgs_src_id_idx ON Packages USING btree (Source);
 
 GRANT SELECT ON Packages TO PUBLIC;
 GRANT SELECT ON sources TO PUBLIC;
+GRANT SELECT ON popcon TO PUBLIC;
