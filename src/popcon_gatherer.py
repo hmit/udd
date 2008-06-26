@@ -1,3 +1,10 @@
+#!/usr/bin/env python
+
+"""
+This script imports the popcon data into the database
+See http://popcon.debian.org/
+"""
+
 import aux
 import sys
 import gzip

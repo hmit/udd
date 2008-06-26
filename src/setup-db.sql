@@ -29,19 +29,10 @@ CREATE VIEW popcon_average AS
 	  popcon.name = packages.package
     GROUP BY sources.package;
 
-CREATE VIEW popcon_sum AS
-  SELECT sources.package, sum(vote) AS vote, sum(olde) AS old, sum(recent) AS recent, sum(nofiles) as nofiles
-    FROM sources, popcon,
-         (SELECT DISTINCT packages.package, packages.source FROM packages) as packages
-    WHERE sources.release = 'sid' AND
-          packages.source = sources.package AND
-	  popcon.name = packages.package
-    GROUP BY sources.package;
 
 CREATE VIEW popcon_max AS
   SELECT sources.package, max(vote) AS vote, max(olde) AS old, max(recent) AS recent, max(nofiles) as nofiles
-    FROM sources, popcon,
-         (SELECT DISTINCT packages.package, packages.source FROM packages) as packages
+    FROM sources, popcon, packages
     WHERE sources.release = 'sid' AND
           packages.source = sources.package AND
 	  popcon.name = packages.package
@@ -51,7 +42,10 @@ CREATE VIEW popcon_max AS
 CREATE INDEX pkgs_name_idx ON Packages (Package);
 CREATE INDEX sources_id_idx ON sources (Package);
 CREATE INDEX pkgs_src_id_idx ON Packages USING btree (Source);
-CREATE INDEX popcon_name ON popcon (name);
+CREATE INDEX popcon_name_idx ON popcon (name);
+CREATE INDEX sources_distribution_idx on sources(distribution);
+CREATE INDEX sources_release_idx on sources(release);
+CREATE INDEX sources_component_idx on sources(component);
 
 GRANT SELECT ON Packages TO PUBLIC;
 GRANT SELECT ON sources TO PUBLIC;
