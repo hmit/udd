@@ -1,5 +1,5 @@
 #/usr/bin/env python
-# Last-Modified: <Sun Jun 22 20:43:14 2008>
+# Last-Modified: <Thu Jun 26 10:20:28 2008>
 
 import debian_bundle.deb822
 import gzip
@@ -122,7 +122,7 @@ def main():
 	($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
 	$17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, '%s', '%s',
 	'%s')"""\
-	% (src_cfg['distribution'], comp, src_cfg['release'])
+	% (src_cfg['distribution'], src_cfg['release'], comp)
       cur.execute(query)
 
       aux.print_debug("Reading file " + path)

@@ -20,6 +20,24 @@ CREATE TABLE sources
 CREATE TABLE popcon
   (Name text, vote int, olde int, recent int, nofiles int, UNIQUE (Name));
 
+CREATE VIEW popcon_average AS
+  SELECT sources.package, avg(vote + olde + recent + nofiles)
+    FROM sources, popcon,
+          (SELECT DISTINCT packages.name, packages.source FROM packages) as packages
+    WHERE sources.release = 'sid' AND
+          packages.source = sources.package AND
+	  popcon.name = packages.package
+    GROUP BY sources.package;
+
+CREATE VIEW popcon_sum AS
+  SELECT sources.package, sum(vote + olde + recent + nofiles)
+    FROM sources, popcon,
+         (SELECT DISTINCT packages.name, packages.source FROM packages) as packages
+    WHERE sources.release = 'sid' AND
+          packages.source = sources.package AND
+	  popcon.name = packages.package
+    GROUP BY sources.package;
+
 CREATE INDEX pkgs_name_idx ON Packages (Package);
 CREATE INDEX sources_id_idx ON sources (Package);
 CREATE INDEX pkgs_src_id_idx ON Packages USING btree (Source);
@@ -27,3 +45,6 @@ CREATE INDEX pkgs_src_id_idx ON Packages USING btree (Source);
 GRANT SELECT ON Packages TO PUBLIC;
 GRANT SELECT ON sources TO PUBLIC;
 GRANT SELECT ON popcon TO PUBLIC;
+
+GRANT SELECT ON popcon_average TO PUBLIC;
+GRANT SELECT ON popcon_sum TO PUBLIC;

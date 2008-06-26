@@ -7,6 +7,7 @@ import os
 """This scripts sets up and deletes the tables of the database"""
 
 TABLES = ('sources', 'packages', 'popcon')
+VIEWS = ('popcon_average', 'popcon_sum')
 
 def print_help():
   print "Usage: %s <config> <delete|setup>" % sys.argv[0]
@@ -14,8 +15,12 @@ def print_help():
 def delete(conn):
   c = conn.cursor()
 
+  for v in VIEWS:
+    c.execute("DROP VIEW " + v)
+
   for t in TABLES:
     c.execute("DROP TABLE " + t)
+
 
 def setup(conn, config):
   if 'script' not in config['setup']:
