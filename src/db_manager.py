@@ -1,13 +1,13 @@
 #!/usr/bin/python
 
-import aux
+import udd.aux
 import sys
 import os
 
 """This scripts sets up and deletes the tables of the database"""
 
 TABLES = ('sources', 'packages', 'popcon')
-VIEWS = ('popcon_average', 'popcon_sum')
+VIEWS = ('popcon_average', 'popcon_max')
 
 def print_help():
   print "Usage: %s <config> <delete|setup>" % sys.argv[0]
@@ -24,7 +24,7 @@ def delete(conn):
 
 def setup(conn, config):
   if 'script' not in config['setup']:
-    raise aux.ConfigException('Script not specified in setup')
+    raise udd.aux.ConfigException('Script not specified in setup')
 
   os.system("psql %s < %s" % (config['general']['dbname'],
                               config['setup']['script']))
@@ -37,8 +37,8 @@ def main():
   command = sys.argv[2]
   config_path = sys.argv[1]
 
-  config = aux.load_config(open(config_path).read())
-  conn = aux.open_connection(config)
+  config = udd.aux.load_config(open(config_path).read())
+  conn = udd.aux.open_connection(config)
 
   if command == 'setup':
     setup(conn, config)

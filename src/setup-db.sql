@@ -18,7 +18,7 @@ CREATE TABLE sources
     UNIQUE (package, version, distribution, release, component));
 
 CREATE TABLE popcon
-  (Name text, vote int, olde int, recent int, nofiles int, UNIQUE (Name));
+  (Name text, vote int, olde int, recent int, nofiles int, distribution text, UNIQUE (Name, distribution));
 
 CREATE VIEW popcon_average AS
   SELECT sources.package, avg(vote) AS vote, avg(olde) AS old, avg(recent) AS recent, avg(nofiles) as nofiles
