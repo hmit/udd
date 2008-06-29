@@ -1,12 +1,12 @@
 general:
-  dbname: udd
+  dbname: udd-test
   types:
-    sources: python sources_gatherer.py
-    packages: python packages_gatherer.py
-    setup: python db_manager.py
-    delete: python db_manager.py
-    src-pkg: python srcs_and_pkgs.py
-    popcon: python popcon_gatherer.py
+    sources: module udd.sources_gatherer
+    packages: module udd.packages_gatherer
+    setup: exec python db_manager.py
+    delete: exec python db_manager.py
+    src-pkg: exec python srcs_and_pkgs.py
+    popcon: module udd.popcon_gatherer
     #src-pkg: python sources_gatherer.py
   debug: 1
 

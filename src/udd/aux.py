@@ -7,6 +7,17 @@ import psycopg2
 # If debug is something that evaluates to True, then print_debug actually prints something
 debug = 0
 
+def quote(s):
+  "Quote a string for SQL"
+  return "'" + s.replace("'", "\\'") + "'"
+
+def null_or_quote(dict, key):
+  "If key is an element of dict, return it quoted. Return NULL otherwise"
+  if key in dict:
+    return quote(dict[key])
+  else:
+    return 'NULL'
+
 def get_archs(conn):
   """Return a dicitionary, mapping from architecture names to their ids.
 

@@ -1,5 +1,5 @@
 #/usr/bin/env python
-# Last-Modified: <Sat Jun 28 15:48:36 2008>
+# Last-Modified: <Sat Jun 28 17:17:05 2008>
 
 import debian_bundle.deb822
 import gzip
@@ -11,14 +11,8 @@ from aux import ConfigException
 import psycopg2
 from gatherer import gatherer
 
-def quote(s):
-  return "'" + s.replace("'", "\\'") + "'"
-
-def null_or_quote(dict, key):
-  if key in dict:
-    return quote(dict[key])
-  else:
-    return 'NULL'
+def get_gatherer(connection, config):
+  return packages_gatherer(connection, config)
 
 class packages_gatherer(gatherer):
   # For efficiency, these are dictionaries
@@ -52,7 +46,7 @@ class packages_gatherer(gatherer):
 	raise "Mandatory field %s not specified" % k
       d[k] = "'" + control[k].replace("\\", "\\\\").replace("'", "\\'") + "'"
     for k in packages_gatherer.non_mandatory:
-      d[k] = packages_gatherer.null_or_quote(control, k)
+      d[k] = aux.null_or_quote(control, k)
     for k in control.keys():
       if k not in packages_gatherer.mandatory and k not in packages_gatherer.non_mandatory and k not in packages_gatherer.ignorable:
 	if k not in packages_gatherer.warned_about:
@@ -104,8 +98,8 @@ class packages_gatherer(gatherer):
 	if len(split) == 1:
 	  d['Source_Version'] = d['Version']
 	else:
-	  d['Source'] = quote(split[0])
-	  d['Source_Version'] = quote(split[1].strip("()"))
+	  d['Source'] = aux.quote(split[0])
+	  d['Source_Version'] = aux.quote(split[1].strip("()"))
 
       query = """EXECUTE package_insert
 	  (%(Package)s, %(Version)s, %(Architecture)s, %(Maintainer)s,
@@ -165,7 +159,7 @@ class packages_gatherer(gatherer):
 	  VALUES
 	    ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15,
 	      $16, $17, '%s', '%s', '%s')
-	    """ %  (distr, src_cfg['release'], comp))
+	    """ %  (self._distr, src_cfg['release'], comp))
 	  aux.print_debug("Reading file " + path)
 	  # Copy content from gzipped file to temporary file, so that apt_pkg is
 	  # used by debian_bundle
