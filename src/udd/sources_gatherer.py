@@ -1,5 +1,5 @@
 #/usr/bin/env python
-# Last-Modified: <Sun Jun 29 10:48:17 2008>
+# Last-Modified: <Sun Jun 29 11:28:15 2008>
 
 import debian_bundle.deb822
 import gzip
@@ -96,6 +96,9 @@ class sources_gatherer(gatherer):
 
     for comp in src_cfg['components']:
       path = os.path.join(src_cfg['directory'], comp, 'source', 'Sources.gz')
+      cur.execute("DELETE from sources WHERE Distribution = '%s' AND\
+	release = '%s' AND component = '%s'"\
+	% (src_cfg['distribution'], src_cfg['release'], comp))
       try:
 	query = """PREPARE source_insert as INSERT INTO sources
 	  (Package, Version, Maintainer, Format, Files, Uploaders, Bin,

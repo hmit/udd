@@ -1,5 +1,5 @@
 #/usr/bin/env python
-# Last-Modified: <Sat Jun 28 17:17:05 2008>
+# Last-Modified: <Sun Jun 29 11:34:11 2008>
 
 import debian_bundle.deb822
 import gzip
@@ -148,6 +148,8 @@ class packages_gatherer(gatherer):
 
     # For every part and every architecture, import the packages into the DB
     for comp in src_cfg['components']:
+      cur.execute("DELETE FROM packages WHERE distribution = '%s' AND release = '%s' AND component = '%s'" %\
+	(self._distr, src_cfg['release'], comp))
       for arch in src_cfg['archs']:
 	path = os.path.join(src_cfg['directory'], comp, 'binary-' + arch, 'Packages.gz')
 	try:
