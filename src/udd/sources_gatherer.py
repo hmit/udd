@@ -1,5 +1,5 @@
 #/usr/bin/env python
-# Last-Modified: <Sun Jun 29 11:28:15 2008>
+# Last-Modified: <Sun Jun 29 12:12:27 2008>
 
 import debian_bundle.deb822
 import gzip
@@ -129,6 +129,8 @@ class sources_gatherer(gatherer):
       except IOError, (e, message):
 	print "Could not read packages from %s: %s" % (path, message)
 
+    self.print_warnings()
+
   def print_warnings(self):
-    for key in warned_about:
-      print "Unknowen key %s appeared %d times" % (key, warned_about[key])
+    for key in sources_gatherer.warned_about:
+      print "Unknowen key %s appeared %d times" % (key, sources_gatherer.warned_about[key])

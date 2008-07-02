@@ -5,7 +5,7 @@ general:
     packages: module udd.packages_gatherer
     setup: exec python db_manager.py
     delete: exec python db_manager.py
-    src-pkg: exec python srcs_and_pkgs.py
+    src-pkg: module udd.src_and_pkg_gatherer
     popcon: module udd.popcon_gatherer
     #src-pkg: python sources_gatherer.py
   debug: 1

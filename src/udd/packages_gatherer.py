@@ -1,5 +1,5 @@
 #/usr/bin/env python
-# Last-Modified: <Sun Jun 29 11:34:11 2008>
+# Last-Modified: <Sun Jun 29 11:49:49 2008>
 
 import debian_bundle.deb822
 import gzip
@@ -178,6 +178,8 @@ class packages_gatherer(gatherer):
 	cur.execute("DEALLOCATE package_insert")
 
     self.connection.commit()
+
+    self.print_warnings()
 
   def print_warnings(self):
     for key in packages_gatherer.warned_about:
