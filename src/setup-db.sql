@@ -39,10 +39,7 @@ CREATE VIEW popcon_max AS
     GROUP BY sources.package;
 
 
-CREATE INDEX pkgs_name_idx ON Packages (Package);
-CREATE INDEX sources_id_idx ON sources (Package);
 CREATE INDEX pkgs_src_id_idx ON Packages USING btree (Source);
-CREATE INDEX popcon_name_idx ON popcon (name);
 CREATE INDEX sources_distribution_idx on sources(distribution);
 CREATE INDEX sources_release_idx on sources(release);
 CREATE INDEX sources_component_idx on sources(component);

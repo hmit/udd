@@ -1,5 +1,5 @@
 general:
-  dbname: udd
+  dbname: udd-test
   types:
     sources: module udd.sources_gatherer
     packages: module udd.packages_gatherer
@@ -75,6 +75,25 @@ debian-volatile-etch:
   distribution: debian-volatile
   release: etch
 
+ubuntu-intrepid:
+  type: src-pkg
+  archs: [amd64, i386]
+  directory: ./ubuntu/intrepid/
+  components: [main, multiverse, universe, restricted]
+  distribution: ubuntu
+  release: intrepid
+  update-command: ./ubuntu-rsync intrepid ./ubuntu
+
+ubuntu-hardy:
+  type: src-pkg
+  archs: [amd64, i386]
+  directory: ./ubuntu/hardy/
+  components: [main, multiverse, universe, restricted]
+  distribution: ubuntu
+  release: hardy
+  update-command: ./ubuntu-rsync hardy ./ubuntu
+
+
 test-src:
   type: sources
   directory: /org/ftp.debian.org/dists/lenny/
@@ -104,3 +123,5 @@ ubuntu-popcon:
   path: /tmp/ubuntu-popcon-results.txt.gz
   update-command: wget -O /tmp/ubuntu-popcon-results.txt.gz http://popcon.ubuntu.com/all-popcon-results.txt.gz
   distribution: ubuntu
+
+
