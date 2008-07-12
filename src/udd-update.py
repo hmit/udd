@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Last-Modified: <Sun Jun 29 11:03:13 2008>
+# Last-Modified: <Sat Jul 12 16:44:23 2008>
 
 """
 This script executes the update statements for selected sources
@@ -21,7 +21,7 @@ if __name__ == '__main__':
 
   for src in sys.argv[2:]:
     if not src in config:
-      raise aux.ConfigException("%s is not specified in %s" % (src, sys.argv[1]))
+      raise udd.aux.ConfigException("%s is not specified in %s" % (src, sys.argv[1]))
 
   for src in sys.argv[2:]:
     src_cfg = config[src]

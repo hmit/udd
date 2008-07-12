@@ -1,5 +1,5 @@
 general:
-  dbname: udd-test
+  dbname: udd
   types:
     sources: module udd.sources_gatherer
     packages: module udd.packages_gatherer
@@ -7,6 +7,7 @@ general:
     delete: exec python db_manager.py
     src-pkg: module udd.src_and_pkg_gatherer
     popcon: module udd.popcon_gatherer
+    testing-migrations: module udd.testing_migrations_gatherer
     #src-pkg: python sources_gatherer.py
   debug: 1
 
@@ -124,4 +125,7 @@ ubuntu-popcon:
   update-command: wget -O /tmp/ubuntu-popcon-results.txt.gz http://popcon.ubuntu.com/all-popcon-results.txt.gz
   distribution: ubuntu
 
-
+testing-migrations:
+  type: testing-migrations
+  path: /tmp/migrations
+  update-command: echo "test"; wget -O /tmp/migrations 'http://qa.debian.org/~lucas/testing-status.raw'

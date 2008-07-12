@@ -6,7 +6,7 @@ import os
 
 """This scripts sets up and deletes the tables of the database"""
 
-TABLES = ('sources', 'packages', 'popcon')
+TABLES = ('sources', 'packages', 'popcon', 'migrations')
 VIEWS = ('popcon_average', 'popcon_max')
 
 def print_help():

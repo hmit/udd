@@ -17,6 +17,10 @@ CREATE TABLE sources
     text, X_Vcs_Svn text,
     UNIQUE (package, version, distribution, release, component));
 
+CREATE TABLE migrations
+  (package text, in_testing date, testing_version text, in_unstable date, unstable_version text, sync date, sync_version text, first_seen date,
+  UNIQUE (package));
+
 CREATE TABLE popcon
   (Name text, vote int, olde int, recent int, nofiles int, distribution text, UNIQUE (Name, distribution));
 
