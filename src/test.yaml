@@ -1,5 +1,5 @@
 general:
-  dbname: udd
+  dbname: udd-test
   types:
     sources: module udd.sources_gatherer
     packages: module udd.packages_gatherer
