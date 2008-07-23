@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# Last-Modified: <Wed Jul 23 11:21:47 2008>
+# Last-Modified: <Wed Jul 23 14:26:55 2008>
 
 use strict;
 use warnings;
@@ -10,7 +10,7 @@ use DBI;
 use YAML::Syck;
 
 use Debbugs::Bugs qw{get_bugs};
-use Debbugs::Status qw{readbug get_bug_status};
+use Debbugs::Status qw{readbug get_bug_status bug_presence};
 
 use POSIX qw{strftime};
 
@@ -46,10 +46,40 @@ sub main {
 		my @found_versions = map { $dbh->quote($_) } @{$bug{found_versions}};
 		my @fixed_versions = map { $dbh->quote($_) } @{$bug{fixed_versions}};
 
+		#Calculate bug presence in distributions
+		my $present_in_stable =
+			bug_presence(bug => $bug_nr, status => \%bug,
+				         dist => 'stable');
+		my $present_in_testing =
+			bug_presence(bug => $bug_nr, status => \%bug,
+				         dist => 'testing');
+		my $present_in_unstable =
+			bug_presence(bug => $bug_nr, status => \%bug,
+				         dist => 'unstable');
+		if(!defined($present_in_stable) or !defined($present_in_unstable) or !defined($present_in_testing)) {
+			print "NUMBER: $bug_nr\n";
+		}
+		if(defined($present_in_stable) and ($present_in_stable eq 'absent' or $present_in_stable eq 'fixed')) {
+			$present_in_stable = 'FALSE';
+		} else {
+			$present_in_stable = 'TRUE';
+		}
+		if(defined($present_in_testing) and ($present_in_testing eq 'absent' or $present_in_testing eq 'fixed')) {
+			$present_in_testing = 'FALSE';
+		} else {
+			$present_in_testing = 'TRUE';
+		}
+		if(defined($present_in_unstable) and ($present_in_unstable eq 'absent' or $present_in_unstable eq 'fixed')) {
+			$present_in_unstable = 'FALSE';
+		} else {
+			$present_in_unstable = 'TRUE';
+		}
+
 		# Insert data into bugs table
 		my $query = "INSERT INTO bugs VALUES ($bug_nr, '$bug{package}', '$date', \
 		             NULL, '$bug{severity}', '$bug{keywords}', $bug{originator}, $bug{owner}, \
-					 $bug{subject}, '$log_modified')";
+					 $bug{subject}, '$log_modified', $present_in_stable,
+					 $present_in_testing, $present_in_unstable)";
 		# Execute insertion
 		my $sth = $dbh->prepare($query);
 		$sth->execute() or die $!;

@@ -27,7 +27,8 @@ CREATE TABLE popcon
 CREATE TABLE bugs
   (id int, package text, arrival timestamp, status text,
      severity text, tags text, submitter text, owner text, title text,
-     last_modified timestamp, UNIQUE (id));
+     last_modified timestamp, affects_stable boolean,
+    affects_testings boolean, affects_unstable boolean, UNIQUE (id));
 
 CREATE TABLE bug_merged_with
   (bug int, merged_with int);
