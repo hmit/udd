@@ -68,6 +68,11 @@ CREATE INDEX sources_component_idx on sources(component);
 GRANT SELECT ON Packages TO PUBLIC;
 GRANT SELECT ON sources TO PUBLIC;
 GRANT SELECT ON popcon TO PUBLIC;
-
 GRANT SELECT ON popcon_average TO PUBLIC;
 GRANT SELECT ON popcon_max TO PUBLIC;
+GRANT SELECT ON bugs TO PUBLIC;
+GRANT SELECT ON bug_merged_with TO PUBLIC;
+GRANT SELECT ON bug_found_in TO PUBLIC;
+GRANT SELECT ON bug_fixed_in TO PUBLIC;
+GRANT SELECT ON bug_user_tags TO PUBLIC;
+

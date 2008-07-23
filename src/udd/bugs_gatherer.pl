@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# Last-Modified: <Wed Jul 23 10:02:51 2008>
+# Last-Modified: <Wed Jul 23 11:21:47 2008>
 
 use strict;
 use warnings;
@@ -34,6 +34,7 @@ sub main {
 	$dbh->prepare("DELETE FROM bugs")->execute();
 	$dbh->prepare("DELETE from bug_found_in")->execute();
 	$dbh->prepare("DELETE from bug_fixed_in")->execute();
+	$dbh->prepare("DELETE FROM bug_merged_with")->execute();
 
 	# Read all bugs
 	foreach my $bug_nr (get_bugs()) {
@@ -60,6 +61,10 @@ sub main {
 		}
 		foreach my $version (@fixed_versions) {
 			$query = "INSERT INTO bug_fixed_in VALUES ($bug_nr, $version)";
+			$dbh->prepare($query)->execute() or die $!;
+		}
+		foreach my $mergee (split / /, $bug{mergedwith}) {
+			$query = "INSERT INTO bug_merged_with VALUES ($bug_nr, $mergee)";
 			$dbh->prepare($query)->execute() or die $!;
 		}
 	}
