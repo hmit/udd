@@ -35,6 +35,12 @@ CREATE TABLE bug_merged_with
 CREATE TABLE bug_user_tags
   (bug_user text, tag text, bug_nr text);
 
+CREATE TABLE bug_found_in
+  (id int, version text);
+
+CREATE TABLE bug_fixed_in
+  (id int, version text);
+
 CREATE VIEW popcon_average AS
   SELECT sources.package, avg(vote) AS vote, avg(olde) AS old, avg(recent) AS recent, avg(nofiles) as nofiles
     FROM sources, popcon,
