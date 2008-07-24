@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# Last-Modified: <Wed Jul 23 14:26:55 2008>
+# Last-Modified: <Wed Jul 23 14:44:51 2008>
 
 use strict;
 use warnings;
@@ -38,11 +38,11 @@ sub main {
 
 	# Read all bugs
 	foreach my $bug_nr (get_bugs()) {
-		my %bug = %{readbug($bug_nr)};
+		my %bug = %{get_bug_status($bug_nr)};
 		# Construct insertion query
 		my $date = strftime("%Y-%m-%d %T", localtime($bug{date}));
 		my $log_modified = strftime("%Y-%m-%d %T", localtime($bug{log_modified}));
-		map { $bug{$_} = $dbh->quote($bug{$_}) } qw(subject originator owner);
+		map { $bug{$_} = $dbh->quote($bug{$_}) } qw(subject originator owner pending);
 		my @found_versions = map { $dbh->quote($_) } @{$bug{found_versions}};
 		my @fixed_versions = map { $dbh->quote($_) } @{$bug{fixed_versions}};
 
@@ -75,9 +75,11 @@ sub main {
 			$present_in_unstable = 'TRUE';
 		}
 
+		#my $bug_status = get_bug_status(bug => $bug_nr, status => \%bug);
+
 		# Insert data into bugs table
 		my $query = "INSERT INTO bugs VALUES ($bug_nr, '$bug{package}', '$date', \
-		             NULL, '$bug{severity}', '$bug{keywords}', $bug{originator}, $bug{owner}, \
+		             $bug{pending}, '$bug{severity}', '$bug{keywords}', $bug{originator}, $bug{owner}, \
 					 $bug{subject}, '$log_modified', $present_in_stable,
 					 $present_in_testing, $present_in_unstable)";
 		# Execute insertion
