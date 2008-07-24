@@ -25,7 +25,7 @@ CREATE TABLE popcon
   (Name text, vote int, olde int, recent int, nofiles int, distribution text, UNIQUE (Name, distribution));
 
 CREATE TABLE bugs
-  (id int, package text, arrival timestamp, status text,
+  (id int, package text, source text, arrival timestamp, status text,
      severity text, tags text, submitter text, owner text, title text,
      last_modified timestamp, affects_stable boolean,
     affects_testings boolean, affects_unstable boolean, UNIQUE (id));

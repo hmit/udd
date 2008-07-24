@@ -43,8 +43,9 @@ class popcon_gatherer(gatherer):
 	cur.execute("INSERT INTO popcon (name, vote, distribution) VALUES ('_submissions', %s, '%s')" % (data, my_config['distribution']))
       try:
 	(name, vote, old, recent, nofiles) = data.split()
-	cur.execute("EXECUTE pop_insert('%s', %s, %s, %s, %s)" %\
-	    (name, vote, old, recent, nofiles))
+	query = "EXECUTE pop_insert('%s', %s, %s, %s, %s)" %\
+	    (name, vote, old, recent, nofiles)
+	cur.execute(query)
       except ValueError:
 	continue
 

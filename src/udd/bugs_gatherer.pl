@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# Last-Modified: <Wed Jul 23 14:44:51 2008>
+# Last-Modified: <Thu Jul 24 13:05:26 2008>
 
 use strict;
 use warnings;
@@ -11,6 +11,7 @@ use YAML::Syck;
 
 use Debbugs::Bugs qw{get_bugs};
 use Debbugs::Status qw{readbug get_bug_status bug_presence};
+use Debbugs::Packages qw{binarytosource getpkgsrc};
 
 use POSIX qw{strftime};
 
@@ -36,6 +37,10 @@ sub main {
 	$dbh->prepare("DELETE from bug_fixed_in")->execute();
 	$dbh->prepare("DELETE FROM bug_merged_with")->execute();
 
+	my %pkgsrcmap = %{getpkgsrc()};
+
+	my $counter = 0;
+
 	# Read all bugs
 	foreach my $bug_nr (get_bugs()) {
 		my %bug = %{get_bug_status($bug_nr)};
@@ -45,6 +50,13 @@ sub main {
 		map { $bug{$_} = $dbh->quote($bug{$_}) } qw(subject originator owner pending);
 		my @found_versions = map { $dbh->quote($_) } @{$bug{found_versions}};
 		my @fixed_versions = map { $dbh->quote($_) } @{$bug{fixed_versions}};
+
+		my $source = binarytosource($bug{package});
+		if(not defined $source) {
+			$source = 'NULL';
+		} else {
+			$source = $dbh->quote($source);
+		}
 
 		#Calculate bug presence in distributions
 		my $present_in_stable =
@@ -78,7 +90,7 @@ sub main {
 		#my $bug_status = get_bug_status(bug => $bug_nr, status => \%bug);
 
 		# Insert data into bugs table
-		my $query = "INSERT INTO bugs VALUES ($bug_nr, '$bug{package}', '$date', \
+		my $query = "INSERT INTO bugs VALUES ($bug_nr, '$bug{package}', $source, '$date', \
 		             $bug{pending}, '$bug{severity}', '$bug{keywords}', $bug{originator}, $bug{owner}, \
 					 $bug{subject}, '$log_modified', $present_in_stable,
 					 $present_in_testing, $present_in_unstable)";
@@ -99,6 +111,7 @@ sub main {
 			$query = "INSERT INTO bug_merged_with VALUES ($bug_nr, $mergee)";
 			$dbh->prepare($query)->execute() or die $!;
 		}
+		print "$counter\n" if ++$counter % 500 == 0;
 	}
 
 	$dbh->commit();
