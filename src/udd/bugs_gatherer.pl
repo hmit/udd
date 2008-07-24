@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# Last-Modified: <Thu Jul 24 13:05:26 2008>
+# Last-Modified: <Thu Jul 24 17:54:33 2008>
 
 use strict;
 use warnings;
@@ -14,8 +14,21 @@ use Debbugs::Status qw{readbug get_bug_status bug_presence};
 use Debbugs::Packages qw{binarytosource getpkgsrc};
 
 use POSIX qw{strftime};
+use Time::Local qw{timelocal};
 
 $YAML::Syck::ImplicitTyping = 1;
+
+sub parse_time {
+	if(shift =~ /(\d\d\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/) {
+		return ($1, $2, $3, $4, $5, $6);
+	}
+	return undef;
+}
+
+sub is_bug_in_db {
+	my ($dbh, $bug_nr) = @_;
+	return $dbh->execute("SELECT * FROM bugs WHERE id = $bug_nr")->fetchrow_array();
+}
 
 sub main {
 	if(@ARGV != 2) {
@@ -32,25 +45,39 @@ sub main {
 	# We want to commit the transaction as a hole at the end
 	$dbh->{AutoCommit} = 0;
 
-	$dbh->prepare("DELETE FROM bugs")->execute();
-	$dbh->prepare("DELETE from bug_found_in")->execute();
-	$dbh->prepare("DELETE from bug_fixed_in")->execute();
-	$dbh->prepare("DELETE FROM bug_merged_with")->execute();
+	# We want to know the last modification date of the bugs
+	my $sth = $dbh->prepare("SELECT MAX(last_modified) FROM bugs");
+	$sth->execute();
+	my $max_last_modified = $sth->fetchrow_array();
+
+	#$dbh->prepare("DELETE FROM bugs")->execute();
+	#$dbh->prepare("DELETE from bug_found_in")->execute();
+	#$dbh->prepare("DELETE from bug_fixed_in")->execute();
+	#$dbh->prepare("DELETE FROM bug_merged_with")->execute();
 
 	my %pkgsrcmap = %{getpkgsrc()};
 
 	my $counter = 0;
 
+	my ($year, $month, $day, $hour, $minute, $second) = parse_time($max_last_modified);
+	$max_last_modified = timelocal($second, $minute, $hour, $day, $month-1, $year);
+	
 	# Read all bugs
 	foreach my $bug_nr (get_bugs()) {
+		# Fetch bug using Debbugs
 		my %bug = %{get_bug_status($bug_nr)};
-		# Construct insertion query
+
+		# Check if the bug was last changed since we updated the DB
+		next if $max_last_modified > $bug{log_modified};
+
+		print "Working bug $bug_nr\n";
+
+		# Convert data where necessary
 		my $date = strftime("%Y-%m-%d %T", localtime($bug{date}));
 		my $log_modified = strftime("%Y-%m-%d %T", localtime($bug{log_modified}));
 		map { $bug{$_} = $dbh->quote($bug{$_}) } qw(subject originator owner pending);
 		my @found_versions = map { $dbh->quote($_) } @{$bug{found_versions}};
 		my @fixed_versions = map { $dbh->quote($_) } @{$bug{fixed_versions}};
-
 		my $source = binarytosource($bug{package});
 		if(not defined $source) {
 			$source = 'NULL';
@@ -87,7 +114,11 @@ sub main {
 			$present_in_unstable = 'TRUE';
 		}
 
-		#my $bug_status = get_bug_status(bug => $bug_nr, status => \%bug);
+		#delete the bug, if it exists
+		$dbh->prepare("DELETE FROM bugs WHERE id = $bug_nr")->execute();
+		$dbh->prepare("DELETE FROM bug_found_in WHERE id = $bug_nr")->execute();
+		$dbh->prepare("DELETE FROM bug_fixed_in WHERE id = $bug_nr")->execute();
+		$dbh->prepare("DELETE FROM bug_merged_with WHERE bug = $bug_nr")->execute();
 
 		# Insert data into bugs table
 		my $query = "INSERT INTO bugs VALUES ($bug_nr, '$bug{package}', $source, '$date', \
