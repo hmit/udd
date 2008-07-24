@@ -1,0 +1,71 @@
+TODO List
+=========
+
+Priorities:
+- high: It should be done before the end of the GSOC project
+- medium: It would be great if it would be done
+- low: not so urgent. We could get someone else to work on that ;-)
+
+General
+-------
+Main objective: get UDD into a state where it can be used for QA purposes.
+That's the first step towards world domination!
+- (prio: high) Install UDD into /org/udd.debian.net, using the udd user. Do
+  that by starting from a checkout from SVN, to ensure that no files are
+  missing in SVN.
+- (prio: high) Set up cronjobs so that the database is updated on a regular
+  basis (it's still possible to continue to use udd-test for development
+  purposes). Document how frequently the DB is updated.
+- (prio: high) Start a basic website at http://udd.debian.net/ using CGIs that
+  display the results of some queries in a text/machine-parseable format (one
+  query per page).
+- (prio: high) Update the pages on the wiki so that they reflect what was
+  decided / the current status of everything.
+- (prio: high) add a way to mark the date of the last successful update in a
+  file, for each data source, so we can answer the "how up-to-date is this
+  data?" question.
+
+packages/sources
+----------------
+- (prio: medium) Add support for keeping history of Packages and Sources in
+  separate tables.
+
+bugs.debian.org
+---------------
+- (prio: high) Optimize import so that all bugs are imported in a more
+  reasonable time (< 30 mins?). Feel free to hack Debbugs (it's fine if you
+  copy all the Debbugs perl modules to udd), but do it in a way that allows
+  patches to be submitted to the debbugs developers. To test, maybe change your
+  code to only import a subset of bugs, so it runs in a few minutes instead of
+  an hour.
+- (prio: high) try to fix http://bugs.debian.org/492170, or at least understand
+  what's happening.
+- (prio: high) compare what's imported with what's available on
+  http://bts.turmzimmer.net/details.php. Do the results match?
+- (prio: high) deal with archived bugs. They should be imported as well, but
+  probably less frequently. How do we deal with bugs that were archived /
+  unarchived since the last run?
+- (prio: medium) generate output using bts2ldap format, and check that the
+  result matches a fresh bts2ldap run done by Lucas
+
+popcon
+------
+- (prio: high) rename view popcon_* so it's clear that they are for source
+  package. Maybe popcon_src_max and popcon_src_average ?
+- (prio: high) fix the views. Shouldn't they max() and avg() only results from
+  Debian's popcon, not Ubuntu's?
+- (prio: high) fix Ubuntu's popcon? (is it broken?)
+  16:55 < Neronus> Great. ubuntu popcon raw data is broken.
+
+Other data sources
+------------------
+- (prio: medium) do history of uploads (coordinate with godog on the format)
+- (prio: medium) DEHS
+- (prio: medium) carnivore
+- (prio: low) MIA
+- (prio: low) debtags
+- (prio: low) wanna-build
+- (prio: low) lintian
+- (prio: low) edos.debian.net
+- (prio: low) version numbers, diffs and bugs for each package for each
+  derivative distro 
