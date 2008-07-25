@@ -24,6 +24,7 @@ That's the first step towards world domination!
 - (prio: high) add a way to mark the date of the last successful update in a
   file, for each data source, so we can answer the "how up-to-date is this
   data?" question.
+- (prio: medium) Write/update documentation about the system, and how to use it.
 
 packages/sources
 ----------------
@@ -50,10 +51,6 @@ bugs.debian.org
 
 popcon
 ------
-- (prio: high) rename view popcon_* so it's clear that they are for source
-  package. Maybe popcon_src_max and popcon_src_average ?
-- (prio: high) fix the views. Shouldn't they max() and avg() only results from
-  Debian's popcon, not Ubuntu's?
 - (prio: high) fix Ubuntu's popcon? (is it broken?)
   16:55 < Neronus> Great. ubuntu popcon raw data is broken.
 

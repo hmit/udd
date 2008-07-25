@@ -6,8 +6,9 @@ import os
 
 """This scripts sets up and deletes the tables of the database"""
 
-TABLES = ('sources', 'packages', 'popcon', 'migrations', 'bugs', 'bug_merged_with', 'bug_user_tags')
-VIEWS = ('popcon_average', 'popcon_max')
+TABLES = ('sources', 'packages', 'popcon', 'migrations', 'bugs', 'bug_merged_with', 'bug_user_tags', 'bug_found_in',
+          'bug_fixed_in')
+VIEWS = ('popcon_src_average', 'popcon_src_max')
 
 def print_help():
   print "Usage: %s <config> <delete|setup>" % sys.argv[0]

@@ -42,22 +42,25 @@ CREATE TABLE bug_found_in
 CREATE TABLE bug_fixed_in
   (id int, version text);
 
-CREATE VIEW popcon_average AS
+CREATE VIEW popcon_src_average AS
   SELECT sources.package, avg(vote) AS vote, avg(olde) AS old, avg(recent) AS recent, avg(nofiles) as nofiles
     FROM sources, popcon,
-          (SELECT DISTINCT packages.package, packages.source FROM packages) as packages
+          (SELECT DISTINCT packages.package, packages.source FROM packages WHERE packages.distribution = 'debian') as packages
     WHERE sources.release = 'sid' AND
           packages.source = sources.package AND
-	  popcon.name = packages.package
+	  popcon.name = packages.package AND
+	  popcon.distribution = 'debian'
     GROUP BY sources.package;
 
 
-CREATE VIEW popcon_max AS
+CREATE VIEW popcon_src_max AS
   SELECT sources.package, max(vote) AS vote, max(olde) AS old, max(recent) AS recent, max(nofiles) as nofiles
     FROM sources, popcon, packages
     WHERE sources.release = 'sid' AND
+          packages.distribution = 'debian' AND 
           packages.source = sources.package AND
-	  popcon.name = packages.package
+	  popcon.name = packages.package AND
+	  popcon.distribution = 'debian'
     GROUP BY sources.package;
 
 
@@ -69,8 +72,8 @@ CREATE INDEX sources_component_idx on sources(component);
 GRANT SELECT ON Packages TO PUBLIC;
 GRANT SELECT ON sources TO PUBLIC;
 GRANT SELECT ON popcon TO PUBLIC;
-GRANT SELECT ON popcon_average TO PUBLIC;
-GRANT SELECT ON popcon_max TO PUBLIC;
+GRANT SELECT ON popcon_src_average TO PUBLIC;
+GRANT SELECT ON popcon_src_max TO PUBLIC;
 GRANT SELECT ON bugs TO PUBLIC;
 GRANT SELECT ON bug_merged_with TO PUBLIC;
 GRANT SELECT ON bug_found_in TO PUBLIC;
