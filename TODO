@@ -39,8 +39,6 @@ bugs.debian.org
   patches to be submitted to the debbugs developers. To test, maybe change your
   code to only import a subset of bugs, so it runs in a few minutes instead of
   an hour.
-- (prio: high) try to fix http://bugs.debian.org/492170, or at least understand
-  what's happening.
 - (prio: high) compare what's imported with what's available on
   http://bts.turmzimmer.net/details.php. Do the results match?
 - (prio: high) deal with archived bugs. They should be imported as well, but
