@@ -24,7 +24,7 @@ That's the first step towards world domination!
 - (prio: high) add a way to mark the date of the last successful update in a
   file, for each data source, so we can answer the "how up-to-date is this
   data?" question.
-- (prio: medium) Write/update documentation about the system, and how to use it.
+- (prio: high) Write/update documentation about the system, and how to use it.
 
 packages/sources
 ----------------
@@ -46,6 +46,7 @@ bugs.debian.org
 - (prio: high) deal with archived bugs. They should be imported as well, but
   probably less frequently. How do we deal with bugs that were archived /
   unarchived since the last run?
+- (prio: high) user tags
 - (prio: medium) generate output using bts2ldap format, and check that the
   result matches a fresh bts2ldap run done by Lucas
 
