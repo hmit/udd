@@ -42,6 +42,9 @@ CREATE TABLE bug_found_in
 CREATE TABLE bug_fixed_in
   (id int, version text);
 
+CREATE TABLE upload_history
+ (package text, version text, date timestamp with time zone, changed_by text, maintainer text, nmu boolean, signed_by text, key_id text);
+
 CREATE VIEW popcon_src_average AS
   SELECT sources.package, avg(vote) AS vote, avg(olde) AS old, avg(recent) AS recent, avg(nofiles) as nofiles
     FROM sources, popcon,

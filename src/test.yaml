@@ -1,5 +1,5 @@
 general:
-  dbname: udd
+  dbname: udd-test
   types:
     sources: module udd.sources_gatherer
     packages: module udd.packages_gatherer
@@ -8,6 +8,7 @@ general:
     src-pkg: module udd.src_and_pkg_gatherer
     popcon: module udd.popcon_gatherer
     testing-migrations: module udd.testing_migrations_gatherer
+    upload-history: module udd.upload_history_gatherer
     #src-pkg: python sources_gatherer.py
   debug: 1
 
@@ -128,4 +129,9 @@ ubuntu-popcon:
 testing-migrations:
   type: testing-migrations
   path: /tmp/migrations
-  update-command: echo "test"; wget -O /tmp/migrations 'http://qa.debian.org/~lucas/testing-status.raw'
+  update-command: wget -O /tmp/migrations 'http://qa.debian.org/~lucas/testing-status.raw'
+
+upload-history:
+  type: upload-history
+  path: /tmp/upload-history
+  update-command: if [ ! -e /tmp/upload-history/ ]; then mkdir /tmp/upload-history/; fi; rm -rf /tmp/upload-history/*; wget -r --no-parent -nd -A debian-devel-* -P /tmp/upload-history http://qa.debian.org/~filippo/ddc/

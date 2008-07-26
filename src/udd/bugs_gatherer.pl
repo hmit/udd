@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# Last-Modified: <Sat Jul 26 12:01:01 2008>
+# Last-Modified: <Sat Jul 26 13:26:22 2008>
 
 use strict;
 use warnings;
@@ -51,6 +51,8 @@ sub main {
 	$dbh->prepare("DELETE FROM bug_fixed_in")->execute();
 	$dbh->prepare("DELETE FROM bug_merged_with")->execute();
 
+	my %binarytosource = ();
+
 	# Read all bugs
 	foreach my $bug_nr (get_bugs()) {
 		# Fetch bug using Debbugs
@@ -62,7 +64,13 @@ sub main {
 		map { $bug{$_} = $dbh->quote($bug{$_}) } qw(subject originator owner pending);
 		my @found_versions = map { $dbh->quote($_) } @{$bug{found_versions}};
 		my @fixed_versions = map { $dbh->quote($_) } @{$bug{fixed_versions}};
-		my $source = binarytosource($bug{package});
+
+
+		if(not exists $binarytosource{$bug{package}}) {
+			$binarytosource{$bug{package}} = binarytosource($bug{package});
+		}
+		my $source = $binarytosource{$bug{package}};
+
 		if(not defined $source) {
 			$source = 'NULL';
 		} else {
