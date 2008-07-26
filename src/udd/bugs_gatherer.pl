@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# Last-Modified: <Thu Jul 24 17:54:33 2008>
+# Last-Modified: <Sat Jul 26 12:01:01 2008>
 
 use strict;
 use warnings;
@@ -45,33 +45,17 @@ sub main {
 	# We want to commit the transaction as a hole at the end
 	$dbh->{AutoCommit} = 0;
 
-	# We want to know the last modification date of the bugs
-	my $sth = $dbh->prepare("SELECT MAX(last_modified) FROM bugs");
-	$sth->execute();
-	my $max_last_modified = $sth->fetchrow_array();
+	#delete the bug, if it exists
+	$dbh->prepare("DELETE FROM bugs")->execute();
+	$dbh->prepare("DELETE FROM bug_found_in")->execute();
+	$dbh->prepare("DELETE FROM bug_fixed_in")->execute();
+	$dbh->prepare("DELETE FROM bug_merged_with")->execute();
 
-	#$dbh->prepare("DELETE FROM bugs")->execute();
-	#$dbh->prepare("DELETE from bug_found_in")->execute();
-	#$dbh->prepare("DELETE from bug_fixed_in")->execute();
-	#$dbh->prepare("DELETE FROM bug_merged_with")->execute();
-
-	my %pkgsrcmap = %{getpkgsrc()};
-
-	my $counter = 0;
-
-	my ($year, $month, $day, $hour, $minute, $second) = parse_time($max_last_modified);
-	$max_last_modified = timelocal($second, $minute, $hour, $day, $month-1, $year);
-	
 	# Read all bugs
 	foreach my $bug_nr (get_bugs()) {
 		# Fetch bug using Debbugs
 		my %bug = %{get_bug_status($bug_nr)};
-
-		# Check if the bug was last changed since we updated the DB
-		next if $max_last_modified > $bug{log_modified};
-
-		print "Working bug $bug_nr\n";
-
+		
 		# Convert data where necessary
 		my $date = strftime("%Y-%m-%d %T", localtime($bug{date}));
 		my $log_modified = strftime("%Y-%m-%d %T", localtime($bug{log_modified}));
@@ -114,16 +98,11 @@ sub main {
 			$present_in_unstable = 'TRUE';
 		}
 
-		#delete the bug, if it exists
-		$dbh->prepare("DELETE FROM bugs WHERE id = $bug_nr")->execute();
-		$dbh->prepare("DELETE FROM bug_found_in WHERE id = $bug_nr")->execute();
-		$dbh->prepare("DELETE FROM bug_fixed_in WHERE id = $bug_nr")->execute();
-		$dbh->prepare("DELETE FROM bug_merged_with WHERE bug = $bug_nr")->execute();
 
 		# Insert data into bugs table
 		my $query = "INSERT INTO bugs VALUES ($bug_nr, '$bug{package}', $source, '$date', \
-		             $bug{pending}, '$bug{severity}', '$bug{keywords}', $bug{originator}, $bug{owner}, \
-					 $bug{subject}, '$log_modified', $present_in_stable,
+		             E$bug{pending}, '$bug{severity}', '$bug{keywords}', E$bug{originator}, E$bug{owner}, \
+					 E$bug{subject}, '$log_modified', $present_in_stable,
 					 $present_in_testing, $present_in_unstable)";
 		# Execute insertion
 		my $sth = $dbh->prepare($query);
@@ -142,7 +121,6 @@ sub main {
 			$query = "INSERT INTO bug_merged_with VALUES ($bug_nr, $mergee)";
 			$dbh->prepare($query)->execute() or die $!;
 		}
-		print "$counter\n" if ++$counter % 500 == 0;
 	}
 
 	$dbh->commit();

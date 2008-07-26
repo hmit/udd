@@ -1,4 +1,6 @@
-# Last-Modified: <Sat Jul 12 17:31:22 2008>
+# Last-Modified: <Sat Jul 26 13:03:16 2008>
+
+# This file is a part of the Ultimate Debian Database Project
 
 from gatherer import gatherer
 from aux import ConfigException, quote
@@ -11,6 +13,9 @@ def get_gatherer(config, connection):
 
 
 class testing_migrations_gatherer(gatherer):
+  """This class imports testing migrations data into the database.
+
+  For the files, see http://qa.debian.org/~lucas/testing-status.raw"""
   def __init__(self, connection, config):
     gatherer.__init__(self, connection, config)
 
@@ -35,8 +40,6 @@ class testing_migrations_gatherer(gatherer):
 	  exec "is_null = %s == ZERO_DATE" % field
 	  if is_null:
 	    exec "%s = 'NULL'" % field
-	  #else:
-	    #exec field + " = strptime('%Y-%m-%d', " + field + ")"
 	  else:
 	    exec "%s = quote(%s)" % (field, field)
 

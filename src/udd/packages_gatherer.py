@@ -1,5 +1,6 @@
-#/usr/bin/env python
-# Last-Modified: <Sun Jun 29 11:49:49 2008>
+# /usr/bin/env python
+# Last-Modified: <Sat Jul 26 12:58:43 2008>
+# This file is a part of the Ultimate Debian Database project
 
 import debian_bundle.deb822
 import gzip
@@ -15,7 +16,12 @@ def get_gatherer(connection, config):
   return packages_gatherer(connection, config)
 
 class packages_gatherer(gatherer):
+  "This class imports the data from Packages.gz files into the database"
   # For efficiency, these are dictionaries
+  # mandatory: list of fields which each package has to provide
+  # non_mandatory: list of fields which are possibly provided by packages
+  # ignorable: fields which are not useful for the database,
+  #            but for which no warning should be printed
   mandatory = {'Package': 0, 'Version': 0, 'Architecture': 0, 'Maintainer': 0,
       'Description': 0}
   non_mandatory = {'Source': 0, 'Essential': 0, 'Depends': 0, 'Recommends': 0,
@@ -140,11 +146,10 @@ class packages_gatherer(gatherer):
 
     aux.debug = self.config['general']['debug']
 
-    # Get distribution ID. If it does not exist, create it
+    # Get distribution ID
     self._distr = src_cfg['distribution']
 
     cur = self.cursor()
-    #cur.execute("PREPARE pkg_insert AS INSERT INTO pkgs (name, distr_id, arch_id, version, src_id) VALUES ($1, $2, $3, $4, $5);")
 
     # For every part and every architecture, import the packages into the DB
     for comp in src_cfg['components']:

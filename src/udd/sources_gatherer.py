@@ -1,5 +1,6 @@
 #/usr/bin/env python
-# Last-Modified: <Thu Jul 24 12:26:00 2008>
+# Last-Modified: <Sat Jul 26 12:59:30 2008>
+# This file is a part of the Ultimate Debian Database project
 
 import debian_bundle.deb822
 import gzip
@@ -15,6 +16,7 @@ def get_gatherer(connection, config):
   return sources_gatherer(connection, config)
 
 class sources_gatherer(gatherer):
+  "This class imports the data from Sources.gz files into the database"
   mandatory = {'Format': 0, 'Maintainer': 0, 'Package': 0, 'Version': 0, 'Files': 0}
   non_mandatory = {'Uploaders': 0, 'Binary': 0, 'Architecture': 0,
       'Standards-Version': 0, 'Homepage': 0, 'Build-Depends': 0,
