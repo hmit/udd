@@ -1,0 +1,5 @@
+Various notes regarding the Ultimate Debian Database:
+
+bugs-gatherer.pl:
+	if log_modified or date of a bug cannot be determined,
+		NULL is written into the those columns

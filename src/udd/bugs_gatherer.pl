@@ -1,10 +1,13 @@
 #!/usr/bin/perl
-# Last-Modified: <Sun Jul 27 12:50:43 2008>
+# Last-Modified: <Sun Jul 27 13:09:48 2008>
 
 use strict;
 use warnings;
 
-use lib qw{./ /org/udd.debian.net/mirrors/bugs.debian.org/perl};
+use FindBin '$Bin';
+
+# We need our own copy of Debbugs::Status for now
+use lib $Bin, qw{/org/udd.debian.net/mirrors/bugs.debian.org/perl};
 
 use DBI;
 use YAML::Syck;
@@ -47,20 +50,22 @@ sub main {
 	$dbh->{AutoCommit} = 0;
 
 	#delete the bug, if it exists
-	$dbh->prepare("DELETE FROM bugs")->execute();
-	$dbh->prepare("DELETE FROM bug_found_in")->execute();
-	$dbh->prepare("DELETE FROM bug_fixed_in")->execute();
-	$dbh->prepare("DELETE FROM bug_merged_with")->execute();
+	map {
+		$dbh->prepare("DELETE FROM $_ WHERE EXISTS (SELECT * FROM bugs WHERE id = bugs.id AND bugs.is_archived = " . ($src_config{archived} ? 'TRUE' : 'FALSE') . ")")->execute();
+	} qw{bug_found_in bug_fixed_in bug_merged_with};
+	$dbh->prepare("DELETE FROM bugs WHERE is_archived = " . ($src_config{archived} ? 'TRUE' : 'FALSE'))->execute();
 
 	my %binarytosource = ();
 
 	my $location = $src_config{archived} ? 'archive' : 'db_h';
 	# Read all bugs
 	foreach my $bug_nr ($src_config{archived} ? get_bugs(archive => 1) : get_bugs()) {
-		next unless $bug_nr =~ /00$/;
+		#next unless $bug_nr =~ /00$/;
 		# Fetch bug using Debbugs
-		# Yeah, great, why does get_bug_status not accept a location?
+		# Bugs which were once archived and have been unarchived again will appear in get_bugs(archive => 1).
+		# However, those bugs are not to be found in location 'archive', so we detect them, and skip them
 		my $bug_ref = read_bug(bug => $bug_nr, location => $location) or (print STDERR "Could not read file for bug $bug_nr in $location; skipping\n" and next);
+		# Yeah, great, why does get_bug_status not accept a location?
 		my %bug = %{get_bug_status(bug => $bug_nr, status => $bug_ref)};
 		
 		# Convert data where necessary
