@@ -135,8 +135,15 @@ testing-migrations:
 upload-history:
   type: upload-history
   path: /tmp/upload-history
-  update-command: if [ ! -e /tmp/upload-history/ ]; then mkdir /tmp/upload-history/; fi; rm -rf /tmp/upload-history/*; wget -r --no-parent -nd -A debian-devel-* -P /tmp/upload-history http://qa.debian.org/~filippo/ddc/
+  #update-command: if [ ! -e /tmp/upload-history/ ]; then mkdir /tmp/upload-history/; fi; rm -rf /tmp/upload-history/*; wget -r --no-parent -nd -A debian-devel-* -P /tmp/upload-history http://qa.debian.org/~filippo/ddc/
+  update-command: if [ ! -e /tmp/upload-history/ ]; then mkdir /tmp/upload-history/; fi; rm -rf /tmp/upload-history/*; wget -r --no-parent -nd -A debian-devel-* -P /tmp/upload-history http://giunched.web.cs.unibo.it/nokeys/
 
 bugs:
   type: bugs
+  archived: false
+  update-command: /org/udd.debian.org/mirrors/sync-bugs.debian.org
+
+bugs-archive:
+  type: bugs
+  archived: true
   update-command: /org/udd.debian.org/mirrors/sync-bugs.debian.org

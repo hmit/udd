@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# Last-Modified: <Sun Jul 27 11:36:21 2008>
+# Last-Modified: <Sun Jul 27 12:50:43 2008>
 
 use strict;
 use warnings;
@@ -38,6 +38,7 @@ sub main {
 
 	my $config = LoadFile($ARGV[0]) or die "Could not load configuration: $!";
 	my $source = $ARGV[1];
+	my %src_config = %{$config->{$source}};
 
 	my $dbname = $config->{general}->{dbname};
 	# Connection to DB
@@ -53,19 +54,29 @@ sub main {
 
 	my %binarytosource = ();
 
+	my $location = $src_config{archived} ? 'archive' : 'db_h';
 	# Read all bugs
-	foreach my $bug_nr (get_bugs()) {
-		#next unless $bug_nr =~ /0$/;
+	foreach my $bug_nr ($src_config{archived} ? get_bugs(archive => 1) : get_bugs()) {
+		next unless $bug_nr =~ /00$/;
 		# Fetch bug using Debbugs
 		# Yeah, great, why does get_bug_status not accept a location?
-		my %bug = %{get_bug_status(bug => $bug_nr, status => read_bug(bug => $bug_nr, location => 'db_h'))};
+		my $bug_ref = read_bug(bug => $bug_nr, location => $location) or (print STDERR "Could not read file for bug $bug_nr in $location; skipping\n" and next);
+		my %bug = %{get_bug_status(bug => $bug_nr, status => $bug_ref)};
 		
 		# Convert data where necessary
-		#my $date = strftime("%Y-%m-%d %T", localtime($bug{date}));
-		#my $log_modified = strftime("%Y-%m-%d %T", localtime($bug{log_modified}));
 		map { $bug{$_} = $dbh->quote($bug{$_}) } qw(subject originator owner pending);
 		my @found_versions = map { $dbh->quote($_) } @{$bug{found_versions}};
 		my @fixed_versions = map { $dbh->quote($_) } @{$bug{fixed_versions}};
+
+		# log_modified and date are not necessarily set. If they are not available, they
+		# are assumed to be epoch (i.e. bug #4170)
+		map {
+			if($bug{$_}) {
+				$bug{$_} = "$bug{$_}::abstime";
+			} else {
+				$bug{$_} = '0::abstime';
+			}
+		} qw{date log_modified};
 
 
 		if(not exists $binarytosource{$bug{package}}) {
@@ -110,10 +121,10 @@ sub main {
 
 
 		# Insert data into bugs table
-		my $query = "INSERT INTO bugs VALUES ($bug_nr, '$bug{package}', $source, $bug{date}::abstime, \
+		my $query = "INSERT INTO bugs VALUES ($bug_nr, '$bug{package}', $source, $bug{date}, \
 		             E$bug{pending}, '$bug{severity}', '$bug{keywords}', E$bug{originator}, E$bug{owner}, \
-					 E$bug{subject}, $bug{log_modified}::abstime, $present_in_stable,
-					 $present_in_testing, $present_in_unstable)";
+					 E$bug{subject}, $bug{log_modified}, $present_in_stable,
+					 $present_in_testing, $present_in_unstable, " . ($src_config{archived} ? 'True' : 'False') . ")";
 		# Execute insertion
 		my $sth = $dbh->prepare($query);
 		$sth->execute() or die $!;
