@@ -1,4 +1,4 @@
-# Last-Modified: <Sat Jul 26 18:20:06 2008>
+# Last-Modified: <Sun Jul 27 11:53:58 2008>
 # This file is part of the Ultimate Debian Database Project
 
 from gatherer import gatherer
@@ -77,5 +77,3 @@ class upload_history_gatherer(gatherer):
 	last_field = field
     
     cursor.execute("DEALLOCATE uh_insert")
-
-    sys.exit(1)
