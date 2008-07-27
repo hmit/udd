@@ -1,16 +1,16 @@
 #!/usr/bin/perl
-# Last-Modified: <Sat Jul 26 13:26:22 2008>
+# Last-Modified: <Sun Jul 27 11:36:21 2008>
 
 use strict;
 use warnings;
 
-use lib qw{/org/udd.debian.net/mirrors/bugs.debian.org/perl};
+use lib qw{./ /org/udd.debian.net/mirrors/bugs.debian.org/perl};
 
 use DBI;
 use YAML::Syck;
 
 use Debbugs::Bugs qw{get_bugs};
-use Debbugs::Status qw{readbug get_bug_status bug_presence};
+use Debbugs::Status qw{read_bug get_bug_status bug_presence};
 use Debbugs::Packages qw{binarytosource getpkgsrc};
 
 use POSIX qw{strftime};
@@ -55,12 +55,14 @@ sub main {
 
 	# Read all bugs
 	foreach my $bug_nr (get_bugs()) {
+		#next unless $bug_nr =~ /0$/;
 		# Fetch bug using Debbugs
-		my %bug = %{get_bug_status($bug_nr)};
+		# Yeah, great, why does get_bug_status not accept a location?
+		my %bug = %{get_bug_status(bug => $bug_nr, status => read_bug(bug => $bug_nr, location => 'db_h'))};
 		
 		# Convert data where necessary
-		my $date = strftime("%Y-%m-%d %T", localtime($bug{date}));
-		my $log_modified = strftime("%Y-%m-%d %T", localtime($bug{log_modified}));
+		#my $date = strftime("%Y-%m-%d %T", localtime($bug{date}));
+		#my $log_modified = strftime("%Y-%m-%d %T", localtime($bug{log_modified}));
 		map { $bug{$_} = $dbh->quote($bug{$_}) } qw(subject originator owner pending);
 		my @found_versions = map { $dbh->quote($_) } @{$bug{found_versions}};
 		my @fixed_versions = map { $dbh->quote($_) } @{$bug{fixed_versions}};
@@ -108,9 +110,9 @@ sub main {
 
 
 		# Insert data into bugs table
-		my $query = "INSERT INTO bugs VALUES ($bug_nr, '$bug{package}', $source, '$date', \
+		my $query = "INSERT INTO bugs VALUES ($bug_nr, '$bug{package}', $source, $bug{date}::abstime, \
 		             E$bug{pending}, '$bug{severity}', '$bug{keywords}', E$bug{originator}, E$bug{owner}, \
-					 E$bug{subject}, '$log_modified', $present_in_stable,
+					 E$bug{subject}, $bug{log_modified}::abstime, $present_in_stable,
 					 $present_in_testing, $present_in_unstable)";
 		# Execute insertion
 		my $sth = $dbh->prepare($query);
