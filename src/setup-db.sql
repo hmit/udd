@@ -46,26 +46,22 @@ CREATE TABLE upload_history
  (package text, version text, date timestamp with time zone, changed_by text, maintainer text, nmu boolean, signed_by text, key_id text);
 
 CREATE VIEW popcon_src_average AS
-  SELECT sources.package, avg(insts), avg(vote) AS vote, avg(olde) AS old, avg(recent) AS recent, avg(nofiles) as nofiles, sources.distribution
-    FROM sources, popcon,
+  SELECT package, avg(insts) AS insts, avg(vote) AS vote, avg(olde) AS old, avg(recent) AS recent, avg(nofiles) as nofiles, packages.distribution
+    FROM popcon,
           (SELECT DISTINCT packages.package, packages.source, packages.distribution FROM packages) as packages
     WHERE 
-          packages.source = sources.package AND
-	  packages.distribution = sources.distribution AND
 	  popcon.name = packages.package AND
-	  popcon.distribution = sources.distribution
-    GROUP BY sources.package, sources.distribution;
+	  popcon.distribution = packages.distribution
+    GROUP BY packages.source, packages.distribution, packages.package;
 
 CREATE VIEW popcon_src_max AS
-  SELECT sources.package, max(insts), max(vote) AS vote, max(olde) AS old, max(recent) AS recent, max(nofiles) as nofiles, sources.distribution
-    FROM sources, popcon,
+  SELECT package, max(insts) AS insts, max(vote) AS vote, max(olde) AS old, max(recent) AS recent, max(nofiles) as nofiles, packages.distribution
+    FROM popcon,
           (SELECT DISTINCT packages.package, packages.source, packages.distribution FROM packages) as packages
     WHERE 
-          packages.source = sources.package AND
-	  packages.distribution = sources.distribution AND
 	  popcon.name = packages.package AND
-	  popcon.distribution = sources.distribution
-    GROUP BY sources.package, sources.distribution;
+	  popcon.distribution = packages.distribution
+    GROUP BY packages.source, packages.distribution, packages.package;
 
 CREATE INDEX pkgs_src_id_idx ON Packages USING btree (Source);
 CREATE INDEX sources_distribution_idx on sources(distribution);
