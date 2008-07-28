@@ -9,6 +9,7 @@ import aux
 import sys
 import gzip
 from gatherer import gatherer
+import re
 
 def get_gatherer(connection, config):
   return popcon_gatherer(connection, config)
@@ -37,12 +38,20 @@ class popcon_gatherer(gatherer):
 
     cur.execute("DELETE FROM popcon WHERE distribution = '%s'" % my_config['distribution'])
 
+    # used for ignoring ubuntu's broken popcon lines
+    ascii_match = re.compile("^[A-Za-z0-9-.+_]+$")
+
+    linenr = 0
     for line in popcon.readlines():
+      linenr += 1
       name, data = line.split(None, 1)
       if name == "Submissions:":
 	cur.execute("INSERT INTO popcon (name, vote, distribution) VALUES ('_submissions', %s, '%s')" % (data, my_config['distribution']))
       try:
 	(name, vote, old, recent, nofiles) = data.split()
+	if ascii_match.match(name) == None:
+	  print name
+	continue
 	query = "EXECUTE pop_insert('%s', %s, %s, %s, %s)" %\
 	    (name, vote, old, recent, nofiles)
 	cur.execute(query)
