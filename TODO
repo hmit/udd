@@ -49,6 +49,7 @@ Other data sources
 - (prio: medium) do history of uploads (coordinate with godog on the format)
 - (prio: medium) DEHS
 - (prio: medium) carnivore
+- (prio: low) WNPP (see collab-qa/orphan-list)
 - (prio: low) MIA
 - (prio: low) debtags
 - (prio: low) wanna-build
