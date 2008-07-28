@@ -32,7 +32,7 @@ class popcon_gatherer(gatherer):
 
     cur = self.cursor()
 
-    cur.execute("PREPARE pop_insert AS INSERT INTO popcon (name, vote, olde, recent, nofiles, distribution) VALUES ($1, $2, $3, $4, $5, '%s')" % my_config['distribution'])
+    cur.execute("PREPARE pop_insert AS INSERT INTO popcon (name, insts, vote, olde, recent, nofiles, distribution) VALUES ($1, $2, $3, $4, $5, $6, '%s')" % my_config['distribution'])
 
     popcon = gzip.open(my_config['path'])
 
@@ -50,10 +50,11 @@ class popcon_gatherer(gatherer):
       try:
 	(name, vote, old, recent, nofiles) = data.split()
 	if ascii_match.match(name) == None:
-	  print name
-	continue
-	query = "EXECUTE pop_insert('%s', %s, %s, %s, %s)" %\
-	    (name, vote, old, recent, nofiles)
+	  print "Skipping line %d of file %s as it contains illegal characters: %s" % (linenr, my_config['path'], line)
+	  continue
+	query = "EXECUTE pop_insert('%s', %s, %s, %s, %s, %s)" %\
+	    (name, int(vote) + int(old) + int(recent) + int(nofiles), vote, old, recent, nofiles)
+	print query
 	cur.execute(query)
       except ValueError:
 	continue

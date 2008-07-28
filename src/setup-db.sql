@@ -22,7 +22,7 @@ CREATE TABLE migrations
   UNIQUE (package));
 
 CREATE TABLE popcon
-  (Name text, vote int, olde int, recent int, nofiles int, distribution text, UNIQUE (Name, distribution));
+  (Name text, insts int, vote int, olde int, recent int, nofiles int, distribution text, UNIQUE (Name, distribution));
 
 CREATE TABLE bugs
   (id int, package text, source text, arrival timestamp, status text,
