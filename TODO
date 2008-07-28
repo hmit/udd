@@ -28,6 +28,10 @@ packages/sources
 - (prio: medium) Add support for keeping history of Packages and Sources in
   separate tables.
 
+migrations
+----------
+- (prio: high) rename 'package' to 'source'
+
 bugs.debian.org
 ---------------
 - (prio: high) compare what's imported with what's available on
