@@ -32,7 +32,7 @@ class popcon_gatherer(gatherer):
 
     cur = self.cursor()
 
-    cur.execute("PREPARE pop_insert AS INSERT INTO popcon (name, insts, vote, olde, recent, nofiles, distribution) VALUES ($1, $2, $3, $4, $5, $6, '%s')" % my_config['distribution'])
+    cur.execute("PREPARE pop_insert AS INSERT INTO popcon (package, insts, vote, olde, recent, nofiles, distribution) VALUES ($1, $2, $3, $4, $5, $6, '%s')" % my_config['distribution'])
 
     popcon = gzip.open(my_config['path'])
 
@@ -46,7 +46,7 @@ class popcon_gatherer(gatherer):
       linenr += 1
       name, data = line.split(None, 1)
       if name == "Submissions:":
-	cur.execute("INSERT INTO popcon (name, vote, distribution) VALUES ('_submissions', %s, '%s')" % (data, my_config['distribution']))
+	cur.execute("INSERT INTO popcon (package, vote, distribution) VALUES ('_submissions', %s, '%s')" % (data, my_config['distribution']))
       try:
 	(name, vote, old, recent, nofiles) = data.split()
 	if ascii_match.match(name) == None:

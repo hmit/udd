@@ -117,14 +117,14 @@ test-pkg:
 
 debian-popcon:
   type: popcon
-  path: /tmp/all-popcon-results.txt.gz
-  update-command: wget -O /tmp/all-popcon-results.txt.gz http://popcon.debian.org/all-popcon-results.txt.gz
+  path: ./all-popcon-results.txt.gz
+  update-command: wget -O ./all-popcon-results.txt.gz http://popcon.debian.org/all-popcon-results.txt.gz
   distribution: debian
   
 ubuntu-popcon:
   type: popcon
-  path: /tmp/ubuntu-popcon-results.txt.gz
-  update-command: wget -O /tmp/ubuntu-popcon-results.txt.gz http://popcon.ubuntu.com/all-popcon-results.txt.gz
+  path: /tmp/udd-test/ubuntu-popcon-results.txt.gz
+  update-command: wget -O /tmp/udd-test/ubuntu-popcon-results.txt.gz http://popcon.ubuntu.com/all-popcon-results.txt.gz
   distribution: ubuntu
 
 testing-migrations:

@@ -18,12 +18,12 @@ CREATE TABLE sources
     PRIMARY KEY (package, version, distribution, release, component));
 
 CREATE TABLE migrations
-  (package text PRIMARY KEY, in_testing date, testing_version text, in_unstable date, unstable_version text, sync date, sync_version text, first_seen date);
+  (source text PRIMARY KEY, in_testing date, testing_version text, in_unstable date, unstable_version text, sync date, sync_version text, first_seen date);
 
 CREATE TABLE popcon (
-   Name text, insts int, vote int, olde int, recent int, nofiles int,
+   package text, insts int, vote int, olde int, recent int, nofiles int,
    distribution text,
-   PRIMARY KEY (Name, distribution));
+   PRIMARY KEY (package, distribution));
 
 CREATE TABLE bugs
   (id int PRIMARY KEY, package text, source text, arrival timestamp, status text,
@@ -52,20 +52,20 @@ CREATE TABLE upload_history
   maintainer text, nmu boolean, signed_by text, key_id text);
 
 CREATE VIEW popcon_src_average AS
-  SELECT package, avg(insts) AS insts, avg(vote) AS vote, avg(olde) AS old, avg(recent) AS recent, avg(nofiles) as nofiles, packages.distribution
+  SELECT packages.package, avg(insts) AS insts, avg(vote) AS vote, avg(olde) AS old, avg(recent) AS recent, avg(nofiles) as nofiles, packages.distribution
     FROM popcon,
           (SELECT DISTINCT packages.package, packages.source, packages.distribution FROM packages) as packages
     WHERE 
-	  popcon.name = packages.package AND
+	  popcon.package = packages.package AND
 	  popcon.distribution = packages.distribution
     GROUP BY packages.source, packages.distribution, packages.package;
 
 CREATE VIEW popcon_src_max AS
-  SELECT package, max(insts) AS insts, max(vote) AS vote, max(olde) AS old, max(recent) AS recent, max(nofiles) as nofiles, packages.distribution
+  SELECT packages.package, max(insts) AS insts, max(vote) AS vote, max(olde) AS old, max(recent) AS recent, max(nofiles) as nofiles, packages.distribution
     FROM popcon,
           (SELECT DISTINCT packages.package, packages.source, packages.distribution FROM packages) as packages
     WHERE 
-	  popcon.name = packages.package AND
+	  popcon.package = packages.package AND
 	  popcon.distribution = packages.distribution
     GROUP BY packages.source, packages.distribution, packages.package;
 
