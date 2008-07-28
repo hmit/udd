@@ -54,7 +54,6 @@ class popcon_gatherer(gatherer):
 	  continue
 	query = "EXECUTE pop_insert('%s', %s, %s, %s, %s, %s)" %\
 	    (name, int(vote) + int(old) + int(recent) + int(nofiles), vote, old, recent, nofiles)
-	print query
 	cur.execute(query)
       except ValueError:
 	continue

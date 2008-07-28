@@ -46,7 +46,7 @@ CREATE TABLE upload_history
  (package text, version text, date timestamp with time zone, changed_by text, maintainer text, nmu boolean, signed_by text, key_id text);
 
 CREATE VIEW popcon_src_average AS
-  SELECT sources.package, avg(vote) AS vote, avg(olde) AS old, avg(recent) AS recent, avg(nofiles) as nofiles, sources.distribution
+  SELECT sources.package, avg(insts), avg(vote) AS vote, avg(olde) AS old, avg(recent) AS recent, avg(nofiles) as nofiles, sources.distribution
     FROM sources, popcon,
           (SELECT DISTINCT packages.package, packages.source, packages.distribution FROM packages) as packages
     WHERE 
@@ -57,7 +57,7 @@ CREATE VIEW popcon_src_average AS
     GROUP BY sources.package, sources.distribution;
 
 CREATE VIEW popcon_src_max AS
-  SELECT sources.package, max(vote) AS vote, max(olde) AS old, max(recent) AS recent, max(nofiles) as nofiles, sources.distribution
+  SELECT sources.package, max(insts), max(vote) AS vote, max(olde) AS old, max(recent) AS recent, max(nofiles) as nofiles, sources.distribution
     FROM sources, popcon,
           (SELECT DISTINCT packages.package, packages.source, packages.distribution FROM packages) as packages
     WHERE 
