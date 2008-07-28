@@ -46,26 +46,25 @@ CREATE TABLE upload_history
  (package text, version text, date timestamp with time zone, changed_by text, maintainer text, nmu boolean, signed_by text, key_id text);
 
 CREATE VIEW popcon_src_average AS
-  SELECT sources.package, avg(vote) AS vote, avg(olde) AS old, avg(recent) AS recent, avg(nofiles) as nofiles
+  SELECT sources.package, avg(vote) AS vote, avg(olde) AS old, avg(recent) AS recent, avg(nofiles) as nofiles, sources.distribution
     FROM sources, popcon,
           (SELECT DISTINCT packages.package, packages.source FROM packages WHERE packages.distribution = 'debian') as packages
     WHERE sources.release = 'sid' AND
           packages.source = sources.package AND
 	  popcon.name = packages.package AND
 	  popcon.distribution = 'debian'
-    GROUP BY sources.package;
+    GROUP BY sources.package, sources.distribution;
 
 
 CREATE VIEW popcon_src_max AS
-  SELECT sources.package, max(vote) AS vote, max(olde) AS old, max(recent) AS recent, max(nofiles) as nofiles
+  SELECT sources.package, max(vote) AS vote, max(olde) AS old, max(recent) AS recent, max(nofiles) as nofiles, sources.distribution
     FROM sources, popcon, packages
     WHERE sources.release = 'sid' AND
           packages.distribution = 'debian' AND 
           packages.source = sources.package AND
 	  popcon.name = packages.package AND
 	  popcon.distribution = 'debian'
-    GROUP BY sources.package;
-
+    GROUP BY sources.package, sources.distribution;
 
 CREATE INDEX pkgs_src_id_idx ON Packages USING btree (Source);
 CREATE INDEX sources_distribution_idx on sources(distribution);
