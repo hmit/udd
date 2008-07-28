@@ -10,9 +10,6 @@ General
 -------
 Main objective: get UDD into a state where it can be used for QA purposes.
 That's the first step towards world domination!
-- (prio: high) Install UDD into /org/udd.debian.net, using the udd user. Do
-  that by starting from a checkout from SVN, to ensure that no files are
-  missing in SVN.
 - (prio: high) Set up cronjobs so that the database is updated on a regular
   basis (it's still possible to continue to use udd-test for development
   purposes). Document how frequently the DB is updated.
@@ -33,12 +30,6 @@ packages/sources
 
 bugs.debian.org
 ---------------
-- (prio: high) Optimize import so that all bugs are imported in a more
-  reasonable time (< 30 mins?). Feel free to hack Debbugs (it's fine if you
-  copy all the Debbugs perl modules to udd), but do it in a way that allows
-  patches to be submitted to the debbugs developers. To test, maybe change your
-  code to only import a subset of bugs, so it runs in a few minutes instead of
-  an hour.
 - (prio: high) compare what's imported with what's available on
   http://bts.turmzimmer.net/details.php. Do the results match?
 - (prio: high) deal with archived bugs. They should be imported as well, but
