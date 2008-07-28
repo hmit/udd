@@ -8,14 +8,14 @@ use CGI;
 
 my $dbh = DBI->connect("dbi:Pg:dbname=udd") or die $!;
 my $sth = $dbh->prepare(<<EOF
-	SELECT DISTINCT intrepid.package, (vote + popcon_src_max.old + recent + nofiles) as pvote
+	SELECT DISTINCT intrepid.package, insts
         FROM (SELECT DISTINCT package FROM sources
                 WHERE distribution = 'ubuntu' and release = 'intrepid')
           AS intrepid,
              popcon_src_max
         WHERE NOT EXISTS (SELECT * FROM sources WHERE distribution = 'debian'
                           and package = intrepid.package)
-              AND popcon_src_max.package = intrepid.package AND popcon_src_max.distribution = 'ubuntu' ORDER BY pvote DESC;
+              AND popcon_src_max.package = intrepid.package AND popcon_src_max.distribution = 'ubuntu' ORDER BY insts DESC;
 EOF
 	);
 

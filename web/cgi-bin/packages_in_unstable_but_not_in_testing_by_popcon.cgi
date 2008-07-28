@@ -8,14 +8,14 @@ use CGI;
 
 my $dbh = DBI->connect("dbi:Pg:dbname=udd") or die $!;
 my $sth = $dbh->prepare(<<EOF
-	SELECT DISTINCT unstable.package, (vote + olde + recent + nofiles) as pvote
+	SELECT DISTINCT unstable.package, insts
         FROM (SELECT DISTINCT package FROM packages
                 WHERE distribution = 'debian' and release = 'sid')
           AS unstable,
              popcon
         WHERE NOT EXISTS (SELECT * FROM packages where distribution = 'debian'
                           AND release = 'lenny' and package = unstable.package)
-              AND popcon.name = unstable.package AND popcon.distribution = 'debian' ORDER BY pvote DESC;
+              AND popcon.package = unstable.package AND popcon.distribution = 'debian' ORDER BY insts DESC;
 EOF
 	);
 
