@@ -43,6 +43,7 @@ popcon
 ------
 - (prio: high) fix Ubuntu's popcon? (is it broken?)
   16:55 < Neronus> Great. ubuntu popcon raw data is broken.
+- (prio: high) rename "name" to "package". (and fix the views accordingly)
 
 Other data sources
 ------------------
