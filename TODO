@@ -36,8 +36,6 @@ bugs.debian.org
 - (prio: high) deal with archived bugs. They should be imported as well, but
   probably less frequently. How do we deal with bugs that were archived /
   unarchived since the last run?
-- (prio: high) user tags
-  + please make the table bug_user_tags(user, tag, id)
 - (prio: medium) generate output using bts2ldap format, and check that the
   result matches a fresh bts2ldap run done by Lucas
 
