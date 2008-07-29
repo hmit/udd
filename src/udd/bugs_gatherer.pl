@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# Last-Modified: <Sun Jul 27 13:09:48 2008>
+# Last-Modified: <Mon Jul 28 23:38:37 2008>
 
 use strict;
 use warnings;
@@ -15,6 +15,8 @@ use YAML::Syck;
 use Debbugs::Bugs qw{get_bugs};
 use Debbugs::Status qw{read_bug get_bug_status bug_presence};
 use Debbugs::Packages qw{binarytosource getpkgsrc};
+use Debbugs::Config qw{:globals};
+use Debbugs::User qw{read_usertags};
 
 use POSIX qw{strftime};
 use Time::Local qw{timelocal};
@@ -26,6 +28,22 @@ sub parse_time {
 		return ($1, $2, $3, $4, $5, $6);
 	}
 	return undef;
+}
+
+# Return the list of usernames
+sub get_bugs_users {
+	my $topdir = "$gSpoolDir/user";
+	my @ret = ();
+	# see Debbugs::User::filefromemail for why 0...6
+	for(my $i = 0; $i < 7; $i++) {
+		my $dir = "$topdir/$i";
+		opendir DIR, $dir or die "Can't open dir $dir: $!";
+		# Replace all occurences of %dd with the corresponding
+		# character represented by dd, where dd is a hexadecimal
+		# number
+		push @ret, map { s/%(..)/chr(hex($1))/ge; $_ } readdir DIR;
+	}
+	return @ret;
 }
 
 sub is_bug_in_db {
@@ -49,7 +67,22 @@ sub main {
 	# We want to commit the transaction as a hole at the end
 	$dbh->{AutoCommit} = 0;
 
-	#delete the bug, if it exists
+	# Free usertags table
+	$dbh->prepare("DELETE FROM bug_user_tags")->execute() or die
+		"Couldn't empty bug_user_tags: $!";
+	# read user tags
+	my @users = get_bugs_users();
+	foreach my $user (@users) {
+		my %tags = ();
+		read_usertags(\%tags, $user);
+		$user = $dbh->quote($user);
+		foreach my $tag (keys %tags) {
+			my $qtag = $dbh->quote($tag);
+			map { $dbh->prepare("INSERT INTO bug_user_tags VALUES ($user, $qtag, $_)")->execute() or die $! } @{$tags{$tag}};
+		}
+	}
+
+	#delete the bug from the other tables, if it exists
 	map {
 		$dbh->prepare("DELETE FROM $_ WHERE EXISTS (SELECT * FROM bugs WHERE id = bugs.id AND bugs.is_archived = " . ($src_config{archived} ? 'TRUE' : 'FALSE') . ")")->execute();
 	} qw{bug_found_in bug_fixed_in bug_merged_with};

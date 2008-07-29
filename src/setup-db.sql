@@ -37,7 +37,7 @@ CREATE TABLE bug_merged_with
 PRIMARY KEY(bug, merged_with));
 
 CREATE TABLE bug_user_tags
-  (bug_user text, tag text, bug_nr text);
+  (email text, tag text, id int);
 
 CREATE TABLE bug_found_in
   (id int, version text,
