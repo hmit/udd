@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# Last-Modified: <Mon Jul 28 23:38:37 2008>
+# Last-Modified: <Tue Jul 29 13:55:14 2008>
 
 use strict;
 use warnings;
@@ -14,21 +14,11 @@ use YAML::Syck;
 
 use Debbugs::Bugs qw{get_bugs};
 use Debbugs::Status qw{read_bug get_bug_status bug_presence};
-use Debbugs::Packages qw{binarytosource getpkgsrc};
+use Debbugs::Packages qw{binarytosource};
 use Debbugs::Config qw{:globals};
 use Debbugs::User qw{read_usertags};
 
-use POSIX qw{strftime};
-use Time::Local qw{timelocal};
-
 $YAML::Syck::ImplicitTyping = 1;
-
-sub parse_time {
-	if(shift =~ /(\d\d\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/) {
-		return ($1, $2, $3, $4, $5, $6);
-	}
-	return undef;
-}
 
 # Return the list of usernames
 sub get_bugs_users {
@@ -44,11 +34,6 @@ sub get_bugs_users {
 		push @ret, map { s/%(..)/chr(hex($1))/ge; $_ } readdir DIR;
 	}
 	return @ret;
-}
-
-sub is_bug_in_db {
-	my ($dbh, $bug_nr) = @_;
-	return $dbh->execute("SELECT * FROM bugs WHERE id = $bug_nr")->fetchrow_array();
 }
 
 sub main {
@@ -70,7 +55,8 @@ sub main {
 	# Free usertags table
 	$dbh->prepare("DELETE FROM bug_user_tags")->execute() or die
 		"Couldn't empty bug_user_tags: $!";
-	# read user tags
+
+	# read and insert user tags
 	my @users = get_bugs_users();
 	foreach my $user (@users) {
 		my %tags = ();
@@ -82,17 +68,22 @@ sub main {
 		}
 	}
 
-	#delete the bug from the other tables, if it exists
-	map {
-		$dbh->prepare("DELETE FROM $_ WHERE EXISTS (SELECT * FROM bugs WHERE id = bugs.id AND bugs.is_archived = " . ($src_config{archived} ? 'TRUE' : 'FALSE') . ")")->execute();
-	} qw{bug_found_in bug_fixed_in bug_merged_with};
-	$dbh->prepare("DELETE FROM bugs WHERE is_archived = " . ($src_config{archived} ? 'TRUE' : 'FALSE'))->execute();
+	#Get the bugs we want to import
+	my @bugs = $src_config{archived} ? get_bugs(archive => 1) : get_bugs();
 
+	# Delete all bugs we are going to import
+	map {
+		$dbh->prepare("DELETE FROM $_ WHERE id IN (" . join(", ", @bugs) . ")")->execute()
+			or die "Could not delete entries from $_: $!";
+	} qw{bugs bug_found_in bug_fixed_in bug_merged_with};
+
+	# Used to chache binary to source mappings
 	my %binarytosource = ();
 
+	# XXX What if a bug is in location 'db' (which currently doesn't exist)
 	my $location = $src_config{archived} ? 'archive' : 'db_h';
 	# Read all bugs
-	foreach my $bug_nr ($src_config{archived} ? get_bugs(archive => 1) : get_bugs()) {
+	foreach my $bug_nr (@bugs) {
 		#next unless $bug_nr =~ /00$/;
 		# Fetch bug using Debbugs
 		# Bugs which were once archived and have been unarchived again will appear in get_bugs(archive => 1).
