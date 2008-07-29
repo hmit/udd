@@ -33,8 +33,8 @@ CREATE TABLE bugs
 is_archived boolean);
 
 CREATE TABLE bug_merged_with
-  (bug int, merged_with int,
-PRIMARY KEY(bug, merged_with));
+  (id int, merged_with int,
+PRIMARY KEY(id, merged_with));
 
 CREATE TABLE bug_user_tags
   (email text, tag text, id int);
