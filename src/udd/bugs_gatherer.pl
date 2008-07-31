@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# Last-Modified: <Tue Jul 29 13:55:14 2008>
+# Last-Modified: <Thu Jul 31 15:27:18 2008>
 
 use strict;
 use warnings;
@@ -11,6 +11,7 @@ use lib $Bin, qw{/org/udd.debian.net/mirrors/bugs.debian.org/perl};
 
 use DBI;
 use YAML::Syck;
+use Time::Local;
 
 use Debbugs::Bugs qw{get_bugs};
 use Debbugs::Status qw{read_bug get_bug_status bug_presence};
@@ -36,6 +37,55 @@ sub get_bugs_users {
 	return @ret;
 }
 
+sub parse_time {
+	if(shift =~ /(\d\d\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/) {
+		return ($1, $2, $3, $4, $5, $6);
+	}
+	return undef;
+}
+
+
+sub get_db_max_last_modified {
+	my $dbh = shift or die "Argument required";
+	my $sth = $dbh->prepare("SELECT MAX (last_modified) FROM bugs");
+	$sth->execute() or die $!;
+	my $date = $sth->fetchrow_array();
+	if(defined $date) {
+		my ($year, $month, $day, $hour, $minute, $second) = parse_time($date);
+		return timelocal($second, $minute, $hour, $day, $month-1, $year);
+	} else {
+		return 0;
+	}
+}
+
+sub get_mtime {
+	return ((stat(shift))[9]);
+}
+
+sub get_modified_bugs {
+	my $prune_stamp = shift;
+	die "Argument required" unless defined $prune_stamp;
+	my $top_dir = $gSpoolDir;
+	my @result = ();
+	foreach my $sub (qw(archive db-h)) {
+		my $spool = "$top_dir/$sub";
+		foreach my $subsub (glob "$spool/*") {
+			if( -d $subsub and get_mtime($subsub) > $prune_stamp ) {
+				push @result, 
+					map { s{.*/(.*)\.log}{$1}; $_ } 
+						grep { get_mtime("$_") > $prune_stamp }
+							glob "$subsub/*.log";
+			}
+		}
+	}
+	return \@result;
+}
+
+sub without_duplicates {
+	my %h = ();
+	return (grep { ($h{$_}++ == 0) || 0 } @_);
+}
+
 sub main {
 	if(@ARGV != 2) {
 		print STDERR "Usage: $0 <config> <source>";
@@ -51,6 +101,8 @@ sub main {
 	my $dbh = DBI->connect("dbi:Pg:dbname=$dbname");
 	# We want to commit the transaction as a hole at the end
 	$dbh->{AutoCommit} = 0;
+
+
 
 	# Free usertags table
 	$dbh->prepare("DELETE FROM bug_user_tags")->execute() or die
@@ -68,14 +120,42 @@ sub main {
 		}
 	}
 
-	#Get the bugs we want to import
-	my @bugs = $src_config{archived} ? get_bugs(archive => 1) : get_bugs();
+	####### XXX EXPERIMENT
+	####### XXX What to do with bugs both archived and unarchived
+	#my $max_last_modified = get_db_max_last_modified($dbh);
+	#my @modified_bugs;
+	#if($max_last_modified) {
+	#	@modified_bugs = @{get_modified_bugs($max_last_modified)};
+		# Delete modified bugs
+		#	for my $bug (@modified_bugs) {
+		#		map {
+		#			$dbh->prepare("DELETE FROM $_ WHERE id = $bug")->execute()
+		#		} qw{bugs bug_merged_with bug_found_in bug_fixed_in};
+		#	}
+		#} else {
+		#	@modified_bugs = get_bugs(archive => 'both');
+		#}
+		#@modified_bugs = without_duplicates(@modified_bugs);
+	my @modified_bugs;
+	if($src_config{archived}) {
+		@modified_bugs = get_bugs(archive => 1);
+	} else {
+		@modified_bugs = get_bugs();
+	}
+
+	print scalar(@modified_bugs), " modified bugs\n";
+	####### XXX EXPERIMENT
+
+	# Get the bugs we want to import
+	# my @bugs = $src_config{archived} ? get_bugs(archive => 1) : get_bugs();
 
 	# Delete all bugs we are going to import
-	map {
-		$dbh->prepare("DELETE FROM $_ WHERE id IN (" . join(", ", @bugs) . ")")->execute()
-			or die "Could not delete entries from $_: $!";
-	} qw{bugs bug_found_in bug_fixed_in bug_merged_with};
+	for my $bug (@modified_bugs) {
+		map {
+			$dbh->prepare("DELETE FROM $_ WHERE id = $bug")->execute()
+		} qw{bugs bug_merged_with bug_found_in bug_fixed_in};
+	}
+	print "Bugs deleted\n";
 
 	# Used to chache binary to source mappings
 	my %binarytosource = ();
@@ -83,12 +163,12 @@ sub main {
 	# XXX What if a bug is in location 'db' (which currently doesn't exist)
 	my $location = $src_config{archived} ? 'archive' : 'db_h';
 	# Read all bugs
-	foreach my $bug_nr (@bugs) {
+	foreach my $bug_nr (@modified_bugs) {
 		#next unless $bug_nr =~ /00$/;
 		# Fetch bug using Debbugs
 		# Bugs which were once archived and have been unarchived again will appear in get_bugs(archive => 1).
 		# However, those bugs are not to be found in location 'archive', so we detect them, and skip them
-		my $bug_ref = read_bug(bug => $bug_nr, location => $location) or (print STDERR "Could not read file for bug $bug_nr in $location; skipping\n" and next);
+		my $bug_ref = read_bug(bug => $bug_nr, location => $location) or (print STDERR "Could not read file for bug $bug_nr; skipping\n" and next);
 		# Yeah, great, why does get_bug_status not accept a location?
 		my %bug = %{get_bug_status(bug => $bug_nr, status => $bug_ref)};
 		
@@ -159,15 +239,15 @@ sub main {
 		$sth->execute() or die $!;
 
 		# insert data into bug_fixed_in and bug_found_in tables
-		foreach my $version (@found_versions) {
+		foreach my $version (without_duplicates(@found_versions)) {
 			$query = "INSERT INTO bug_found_in VALUES ($bug_nr, $version)";
 			$dbh->prepare($query)->execute() or die $!;
 		}
-		foreach my $version (@fixed_versions) {
+		foreach my $version (without_duplicates(@fixed_versions)) {
 			$query = "INSERT INTO bug_fixed_in VALUES ($bug_nr, $version)";
 			$dbh->prepare($query)->execute() or die $!;
 		}
-		foreach my $mergee (split / /, $bug{mergedwith}) {
+		foreach my $mergee (without_duplicates(split / /, $bug{mergedwith})) {
 			$query = "INSERT INTO bug_merged_with VALUES ($bug_nr, $mergee)";
 			$dbh->prepare($query)->execute() or die $!;
 		}
