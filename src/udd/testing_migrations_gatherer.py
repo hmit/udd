@@ -1,4 +1,4 @@
-# Last-Modified: <Sat Jul 26 13:03:16 2008>
+# Last-Modified: <Thu Jul 31 15:40:12 2008>
 
 # This file is a part of the Ultimate Debian Database Project
 
@@ -29,6 +29,8 @@ class testing_migrations_gatherer(gatherer):
 	raise ConfigException('path not specified for source %s' % source)
       
       c = self.connection.cursor()
+
+      c.execute("DELETE FROM migrations")
 
       c.execute("PREPARE mig_insert AS INSERT INTO migrations VALUES ($1, $2, $3, $4, $5, $6, $7, $8)")
       
