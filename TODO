@@ -10,12 +10,6 @@ General
 -------
 Main objective: get UDD into a state where it can be used for QA purposes.
 That's the first step towards world domination! (Universe is next! CvE)
-- (prio: high) Set up cronjobs so that the database is updated on a regular
-  basis (it's still possible to continue to use udd-test for development
-  purposes). Document how frequently the DB is updated.
-- (prio: high) Start a basic website at http://udd.debian.net/ using CGIs that
-  display the results of some queries in a text/machine-parseable format (one
-  query per page).
 - (prio: high) Update the pages on the wiki so that they reflect what was
   decided / the current status of everything.
 - (prio: high) add a way to mark the date of the last successful update in a
@@ -33,16 +27,12 @@ bugs.debian.org
 ---------------
 - (prio: high) compare what's imported with what's available on
   http://bts.turmzimmer.net/details.php. Do the results match?
-- (prio: high) deal with archived bugs. They should be imported as well, but
-  probably less frequently. How do we deal with bugs that were archived /
-  unarchived since the last run?
 - (prio: medium) generate output using bts2ldap format, and check that the
   result matches a fresh bts2ldap run done by Lucas
+- (prio: medium) Optimize bugs importing
 
 popcon
 ------
-- (prio: high) fix Ubuntu's popcon? (is it broken?)
-  16:55 < Neronus> Great. ubuntu popcon raw data is broken.
 
 Other data sources
 ------------------
