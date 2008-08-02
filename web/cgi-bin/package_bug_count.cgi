@@ -1,0 +1,24 @@
+#!/usr/bin/perl -T
+
+use strict;
+use warnings;
+
+use DBI;
+use CGI;
+
+my $dbh = DBI->connect("dbi:Pg:dbname=udd") or die $!;
+my $sth = $dbh->prepare(<<EOF
+	SELECT package, COUNT(id) AS nr FROM bugs WHERE NOT is_archived AND NOT tags LIKE '%fixed%' AND (affects_stable OR affects_testing OR affects_unstable) GROUP BY package ORDER BY nr DESC
+EOF
+	);
+
+$sth->execute() or die $!;
+
+my $q = CGI->new();
+
+print $q->header(-type => 'text/plain');
+while(my @row = $sth->fetchrow_array) {
+	my ($package, $score) = @row;
+	print "$package\t$score\n";
+}
+
