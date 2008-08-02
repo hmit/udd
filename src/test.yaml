@@ -12,6 +12,7 @@ general:
     bugs: exec DEBBUGS_CONFIG_FILE=/org/udd.debian.net/mirrors/bugs.debian.org/etc/config perl ./udd/bugs_gatherer.pl 
     #src-pkg: python sources_gatherer.py
   debug: 1
+  update-timestamp-folder: ./timestamps/
 
   archs:
    [alpha, amd64, arm, armeb, armel, hppa, hurd-i386,
@@ -141,9 +142,9 @@ upload-history:
 bugs:
   type: bugs
   archived: false
-  update-command: /org/udd.debian.org/mirrors/sync-bugs.debian.org
+  update-command: /org/udd.debian.net/mirrors/sync-bugs.debian.org
 
 bugs-archive:
   type: bugs
   archived: true
-  update-command: /org/udd.debian.org/mirrors/sync-bugs.debian.org
+  update-command: /org/udd.debian.net/mirrors/sync-bugs.debian.org
