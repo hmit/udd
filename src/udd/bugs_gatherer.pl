@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# Last-Modified: <Thu Jul 31 15:27:18 2008>
+# Last-Modified: <Sun Aug  3 13:11:34 2008>
 
 use strict;
 use warnings;
@@ -189,7 +189,7 @@ sub main {
 
 
 		if(not exists $binarytosource{$bug{package}}) {
-			$binarytosource{$bug{package}} = binarytosource($bug{package});
+			$binarytosource{$bug{package}} = (binarytosource($bug{package}))[0];
 		}
 		my $source = $binarytosource{$bug{package}};
 
