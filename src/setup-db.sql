@@ -25,12 +25,17 @@ CREATE TABLE popcon (
    distribution text,
    PRIMARY KEY (package, distribution));
 
-CREATE TABLE bugs
+CREATE TABLE bugs_unarchived
   (id int PRIMARY KEY, package text, source text, arrival timestamp, status text,
-     severity text, tags text, submitter text, owner text, title text,
+     severity text, submitter text, owner text, title text,
      last_modified timestamp, affects_stable boolean,
-    affects_testing boolean, affects_unstable boolean,
-is_archived boolean);
+    affects_testing boolean, affects_unstable boolean);
+
+CREATE TABLE bugs_archived
+  (id int PRIMARY KEY, package text, source text, arrival timestamp, status text,
+     severity text, submitter text, owner text, title text,
+     last_modified timestamp, affects_stable boolean,
+    affects_testing boolean, affects_unstable boolean);
 
 CREATE TABLE bug_merged_with
   (id int, merged_with int,
@@ -46,6 +51,19 @@ CREATE TABLE bug_found_in
 CREATE TABLE bug_fixed_in
   (id int, version text,
    PRIMARY KEY(id, version));
+
+CREATE TABLE bug_tags
+  (id int, tag text, PRIMARY KEY (id, tag));
+
+CREATE VIEW bugs AS
+  SELECT id, package, source, arrival, status, severity, submitter, owner,
+        title, last_modified, affects_stable, affects_testing,
+	affects_unstable, TRUE as is_archived
+  FROM bugs_archived
+  UNION
+  SELECT id, package, source, arrival, status, severity, submitter, owner,
+	title, last_modified, affects_stable, affects_testing,
+	affects_unstable, FALSE as is_archived FROM bugs_unarchived;
 
 CREATE TABLE upload_history
  (package text, version text, date timestamp with time zone, changed_by text,
@@ -80,6 +98,8 @@ GRANT SELECT ON popcon TO PUBLIC;
 GRANT SELECT ON popcon_src_average TO PUBLIC;
 GRANT SELECT ON popcon_src_max TO PUBLIC;
 GRANT SELECT ON bugs TO PUBLIC;
+GRANT SELECT ON bugs_archived TO PUBLIC;
+GRANT SELECt ON bugs_unarchived TO PUBLIC;
 GRANT SELECT ON bug_merged_with TO PUBLIC;
 GRANT SELECT ON bug_found_in TO PUBLIC;
 GRANT SELECT ON bug_fixed_in TO PUBLIC;

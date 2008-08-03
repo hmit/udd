@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# Last-Modified: <Sun Aug  3 13:11:34 2008>
+# Last-Modified: <Sun Aug  3 16:19:54 2008>
 
 use strict;
 use warnings;
@@ -152,8 +152,8 @@ sub main {
 	# Delete all bugs we are going to import
 	for my $bug (@modified_bugs) {
 		map {
-			$dbh->prepare("DELETE FROM $_ WHERE id = $bug")->execute()
-		} qw{bugs bug_merged_with bug_found_in bug_fixed_in};
+			$dbh->prepare("DELETE FROM $_ WHERE id = $bug")->execute() or die $!
+		} qw{bugs_archived bugs_unarchived bug_merged_with bug_found_in bug_fixed_in bug_tags};
 	}
 	print "Bugs deleted\n";
 
@@ -162,9 +162,10 @@ sub main {
 
 	# XXX What if a bug is in location 'db' (which currently doesn't exist)
 	my $location = $src_config{archived} ? 'archive' : 'db_h';
+	my $table = $src_config{archived} ? 'bugs_archived' : 'bugs_unarchived';
 	# Read all bugs
 	foreach my $bug_nr (@modified_bugs) {
-		#next unless $bug_nr =~ /00$/;
+		next unless $bug_nr =~ /00$/;
 		# Fetch bug using Debbugs
 		# Bugs which were once archived and have been unarchived again will appear in get_bugs(archive => 1).
 		# However, those bugs are not to be found in location 'archive', so we detect them, and skip them
@@ -176,6 +177,7 @@ sub main {
 		map { $bug{$_} = $dbh->quote($bug{$_}) } qw(subject originator owner pending);
 		my @found_versions = map { $dbh->quote($_) } @{$bug{found_versions}};
 		my @fixed_versions = map { $dbh->quote($_) } @{$bug{fixed_versions}};
+		my @tags = map {$dbh->quote($_) } split / /, $bug{keywords};
 
 		# log_modified and date are not necessarily set. If they are not available, they
 		# are assumed to be epoch (i.e. bug #4170)
@@ -230,10 +232,10 @@ sub main {
 
 
 		# Insert data into bugs table
-		my $query = "INSERT INTO bugs VALUES ($bug_nr, '$bug{package}', $source, $bug{date}, \
-		             E$bug{pending}, '$bug{severity}', '$bug{keywords}', E$bug{originator}, E$bug{owner}, \
+		my $query = "INSERT INTO $table VALUES ($bug_nr, '$bug{package}', $source, $bug{date}, \
+		             E$bug{pending}, '$bug{severity}', E$bug{originator}, E$bug{owner}, \
 					 E$bug{subject}, $bug{log_modified}, $present_in_stable,
-					 $present_in_testing, $present_in_unstable, " . ($src_config{archived} ? 'True' : 'False') . ")";
+					 $present_in_testing, $present_in_unstable)";
 		# Execute insertion
 		my $sth = $dbh->prepare($query);
 		$sth->execute() or die $!;
@@ -249,6 +251,10 @@ sub main {
 		}
 		foreach my $mergee (without_duplicates(split / /, $bug{mergedwith})) {
 			$query = "INSERT INTO bug_merged_with VALUES ($bug_nr, $mergee)";
+			$dbh->prepare($query)->execute() or die $!;
+		}
+		foreach my $tag (without_duplicates(@tags)) {
+			$query = "INSERT INTO bug_tags VALUES ($bug_nr, $tag)";
 			$dbh->prepare($query)->execute() or die $!;
 		}
 	}
