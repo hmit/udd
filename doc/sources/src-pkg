@@ -1,0 +1,4 @@
+DESCRIPTION:
+  This gatherer just calls the 'sources' gatherer first, and then the
+  'packages' gatherer next. Note: the configuration for the sources source
+  type is a subset of the configuration of the packages source type.

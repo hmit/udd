@@ -1,31 +1,44 @@
 OVERVIEW:
-  The configuration file is in YAML format.
+  The configuration file is in YAML format. See src/test.yaml for an example.
 
-  There are two types of stanzas: general, and source names.
+  There are two types of top nodes:
+    - One with name 'general'
+    - The rest specified sources. Here the name corresponds to the name of the
+      source it describes
 
 GENERAL:
   In the 'general' part, you specify:
     - dbname: The name of the database you will access
     - debug: 0 if you want no debug output, 1 otherwise
-    - archs: The list of possible architectures we're going to handle
     - types:
-      The list of possible source types. This consists of a mapping
-      from source names, to commands. These commands will be executed
-      when udd-dispatch.py is told to gather the matching type of source.
-      The command-line executed consists of the string specified for this
-      source type, with the configuration file path and the source name
-      appended
+      This subtree specified the possible source types. Each sub-node names a
+      type, and contains exactly one sub-node. This sub-node is a string,
+      either beginning with 'exec' or 'module'. To gather a source, the
+      dispatcher look into the configuraiton file for the source's type, and
+      then fetches the string specifed in the according sub-node of
+      general->types. If this string begins with 'exec', the rest of the string
+      is excuted as a command, with the path of the configuration file and the
+      name of the source appended to the command line. If this string begins
+      with 'module', the dispatcher assumes, that the rest of the line names a
+      module, which can be imported into python. The dispatcher expects the
+      module to provide function called get_gatherer, which should return an
+      object behaving like the class in src/udd/gatherer.py suggests.
+    - update-timestamps-folder:
+      If specified, each time a source is successfully updated via
+      src/udd-update.py, a file named like the source is created/modified in
+      the folder specified by this stanza, containing the date and time.
 
 SOURCES:
-  As said before, all other parts are sources.
-  For each source, you have to specify a type, which has to have
-  a corresponding entry in general->types. The rest of the entries depend on
-  the type of the source (see Below)
-
-SOURCE TYPE packages:
-  Each of these sources correspond to a directory in the "dists" directory
-  of a Packages mirror. Required specification are:
-  * archs: List of architectures you want to read
-  * directory: The directory of the release you want to include
-  * parts: The parts you want to include
-  * distribution: The name of the distribution
+  Each such sub-tree whose top node is not called 'general', represents a
+  source. The source's name is specified by the name of the top node.  The
+  sub-nodes of that tree specify the configuration of that source.  All
+  sources have to have a 'type' node, specifying the type of the source.  The
+  type has to have an corresponding entry in general->types. See the GENERAL
+  section.
+  Each source can have an 'update-command' node. If the name of a source is
+  passed as an argument to src/udd-update.py, and the sub-tree of that source
+  contains a node called 'update-command', the sub-node of that node is
+  executed with the system command, and is expected to fetch the data of that
+  source.
+  Other than that, each source type, has its own format, see doc/sources/ for the
+  format of each source type.

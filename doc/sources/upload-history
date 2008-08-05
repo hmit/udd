@@ -1,0 +1,17 @@
+DESCRIPTION:
+  Upload history is, as the name suggests, the history of uploads of packages.
+  We import this information from http://qa.debian.org/~filippo/ddc/. From
+  there we get for each upload:
+    the package
+    the version
+    the date
+    changed_by
+    the maintainer
+    if it was a NMU
+    signed by
+    the key id
+
+CONFIGURATION:
+  path: The path where the files coming from godog's site (see above) are
+        saved.
+

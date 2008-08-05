@@ -1,0 +1,56 @@
+DESCRIPTION:
+  The source source type handles Sources.gz files of distribution using the
+  distribution scheme coming from Debian (e.g. Ubuntu).
+
+  If $d is the directory, then the gatherer looks for Sources.gz files
+  in all directories of the form $d/$c/source/, where $c is an element
+  of the list specified by 'components'.
+  If no such directory exists, the gatherer prints a warning message, and
+  ignores the directory. Otherwise, it decompresses the Sources.gz
+  file and imports the information which is found.
+  At the moment, the follwing fields are imported:
+    Format
+    Maintainer
+    Package
+    Version
+    Files
+    Uploaders
+    Binary
+    Architecture
+    Standards-Version
+    Homepage
+    Build-Depends
+    Build-Depends-Indep
+    Build-Conflicts
+    Build-Conflicts-Indep
+    Priority
+    Section
+    Vcs-Arch
+    Vcs-Browser
+    Vcs-Bzr
+    Vcs-Cvs
+    Vcs-Darcs
+    Vcs-Git
+    Vcs-Hg
+    Vcs-Svn
+    X-Vcs-Browser
+    X-Vcs-Bzr
+    X-Vcs-Darcs
+    X-Vcs-Svn
+  If a field is found, which is not one of those, a warning is printed.
+  The first 5 fields are considered mandatory, i.e. if one of those
+  fields is missing, an exception is raised, and the program gets aborted.
+  If one of the other fields is missing, their value is NULL in the database.
+
+TERMINOLOGY:
+  Distribution: The distributing group, e.g. Debian or Ubuntu
+  Release: A release coming from a distribution, e.g. lenny, sid...
+  Component: A part of a release, e.g. main, contrib, non-free, universe,
+             multiverse
+CONFIGURATION:
+  directory: The directory denoting the release. Normally a subdirectory of
+             the dists directory of a mirror. Contains the sub-directories of
+	     the components
+  components: The list components to handle. 
+  distribution: The distribution these packages belong to
+  release: The release these packages belong to

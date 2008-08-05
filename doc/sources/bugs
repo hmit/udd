@@ -1,0 +1,27 @@
+DESCRIPTION:
+  The bugs source type imports the data from bugs.debian.org. For this, the
+  perl module Debbugs is used.
+  We device bugs into two parts: On the one hand, there are unarchived bugs,
+  and on the other hand, there are archived bugs.
+  For each bug, we save the following information:
+    id
+    package(s) affected by the bug
+    the source of the package affected by the bug (if existing)
+    the date of the arrival of the bug
+    the bug's severity
+    the submitter
+    the owner
+    the subject of the mail submitting the bug
+    the date the bug has been modified the last time
+    if it affects stable, testing and unstable
+    if it is archived
+    what versions the bug was found and fixed in
+    what tags belong to the bug
+    which bugs the bug was merged with
+
+  Furthermore, for each user found at bugs.debian.org, we save the usertags
+  they have set
+
+CONFIGURATION:
+  archived: Should the gatherer import archived or unarchived bugs?
+  

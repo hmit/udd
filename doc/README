@@ -1,0 +1,38 @@
+The Ultimate Debian Database (UDD)
+
+GOAL:
+The UDD project is an effort to collect a part of the data of the Debian
+Project to support Quality Assurance (QA).
+
+CONTEXT AND PEOPLE:
+It started as a Google Summer of Code (GSoC) 2008 project, the student being
+Christian von Essen, who wrote most of the code, mentor being Lucas Nussbaum,
+and Co-Mentors being Stefano Zacchiroli and Marc Brockschmidt.
+
+DESCRIPTION:
+The data we import comes from different sources. Each source has a specific
+type (e.g. popcon). For each such type, there is a program to import this data
+into the database. These programs are called gatherers. Furthermore, there is
+an optional way to update the data (i.e. get it from the source) for each
+source.
+
+The gatherers can be started via src/udd-dispatcher.py, which we call
+dispatcher. The updates can be initiated via src/udd-update.py. Both are
+controlled via a configuration file. See doc/README.config for further
+information.
+
+Each source has its own documentation. See doc/sources/.
+
+The sources are imported into a PostgreSQL database. For the schema,
+see src/setup-db.sql
+
+udd-dispatch.py:
+  udd-dispatch.py <configuration> <source1> [source2 [source3 ...]]
+  This program invokes the gatherers. As first parameter, it accepts
+  a configuration file (see doc/README.config), while the
+  rest of its arguments specify the sources to be gathered.
+
+udd-update.py:
+  udd-update.py: <configuration> <source1> [source2 [source3 ...]]
+  This programs is meant to update the sources. See (doc/README.config)
+  fur further information.

@@ -1,0 +1,49 @@
+DESCRIPTION:
+  The packages source type handles the Packages.gz files of distributions
+  using the distribution scheme coming from Debian (e.g. Ubuntu).
+
+  If $d is the directory, then the gatherer looks for Packages.gz files
+  in all directories of the form $d/$c/binary-$a/, where $c is an element
+  of the list specified by 'components', and $a is a member of the list
+  specified by 'archs'.
+  If no such directory exists, the gatherer prints a warning message, and
+  ignores the directory. Otherwise, it decompresses the Packages.gz
+  file and imports the information which is found.
+  At the moment, the follwing fields are imported:
+    Package
+    Version
+    Architecture
+    Maintainer
+    Description
+    Source
+    Essential
+    Depends
+    Recommends
+    Suggests
+    Enhances
+    Pre-Depends
+    Installed-Size
+    Homepage
+    Size
+    MD5Sum
+  If a field is found, which is not one of those, a warning is printed.
+  The first 5 fields are considered mandatory, i.e. if one of those
+  fields is missing, an exception is raised, and the program gets aborted.
+  If one of the other fields is missing, their value is NULL in the database,
+  the exceptions being 'source': If this field is missing, the package
+  name is being assumed to be equal to the source name.
+
+TERMINOLOGY:
+  Distribution: The distributing group, e.g. Debian or Ubuntu
+  Release: A release coming from a distribution, e.g. lenny, sid...
+  Component: A part of a release, e.g. main, contrib, non-free, universe,
+             multiverse
+
+CONFIGURATION:
+  directory: The directory denoting the release. Normally a subdirectory of
+             the dists directory of a mirror. Contains the sub-directories of
+	     the components
+  components: The list components to handle. 
+  distribution: The distribution these packages belong to
+  release: The release these packages belong to
+  archs: The list of architectures to handle.
