@@ -1,0 +1,19 @@
+DESCRIPTION
+  The popcon source type handles the popcon data delivered by debian and ubuntu.
+
+  Specifically, the raw, compressed popcon data is read (e.g. from
+  http://popcon.debian.org/all-popcon-results.txt.gz.
+
+  For each line in the file, we import:
+    the package name
+    the scores for the package (recent, vote, old, nofiles)
+    the sum of the above
+  See http://popcon.debian.org/all-popcon-results.txt.gz for more information
+  about the format.
+
+  Furthermore, we save the number of submissions in the row with package name
+  '_submissions'.
+
+CONFIGURATION:
+  path: The path of the popcon raw data to be read
+  distribution: To which distribution does this popcon data belong?
