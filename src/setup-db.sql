@@ -2,16 +2,22 @@ CREATE TABLE packages
   (package text, version text, architecture text, maintainer text, description
     text, source text, source_version text, essential text, depends text,
     recommends text, suggests text, enhances text, pre_depends text,
-    installed_size int, homepage text, size int, md5sum text, distribution
-    text, release text, component text,
+    installed_size int, homepage text, size int,
+    build_essential text, origin text, sha1 text, replaces text, section text,
+    md5sum text, bugs text, priority text, tag text, task text, python_version text,
+    provides text, conflicts text, sha256 text, original_maintainer text,
+    distribution text, release text, component text,
   PRIMARY KEY (package, version, architecture, distribution, release, component));
 
 CREATE TABLE ubuntu_packages
   (package text, version text, architecture text, maintainer text, description
     text, source text, source_version text, essential text, depends text,
     recommends text, suggests text, enhances text, pre_depends text,
-    installed_size int, homepage text, size int, md5sum text, distribution
-    text, release text, component text,
+    installed_size int, homepage text, size int,
+    build_essential text, origin text, sha1 text, replaces text, section text,
+    md5sum text, bugs text, priority text, tag text, task text, python_version text,
+    provides text, conflicts text, sha256 text, original_maintainer text,
+    distribution text, release text, component text,
   PRIMARY KEY (package, version, architecture, distribution, release, component));
 
 CREATE TABLE sources

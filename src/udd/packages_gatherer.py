@@ -26,8 +26,11 @@ class packages_gatherer(gatherer):
       'Description': 0}
   non_mandatory = {'Source': 0, 'Essential': 0, 'Depends': 0, 'Recommends': 0,
       'Suggests': 0, 'Enhances': 0, 'Pre-Depends': 0, 'Installed-Size': 0,
-      'Homepage': 0, 'Size': 0, 'MD5Sum': 0}
-  ignorable = ()
+      'Homepage': 0, 'Size': 0, 'Build-Essential':0, 'Origin':0,
+      'SHA1':0, 'Replaces':0, 'Section':0, 'MD5sum':0, 'Bugs':0, 'Priority':0,
+      'Tag':0, 'Task':0, 'Python-Version':0, 'Provides':0, 'Conflicts':0,
+      'SHA256':0, 'Original-Maintainer':0}
+  ignorable = {'Filename':0}
 
   warned_about = {}
   # A mapping from <package-name><version> to 1 If <package-name><version> is
@@ -112,7 +115,10 @@ class packages_gatherer(gatherer):
 	  %(Description)s, %(Source)s, %(Source_Version)s, %(Essential)s,
 	  %(Depends)s, %(Recommends)s, %(Suggests)s, %(Enhances)s,
 	  %(Pre-Depends)s, %(Installed-Size)s, %(Homepage)s, %(Size)s,
-	  %(MD5Sum)s)""" % d
+	  %(Build-Essential)s, %(Origin)s, %(SHA1)s,
+	  %(Replaces)s, %(Section)s, %(MD5sum)s, %(Bugs)s, %(Priority)s,
+	  %(Tag)s, %(Task)s, %(Python-Version)s, %(Provides)s,
+	  %(Conflicts)s, %(SHA256)s, %(Original-Maintainer)s)""" % d
       try:
 	cur.execute(query)
       except psycopg2.ProgrammingError:
@@ -165,11 +171,15 @@ class packages_gatherer(gatherer):
 	  cur.execute("""PREPARE package_insert AS INSERT INTO %s
 	    (Package, Version, Architecture, Maintainer, Description, Source,
 	    Source_Version, Essential, Depends, Recommends, Suggests, Enhances,
-	    Pre_Depends, Installed_Size, Homepage, Size, MD5Sum, Distribution,
-	    Release, Component)
+	    Pre_Depends, Installed_Size, Homepage, Size,
+	    build_essential, origin, sha1, replaces, section,
+            md5sum, bugs, priority, tag, task, python_version,
+            provides, conflicts, sha256, original_maintainer,
+	    Distribution, Release, Component)
 	  VALUES
 	    ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15,
-	      $16, $17, '%s', '%s', '%s')
+	      $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28,
+	      $29, $30, $31, '%s', '%s', '%s')
 	    """ %  (table, self._distr, src_cfg['release'], comp))
 	  aux.print_debug("Reading file " + path)
 	  # Copy content from gzipped file to temporary file, so that apt_pkg is
