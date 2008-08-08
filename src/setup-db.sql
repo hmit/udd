@@ -19,10 +19,8 @@ CREATE TABLE sources
     uploaders text, bin text, architecture text, standards_version text,
     homepage text, build_depends text, build_depends_indep text,
     build_conflicts text, build_conflicts_indep text, priority text, section
-    text, distribution text, release text, component text, vcs_arch text,
-    vcs_browser text, vcs_bzr text, vcs_cvs text, vcs_darcs text, vcs_git text,
-    vcs_hg text, vcs_svn text, x_vcs_browser text, x_vcs_bzr text, x_vcs_darcs
-    text, x_vcs_svn text,
+    text, distribution text, release text, component text, vcs_type text,
+    vcs_url text, vcs_browser text,
     PRIMARY KEY (package, version, distribution, release, component));
 
 CREATE TABLE ubuntu_sources
@@ -30,10 +28,8 @@ CREATE TABLE ubuntu_sources
     uploaders text, bin text, architecture text, standards_version text,
     homepage text, build_depends text, build_depends_indep text,
     build_conflicts text, build_conflicts_indep text, priority text, section
-    text, distribution text, release text, component text, vcs_arch text,
-    vcs_browser text, vcs_bzr text, vcs_cvs text, vcs_darcs text, vcs_git text,
-    vcs_hg text, vcs_svn text, x_vcs_browser text, x_vcs_bzr text, x_vcs_darcs
-    text, x_vcs_svn text,
+    text, distribution text, release text, component text, vcs_type text,
+    vcs_url text, vcs_browser text,
     PRIMARY KEY (package, version, distribution, release, component));
 
 CREATE TABLE migrations
