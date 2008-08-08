@@ -32,7 +32,7 @@ if __name__ == '__main__':
       if result != 0:
 	sys.exit(result)
       if 'timestamp-folder' in config['general']:
-	f = open(os.path.join(config['general']['update-timestamp-folder'], src+".update"), "w")
+	f = open(os.path.join(config['general']['timestamp-folder'], src+".update"), "w")
 	f.write(asctime())
 	f.close()
 

@@ -7,7 +7,9 @@ This script is used to dispatch the source gatherers of the UDD project."""
 
 import sys
 from os import system
+from time import asctime
 import udd.aux
+import os.path
 
 def print_help():
   print "Usage: " + sys.argv[0] + " <configuration> <source1> [source2 source3 ...]"
@@ -47,7 +49,7 @@ if __name__ == '__main__':
       gatherer.run(src)
     connection.commit()
     if 'timestamp-folder' in config['general']:
-      f = open(os.path.join(config['general']['update-timestamp-folder'], src+".dispatch"), "w")
+      f = open(os.path.join(config['general']['timestamp-folder'], src+".dispatch"), "w")
       f.write(asctime())
       f.close()
 
