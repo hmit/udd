@@ -34,7 +34,7 @@ class popcon_gatherer(gatherer):
       raise aux.ConfigException, "packages-table not configured for source " + source
 
     table = my_config['table']
-    table_src_max = table + "_src_max"
+    table_src = table + "_src"
     table_src_average = table + "_src_average"
 
     cur = self.cursor()
@@ -44,7 +44,7 @@ class popcon_gatherer(gatherer):
     popcon = gzip.open(my_config['path'])
 
     cur.execute("DELETE FROM " + table)
-    cur.execute("DELETE FROM " + table_src_max)
+    cur.execute("DELETE FROM " + table_src)
     cur.execute("DELETE FROM " + table_src_average)
 
     # used for ignoring ubuntu's broken popcon lines
@@ -69,8 +69,8 @@ class popcon_gatherer(gatherer):
 
     cur.execute("DEALLOCATE pop_insert")
 
-    #calculate _src_max and _src_avg
-    cur.execute("PREPARE pop_insert AS INSERT INTO %s VALUES ($1, $2, $3, $4, $5, $6)" % table_src_max)
+    #calculate _src and _src_avg
+    cur.execute("PREPARE pop_insert AS INSERT INTO %s VALUES ($1, $2, $3, $4, $5, $6)" % table_src)
     cur.execute("""
     SELECT packages.source, max(insts) AS insts, max(vote) AS vote, max(olde) AS old,
            max(recent) AS recent, max(nofiles) as nofiles
