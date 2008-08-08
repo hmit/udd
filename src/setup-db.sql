@@ -44,11 +44,11 @@ CREATE TABLE popcon (
    PRIMARY KEY (package));
  
 CREATE TABLE popcon_src_max (
-   package text, insts int, vote int, olde int, recent int, nofiles int,
+   source text, insts int, vote int, olde int, recent int, nofiles int,
    PRIMARY KEY (package));
 
 CREATE TABLE popcon_src_average (
-   package text, insts int, vote int, olde int, recent int, nofiles int,
+   source text, insts int, vote int, olde int, recent int, nofiles int,
    PRIMARY KEY (package));
 
 CREATE TABLE ubuntu_popcon (
@@ -56,11 +56,11 @@ CREATE TABLE ubuntu_popcon (
    PRIMARY KEY (package));
  
 CREATE TABLE ubuntu_popcon_src_max (
-   package text, insts int, vote int, olde int, recent int, nofiles int,
+   source text, insts int, vote int, olde int, recent int, nofiles int,
    PRIMARY KEY (package));
 
 CREATE TABLE ubuntu_popcon_src_average (
-   package text, insts int, vote int, olde int, recent int, nofiles int,
+   source text, insts int, vote int, olde int, recent int, nofiles int,
    PRIMARY KEY (package));
 
 CREATE TABLE bugs_unarchived
@@ -111,12 +111,21 @@ CREATE INDEX packages_source_idx on packages(source);
 CREATE INDEX sources_distribution_idx on sources(distribution);
 CREATE INDEX sources_release_idx on sources(release);
 CREATE INDEX sources_component_idx on sources(component);
+CREATE INDEX ubuntu_packages_source_idx on ubuntu_packages(source);
+CREATE INDEX ubuntu_sources_distribution_idx on ubuntu_sources(distribution);
+CREATE INDEX ubuntu_sources_release_idx on ubuntu_sources(release);
+CREATE INDEX ubuntu_sources_component_idx on ubuntu_sources(component);
 
 GRANT SELECT ON packages TO PUBLIC;
 GRANT SELECT ON sources TO PUBLIC;
+GRANT SELECT ON ubuntu_Packages TO PUBLIC;
+GRANT SELECT ON ubuntu_sources TO PUBLIC;
 GRANT SELECT ON popcon TO PUBLIC;
 GRANT SELECT ON popcon_src_average TO PUBLIC;
 GRANT SELECT ON popcon_src_max TO PUBLIC;
+GRANT SELECT ON ubuntu_popcon TO PUBLIC;
+GRANT SELECT ON ubuntu_popcon_src_average TO PUBLIC;
+GRANT SELECT ON ubuntu_popcon_src_max TO PUBLIC;
 GRANT SELECT ON bugs TO PUBLIC;
 GRANT SELECT ON bugs_archived TO PUBLIC;
 GRANT SELECt ON bugs_unarchived TO PUBLIC;
