@@ -11,6 +11,8 @@ General
 Main objective: get UDD into a state where it can be used for QA purposes.
 That's the first step towards world domination! (Universe is next! CvE)
 - (prio: high) switch to db-api 2's quoting functionS.
+- (prio: high) clarify debian-backports-etch and debian-volatile-etch. HE
+  will talk to Ganneff.
 
 packages/sources
 ----------------
