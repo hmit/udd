@@ -12,10 +12,10 @@ my $sth = $dbh->prepare(<<EOF
         FROM (SELECT DISTINCT package FROM sources
                 WHERE distribution = 'debian' and release = 'sid')
           AS unstable,
-             popcon_src_max
+             popcon_src
         WHERE NOT EXISTS (SELECT * FROM sources WHERE distribution = 'debian'
                           AND release = 'lenny' and package = unstable.package)
-              AND popcon_src_max.source = unstable.package ORDER BY insts DESC;
+              AND popcon_src.source = unstable.package ORDER BY insts DESC;
 EOF
 	);
 

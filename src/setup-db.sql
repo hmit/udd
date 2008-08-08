@@ -49,7 +49,7 @@ CREATE TABLE popcon (
    package text, insts int, vote int, olde int, recent int, nofiles int,
    PRIMARY KEY (package));
  
-CREATE TABLE popcon_src_max (
+CREATE TABLE popcon_src (
    source text, insts int, vote int, olde int, recent int, nofiles int,
    PRIMARY KEY (source));
 
@@ -61,7 +61,7 @@ CREATE TABLE ubuntu_popcon (
    package text, insts int, vote int, olde int, recent int, nofiles int,
    PRIMARY KEY (package));
  
-CREATE TABLE ubuntu_popcon_src_max (
+CREATE TABLE ubuntu_popcon_src (
    source text, insts int, vote int, olde int, recent int, nofiles int,
    PRIMARY KEY (source));
 
@@ -128,10 +128,10 @@ GRANT SELECT ON ubuntu_Packages TO PUBLIC;
 GRANT SELECT ON ubuntu_sources TO PUBLIC;
 GRANT SELECT ON popcon TO PUBLIC;
 GRANT SELECT ON popcon_src_average TO PUBLIC;
-GRANT SELECT ON popcon_src_max TO PUBLIC;
+GRANT SELECT ON popcon_src TO PUBLIC;
 GRANT SELECT ON ubuntu_popcon TO PUBLIC;
 GRANT SELECT ON ubuntu_popcon_src_average TO PUBLIC;
-GRANT SELECT ON ubuntu_popcon_src_max TO PUBLIC;
+GRANT SELECT ON ubuntu_popcon_src TO PUBLIC;
 GRANT SELECT ON bugs TO PUBLIC;
 GRANT SELECT ON bugs_archived TO PUBLIC;
 GRANT SELECt ON bugs_unarchived TO PUBLIC;
