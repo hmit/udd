@@ -46,3 +46,8 @@ if __name__ == '__main__':
       exec "gatherer = " + rest + ".get_gatherer(connection, config)"
       gatherer.run(src)
     connection.commit()
+    if 'timestamp-folder' in config['general']:
+      f = open(os.path.join(config['general']['update-timestamp-folder'], src+".dispatch"), "w")
+      f.write(asctime())
+      f.close()
+

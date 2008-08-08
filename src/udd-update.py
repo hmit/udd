@@ -31,8 +31,8 @@ if __name__ == '__main__':
       result = system(src_cfg['update-command']) 
       if result != 0:
 	sys.exit(result)
-      if 'update-timestamp-folder' in config['general']:
-	f = open(os.path.join(config['general']['update-timestamp-folder'], src), "w")
+      if 'timestamp-folder' in config['general']:
+	f = open(os.path.join(config['general']['update-timestamp-folder'], src+".update"), "w")
 	f.write(asctime())
 	f.close()
 
