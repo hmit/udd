@@ -15,7 +15,7 @@ my $sth = $dbh->prepare(<<EOF
              popcon_src_max
         WHERE NOT EXISTS (SELECT * FROM sources WHERE distribution = 'debian'
                           AND release = 'lenny' and package = unstable.package)
-              AND popcon_src_max.source = unstable.package AND popcon_src_max.distribution = 'debian' ORDER BY insts DESC;
+              AND popcon_src_max.source = unstable.package ORDER BY insts DESC;
 EOF
 	);
 

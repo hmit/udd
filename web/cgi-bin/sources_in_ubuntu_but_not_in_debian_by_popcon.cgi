@@ -9,13 +9,13 @@ use CGI;
 my $dbh = DBI->connect("dbi:Pg:dbname=udd") or die $!;
 my $sth = $dbh->prepare(<<EOF
 	SELECT DISTINCT intrepid.package, insts
-        FROM (SELECT DISTINCT package FROM sources
-                WHERE distribution = 'ubuntu' and release = 'intrepid')
+        FROM (SELECT DISTINCT package FROM ubuntu_sources
+                WHERE release = 'intrepid')
           AS intrepid,
-             popcon_src_max
+             ubuntu_popcon_src_max
         WHERE NOT EXISTS (SELECT * FROM sources WHERE distribution = 'debian'
                           and package = intrepid.package)
-              AND popcon_src_max.source = intrepid.package AND popcon_src_max.distribution = 'ubuntu' ORDER BY insts DESC;
+              AND ubuntu_popcon_src_max.source = intrepid.package ORDER BY insts DESC;
 EOF
 	);
 

@@ -8,7 +8,24 @@ use CGI;
 
 my $dbh = DBI->connect("dbi:Pg:dbname=udd") or die $!;
 my $sth = $dbh->prepare(<<EOF
-	SELECT package, COUNT(id) as nr FROM bugs WHERE severity in ('critical', 'grave', 'serious') AND affects_testing AND NOT tags LIKE '%fixed%' AND NOT tags LIKE '%lenny-ignore%' AND NOT is_archived AND EXISTS (SELECT * FROM packages WHERE packages.package = package AND packages.release = 'etch') GROUP BY package ORDER BY nr DESC;
+SELECT b.package, COUNT(b.id)
+FROM bugs_unarchived b
+WHERE 
+        (b.severity IN ('serious', 'grave', 'critical'))
+    AND 
+        b.affects_testing
+    AND(
+            NOT EXISTS (SELECT tag FROM bug_tags t WHERE b.id=t.id AND t.tag IN ('sid', 'sarge', 'etch', 'experimental'))
+        OR
+                EXISTS (SELECT tag FROM bug_tags t WHERE b.id=t.id AND t.tag = 'lenny')
+    )
+    AND NOT EXISTS (SELECT tag FROM bug_tags t WHERE b.id=t.id AND t.tag = 'lenny-ignore')
+    AND(
+            EXISTS (SELECT package FROM packages p WHERE p.package = b.package AND p.distribution = 'debian' AND p.release = 'lenny')
+        OR
+            EXISTS (SELECT package FROM sources s WHERE s.package = b.package AND s.distribution = 'debian' AND s.release = 'lenny')
+    )
+GROUP BY b.package
 EOF
 	);
 

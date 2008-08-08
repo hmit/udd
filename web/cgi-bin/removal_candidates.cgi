@@ -16,7 +16,6 @@ and bugs.affects_unstable = true
 and bugs.severity in ('serious', 'grave', 'critical')
 and arrival < (NOW() - interval '14 DAYS')
 and sources.package = popcon_src_max.source
-and popcon_src_max.distribution = 'debian'
 and popcon_src_max.insts < 2000
 order by package;
 EOF
