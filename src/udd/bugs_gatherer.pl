@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# Last-Modified: <Sun Aug  3 16:19:54 2008>
+# Last-Modified: <Fri Aug  8 13:56:31 2008>
 
 use strict;
 use warnings;
@@ -165,7 +165,6 @@ sub main {
 	my $table = $src_config{archived} ? 'bugs_archived' : 'bugs_unarchived';
 	# Read all bugs
 	foreach my $bug_nr (@modified_bugs) {
-		next unless $bug_nr =~ /00$/;
 		# Fetch bug using Debbugs
 		# Bugs which were once archived and have been unarchived again will appear in get_bugs(archive => 1).
 		# However, those bugs are not to be found in location 'archive', so we detect them, and skip them
