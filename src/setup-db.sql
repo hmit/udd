@@ -21,6 +21,8 @@ CREATE TABLE sources
     build_conflicts text, build_conflicts_indep text, priority text, section
     text, distribution text, release text, component text, vcs_type text,
     vcs_url text, vcs_browser text,
+    python_version text, checksums_sha1 text, checksums_sha256 text,
+    original_maintainer text, dm_upload_allowed text,
     PRIMARY KEY (package, version, distribution, release, component));
 
 CREATE TABLE ubuntu_sources
@@ -30,6 +32,8 @@ CREATE TABLE ubuntu_sources
     build_conflicts text, build_conflicts_indep text, priority text, section
     text, distribution text, release text, component text, vcs_type text,
     vcs_url text, vcs_browser text,
+    python_version text, checksums_sha1 text, checksums_sha256 text,
+    original_maintainer text, dm_upload_allowed text,
     PRIMARY KEY (package, version, distribution, release, component));
 
 CREATE TABLE migrations

@@ -21,10 +21,12 @@ class sources_gatherer(gatherer):
   non_mandatory = {'Uploaders': 0, 'Binary': 0, 'Architecture': 0,
       'Standards-Version': 0, 'Homepage': 0, 'Build-Depends': 0,
       'Build-Depends-Indep': 0, 'Build-Conflicts': 0, 'Build-Conflicts-Indep': 0,
-      'Priority': 0, 'Section': 0} 
+      'Priority': 0, 'Section': 0, 'Python-Version': 0, 'Checksums-Sha1':0,
+      'Checksums-Sha256':0, 'Original-Maintainer':0, 'Dm-Upload-Allowed':0} 
   ignorable = {'Vcs-Arch': 0, 'Vcs-Bzr': 0,
       'Vcs-Cvs': 0, 'Vcs-Darcs': 0, 'Vcs-Git': 0, 'Vcs-Hg': 0, 'Vcs-Svn': 0,
-      'X-Vcs-Browser': 0, 'Vcs-Browser': 0, 'X-Vcs-Bzr': 0, 'X-Vcs-Darcs': 0, 'X-Vcs-Svn': 0}
+      'X-Vcs-Browser': 0, 'Vcs-Browser': 0, 'X-Vcs-Bzr': 0, 'X-Vcs-Darcs': 0, 'X-Vcs-Svn': 0,
+      'Directory':0}
   vcs = { 'Arch':0, 'Bzr':0, 'Cvs':0, 'Darcs':0, 'Git':0, 'Hg':0, 'Svn':0}
 
   warned_about = {}
@@ -85,7 +87,9 @@ class sources_gatherer(gatherer):
 	  %(Uploaders)s, %(Binary)s, %(Architecture)s, %(Standards-Version)s,
 	  %(Homepage)s, %(Build-Depends)s, %(Build-Depends-Indep)s,
 	  %(Build-Conflicts)s, %(Build-Conflicts-Indep)s, %(Priority)s,
-	  %(Section)s, %(Vcs-Type)s, %(Vcs-Url)s, %(Vcs-Browser)s)
+	  %(Section)s, %(Vcs-Type)s, %(Vcs-Url)s, %(Vcs-Browser)s,
+	  %(Python-Version)s, %(Checksums-Sha1)s, %(Checksums-Sha256)s,
+	  %(Original-Maintainer)s, %(Dm-Upload-Allowed)s)
 	  """  % d
       cur.execute(query)
 
@@ -131,11 +135,12 @@ class sources_gatherer(gatherer):
 	  (Package, Version, Maintainer, Format, Files, Uploaders, Bin,
 	  Architecture, Standards_Version, Homepage, Build_Depends,
 	  Build_Depends_Indep, Build_Conflicts, Build_Conflicts_Indep, Priority,
-	  Section, Vcs_Type, Vcs_Url, Vcs_Browser,
+	  Section, Vcs_Type, Vcs_Url, Vcs_Browser, python_version, checksums_sha1,
+	  checksums_sha256, original_maintainer, dm_upload_allowed,
 	  Distribution, Release, Component)
 	VALUES
 	  ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
-	  $17, $18, $19, '%s', '%s', '%s')"""\
+	  $17, $18, $19, $20, $21, $22, $23, $24, '%s', '%s', '%s')"""\
 	  % (table, src_cfg['distribution'], src_cfg['release'], comp)
 	cur.execute(query)
 
