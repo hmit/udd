@@ -113,13 +113,30 @@ CREATE TABLE upload_history
  (package text, version text, date timestamp with time zone, changed_by text,
   maintainer text, nmu boolean, signed_by text, key_id text);
 
-CREATE INDEX packages_source_idx on packages(source);
-CREATE INDEX packages_distrelcomp_idx on packages(distribution, release, component);
-CREATE INDEX sources_distrelcomp_idx on sources(distribution, release, component);
+CREATE TABLE carnivore_emails
+ (id int, email text,
+  PRIMARY KEY(id));
 
+CREATE TABLE carnivore_names
+ (id int, name text,
+   PRIMARY KEY(id));
+
+CREATE TABLE carnivore_keys
+ (id int, key text, key_type text,
+   PRIMARY KEY(id));
+
+CREATE TABLE carnivore_login
+ (id int, login text,
+   PRIMARY KEY(id));
+
+CREATE INDEX packages_source_idx on packages(source);
+CREATE INDEX sources_distribution_idx on sources(distribution);
+CREATE INDEX sources_release_idx on sources(release);
+CREATE INDEX sources_component_idx on sources(component);
 CREATE INDEX ubuntu_packages_source_idx on ubuntu_packages(source);
-CREATE INDEX ubuntu_packages_distrelcomp_idx on packages(distribution, release, component);
-CREATE INDEX ubuntu_sources_distrelcomp_idx on ubuntu_sources(distribution, release, component);
+CREATE INDEX ubuntu_sources_distribution_idx on ubuntu_sources(distribution);
+CREATE INDEX ubuntu_sources_release_idx on ubuntu_sources(release);
+CREATE INDEX ubuntu_sources_component_idx on ubuntu_sources(component);
 
 GRANT SELECT ON packages TO PUBLIC;
 GRANT SELECT ON sources TO PUBLIC;
