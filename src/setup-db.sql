@@ -70,22 +70,22 @@ CREATE TABLE upload_history
   maintainer text, nmu boolean, signed_by text, key_id text);
 
 CREATE VIEW popcon_src_average AS
-  SELECT packages.package, avg(insts) AS insts, avg(vote) AS vote, avg(olde) AS old, avg(recent) AS recent, avg(nofiles) as nofiles, packages.distribution
+  SELECT packages.source, avg(insts) AS insts, avg(vote) AS vote, avg(olde) AS old, avg(recent) AS recent, avg(nofiles) as nofiles, packages.distribution
     FROM popcon,
           (SELECT DISTINCT packages.package, packages.source, packages.distribution FROM packages) as packages
     WHERE 
 	  popcon.package = packages.package AND
 	  popcon.distribution = packages.distribution
-    GROUP BY packages.source, packages.distribution, packages.package;
+    GROUP BY packages.source, packages.distribution;
 
 CREATE VIEW popcon_src_max AS
-  SELECT packages.package, max(insts) AS insts, max(vote) AS vote, max(olde) AS old, max(recent) AS recent, max(nofiles) as nofiles, packages.distribution
+  SELECT packages.source, max(insts) AS insts, max(vote) AS vote, max(olde) AS old, max(recent) AS recent, max(nofiles) as nofiles, packages.distribution
     FROM popcon,
           (SELECT DISTINCT packages.package, packages.source, packages.distribution FROM packages) as packages
     WHERE 
 	  popcon.package = packages.package AND
 	  popcon.distribution = packages.distribution
-    GROUP BY packages.source, packages.distribution, packages.package;
+    GROUP BY packages.source, packages.distribution;
 
 CREATE INDEX packages_source_idx on packages(source);
 CREATE INDEX sources_distribution_idx on sources(distribution);

@@ -15,7 +15,7 @@ my $sth = $dbh->prepare(<<EOF
              popcon_src_max
         WHERE NOT EXISTS (SELECT * FROM sources WHERE distribution = 'debian'
                           and package = intrepid.package)
-              AND popcon_src_max.package = intrepid.package AND popcon_src_max.distribution = 'ubuntu' ORDER BY insts DESC;
+              AND popcon_src_max.source = intrepid.package AND popcon_src_max.distribution = 'ubuntu' ORDER BY insts DESC;
 EOF
 	);
 
