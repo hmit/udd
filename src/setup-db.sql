@@ -45,11 +45,11 @@ CREATE TABLE popcon (
  
 CREATE TABLE popcon_src_max (
    source text, insts int, vote int, olde int, recent int, nofiles int,
-   PRIMARY KEY (package));
+   PRIMARY KEY (source));
 
 CREATE TABLE popcon_src_average (
    source text, insts int, vote int, olde int, recent int, nofiles int,
-   PRIMARY KEY (package));
+   PRIMARY KEY (source));
 
 CREATE TABLE ubuntu_popcon (
    package text, insts int, vote int, olde int, recent int, nofiles int,
@@ -57,11 +57,11 @@ CREATE TABLE ubuntu_popcon (
  
 CREATE TABLE ubuntu_popcon_src_max (
    source text, insts int, vote int, olde int, recent int, nofiles int,
-   PRIMARY KEY (package));
+   PRIMARY KEY (source));
 
 CREATE TABLE ubuntu_popcon_src_average (
    source text, insts int, vote int, olde int, recent int, nofiles int,
-   PRIMARY KEY (package));
+   PRIMARY KEY (source));
 
 CREATE TABLE bugs_unarchived
   (id int PRIMARY KEY, package text, source text, arrival timestamp, status text,
