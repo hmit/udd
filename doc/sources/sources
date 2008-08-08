@@ -54,3 +54,5 @@ CONFIGURATION:
   components: The list components to handle. 
   distribution: The distribution these packages belong to
   release: The release these packages belong to
+  sources-table: The name of the database table to be filled with the
+                 data from Sources.gz files

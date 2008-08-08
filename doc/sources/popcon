@@ -14,6 +14,19 @@ DESCRIPTION
   Furthermore, we save the number of submissions in the row with package name
   '_submissions'.
 
+  From this data, three tables are filled:
+   * One table with the name specified by the 'table' node
+   * One table with '_src_max' appended to the first table
+   * One table with '_src_average' appended to the first table
+
+  The first one contains the raw popcon data. For the other tables,
+  please see the source code of the gatherer.
+
+NOTES:
+  You have to have an existing packages table for th
+
 CONFIGURATION:
   path: The path of the popcon raw data to be read
-  distribution: To which distribution does this popcon data belong?
+  table: The name of the database table
+  packages-table: The name of the table from a source of type packages, for the
+                  same distribution

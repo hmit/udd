@@ -47,3 +47,5 @@ CONFIGURATION:
   distribution: The distribution these packages belong to
   release: The release these packages belong to
   archs: The list of architectures to handle.
+  packages-table: The name of the database table to be filled with the
+                  data from Packages.gz files
