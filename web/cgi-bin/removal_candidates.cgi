@@ -6,7 +6,7 @@ use warnings;
 use DBI;
 use CGI;
 
-s = <<EOF
+my $s = <<EOF
 select sources.package, id, insts, arrival, last_modified, title
 from sources, bugs_unarchived AS bugs, popcon_src_max
 where sources.distribution = 'debian' and sources.release = 'lenny'
@@ -20,9 +20,10 @@ and popcon_src_max.distribution = 'debian'
 and popcon_src_max.insts < 2000
 order by package;
 EOF
+;
 
 my $dbh = DBI->connect("dbi:Pg:dbname=udd") or die $!;
-my $sth = $dbh->prepare(s);
+my $sth = $dbh->prepare($s);
 
 $sth->execute() or die $!;
 
@@ -31,7 +32,7 @@ my $q = CGI->new();
 print $q->header(-type => 'text/plain');
 print "$s\n\n";
 while(my @row = $sth->fetchrow_array) {
-	my ($package, $score) = @row;
-	print "$package\t$score\n";
+	$" = "\t";
+	print "@row.\n";
 }
 
