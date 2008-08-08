@@ -14,12 +14,9 @@ That's the first step towards world domination! (Universe is next! CvE)
   decided / the current status of everything.
 - (prio: high) Write/update documentation about the system, and how to use it.
 - (prio: high) add primary keys to tables that don't have one
-- (prio: high) make sure scripts are resilient to failures. For example, the
-  popcon fetcher apparently isn't:
-  udd=> select * from popcon_src_max where distribution = 'debian';
-  package | insts | vote | old | recent | nofiles | distribution 
-  ---------+-------+------+-----+--------+---------+--------------
-  (0 rows)
+- (prio: high) popcon_src_max and popcon_src_average are slow (> 30s!).
+  Replacing them with tables, filled during the import, would make things
+  much faster. What do you think?
 
 packages/sources
 ----------------
