@@ -1,5 +1,5 @@
 #/usr/bin/env python
-# Last-Modified: <Sat Jul 26 12:59:30 2008>
+# Last-Modified: <Fri Aug  8 12:45:43 2008>
 # This file is a part of the Ultimate Debian Database project
 
 import debian_bundle.deb822
@@ -92,17 +92,24 @@ class sources_gatherer(gatherer):
       raise ConfigException('release not specified for source %s' %
 	  (src_name))
 
+    if not 'sources-table' in src_cfg:
+      raise ConfigException('sources-table not specifed for source %s' %
+	  (src_name))
+    
+    table = src_cfg['sources-table']
+	
+
     aux.debug = self.config['general']['debug']
 
     cur = self.cursor()
 
     for comp in src_cfg['components']:
       path = os.path.join(src_cfg['directory'], comp, 'source', 'Sources.gz')
-      cur.execute("DELETE from sources WHERE Distribution = '%s' AND\
+      cur.execute("DELETE from %s WHERE Distribution = '%s' AND\
 	release = '%s' AND component = '%s'"\
-	% (src_cfg['distribution'], src_cfg['release'], comp))
+	% (table, src_cfg['distribution'], src_cfg['release'], comp))
       try:
-	query = """PREPARE source_insert as INSERT INTO sources
+	query = """PREPARE source_insert as INSERT INTO %s
 	  (Package, Version, Maintainer, Format, Files, Uploaders, Bin,
 	  Architecture, Standards_Version, Homepage, Build_Depends,
 	  Build_Depends_Indep, Build_Conflicts, Build_Conflicts_Indep, Priority,
@@ -113,7 +120,7 @@ class sources_gatherer(gatherer):
 	  ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
 	  $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, '%s', '%s',
 	  '%s')"""\
-	  % (src_cfg['distribution'], src_cfg['release'], comp)
+	  % (table, src_cfg['distribution'], src_cfg['release'], comp)
 	cur.execute(query)
 
 	aux.print_debug("Reading file " + path)

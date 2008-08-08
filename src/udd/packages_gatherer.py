@@ -1,5 +1,5 @@
 # /usr/bin/env python
-# Last-Modified: <Sat Jul 26 12:58:43 2008>
+# Last-Modified: <Fri Aug  8 12:42:28 2008>
 # This file is a part of the Ultimate Debian Database project
 
 import debian_bundle.deb822
@@ -144,7 +144,11 @@ class packages_gatherer(gatherer):
       raise ConfigException('distribution not specified for source %s' %
 	  (source))
 
+    if not 'packages-table' in src_cfg:
+      raise ConfigException('packages-table not specified for source %s' % (source))
+
     aux.debug = self.config['general']['debug']
+    table = src_cfg['packages-table']
 
     # Get distribution ID
     self._distr = src_cfg['distribution']
@@ -153,12 +157,12 @@ class packages_gatherer(gatherer):
 
     # For every part and every architecture, import the packages into the DB
     for comp in src_cfg['components']:
-      cur.execute("DELETE FROM packages WHERE distribution = '%s' AND release = '%s' AND component = '%s'" %\
-	(self._distr, src_cfg['release'], comp))
+      cur.execute("DELETE FROM %s WHERE distribution = '%s' AND release = '%s' AND component = '%s'" %\
+	(table, self._distr, src_cfg['release'], comp))
       for arch in src_cfg['archs']:
 	path = os.path.join(src_cfg['directory'], comp, 'binary-' + arch, 'Packages.gz')
 	try:
-	  cur.execute("""PREPARE package_insert AS INSERT INTO Packages
+	  cur.execute("""PREPARE package_insert AS INSERT INTO %s
 	    (Package, Version, Architecture, Maintainer, Description, Source,
 	    Source_Version, Essential, Depends, Recommends, Suggests, Enhances,
 	    Pre_Depends, Installed_Size, Homepage, Size, MD5Sum, Distribution,
@@ -166,7 +170,7 @@ class packages_gatherer(gatherer):
 	  VALUES
 	    ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15,
 	      $16, $17, '%s', '%s', '%s')
-	    """ %  (self._distr, src_cfg['release'], comp))
+	    """ %  (table, self._distr, src_cfg['release'], comp))
 	  aux.print_debug("Reading file " + path)
 	  # Copy content from gzipped file to temporary file, so that apt_pkg is
 	  # used by debian_bundle

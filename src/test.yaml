@@ -36,6 +36,8 @@ debian-lenny:
           mipsel, powerpc, s390, sparc]       
   directory: /org/ftp.debian.org/dists/lenny/
   components: [main, contrib, non-free]
+  packages-table: packages
+  sources-table: sources
   distribution: debian
   release: lenny
 
@@ -46,6 +48,8 @@ debian-sid:
           mipsel, powerpc, ppc64, s390, sparc]       
   directory: /org/ftp.debian.org/dists/sid/
   components: [main, contrib, non-free]
+  packages-table: packages
+  sources-table: sources
   distribution: debian
   release: sid
   
@@ -57,6 +61,8 @@ debian-etch:
   directory: /org/ftp.debian.org/dists/etch/
   components: [main, contrib, non-free]
   distribution: debian
+  packages-table: packages
+  sources-table: sources
   release: etch
 
 debian-backports-etch:
@@ -67,6 +73,8 @@ debian-backports-etch:
   directory: /org/ftp.backports.org/dists/etch-backports/
   components: [main, contrib, non-free]
   distribution: debian-backports
+  packages-table: packages
+  sources-table: sources
   release: etch
 
 debian-volatile-etch:
@@ -76,6 +84,8 @@ debian-volatile-etch:
           mipsel, powerpc, ppc64, s390, sparc]       
   directory: /org/volatile.debian.org/dists/etch/volatile/
   components: [main, contrib, non-free]
+  packages-table: packages
+  sources-table: sources
   distribution: debian-volatile
   release: etch
 
@@ -86,6 +96,8 @@ ubuntu-intrepid:
   components: [main, multiverse, universe, restricted]
   distribution: ubuntu
   release: intrepid
+  packages-table: ubuntu_packages
+  sources-table: ubuntu_sources
   update-command: ./ubuntu-rsync intrepid ./ubuntu
 
 ubuntu-hardy:
@@ -95,6 +107,8 @@ ubuntu-hardy:
   components: [main, multiverse, universe, restricted]
   distribution: ubuntu
   release: hardy
+  packages-table: ubuntu_packages
+  sources-table: ubuntu_sources
   update-command: ./ubuntu-rsync hardy ./ubuntu
 
 
@@ -120,13 +134,15 @@ debian-popcon:
   type: popcon
   path: ./all-popcon-results.txt.gz
   update-command: wget -O ./all-popcon-results.txt.gz http://popcon.debian.org/all-popcon-results.txt.gz
-  distribution: debian
+  table: popcon
+  packages-table: packages
   
 ubuntu-popcon:
   type: popcon
   path: /tmp/udd-test/ubuntu-popcon-results.txt.gz
   update-command: wget -O /tmp/udd-test/ubuntu-popcon-results.txt.gz http://popcon.ubuntu.com/all-popcon-results.txt.gz
-  distribution: ubuntu
+  table: ubuntu_popcon
+  packages-table: ubuntu_packages
 
 testing-migrations:
   type: testing-migrations
