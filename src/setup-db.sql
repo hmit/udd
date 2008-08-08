@@ -1,39 +1,39 @@
-CREATE TABLE Packages
-  (Package text, Version text, Architecture text, Maintainer text, Description
-    text, Source text, Source_version text, Essential text, Depends text,
-    Recommends text, Suggests text, Enhances text, Pre_Depends text,
-    Installed_Size int, Homepage text, Size int, MD5Sum text, Distribution
-    text, Release text, Component text,
-  PRIMARY KEY (Package, Version, Architecture, Distribution, Release, Component));
+CREATE TABLE packages
+  (package text, version text, architecture text, maintainer text, description
+    text, source text, source_version text, essential text, depends text,
+    recommends text, suggests text, enhances text, pre_depends text,
+    installed_size int, homepage text, size int, md5sum text, distribution
+    text, release text, component text,
+  PRIMARY KEY (package, version, architecture, distribution, release, component));
 
 CREATE TABLE ubuntu_packages
-  (Package text, Version text, Architecture text, Maintainer text, Description
-    text, Source text, Source_version text, Essential text, Depends text,
-    Recommends text, Suggests text, Enhances text, Pre_Depends text,
-    Installed_Size int, Homepage text, Size int, MD5Sum text, Distribution
-    text, Release text, Component text,
-  PRIMARY KEY (Package, Version, Architecture, Distribution, Release, Component));
+  (package text, version text, architecture text, maintainer text, description
+    text, source text, source_version text, essential text, depends text,
+    recommends text, suggests text, enhances text, pre_depends text,
+    installed_size int, homepage text, size int, md5sum text, distribution
+    text, release text, component text,
+  PRIMARY KEY (package, version, architecture, distribution, release, component));
 
 CREATE TABLE sources
-  (Package text, Version text, Maintainer text, Format text, Files text,
-    Uploaders text, Bin text, Architecture text, Standards_Version text,
-    Homepage text, Build_Depends text, Build_Depends_Indep text,
-    Build_Conflicts text, Build_Conflicts_Indep text, Priority text, Section
-    text, Distribution text, Release text, Component text, Vcs_Arch text,
-    Vcs_Browser text, Vcs_Bzr text, Vcs_Cvs text, Vcs_Darcs text, Vcs_Git text,
-    Vcs_Hg text, Vcs_Svn text, X_Vcs_Browser text, X_Vcs_Bzr text, X_Vcs_Darcs
-    text, X_Vcs_Svn text,
+  (package text, version text, maintainer text, format text, files text,
+    uploaders text, bin text, architecture text, standards_version text,
+    homepage text, build_depends text, build_depends_indep text,
+    build_conflicts text, build_conflicts_indep text, priority text, section
+    text, distribution text, release text, component text, vcs_arch text,
+    vcs_browser text, vcs_bzr text, vcs_cvs text, vcs_darcs text, vcs_git text,
+    vcs_hg text, vcs_svn text, x_vcs_browser text, x_vcs_bzr text, x_vcs_darcs
+    text, x_vcs_svn text,
     PRIMARY KEY (package, version, distribution, release, component));
 
 CREATE TABLE ubuntu_sources
-  (Package text, Version text, Maintainer text, Format text, Files text,
-    Uploaders text, Bin text, Architecture text, Standards_Version text,
-    Homepage text, Build_Depends text, Build_Depends_Indep text,
-    Build_Conflicts text, Build_Conflicts_Indep text, Priority text, Section
-    text, Distribution text, Release text, Component text, Vcs_Arch text,
-    Vcs_Browser text, Vcs_Bzr text, Vcs_Cvs text, Vcs_Darcs text, Vcs_Git text,
-    Vcs_Hg text, Vcs_Svn text, X_Vcs_Browser text, X_Vcs_Bzr text, X_Vcs_Darcs
-    text, X_Vcs_Svn text,
+  (package text, version text, maintainer text, format text, files text,
+    uploaders text, bin text, architecture text, standards_version text,
+    homepage text, build_depends text, build_depends_indep text,
+    build_conflicts text, build_conflicts_indep text, priority text, section
+    text, distribution text, release text, component text, vcs_arch text,
+    vcs_browser text, vcs_bzr text, vcs_cvs text, vcs_darcs text, vcs_git text,
+    vcs_hg text, vcs_svn text, x_vcs_browser text, x_vcs_bzr text, x_vcs_darcs
+    text, x_vcs_svn text,
     PRIMARY KEY (package, version, distribution, release, component));
 
 CREATE TABLE migrations
@@ -112,7 +112,7 @@ CREATE INDEX sources_distribution_idx on sources(distribution);
 CREATE INDEX sources_release_idx on sources(release);
 CREATE INDEX sources_component_idx on sources(component);
 
-GRANT SELECT ON Packages TO PUBLIC;
+GRANT SELECT ON packages TO PUBLIC;
 GRANT SELECT ON sources TO PUBLIC;
 GRANT SELECT ON popcon TO PUBLIC;
 GRANT SELECT ON popcon_src_average TO PUBLIC;
