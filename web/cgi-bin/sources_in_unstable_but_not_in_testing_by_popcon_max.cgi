@@ -8,14 +8,14 @@ use CGI;
 
 my $dbh = DBI->connect("dbi:Pg:dbname=udd") or die $!;
 my $sth = $dbh->prepare(<<EOF
-	SELECT DISTINCT unstable.package, insts
-        FROM (SELECT DISTINCT package FROM sources
-                WHERE distribution = 'debian' and release = 'sid')
-          AS unstable,
-             popcon_src
-        WHERE NOT EXISTS (SELECT * FROM sources WHERE distribution = 'debian'
-                          AND release = 'lenny' and package = unstable.package)
-              AND popcon_src.source = unstable.package ORDER BY insts DESC;
+SELECT DISTINCT unstable.package, insts
+FROM (SELECT DISTINCT package FROM sources
+WHERE distribution = 'debian' and release = 'sid')
+AS unstable,
+popcon_src
+WHERE unstable.package NOT IN (SELECT package FROM sources WHERE distribution = 'debian'
+AND release = 'lenny')
+AND popcon_src.source = unstable.package ORDER BY insts DESC;
 EOF
 	);
 

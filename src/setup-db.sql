@@ -114,13 +114,12 @@ CREATE TABLE upload_history
   maintainer text, nmu boolean, signed_by text, key_id text);
 
 CREATE INDEX packages_source_idx on packages(source);
-CREATE INDEX sources_distribution_idx on sources(distribution);
-CREATE INDEX sources_release_idx on sources(release);
-CREATE INDEX sources_component_idx on sources(component);
+CREATE INDEX packages_distrelcomp_idx on packages(distribution, release, component);
+CREATE INDEX sources_distrelcomp_idx on sources(distribution, release, component);
+
 CREATE INDEX ubuntu_packages_source_idx on ubuntu_packages(source);
-CREATE INDEX ubuntu_sources_distribution_idx on ubuntu_sources(distribution);
-CREATE INDEX ubuntu_sources_release_idx on ubuntu_sources(release);
-CREATE INDEX ubuntu_sources_component_idx on ubuntu_sources(component);
+CREATE INDEX ubuntu_packages_distrelcomp_idx on packages(distribution, release, component);
+CREATE INDEX ubuntu_sources_distrelcomp_idx on ubuntu_sources(distribution, release, component);
 
 GRANT SELECT ON packages TO PUBLIC;
 GRANT SELECT ON sources TO PUBLIC;
