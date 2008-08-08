@@ -10,13 +10,7 @@ General
 -------
 Main objective: get UDD into a state where it can be used for QA purposes.
 That's the first step towards world domination! (Universe is next! CvE)
-- (prio: high) Update the pages on the wiki so that they reflect what was
-  decided / the current status of everything.
-- (prio: high) Write/update documentation about the system, and how to use it.
-- (prio: high) add primary keys to tables that don't have one
-- (prio: high) popcon_src_max and popcon_src_average are slow (> 30s!).
-  Replacing them with tables, filled during the import, would make things
-  much faster. What do you think?
+- (prio: high) switch to db-api 2's quoting functionS.
 
 packages/sources
 ----------------
@@ -25,14 +19,10 @@ packages/sources
 
 bugs.debian.org
 ---------------
-- (prio: high) compare what's imported with what's available on
-  http://bts.turmzimmer.net/details.php. Do the results match?
+- (prio: high) add an rt_affects_* view, compare with bts.tz.net
 - (prio: medium) generate output using bts2ldap format, and check that the
   result matches a fresh bts2ldap run done by Lucas
 - (prio: medium) Optimize bugs importing
-
-popcon
-------
 
 Other data sources
 ------------------
