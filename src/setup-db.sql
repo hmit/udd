@@ -1,32 +1,3 @@
-DROP TABLE packages CASCADE;
-DROP TABLE ubuntu_packages CASCADE;
-DROP TABLE sources CASCADE;
-DROP TABLE ubuntu_sources CASCADE;
-DROP TABLE migrations CASCADE;
-DROP TABLE popcon CASCADE;
-DROP TABLE popcon_src_max CASCADE;
-DROP TABLE popcon_src_average CASCADE;
-DROP TABLE ubuntu_popcon CASCADE;
-DROP TABLE ubuntu_popcon_src_max CASCADE;
-DROP TABLE ubuntu_popcon_src_average CASCADE;
-DROP TABLE bugs_unarchived CASCADE;
-DROP TABLE bugs_archived CASCADE;
-DROP TABLE bug_merged_with CASCADE;
-DROP TABLE bug_user_tags CASCADE;
-DROP TABLE bug_found_in CASCADE;
-DROP TABLE bug_fixed_in CASCADE;
-DROP TABLE bug_tags CASCADE;
-DROP TABLE upload_history CASCADE;
-DROP VIEW bugs;
-DROP INDEX packages_source_idx;
-DROP INDEX sources_distribution_idx;
-DROP INDEX sources_release_idx;
-DROP INDEX sources_component_idx;
-DROP INDEX ubuntu_packages_source_idx;
-DROP INDEX ubuntu_sources_distribution_idx;
-DROP INDEX ubuntu_sources_release_idx;
-DROP INDEX ubuntu_sources_component_idx;
-
 CREATE TABLE packages
   (package text, version text, architecture text, maintainer text, description
     text, source text, source_version text, essential text, depends text,
