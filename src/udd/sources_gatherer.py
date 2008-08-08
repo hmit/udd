@@ -9,7 +9,7 @@ import sys
 import aux
 import tempfile
 from aux import ConfigException
-from aux import null_or_quote
+from aux import null_or_quote, quote
 from gatherer import gatherer
 
 def get_gatherer(connection, config):
@@ -21,10 +21,11 @@ class sources_gatherer(gatherer):
   non_mandatory = {'Uploaders': 0, 'Binary': 0, 'Architecture': 0,
       'Standards-Version': 0, 'Homepage': 0, 'Build-Depends': 0,
       'Build-Depends-Indep': 0, 'Build-Conflicts': 0, 'Build-Conflicts-Indep': 0,
-      'Priority': 0, 'Section': 0, 'Vcs-Arch': 0, 'Vcs-Browser': 0, 'Vcs-Bzr': 0,
+      'Priority': 0, 'Section': 0} 
+  ignorable = {'Vcs-Arch': 0, 'Vcs-Bzr': 0,
       'Vcs-Cvs': 0, 'Vcs-Darcs': 0, 'Vcs-Git': 0, 'Vcs-Hg': 0, 'Vcs-Svn': 0,
-      'X-Vcs-Browser': 0, 'X-Vcs-Bzr': 0, 'X-Vcs-Darcs': 0, 'X-Vcs-Svn': 0}
-  ignorable = {}
+      'X-Vcs-Browser': 0, 'Vcs-Browser': 0, 'X-Vcs-Bzr': 0, 'X-Vcs-Darcs': 0, 'X-Vcs-Svn': 0}
+  vcs = { 'Arch':0, 'Bzr':0, 'Cvs':0, 'Darcs':0, 'Git':0, 'Hg':0, 'Svn':0}
 
   warned_about = {}
 
@@ -43,6 +44,25 @@ class sources_gatherer(gatherer):
       d[k] = "'" + control[k].replace("\\", "\\\\").replace("'", "\\'") + "'"
     for k in sources_gatherer.non_mandatory:
       d[k] = null_or_quote(control, k)
+    
+    d['Vcs-Type'] = 'NULL'
+    d['Vcs-Url'] = 'NULL'
+    for vcs in sources_gatherer.vcs:
+      if control.has_key("Vcs-"+vcs):  
+        d['Vcs-Type'] = quote(vcs)
+	d['Vcs-Url'] = quote(control["Vcs-"+vcs])
+	break
+      elif control.has_key("X-Vcs-"+vcs):  
+        d['Vcs-Type'] = quote(vcs)
+	d['Vcs-Url'] = quote(control["X-Vcs-"+vcs])
+	break
+    if control.has_key("Vcs-Browser"):  
+        d['Vcs-Browser'] = quote(control["Vcs-Browser"])
+    elif control.has_key("X-Vcs-Browser"):  
+        d['Vcs-Browser'] = quote(control["X-Vcs-Browser"])
+    else:
+        d['Vcs-Browser'] = 'NULL'
+    
     for k in control.keys():
       if k not in sources_gatherer.mandatory and k not in sources_gatherer.non_mandatory and k not in sources_gatherer.ignorable:
 	if k not in sources_gatherer.warned_about:
@@ -65,9 +85,7 @@ class sources_gatherer(gatherer):
 	  %(Uploaders)s, %(Binary)s, %(Architecture)s, %(Standards-Version)s,
 	  %(Homepage)s, %(Build-Depends)s, %(Build-Depends-Indep)s,
 	  %(Build-Conflicts)s, %(Build-Conflicts-Indep)s, %(Priority)s,
-	  %(Section)s, %(Vcs-Arch)s, %(Vcs-Browser)s, %(Vcs-Bzr)s, %(Vcs-Cvs)s,
-	  %(Vcs-Darcs)s, %(Vcs-Git)s, %(Vcs-Hg)s, %(Vcs-Svn)s, %(X-Vcs-Browser)s,
-	  %(X-Vcs-Bzr)s, %(X-Vcs-Darcs)s, %(X-Vcs-Svn)s)
+	  %(Section)s, %(Vcs-Type)s, %(Vcs-Url)s, %(Vcs-Browser)s)
 	  """  % d
       cur.execute(query)
 
@@ -113,13 +131,11 @@ class sources_gatherer(gatherer):
 	  (Package, Version, Maintainer, Format, Files, Uploaders, Bin,
 	  Architecture, Standards_Version, Homepage, Build_Depends,
 	  Build_Depends_Indep, Build_Conflicts, Build_Conflicts_Indep, Priority,
-	  Section, Vcs_Arch, Vcs_Browser, Vcs_Bzr, Vcs_Cvs, Vcs_Darcs, Vcs_Git,
-	  Vcs_Hg, Vcs_Svn, X_Vcs_Browser, X_Vcs_Bzr, X_Vcs_Darcs, X_Vcs_Svn,
+	  Section, Vcs_Type, Vcs_Url, Vcs_Browser,
 	  Distribution, Release, Component)
 	VALUES
 	  ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
-	  $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, '%s', '%s',
-	  '%s')"""\
+	  $17, $18, $19, '%s', '%s', '%s')"""\
 	  % (table, src_cfg['distribution'], src_cfg['release'], comp)
 	cur.execute(query)
 
