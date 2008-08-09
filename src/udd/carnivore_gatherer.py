@@ -102,11 +102,11 @@ class carnivore_gatherer(gatherer):
             match = re.compile('(\w+)@debian.org').search(content)
             record[info["name"]] = match.group(1) 
           elif info["content-type"] == "comma-separated":
-            record[info["name"]] = content.rstrip().split(", ")
+            record[info["name"]] = set(content.rstrip().split(", "))
           elif info["content-type"] == "multiple entries":
             if info["name"] not in record:
-              record[info["name"]] = []
-            record[info["name"]].append(content.rstrip())
+              record[info["name"]] = set()
+            record[info["name"]].add(content.rstrip())
 
 if __name__ == '__main__':
   main()
