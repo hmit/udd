@@ -1,0 +1,23 @@
+This guide tells you how to start UDD from scratch.
+
+I assume that you've downloaded the code and setup and sql database.
+
+After making changes to the configuration (see config.README),
+you have to call udd-dispatch.py <configuration> setup (assuming that you didn't
+change the name of the setup source) (NOTE: This procedure is likely
+to change, as we are planning to have each source setup its own tables).
+After that, you can start importing sources. Keep in mind, though, that some
+sources depend on the existence of other sources. Currently, this means that
+packages/sources have to imported prior to popcon. To import sources, you first
+call
+udd-dispatch.py <configuration> <source name 1> [source name 2 [source name 3
+...]].
+If you want to update your data before you start importing it, you call
+udd-update.py <configuration> <source name 1> [source name 2 [source name 3
+...]].
+
+If you want to drop start cleanly and drop all tables/views from the database,
+you have to call
+udd-dispatch <configuration> delete (again, assuming that you did not change
+the name of the delete source). An alternateive to this is to just drop
+the complete database via dropdb)
