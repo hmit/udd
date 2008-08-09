@@ -10,13 +10,13 @@ from gatherer import gatherer
 import re
 
 def get_gatherer(connection, config):
-  return carnivore_gatherer(connection, config)
+  return lintian_gatherer(connection, config)
 
 class lintian_gatherer(gatherer):
   #RE to parse lintian output, pushing the tag code to $1, package name
   #to $2, pkg type to $3, tag name to $4 and extra info to $5
   # (stolen from Russ Allbery, thanks dude)
-  output_re = re.compile("([EWIXO]): (\S+)(?: (\S+))?: (\S+)(?:\s+(.*))?/");
+  output_re = re.compile("([EWIXO]): (\S+)(?: (\S+))?: (\S+)(?:\s+(.*))?");
 
   code_to_tag_type_map = {
     "E": "error",
@@ -62,9 +62,14 @@ class lintian_gatherer(gatherer):
       match = lintian_gatherer.output_re.match(line)
       if match:
         (code, pkg, pkg_type, tag, extra) = match.groups();
+        #this one is optional:
+        if pkg_type:
+          pkg_type = quote(pkg_type)
+        else:
+          pkg_type = 'NULL'
 
-        cur.execute("EXECUTE lintian_insert (%s, %s, %s, %s)" % \
-          (pkg, pkg_type, tag, lintian_gatherer.code_to_tag_type_map[code]));
+        cur.execute("EXECUTE lintian_insert (%s, %s, %s, %s)"\
+          % (quote(pkg), pkg_type, quote(tag), quote(lintian_gatherer.code_to_tag_type_map[code])));
       else:
         print "Can't parse line %d: %s" % (line_number, line)
 
