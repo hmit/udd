@@ -126,6 +126,23 @@ CREATE TABLE carnivore_login
  (id int, login text,
    PRIMARY KEY(id));
 
+CREATE DOMAIN lintian_tag_type AS TEXT
+NOT NULL
+CHECK(
+     VALUE = 'error'
+  OR VALUE = 'warning'
+  OR VALUE = 'information'
+  OR VALUE = 'experimental'
+  OR VALUE = 'overriden'
+);
+
+CREATE TABLE lintian (
+  package TEXT NOT NULL,
+  tag_type lintian_tag_type,
+  package_type TEXT,
+  tag TEXT NOT NULL
+);
+
 CREATE INDEX packages_source_idx on packages(source);
 CREATE INDEX sources_distribution_idx on sources(distribution);
 CREATE INDEX sources_release_idx on sources(release);
@@ -156,4 +173,5 @@ GRANT SELECT ON carnivore_emails TO PUBLIC;
 GRANT SELECT ON carnivore_names TO PUBLIC;
 GRANT SELECT ON carnivore_keys TO PUBLIC;
 GRANT SELECT ON carnivore_login TO PUBLIC;
+GRANT SELECT ON lintian TO PUBLIC;
 

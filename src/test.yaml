@@ -11,6 +11,7 @@ general:
     upload-history: module udd.upload_history_gatherer
     bugs: exec DEBBUGS_CONFIG_FILE=/org/udd.debian.net/mirrors/bugs.debian.org/etc/config perl ./udd/bugs_gatherer.pl 
     carnivore: module udd.carnivore_gatherer
+    lintian: module udd.lintian_gatherer
     #src-pkg: python sources_gatherer.py
   debug: 1
   update-timestamp-folder: ./timestamps/
@@ -174,3 +175,9 @@ carnivore:
   names-table: carnivore_names
   keys-table: carnivore_keys
   login-table: carnivore_login
+
+lintian:
+  type: lintian
+  update-command: rm -f /org/udd.debian.net/mirrors/lintian.log && wget http://lintian.debian.org/lintian.log -O /org/udd.debian.net/mirrors/lintian.log
+  path: /org/udd.debian.net/mirrors/lintian.log
+  table: lintian
