@@ -69,7 +69,7 @@ CREATE TABLE ubuntu_popcon_src_average (
    source text, insts int, vote int, olde int, recent int, nofiles int,
    PRIMARY KEY (source));
 
-CREATE TABLE bugs_unarchived
+CREATE TABLE bugs
   (id int PRIMARY KEY, package text, source text, arrival timestamp, status text,
      severity text, submitter text, owner text, title text,
      last_modified timestamp, affects_stable boolean,
@@ -99,7 +99,7 @@ CREATE TABLE bug_fixed_in
 CREATE TABLE bug_tags
   (id int, tag text, PRIMARY KEY (id, tag));
 
-CREATE VIEW bugs AS
+CREATE VIEW bugs_both AS
   SELECT id, package, source, arrival, status, severity, submitter, owner,
         title, last_modified, affects_stable, affects_testing,
 	affects_unstable, TRUE as is_archived
@@ -107,7 +107,7 @@ CREATE VIEW bugs AS
   UNION
   SELECT id, package, source, arrival, status, severity, submitter, owner,
 	title, last_modified, affects_stable, affects_testing,
-	affects_unstable, FALSE as is_archived FROM bugs_unarchived;
+	affects_unstable, FALSE as is_archived FROM bugs;
 
 CREATE TABLE upload_history
  (package text, version text, date timestamp with time zone, changed_by text,

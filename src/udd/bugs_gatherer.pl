@@ -153,7 +153,7 @@ sub main {
 	for my $bug (@modified_bugs) {
 		map {
 			$dbh->prepare("DELETE FROM $_ WHERE id = $bug")->execute() or die $!
-		} qw{bugs_archived bugs_unarchived bug_merged_with bug_found_in bug_fixed_in bug_tags};
+		} qw{bugs_archived bugs bug_merged_with bug_found_in bug_fixed_in bug_tags};
 	}
 	print "Bugs deleted\n";
 
@@ -162,7 +162,7 @@ sub main {
 
 	# XXX What if a bug is in location 'db' (which currently doesn't exist)
 	my $location = $src_config{archived} ? 'archive' : 'db_h';
-	my $table = $src_config{archived} ? 'bugs_archived' : 'bugs_unarchived';
+	my $table = $src_config{archived} ? 'bugs_archived' : 'bugs';
 	# Read all bugs
 	foreach my $bug_nr (@modified_bugs) {
 		# Fetch bug using Debbugs
