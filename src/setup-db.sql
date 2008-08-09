@@ -29,7 +29,7 @@ CREATE TABLE sources
     vcs_url text, vcs_browser text,
     python_version text, checksums_sha1 text, checksums_sha256 text,
     original_maintainer text, dm_upload_allowed text,
-    PRIMARY KEY (package, version, distribution, release, component));
+    PRIMARY KEY (source, version, distribution, release, component));
 
 CREATE TABLE ubuntu_sources
   (source text, version text, maintainer text, format text, files text,
@@ -40,7 +40,7 @@ CREATE TABLE ubuntu_sources
     vcs_url text, vcs_browser text,
     python_version text, checksums_sha1 text, checksums_sha256 text,
     original_maintainer text, dm_upload_allowed text,
-    PRIMARY KEY (package, version, distribution, release, component));
+    PRIMARY KEY (source, version, distribution, release, component));
 
 CREATE TABLE migrations
   (source text PRIMARY KEY, in_testing date, testing_version text, in_unstable date, unstable_version text, sync date, sync_version text, first_seen date);
@@ -114,7 +114,7 @@ CREATE TABLE upload_history
   maintainer text, nmu boolean, signed_by text, key_id text);
 
 CREATE VIEW bugs_rt_affects_stable AS
-SELECT id, package, source FROM bugs_unarchived
+SELECT id, package, source FROM bugs
 WHERE affects_stable
 AND (id NOT IN (SELECT id FROM bug_tags WHERE tag IN ('sid', 'sarge', 'lenny', 'experimental'))
 OR id IN (SELECT id FROM bug_tags WHERE tag = 'etch'))
@@ -123,7 +123,7 @@ AND ( package IN (SELECT DISTINCT package FROM packages p WHERE release = 'etch'
 OR source IN (SELECT DISTINCT package FROM sources WHERE release = 'etch'));
 
 CREATE VIEW bugs_rt_affects_testing AS
-SELECT id, package, source FROM bugs_unarchived
+SELECT id, package, source FROM bugs
 WHERE affects_testing 
 AND (id NOT IN (SELECT id FROM bug_tags WHERE tag IN ('sid', 'sarge', 'etch', 'experimental'))
 OR id IN (SELECT id FROM bug_tags WHERE tag = 'lenny'))
@@ -132,7 +132,7 @@ AND ( package IN (SELECT DISTINCT package FROM packages p WHERE release = 'lenny
 OR source IN (SELECT DISTINCT package FROM sources WHERE release = 'lenny'));
 
 CREATE VIEW bugs_rt_affects_unstable AS
-SELECT id, package, source FROM bugs_unarchived
+SELECT id, package, source FROM bugs
 WHERE affects_unstable 
 AND (id NOT IN (SELECT id FROM bug_tags WHERE tag IN ('lenny', 'sarge', 'etch', 'experimental'))
 OR id IN (SELECT id FROM bug_tags WHERE tag = 'sid'))
@@ -140,7 +140,7 @@ AND ( package IN (SELECT DISTINCT package FROM packages p WHERE release = 'sid')
 OR source IN (SELECT DISTINCT package FROM sources WHERE release = 'sid'));
 
 CREATE VIEW bugs_rt_affects_testing_and_unstable AS
-SELECT id, package, source FROM bugs_unarchived
+SELECT id, package, source FROM bugs
 WHERE affects_unstable AND affects_testing
 AND (id NOT IN (SELECT id FROM bug_tags WHERE tag IN ('sarge', 'etch', 'experimental'))
 OR (id IN (SELECT id FROM bug_tags WHERE tag = 'sid') AND id IN (SELECT id FROM bug_tags WHERE tag = 'lenny')))
@@ -221,7 +221,8 @@ GRANT SELECT ON ubuntu_popcon_src_average TO PUBLIC;
 GRANT SELECT ON ubuntu_popcon_src TO PUBLIC;
 GRANT SELECT ON bugs TO PUBLIC;
 GRANT SELECT ON bugs_archived TO PUBLIC;
-GRANT SELECT ON bugs_unarchived TO PUBLIC;
+GRANT SELECT ON bugs TO PUBLIC;
+GRANT SELECT ON bugs_both TO PUBLIC;
 GRANT SELECT ON bug_merged_with TO PUBLIC;
 GRANT SELECT ON bug_found_in TO PUBLIC;
 GRANT SELECT ON bug_fixed_in TO PUBLIC;
