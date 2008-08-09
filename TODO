@@ -33,11 +33,9 @@ bugs.debian.org
 Other data sources
 ------------------
 - (prio: medium) DEHS
-- (prio: medium) carnivore
 - (prio: low) MIA
 - (prio: low) debtags
 - (prio: low) wanna-build
-- (prio: low) lintian
 - (prio: low) edos.debian.net
 - (prio: low) version numbers, diffs and bugs for each package for each
   derivative distro 
