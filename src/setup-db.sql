@@ -152,4 +152,8 @@ GRANT SELECT ON bug_merged_with TO PUBLIC;
 GRANT SELECT ON bug_found_in TO PUBLIC;
 GRANT SELECT ON bug_fixed_in TO PUBLIC;
 GRANT SELECT ON bug_user_tags TO PUBLIC;
+GRANT SELECT ON carnivore_emails TO PUBLIC;
+GRANT SELECT ON carnivore_names TO PUBLIC;
+GRANT SELECT ON carnivore_keys TO PUBLIC;
+GRANT SELECT ON carnivore_login TO PUBLIC;
 
