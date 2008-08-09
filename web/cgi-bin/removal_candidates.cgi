@@ -7,17 +7,17 @@ use DBI;
 use CGI;
 
 my $s = <<EOF
-select sources.package, id, insts, arrival, last_modified, title
+select sources.source, id, insts, arrival, last_modified, title
 from sources, bugs_unarchived AS bugs, popcon_src
 where sources.distribution = 'debian' and sources.release = 'lenny'
-and bugs.source = sources.package
+and bugs.source = sources.source
 and bugs.affects_testing = true
 and bugs.affects_unstable = true
 and bugs.severity in ('serious', 'grave', 'critical')
 and arrival < (NOW() - interval '14 DAYS')
-and sources.package = popcon_src.source
+and sources.source = popcon_src.source
 and popcon_src.insts < 2000
-order by package;
+order by source;
 EOF
 ;
 

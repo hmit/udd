@@ -23,7 +23,7 @@ WHERE
     AND(
             EXISTS (SELECT package FROM packages p WHERE p.package = b.package AND p.distribution = 'debian' AND p.release = 'lenny')
         OR
-            EXISTS (SELECT package FROM sources s WHERE s.package = b.package AND s.distribution = 'debian' AND s.release = 'lenny')
+            EXISTS (SELECT source FROM sources s WHERE s.source = b.package AND s.distribution = 'debian' AND s.release = 'lenny')
     )
 GROUP BY b.package
 EOF

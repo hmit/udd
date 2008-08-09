@@ -21,7 +21,7 @@ CREATE TABLE ubuntu_packages
   PRIMARY KEY (package, version, architecture, distribution, release, component));
 
 CREATE TABLE sources
-  (package text, version text, maintainer text, format text, files text,
+  (source text, version text, maintainer text, format text, files text,
     uploaders text, bin text, architecture text, standards_version text,
     homepage text, build_depends text, build_depends_indep text,
     build_conflicts text, build_conflicts_indep text, priority text, section
@@ -32,7 +32,7 @@ CREATE TABLE sources
     PRIMARY KEY (package, version, distribution, release, component));
 
 CREATE TABLE ubuntu_sources
-  (package text, version text, maintainer text, format text, files text,
+  (source text, version text, maintainer text, format text, files text,
     uploaders text, bin text, architecture text, standards_version text,
     homepage text, build_depends text, build_depends_indep text,
     build_conflicts text, build_conflicts_indep text, priority text, section
@@ -180,7 +180,7 @@ CREATE TABLE lintian (
 );
 
 CREATE TABLE orphaned_packages (
-  package TEXT PRIMARY KEY,
+  source TEXT PRIMARY KEY,
   type TEXT,
   bug INT,
   description TEXT,
