@@ -113,6 +113,32 @@ CREATE TABLE upload_history
  (package text, version text, date timestamp with time zone, changed_by text,
   maintainer text, nmu boolean, signed_by text, key_id text);
 
+CREATE VIEW bugs_rt_affects_stable AS
+SELECT id, package, source FROM bugs_unarchived
+WHERE affects_stable
+AND (id NOT IN (SELECT id FROM bug_tags WHERE tag IN ('sid', 'sarge', 'lenny', 'experimental'))
+OR id IN (SELECT id FROM bug_tags WHERE tag = 'etch'))
+AND id IN (select id FROM bug_tags WHERE tag = 'etch-ignore')
+AND ( package IN (SELECT DISTINCT package FROM packages p WHERE release = 'etch')
+OR source IN (SELECT DISTINCT package FROM sources WHERE release = 'etch'));
+
+CREATE VIEW bugs_rt_affects_testing AS
+SELECT id, package, source FROM bugs_unarchived
+WHERE affects_testing 
+AND (id NOT IN (SELECT id FROM bug_tags WHERE tag IN ('sid', 'sarge', 'etch', 'experimental'))
+OR id IN (SELECT id FROM bug_tags WHERE tag = 'lenny'))
+AND id IN (select id FROM bug_tags WHERE tag = 'lenny-ignore')
+AND ( package IN (SELECT DISTINCT package FROM packages p WHERE release = 'lenny')
+OR source IN (SELECT DISTINCT package FROM sources WHERE release = 'lenny'));
+
+CREATE VIEW bugs_rt_affects_unstable AS
+SELECT id, package, source FROM bugs_unarchived
+WHERE affects_unstable 
+AND (id NOT IN (SELECT id FROM bug_tags WHERE tag IN ('lenny', 'sarge', 'etch', 'experimental'))
+OR id IN (SELECT id FROM bug_tags WHERE tag = 'sid'))
+AND ( package IN (SELECT DISTINCT package FROM packages p WHERE release = 'sid')
+OR source IN (SELECT DISTINCT package FROM sources WHERE release = 'sid'));
+
 CREATE TABLE carnivore_emails
  (id int, email text);
 
@@ -164,14 +190,16 @@ GRANT SELECT ON ubuntu_popcon_src_average TO PUBLIC;
 GRANT SELECT ON ubuntu_popcon_src TO PUBLIC;
 GRANT SELECT ON bugs TO PUBLIC;
 GRANT SELECT ON bugs_archived TO PUBLIC;
-GRANT SELECt ON bugs_unarchived TO PUBLIC;
+GRANT SELECT ON bugs_unarchived TO PUBLIC;
 GRANT SELECT ON bug_merged_with TO PUBLIC;
 GRANT SELECT ON bug_found_in TO PUBLIC;
 GRANT SELECT ON bug_fixed_in TO PUBLIC;
 GRANT SELECT ON bug_user_tags TO PUBLIC;
+GRANT SELECT ON bugs_rt_affects_unstable TO PUBLIC;
+GRANT SELECT ON bugs_rt_affects_testing TO PUBLIC;
+GRANT SELECT ON bugs_rt_affects_stable TO PUBLIC;
 GRANT SELECT ON carnivore_emails TO PUBLIC;
 GRANT SELECT ON carnivore_names TO PUBLIC;
 GRANT SELECT ON carnivore_keys TO PUBLIC;
 GRANT SELECT ON carnivore_login TO PUBLIC;
 GRANT SELECT ON lintian TO PUBLIC;
-
