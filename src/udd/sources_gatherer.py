@@ -1,5 +1,5 @@
 #/usr/bin/env python
-# Last-Modified: <Sat 09 Aug 2008 18:31:11 CEST>
+# Last-Modified: <Sat Aug  9 17:28:33 2008>
 # This file is a part of the Ultimate Debian Database project
 
 import debian_bundle.deb822
@@ -102,7 +102,8 @@ class sources_gatherer(gatherer):
     src_cfg = self.config[source]
 
     for k in ['directory', 'components', 'distribution', 'release', 'sources-table']:
-      raise ConfigException(k + ' not specified for source ' + source)
+      if not k in src_cfg:
+	raise ConfigException(k + ' not specified for source ' + source)
     
     table = src_cfg['sources-table']
 	

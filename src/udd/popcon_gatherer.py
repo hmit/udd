@@ -25,8 +25,8 @@ class popcon_gatherer(gatherer):
       raise
 
     for k in ['path', 'table', 'packages-table']:
-      raise ConfigException(k + ' not specified in ' + source)
-
+      if k not in my_config:
+	raise aux.ConfigException(k + ' not specified in ' + source)
 
     table = my_config['table']
     table_src = table + "_src"
@@ -46,19 +46,26 @@ class popcon_gatherer(gatherer):
     ascii_match = re.compile("^[A-Za-z0-9-.+_]+$")
 
     linenr = 0
+    d = {}
     for line in popcon:
       linenr += 1
       name, data = line.split(None, 1)
       if name == "Submissions:":
-	cur.execute("INSERT INTO %s (package, vote) VALUES ('_submissions', %s)" % (table, data))
+	d['data'] = int(data)
+	cur.execute("INSERT INTO " + table + " (package, vote) VALUES ('_submissions', %(data)s)", d)
+	continue
       try:
 	(name, vote, old, recent, nofiles) = data.split()
+	d['name'] = name
+	for k in ['vote', 'old', 'recent', 'nofiles']:
+	  exec '%s = int(%s)' % (k,k)
+	  exec 'd["%s"] = %s' % (k,k)
+	d['insts'] = vote + old + recent + nofiles
 	if ascii_match.match(name) == None:
 	  print "Skipping line %d of file %s as it contains illegal characters: %s" % (linenr, my_config['path'], line)
 	  continue
-	query = "EXECUTE pop_insert('%s', %s, %s, %s, %s, %s)" %\
-	    (name, int(vote) + int(old) + int(recent) + int(nofiles), vote, old, recent, nofiles)
-	cur.execute(query)
+	query = "EXECUTE pop_insert(%(name)s, %(insts)s, %(vote)s, %(old)s, %(recent)s, %(nofiles)s)"
+	cur.execute(query, d)
       except ValueError:
 	continue
 
@@ -77,7 +84,7 @@ class popcon_gatherer(gatherer):
       GROUP BY packages.source;
       """ % my_config)
     for line in cur.fetchall():
-      cur.execute("EXECUTE pop_insert ('%s', %s, %s, %s, %s, %s)" % line)
+      cur.execute("EXECUTE pop_insert (%s, %s, %s, %s, %s, %s)", line)
     cur.execute("DEALLOCATE pop_insert");
     cur.execute("PREPARE pop_insert AS INSERT INTO %s VALUES ($1, $2, $3, $4, $5, $6)" % table_src_average)
     cur.execute("""
@@ -91,7 +98,7 @@ class popcon_gatherer(gatherer):
       GROUP BY packages.source;
       """ % my_config)
     for line in cur.fetchall():
-      cur.execute("EXECUTE pop_insert ('%s', %s, %s, %s, %s, %s)" % line)
+      cur.execute("EXECUTE pop_insert (%s, %s, %s, %s, %s, %s)", line)
     cur.execute("DEALLOCATE pop_insert");
 
 if __name__ == '__main__':

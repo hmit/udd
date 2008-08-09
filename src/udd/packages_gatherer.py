@@ -1,5 +1,5 @@
 # /usr/bin/env python
-# Last-Modified: <Sat 09 Aug 2008 18:30:18 CEST>
+# Last-Modified: <Sat Aug  9 17:28:45 2008>
 # This file is a part of the Ultimate Debian Database project
 
 import debian_bundle.deb822
@@ -129,7 +129,8 @@ class packages_gatherer(gatherer):
     src_cfg = self.config[source]
 
     for k in ['directory', 'archs', 'release', 'components', 'distribution', 'packages-table']:
-      raise ConfigException(k + ' not sepcified for source ' + source)
+      if not k in src_cfg:
+	raise ConfigException(k + ' not sepcified for source ' + source)
 
     aux.debug = self.config['general']['debug']
     table = src_cfg['packages-table']
