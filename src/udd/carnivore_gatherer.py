@@ -5,7 +5,7 @@ This script imports the carnivore data into the database
 See merkel.debian.org:/org/qa.debian.org/carnivore/
 """
 
-import aux
+from aux import quote
 import sys
 import gzip
 from gatherer import gatherer
@@ -15,8 +15,8 @@ def get_gatherer(connection, config):
   return carnivore_gatherer(connection, config)
 
 class carnivore_gatherer(gatherer):
-  carnivore_field_ignores = ["Packages", "X-MIA", "X-Warning"]
-  carnivore_field_to_DB_map = {
+  field_ignores = ["Packages", "X-MIA", "X-Warning"]
+  field_to_DB_map = {
     "Using emails":    {"name": "emails", "content-type": "comma-separated"},
     "Known as":        {"name": "names", "content-type": "comma-separated"},
     "DD":              {"name": "login", "content-type": "unique-login"},
@@ -52,7 +52,7 @@ class carnivore_gatherer(gatherer):
       VALUES ($1, $2)""" % (my_config['emails-table']))
     cur.execute("""PREPARE carnivore_name_insert
       AS INSERT INTO %s (id, name)
-      VALUES ($1, $2)""" % (my_config['name-table']))
+      VALUES ($1, $2)""" % (my_config['names-table']))
     cur.execute("""PREPARE carnivore_keys_insert
       AS INSERT INTO %s (id, key, key_type)
       VALUES ($1, $2, $3)""" % (my_config['keys-table']))
@@ -60,7 +60,7 @@ class carnivore_gatherer(gatherer):
       AS INSERT INTO %s (id, login)
       VALUES ($1, $2)""" % (my_config['login-table']))
 
-    carnivore_data = file.open(my_config['path'])
+    carnivore_data = open(my_config['path'])
     (line_number, record_number) = (0, 1);
     record = {}
     for line in carnivore_data:
@@ -70,16 +70,16 @@ class carnivore_gatherer(gatherer):
         if 'emails' in record and 'names' in record:
           #collect all queries:
           qs = []
-          for email in record[emails]:
-            qs.append("EXECUTE carnivore_email_insert (%d, '%s')" % (record_number, email))
-          for name in record[names]:
-            qs.append("EXECUTE carnivore_name_insert (%d, '%s')" % (record_number, name))
-          if record[login]:
-            qs.append("EXECUTE carnivore_login_insert (%d, '%s')" % (record_number, record[login]))
-          for key_type in ['keyring', 'ldap', 'emeritus', 'removed']
-            if record["%s_key" % key_type]:
+          for email in record["emails"]:
+            qs.append("EXECUTE carnivore_email_insert (%d, %s)" % (record_number, quote(email)))
+          for name in record["names"]:
+            qs.append("EXECUTE carnivore_name_insert (%d, %s)" % (record_number, quote(name)))
+          if "login" in record:
+            qs.append("EXECUTE carnivore_login_insert (%d, %s)" % (record_number, quote(record["login"])))
+          for key_type in ['keyring', 'ldap', 'emeritus', 'removed']:
+            if ("%s_key" % key_type) in record:
               for key in record["%s_key" % key_type]:
-                qs.append("EXECUTE carnivore_keys_insert (%d, '%s', '%s')" % (record_number, key, key_type))
+                qs.append("EXECUTE carnivore_keys_insert (%d, %s, '%s')" % (record_number, quote(key), key_type))
           for query in qs:
             cur.execute(query)
         record_number += 1
@@ -90,10 +90,10 @@ class carnivore_gatherer(gatherer):
           print "Couldn't parse line %d: %s" % (line_number, line)
         else:
           field_info = {}
-          if field in carnivore_field_ignores:
+          if field in carnivore_gatherer.field_ignores:
             continue
-          elif carnivore_field_to_DB_map[field]:
-            info = carnivore_field_to_DB_map[field]
+          elif carnivore_gatherer.field_to_DB_map[field]:
+            info = carnivore_gatherer.field_to_DB_map[field]
           else:
             print "Unknown field in line %d: %s" % (line_number, field)
             continue

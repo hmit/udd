@@ -10,6 +10,7 @@ general:
     testing-migrations: module udd.testing_migrations_gatherer
     upload-history: module udd.upload_history_gatherer
     bugs: exec DEBBUGS_CONFIG_FILE=/org/udd.debian.net/mirrors/bugs.debian.org/etc/config perl ./udd/bugs_gatherer.pl 
+    carnivore: module udd.carnivore_gatherer
     #src-pkg: python sources_gatherer.py
   debug: 1
   update-timestamp-folder: ./timestamps/
@@ -164,3 +165,12 @@ bugs-archive:
   type: bugs
   archived: true
   update-command: /org/udd.debian.net/mirrors/sync-bugs.debian.org
+
+carnivore:
+  type: carnivore
+  update-command: /org/udd.debian.net/mirrors/sync-carnivore
+  path: /org/udd.debian.net/mirrors/qa.debian.org/carnivore/report
+  emails-table: carnivore_emails
+  names-table: carnivore_names
+  keys-table: carnivore_keys
+  login-table: carnivore_login

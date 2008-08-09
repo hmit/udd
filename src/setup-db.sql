@@ -114,16 +114,13 @@ CREATE TABLE upload_history
   maintainer text, nmu boolean, signed_by text, key_id text);
 
 CREATE TABLE carnivore_emails
- (id int, email text,
-  PRIMARY KEY(id));
+ (id int, email text);
 
 CREATE TABLE carnivore_names
- (id int, name text,
-   PRIMARY KEY(id));
+ (id int, name text);
 
 CREATE TABLE carnivore_keys
- (id int, key text, key_type text,
-   PRIMARY KEY(id));
+ (id int, key text, key_type text);
 
 CREATE TABLE carnivore_login
  (id int, login text,
