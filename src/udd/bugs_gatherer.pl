@@ -195,7 +195,10 @@ sub main {
 		my $source = $binarytosource{$bug{package}};
 
 		if(not defined $source) {
-			$source = 'NULL';
+		# if source is not defined, then we $bug{package} is likely to
+		# be a source package name (or the source package has the same
+		# name as the binary package). See #480818 for ex.
+			$source = $dbh->quote($bug{package});
 		} else {
 			$source = $dbh->quote($source);
 		}
