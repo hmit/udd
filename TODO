@@ -10,7 +10,6 @@ General
 -------
 Main objective: get UDD into a state where it can be used for QA purposes.
 That's the first step towards world domination! (Universe is next! CvE)
-- (prio: high) switch to db-api 2's quoting functionS.
 - (prio: high) clarify debian-backports-etch and debian-volatile-etch. HE
   will talk to Ganneff.
 
@@ -21,7 +20,7 @@ packages/sources
 
 bugs.debian.org
 ---------------
-- (prio: high) add an rt_affects_* view, compare with bts.tz.net
+- (prio: high) compare rt_affects_* with bts.tz.net
 - (prio: medium) generate output using bts2ldap format, and check that the
   result matches a fresh bts2ldap run done by Lucas
 - (prio: medium) Optimize bugs importing
@@ -30,7 +29,6 @@ Other data sources
 ------------------
 - (prio: medium) DEHS
 - (prio: medium) carnivore
-- (prio: low) WNPP (see collab-qa/orphan-list)
 - (prio: low) MIA
 - (prio: low) debtags
 - (prio: low) wanna-build
