@@ -235,3 +235,4 @@ GRANT SELECT ON carnivore_names TO PUBLIC;
 GRANT SELECT ON carnivore_keys TO PUBLIC;
 GRANT SELECT ON carnivore_login TO PUBLIC;
 GRANT SELECT ON lintian TO PUBLIC;
+GRANT SELECT ON orphaned_packages TO PUBLIC;
