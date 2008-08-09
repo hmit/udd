@@ -179,6 +179,14 @@ CREATE TABLE lintian (
   tag TEXT NOT NULL
 );
 
+CREATE TABLE orphaned_packages (
+  package TEXT PRIMARY KEY,
+  type TEXT,
+  bug INT,
+  description TEXT,
+  orphaned_time TIMESTAMP
+);
+
 CREATE INDEX packages_source_idx on packages(source);
 CREATE INDEX packages_distrelcomp_idx on packages(distribution, release, component);
 CREATE INDEX packages_distribution_idx on packages(distribution);
