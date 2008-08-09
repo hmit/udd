@@ -51,7 +51,7 @@ class popcon_gatherer(gatherer):
     ascii_match = re.compile("^[A-Za-z0-9-.+_]+$")
 
     linenr = 0
-    for line in popcon.readlines():
+    for line in popcon:
       linenr += 1
       name, data = line.split(None, 1)
       if name == "Submissions:":

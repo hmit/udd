@@ -23,9 +23,8 @@ class orphaned_packages_gatherer(gatherer):
     bug = str(bug)
     dir = bug[4:6]
     f = open(self.my_config['bugs-path'] + '/spool/db-h/' + dir + '/' + bug + '.log', 'r')
-    s = f.read()
     otime = None
-    for l in s.splitlines(False):
+    for l in f:
       m = self.chtitle_re.match(l)
       if m:
         return otime

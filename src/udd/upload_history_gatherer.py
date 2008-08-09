@@ -1,4 +1,4 @@
-# Last-Modified: <Sun Jul 27 11:53:58 2008>
+# Last-Modified: <Sat 09 Aug 2008 18:19:50 CEST>
 # This file is part of the Ultimate Debian Database Project
 
 from gatherer import gatherer
@@ -43,7 +43,7 @@ class upload_history_gatherer(gatherer):
       current = {}
       last_field = None
       line_count = 0
-      for line in f.readlines():
+      for line in f:
 	line_count += 1
 	line = line.strip()
 	# Stupid multi-line maintainer fields *grml*

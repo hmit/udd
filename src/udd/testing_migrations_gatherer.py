@@ -1,4 +1,4 @@
-# Last-Modified: <Thu Jul 31 15:40:12 2008>
+# Last-Modified: <Sat 09 Aug 2008 18:19:40 CEST>
 
 # This file is a part of the Ultimate Debian Database Project
 
@@ -35,7 +35,7 @@ class testing_migrations_gatherer(gatherer):
       c.execute("PREPARE mig_insert AS INSERT INTO migrations VALUES ($1, $2, $3, $4, $5, $6, $7, $8)")
       
       f = open(src_cfg['path'])
-      for line in f.readlines():
+      for line in f:
 	(package, in_testing, testing_version, in_unstable, unstable_version, sync, sync_version, first_seen) = line.split()
 	for field in ('in_testing', 'in_unstable', 'sync', 'first_seen'):
 	  is_null = False
