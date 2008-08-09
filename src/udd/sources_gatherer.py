@@ -1,5 +1,5 @@
 #/usr/bin/env python
-# Last-Modified: <Sat Aug  9 12:05:42 2008>
+# Last-Modified: <Sat 09 Aug 2008 18:31:11 CEST>
 # This file is a part of the Ultimate Debian Database project
 
 import debian_bundle.deb822
@@ -101,25 +101,8 @@ class sources_gatherer(gatherer):
       raise ConfigException, "Source %s not specified" %(src_name)
     src_cfg = self.config[source]
 
-    if not 'directory' in src_cfg:
-      raise ConfigException('directory not specified for source %s' %
-	  (src_name))
-
-    if not 'components' in src_cfg:
-      raise ConfigException('parts not specified for source %s' %
-	  (src_name))
-
-    if not 'distribution' in src_cfg:
-      raise ConfigException('distribution not specified for source in file %s' %
-	  (src_name))
-
-    if not 'release' in src_cfg:
-      raise ConfigException('release not specified for source %s' %
-	  (src_name))
-
-    if not 'sources-table' in src_cfg:
-      raise ConfigException('sources-table not specifed for source %s' %
-	  (src_name))
+    for k in ['directory', 'components', 'distribution', 'release', 'sources-table']:
+      raise ConfigException(k + ' not specified for source ' + source)
     
     table = src_cfg['sources-table']
 	

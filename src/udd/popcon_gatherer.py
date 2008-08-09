@@ -24,14 +24,9 @@ class popcon_gatherer(gatherer):
     except:
       raise
 
-    if not 'path' in my_config:
-      raise aux.ConfigException, "path not configured for source " + source
+    for k in ['path', 'table', 'packages-table']:
+      raise ConfigException(k + ' not specified in ' + source)
 
-    if not 'table' in my_config:
-      raise aux.ConfigException, "table not configured for source " + source
-
-    if not 'packages-table' in my_config:
-      raise aux.ConfigException, "packages-table not configured for source " + source
 
     table = my_config['table']
     table_src = table + "_src"

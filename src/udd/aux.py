@@ -37,16 +37,9 @@ def load_config(str):
     raise ConfigException('general section not specified')
   
   general = config['general']
-
-  if not 'dbname' in general:
-    raise ConfigException('dbname not specified')
-
-  if not 'archs' in general:
-    raise ConfigException('archs not specified')
-
-  if not 'types' in general:
-    raise ConfigException('types not specified')
-
+  for k in ['dbname', 'archs', 'types']:
+    if not k in general:
+      raise ConfigException(k + ' not specified in node "general"')
   if not 'debug' in general:
     general['debug'] = 0
 

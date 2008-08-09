@@ -1,5 +1,5 @@
 # /usr/bin/env python
-# Last-Modified: <Sat Aug  9 12:45:57 2008>
+# Last-Modified: <Sat 09 Aug 2008 18:30:18 CEST>
 # This file is a part of the Ultimate Debian Database project
 
 import debian_bundle.deb822
@@ -128,28 +128,8 @@ class packages_gatherer(gatherer):
       raise ConfigException, "Source %s not specified" %(source)
     src_cfg = self.config[source]
 
-    if not 'directory' in src_cfg:
-      raise ConfigException('directory not specified for source %s' %
-	  (source))
-
-    if not 'archs' in src_cfg:
-      raise ConfigException('archs not specified for source %s' %
-	  (source))
-
-    if not 'release' in src_cfg:
-      raise ConfigException('release not specified for source %s' %
-	  (source))
-
-    if not 'components' in src_cfg:
-      raise ConfigException('components not specified for source %s' %
-	  (source))
-
-    if not 'distribution' in src_cfg:
-      raise ConfigException('distribution not specified for source %s' %
-	  (source))
-
-    if not 'packages-table' in src_cfg:
-      raise ConfigException('packages-table not specified for source %s' % (source))
+    for k in ['directory', 'archs', 'release', 'components', 'distribution', 'packages-table']:
+      raise ConfigException(k + ' not sepcified for source ' + source)
 
     aux.debug = self.config['general']['debug']
     table = src_cfg['packages-table']
