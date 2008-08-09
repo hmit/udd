@@ -9,7 +9,7 @@ debug = 0
 
 def quote(s):
   "Quote a string for SQL"
-  return "'" + s.replace("'", "\\'") + "'"
+  return "'" + s.replace("\\", "\\\\").replace("'", "\\'") + "'"
 
 def null_or_quote(dict, key):
   "If key is an element of dict, return it quoted. Return NULL otherwise"

@@ -1,5 +1,5 @@
 # /usr/bin/env python
-# Last-Modified: <Fri Aug  8 12:42:28 2008>
+# Last-Modified: <Sat Aug  9 12:45:57 2008>
 # This file is a part of the Ultimate Debian Database project
 
 import debian_bundle.deb822
@@ -53,11 +53,14 @@ class packages_gatherer(gatherer):
     for k in packages_gatherer.mandatory:
       if k not in control:
 	raise "Mandatory field %s not specified" % k
-      d[k] = "'" + control[k].replace("\\", "\\\\").replace("'", "\\'") + "'"
+      d[k] = control[k]
     for k in packages_gatherer.non_mandatory:
-      d[k] = aux.null_or_quote(control, k)
+      if k not in control:
+	d[k] = None
+      else:
+	d[k] = control[k]
     for k in control.keys():
-      if k not in packages_gatherer.mandatory and k not in packages_gatherer.non_mandatory and k not in packages_gatherer.ignorable:
+      if k not in packages_gatherer.non_mandatory and k not in packages_gatherer.mandatory and k not in packages_gatherer.ignorable:
 	if k not in packages_gatherer.warned_about:
 	  packages_gatherer.warned_about[k] = 1
 	else:
@@ -84,22 +87,17 @@ class packages_gatherer(gatherer):
 
       d = self.build_dict(control)
 
-      # These are integer values - we don't need quotes for them
-      if d['Installed-Size'] != 'NULL':
-	d['Installed-Size'] = d['Installed-Size'].strip("'")
-      if d['Size'] != 'NULL':
-	d['Size'] = d['Size'].strip("'")
-
       # We just use the first line of the description
-      if d['Description'] != "NULL":
+      if 'Description' in d:
 	d['Description'] = d['Description'].split("\n",1)[0]
-	# If the description was a one-liner only, we don't need to add
-	# a quote
-	if d['Description'][-1] != "'" or d['Description'][-2] == '\\':
-	  d['Description'] += "'"
+
+      # Convert numbers to numbers
+      for f in ['Installed-Size', 'Size']:
+	if d[f] is not None:
+	  d[f] = int(d[f])
       
       # Source is non-mandatory, but we don't want it to be NULL
-      if d['Source'] == "NULL":
+      if d['Source'] is None:
 	d['Source'] = d['Package']
 	d['Source_Version'] = d['Version']
       else:
@@ -118,9 +116,9 @@ class packages_gatherer(gatherer):
 	  %(Build-Essential)s, %(Origin)s, %(SHA1)s,
 	  %(Replaces)s, %(Section)s, %(MD5sum)s, %(Bugs)s, %(Priority)s,
 	  %(Tag)s, %(Task)s, %(Python-Version)s, %(Provides)s,
-	  %(Conflicts)s, %(SHA256)s, %(Original-Maintainer)s)""" % d
+	  %(Conflicts)s, %(SHA256)s, %(Original-Maintainer)s)"""
       try:
-	cur.execute(query)
+	cur.execute(query, d)
       except psycopg2.ProgrammingError:
 	print query
 	raise

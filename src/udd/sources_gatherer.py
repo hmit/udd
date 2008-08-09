@@ -1,5 +1,5 @@
 #/usr/bin/env python
-# Last-Modified: <Fri Aug  8 12:45:43 2008>
+# Last-Modified: <Sat Aug  9 12:05:42 2008>
 # This file is a part of the Ultimate Debian Database project
 
 import debian_bundle.deb822
@@ -43,27 +43,30 @@ class sources_gatherer(gatherer):
     for k in sources_gatherer.mandatory:
       if k not in control:
 	raise "Mandatory field %s not specified" % k
-      d[k] = "'" + control[k].replace("\\", "\\\\").replace("'", "\\'") + "'"
+      d[k] = control[k]
     for k in sources_gatherer.non_mandatory:
-      d[k] = null_or_quote(control, k)
+      if k in control:
+	d[k] = control[k]
+      else:
+	d[k] = None
     
-    d['Vcs-Type'] = 'NULL'
-    d['Vcs-Url'] = 'NULL'
+    d['Vcs-Type'] = None
+    d['Vcs-Url'] = None
     for vcs in sources_gatherer.vcs:
       if control.has_key("Vcs-"+vcs):  
-        d['Vcs-Type'] = quote(vcs)
-	d['Vcs-Url'] = quote(control["Vcs-"+vcs])
+        d['Vcs-Type'] = vcs
+	d['Vcs-Url'] = control["Vcs-"+vcs]
 	break
       elif control.has_key("X-Vcs-"+vcs):  
-        d['Vcs-Type'] = quote(vcs)
-	d['Vcs-Url'] = quote(control["X-Vcs-"+vcs])
+        d['Vcs-Type'] = vcs
+	d['Vcs-Url'] = control["X-Vcs-"+vcs]
 	break
     if control.has_key("Vcs-Browser"):  
-        d['Vcs-Browser'] = quote(control["Vcs-Browser"])
+        d['Vcs-Browser'] = control["Vcs-Browser"]
     elif control.has_key("X-Vcs-Browser"):  
-        d['Vcs-Browser'] = quote(control["X-Vcs-Browser"])
+        d['Vcs-Browser'] = control["X-Vcs-Browser"]
     else:
-        d['Vcs-Browser'] = 'NULL'
+        d['Vcs-Browser'] = None
     
     for k in control.keys():
       if k not in sources_gatherer.mandatory and k not in sources_gatherer.non_mandatory and k not in sources_gatherer.ignorable:
@@ -90,8 +93,8 @@ class sources_gatherer(gatherer):
 	  %(Section)s, %(Vcs-Type)s, %(Vcs-Url)s, %(Vcs-Browser)s,
 	  %(Python-Version)s, %(Checksums-Sha1)s, %(Checksums-Sha256)s,
 	  %(Original-Maintainer)s, %(Dm-Upload-Allowed)s)
-	  """  % d
-      cur.execute(query)
+	  """ 
+      cur.execute(query, d)
 
   def run(self, source):
     if not source in self.config:
