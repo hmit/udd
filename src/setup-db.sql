@@ -139,6 +139,16 @@ OR id IN (SELECT id FROM bug_tags WHERE tag = 'sid'))
 AND ( package IN (SELECT DISTINCT package FROM packages p WHERE release = 'sid')
 OR source IN (SELECT DISTINCT package FROM sources WHERE release = 'sid'));
 
+CREATE VIEW bugs_rt_affects_testing_and_unstable AS
+SELECT id, package, source FROM bugs_unarchived
+WHERE affects_unstable AND affects_testing
+AND (id NOT IN (SELECT id FROM bug_tags WHERE tag IN ('sarge', 'etch', 'experimental'))
+OR (id IN (SELECT id FROM bug_tags WHERE tag = 'sid') AND id IN (SELECT id FROM bug_tags WHERE tag = 'lenny')))
+AND ( package IN (SELECT DISTINCT package FROM packages p WHERE release = 'sid')
+OR source IN (SELECT DISTINCT package FROM sources WHERE release = 'sid'))
+AND ( package IN (SELECT DISTINCT package FROM packages p WHERE release = 'lenny')
+OR source IN (SELECT DISTINCT package FROM sources WHERE release = 'lenny'));
+
 CREATE TABLE carnivore_emails
  (id int, email text);
 
@@ -198,6 +208,7 @@ GRANT SELECT ON bug_user_tags TO PUBLIC;
 GRANT SELECT ON bugs_rt_affects_unstable TO PUBLIC;
 GRANT SELECT ON bugs_rt_affects_testing TO PUBLIC;
 GRANT SELECT ON bugs_rt_affects_stable TO PUBLIC;
+GRANT SELECT ON bugs_rt_affects_testing_and_unstable TO PUBLIC;
 GRANT SELECT ON carnivore_emails TO PUBLIC;
 GRANT SELECT ON carnivore_names TO PUBLIC;
 GRANT SELECT ON carnivore_keys TO PUBLIC;
