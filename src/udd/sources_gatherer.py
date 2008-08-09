@@ -119,7 +119,7 @@ class sources_gatherer(gatherer):
 	% (table, src_cfg['distribution'], src_cfg['release'], comp))
       try:
 	query = """PREPARE source_insert as INSERT INTO %s
-	  (Package, Version, Maintainer, Format, Files, Uploaders, Bin,
+	  (Source, Version, Maintainer, Format, Files, Uploaders, Bin,
 	  Architecture, Standards_Version, Homepage, Build_Depends,
 	  Build_Depends_Indep, Build_Conflicts, Build_Conflicts_Indep, Priority,
 	  Section, Vcs_Type, Vcs_Url, Vcs_Browser, python_version, checksums_sha1,
