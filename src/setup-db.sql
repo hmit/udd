@@ -180,10 +180,23 @@ CREATE TABLE lintian (
 );
 
 CREATE INDEX packages_source_idx on packages(source);
+CREATE INDEX packages_distrelcomp_idx on packages(distribution, release, component);
+CREATE INDEX packages_distribution_idx on packages(distribution);
+CREATE INDEX packages_release_idx on packages(release);
+CREATE INDEX packages_component_idx on packages(component);
+
+CREATE INDEX sources_distrelcomp_idx on sources(distribution, release, component);
 CREATE INDEX sources_distribution_idx on sources(distribution);
 CREATE INDEX sources_release_idx on sources(release);
 CREATE INDEX sources_component_idx on sources(component);
+
 CREATE INDEX ubuntu_packages_source_idx on ubuntu_packages(source);
+CREATE INDEX ubuntu_packages_distrelcomp_idx on ubuntu_packages(distribution, release, component);
+CREATE INDEX ubuntu_packages_distribution_idx on ubuntu_packages(distribution);
+CREATE INDEX ubuntu_packages_release_idx on ubuntu_packages(release);
+CREATE INDEX ubuntu_packages_component_idx on ubuntu_packages(component);
+
+CREATE INDEX ubuntu_sources_distrelcomp_idx on ubuntu_sources(distribution, release, component);
 CREATE INDEX ubuntu_sources_distribution_idx on ubuntu_sources(distribution);
 CREATE INDEX ubuntu_sources_release_idx on ubuntu_sources(release);
 CREATE INDEX ubuntu_sources_component_idx on ubuntu_sources(component);
