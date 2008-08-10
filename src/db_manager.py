@@ -9,9 +9,9 @@ import os
 TABLES = ('popcon_src_average', 'popcon_src', 'popcon',
     'ubuntu_popcon_src_average', 'ubuntu_popcon_src', 'ubuntu_popcon',
     'sources', 'packages', 'ubuntu_sources', 'ubuntu_packages', 'migrations',
-    'bugs_archived', 'bugs_unarchived', 'bug_merged_with', 'bug_user_tags',
-    'bug_found_in', 'bug_fixed_in', 'bug_tags', 'upload_history')
-VIEWS = ('bugs', )
+    'bugs_archived', 'bugs', 'bug_merged_with', 'bug_user_tags',
+    'bug_found_in', 'bug_fixed_in', 'bug_tags', 'upload_history', 'carnivore_emails', 'carnivore_keys', 'carnivore_login', 'carnivore_names', 'lintian', 'orphaned_packages')
+VIEWS = ('bugs_both',)
 
 def print_help():
   print "Usage: %s <config> <delete|setup>" % sys.argv[0]
@@ -23,7 +23,7 @@ def delete(conn):
     c.execute("DROP VIEW " + v)
 
   for t in TABLES:
-    c.execute("DROP TABLE " + t)
+    c.execute("DROP TABLE " + t + " CASCADE")
 
 
 def setup(conn, config):
