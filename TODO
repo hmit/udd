@@ -23,11 +23,9 @@ packages/sources
 bugs.debian.org
 ---------------
 - (prio: high) compare rt_affects_* with bts.tz.net
-- (prio: medium) warning when running: read_usertags is deprecated at
-  /org/udd.debian.net/udd/src/udd/bugs_gatherer.pl line 115
 - (prio: medium) generate output using bts2ldap format, and check that the
   result matches a fresh bts2ldap run done by Lucas
-- (prio: medium) Optimize bugs importing
+- (prio: medium) Optimize bugs importing (again)
 - (prio: high) Tricky problem with affects_*: some bugs (e.g #245548) were
   filed against an experimental version, and fixed in that experimental
   version. So the BTS doesn't know if they affect unstable or not. We mark
