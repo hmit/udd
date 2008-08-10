@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# Last-Modified: <Fri Aug  8 13:56:31 2008>
+# Last-Modified: <Sun Aug 10 10:31:57 2008>
 
 use strict;
 use warnings;
@@ -17,7 +17,8 @@ use Debbugs::Bugs qw{get_bugs};
 use Debbugs::Status qw{read_bug get_bug_status bug_presence};
 use Debbugs::Packages qw{binarytosource};
 use Debbugs::Config qw{:globals};
-use Debbugs::User qw{read_usertags};
+use Debbugs::User;
+#use Debbugs::User qw{read_usertags};
 
 $YAML::Syck::ImplicitTyping = 1;
 
@@ -111,8 +112,9 @@ sub main {
 	# read and insert user tags
 	my @users = get_bugs_users();
 	foreach my $user (@users) {
-		my %tags = ();
-		read_usertags(\%tags, $user);
+		#read_usertags(\%tags, $user);
+		my $u = Debbugs::User->new($user);
+		my %tags = %{$u->{tags}};
 		$user = $dbh->quote($user);
 		foreach my $tag (keys %tags) {
 			my $qtag = $dbh->quote($tag);
