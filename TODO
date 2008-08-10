@@ -26,6 +26,7 @@ bugs.debian.org
 - (prio: medium) generate output using bts2ldap format, and check that the
   result matches a fresh bts2ldap run done by Lucas
 - (prio: medium) Optimize bugs importing (again)
+  + use PREPARE/EXECUTE.
 - (prio: high) Tricky problem with affects_*: some bugs (e.g #245548) were
   filed against an experimental version, and fixed in that experimental
   version. So the BTS doesn't know if they affect unstable or not. We mark
