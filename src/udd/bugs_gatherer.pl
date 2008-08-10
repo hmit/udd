@@ -102,13 +102,16 @@ sub main {
 	my $dbh = DBI->connect("dbi:Pg:dbname=$dbname");
 	# We want to commit the transaction as a hole at the end
 	$dbh->{AutoCommit} = 0;
+	my $timing = 1;
+	my $t;
 
 
-
+	$t = time();
 	# Free usertags table
 	$dbh->prepare("DELETE FROM bug_user_tags")->execute() or die
 		"Couldn't empty bug_user_tags: $!";
-
+	print "Deleting usertags: ",(time() - $t),"s\n" if $timing;
+	$t = time();
 	# read and insert user tags
 	my @users = get_bugs_users();
 	foreach my $user (@users) {
@@ -121,23 +124,8 @@ sub main {
 			map { $dbh->prepare("INSERT INTO bug_user_tags VALUES ($user, $qtag, $_)")->execute() or die $! } @{$tags{$tag}};
 		}
 	}
-
-	####### XXX EXPERIMENT
-	####### XXX What to do with bugs both archived and unarchived
-	#my $max_last_modified = get_db_max_last_modified($dbh);
-	#my @modified_bugs;
-	#if($max_last_modified) {
-	#	@modified_bugs = @{get_modified_bugs($max_last_modified)};
-		# Delete modified bugs
-		#	for my $bug (@modified_bugs) {
-		#		map {
-		#			$dbh->prepare("DELETE FROM $_ WHERE id = $bug")->execute()
-		#		} qw{bugs bug_merged_with bug_found_in bug_fixed_in};
-		#	}
-		#} else {
-		#	@modified_bugs = get_bugs(archive => 'both');
-		#}
-		#@modified_bugs = without_duplicates(@modified_bugs);
+	print "Inserting usertags: ",(time() - $t),"s\n" if $timing;
+	$t = time();
 	my @modified_bugs;
 	if($src_config{archived}) {
 		@modified_bugs = get_bugs(archive => 1);
@@ -145,23 +133,22 @@ sub main {
 		@modified_bugs = get_bugs();
 	}
 
-	print scalar(@modified_bugs), " modified bugs\n";
-	####### XXX EXPERIMENT
+	print "Fetching list of ",scalar(@modified_bugs), " bugs to insert: ",(time() - $t),"s\n" if $timing;
+	$t = time();
 
 	# Get the bugs we want to import
 	# my @bugs = $src_config{archived} ? get_bugs(archive => 1) : get_bugs();
 
 	# Delete all bugs we are going to import
-	for my $bug (@modified_bugs) {
-		map {
-			$dbh->prepare("DELETE FROM $_ WHERE id = $bug")->execute() or die $!
-		} qw{bugs_archived bugs bug_merged_with bug_found_in bug_fixed_in bug_tags};
+	my $modbugs = join(", ", @modified_bugs);
+	for my $table qw{bugs_archived bugs bug_merged_with bug_found_in bug_fixed_in bug_tags} {
+		$dbh->prepare("DELETE FROM $table WHERE id IN ($modbugs)")->execute() or die $!
 	}
-	print "Bugs deleted\n";
+	print "Deleting bugs: ",(time() - $t),"s\n" if $timing;
+	$t = time();
 
 	# Used to chache binary to source mappings
 	my %binarytosource = ();
-
 	# XXX What if a bug is in location 'db' (which currently doesn't exist)
 	my $location = $src_config{archived} ? 'archive' : 'db_h';
 	my $table = $src_config{archived} ? 'bugs_archived' : 'bugs';
@@ -234,7 +221,6 @@ sub main {
 			$present_in_unstable = 'TRUE';
 		}
 
-
 		# Insert data into bugs table
 		my $query = "INSERT INTO $table VALUES ($bug_nr, '$bug{package}', $source, $bug{date}, \
 		             E$bug{pending}, '$bug{severity}', E$bug{originator}, E$bug{owner}, \
@@ -263,7 +249,10 @@ sub main {
 		}
 	}
 
+	print "Inserting bugs: ",(time() - $t),"s\n" if $timing;
+	$t = time();
 	$dbh->commit();
+	print "Committing bugs: ",(time() - $t),"s\n" if $timing;
 }
 
 main();
