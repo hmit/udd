@@ -44,7 +44,7 @@ class orphaned_packages_gatherer(gatherer):
     #for the new data:
     cur = self.cursor()
     cur2 = self.cursor()
-    cur.execute("SELECT id, title, arrival FROM bugs_unarchived WHERE package = 'wnpp' AND status != 'done' AND title ~* '^(ITA|RFA|O):' AND id NOT IN (SELECT id from bug_merged_with WHERE id > merged_with)")
+    cur.execute("SELECT id, title, arrival FROM bugs WHERE package = 'wnpp' AND status != 'done' AND title ~* '^(ITA|RFA|O):' AND id NOT IN (SELECT id from bug_merged_with WHERE id > merged_with)")
     rows = cur.fetchall()
 
     cur2.execute("DELETE FROM orphaned_packages")
