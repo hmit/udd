@@ -108,7 +108,7 @@ sub main {
 
 	$t = time();
 	# Free usertags table
-	$dbh->prepare("DELETE FROM bug_user_tags")->execute() or die
+	$dbh->do("DELETE FROM bug_user_tags") or die
 		"Couldn't empty bug_user_tags: $!";
 	print "Deleting usertags: ",(time() - $t),"s\n" if $timing;
 	$t = time();
@@ -121,7 +121,7 @@ sub main {
 		$user = $dbh->quote($user);
 		foreach my $tag (keys %tags) {
 			my $qtag = $dbh->quote($tag);
-			map { $dbh->prepare("INSERT INTO bug_user_tags VALUES ($user, $qtag, $_)")->execute() or die $! } @{$tags{$tag}};
+			map { $dbh->do("INSERT INTO bug_user_tags VALUES ($user, $qtag, $_)") or die $! } @{$tags{$tag}};
 		}
 	}
 	print "Inserting usertags: ",(time() - $t),"s\n" if $timing;
@@ -133,16 +133,21 @@ sub main {
 		@modified_bugs = get_bugs();
 	}
 
+	my @modified_bugs2;
+	if ($src_config{debug}) {
+		foreach $b (@modified_bugs) {
+			push(@modified_bugs2, $b) if ($b =~ /0$/);
+		}
+		@modified_bugs = @modified_bugs2;
+	}
+
 	print "Fetching list of ",scalar(@modified_bugs), " bugs to insert: ",(time() - $t),"s\n" if $timing;
 	$t = time();
-
-	# Get the bugs we want to import
-	# my @bugs = $src_config{archived} ? get_bugs(archive => 1) : get_bugs();
 
 	# Delete all bugs we are going to import
 	my $modbugs = join(", ", @modified_bugs);
 	for my $table qw{bugs_archived bugs bug_merged_with bug_found_in bug_fixed_in bug_tags} {
-		$dbh->prepare("DELETE FROM $table WHERE id IN ($modbugs)")->execute() or die $!
+		$dbh->do("DELETE FROM $table WHERE id IN ($modbugs)") or die $!
 	}
 	print "Deleting bugs: ",(time() - $t),"s\n" if $timing;
 	$t = time();
@@ -227,25 +232,24 @@ sub main {
 					 E$bug{subject}, $bug{log_modified}, $present_in_stable,
 					 $present_in_testing, $present_in_unstable)";
 		# Execute insertion
-		my $sth = $dbh->prepare($query);
-		$sth->execute() or die $!;
+		$dbh->do($query) or die $!;
 
 		# insert data into bug_fixed_in and bug_found_in tables
 		foreach my $version (without_duplicates(@found_versions)) {
 			$query = "INSERT INTO bug_found_in VALUES ($bug_nr, $version)";
-			$dbh->prepare($query)->execute() or die $!;
+			$dbh->do($query) or die $!;
 		}
 		foreach my $version (without_duplicates(@fixed_versions)) {
 			$query = "INSERT INTO bug_fixed_in VALUES ($bug_nr, $version)";
-			$dbh->prepare($query)->execute() or die $!;
+			$dbh->do($query) or die $!;
 		}
 		foreach my $mergee (without_duplicates(split / /, $bug{mergedwith})) {
 			$query = "INSERT INTO bug_merged_with VALUES ($bug_nr, $mergee)";
-			$dbh->prepare($query)->execute() or die $!;
+			$dbh->do($query) or die $!;
 		}
 		foreach my $tag (without_duplicates(@tags)) {
 			$query = "INSERT INTO bug_tags VALUES ($bug_nr, $tag)";
-			$dbh->prepare($query)->execute() or die $!;
+			$dbh->do($query) or die $!;
 		}
 	}
 
