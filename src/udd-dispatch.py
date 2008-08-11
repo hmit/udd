@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Last-Modified: <Sun Aug 10 11:44:14 2008>
+# Last-Modified: <Mon Aug 11 13:49:35 2008>
 
 """Dispatch udd gatherers
 
@@ -22,7 +22,7 @@ if __name__ == '__main__':
   command = sys.argv[2]
   if command not in ('run', 'setup', 'drop'):
     sys.stderr.write("command has to be one of 'run', 'setup', 'drop'\n")
-    sys.ext(1)
+    sys.exit(1)
 
   # Check the configuration
   config = udd.aux.load_config(open(sys.argv[1]).read())
