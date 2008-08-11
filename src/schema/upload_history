@@ -1,0 +1,5 @@
+CREATE TABLE %(table)s
+ (package text, version text, date timestamp with time zone, changed_by text,
+  maintainer text, nmu boolean, signed_by text, key_id text);
+
+GRANT SELECT ON %(table)s TO PUBLIC;

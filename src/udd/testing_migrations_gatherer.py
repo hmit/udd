@@ -1,4 +1,4 @@
-# Last-Modified: <Sat 09 Aug 2008 18:19:40 CEST>
+# Last-Modified: <Sun Aug 10 12:16:12 2008>
 
 # This file is a part of the Ultimate Debian Database Project
 
@@ -8,26 +8,21 @@ from time import strptime
 
 ZERO_DATE = '0000-01-01'
 
-def get_gatherer(config, connection):
-  return testing_migrations_gatherer(config, connection)
+def get_gatherer(config, connection, source):
+  return testing_migrations_gatherer(config, connection, source)
 
 
 class testing_migrations_gatherer(gatherer):
   """This class imports testing migrations data into the database.
 
   For the files, see http://qa.debian.org/~lucas/testing-status.raw"""
-  def __init__(self, connection, config):
-    gatherer.__init__(self, connection, config)
+  def __init__(self, connection, config, source):
+    gatherer.__init__(self, connection, config, source)
+    self.assert_my_config('path')
 
-  def run(self, source):
-      if not source in self.config:
-	raise ConfigException('Source %s was not specified' % source)
+  def run(self):
+      src_cfg = self.my_config
 
-      src_cfg = self.config[source]
-
-      if not 'path' in src_cfg:
-	raise ConfigException('path not specified for source %s' % source)
-      
       c = self.connection.cursor()
 
       c.execute("DELETE FROM migrations")

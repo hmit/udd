@@ -1,0 +1,4 @@
+CREATE TABLE %(table)s
+  (source text PRIMARY KEY, in_testing date, testing_version text, in_unstable date, unstable_version text, sync date, sync_version text, first_seen date);
+
+GRANT SELECT ON %(table)s TO PUBLIC;

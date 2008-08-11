@@ -1,5 +1,5 @@
 # /usr/bin/env python
-# Last-Modified: <Sat Aug  9 17:28:45 2008>
+# Last-Modified: <Sun Aug 10 12:11:38 2008>
 # This file is a part of the Ultimate Debian Database project
 
 import debian_bundle.deb822
@@ -12,8 +12,8 @@ from aux import ConfigException
 import psycopg2
 from gatherer import gatherer
 
-def get_gatherer(connection, config):
-  return packages_gatherer(connection, config)
+def get_gatherer(connection, config, source):
+  return packages_gatherer(connection, config, source)
 
 class packages_gatherer(gatherer):
   "This class imports the data from Packages.gz files into the database"
@@ -40,10 +40,11 @@ class packages_gatherer(gatherer):
   # with the same version, and we don't want these duplicate entries
   imported_all_pkgs = {}
 
-  def __init__(self, connection, config):
-    gatherer.__init__(self, connection, config)
+  def __init__(self, connection, config, source):
+    gatherer.__init__(self, connection, config, source)
     # The ID for the distribution we want to include
     self._distr = None
+    self.assert_my_config('directory', 'archs', 'release', 'components', 'distribution', 'packages-table', 'packages-schema')
 
   def build_dict(self, control):
     """Build a dictionary from the control dictionary.
@@ -123,14 +124,22 @@ class packages_gatherer(gatherer):
 	print query
 	raise
 
-  def run(self, source):
-    if not source in self.config:
-      raise ConfigException, "Source %s not specified" %(source)
-    src_cfg = self.config[source]
+  def setup(self):
+    if 'schema-dir' in self.config['general']:
+      schema_dir = self.config['general']['schema-dir']
+      if 'packages-schema' in self.my_config:
+	schema = schema_dir + '/' + self.my_config['packages-schema']
+	self.eval_sql_file(schema, self.my_config)
+      else:
+	raise Exception("'packages-schema' not specified for source " + self.source)
+    else:
+      raise Exception("'schema-dir' not specified")
 
-    for k in ['directory', 'archs', 'release', 'components', 'distribution', 'packages-table']:
-      if not k in src_cfg:
-	raise ConfigException(k + ' not sepcified for source ' + source)
+  def drop(self):
+    self.cursor().execute("DROP TABLE " + self.my_config['packages-table'])
+
+  def run(self):
+    src_cfg = self.my_config
 
     aux.debug = self.config['general']['debug']
     table = src_cfg['packages-table']

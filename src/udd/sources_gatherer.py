@@ -1,5 +1,5 @@
 #/usr/bin/env python
-# Last-Modified: <Sat Aug  9 17:28:33 2008>
+# Last-Modified: <Sun Aug 10 12:11:44 2008>
 # This file is a part of the Ultimate Debian Database project
 
 import debian_bundle.deb822
@@ -12,8 +12,8 @@ from aux import ConfigException
 from aux import null_or_quote, quote
 from gatherer import gatherer
 
-def get_gatherer(connection, config):
-  return sources_gatherer(connection, config)
+def get_gatherer(connection, config, source):
+  return sources_gatherer(connection, config, source)
 
 class sources_gatherer(gatherer):
   "This class imports the data from Sources.gz files into the database"
@@ -31,9 +31,10 @@ class sources_gatherer(gatherer):
 
   warned_about = {}
 
-  def __init__(self, connection, config):
-    gatherer.__init__(self, connection, config)
+  def __init__(self, connection, config, source):
+    gatherer.__init__(self, connection, config, source)
     self._distr = None
+    self.assert_my_config('directory', 'components', 'distribution', 'release', 'sources-table', 'sources-schema')
 
   def build_dict(self, control):
     """Build a dictionary from the control dictionary.
@@ -96,17 +97,13 @@ class sources_gatherer(gatherer):
 	  """ 
       cur.execute(query, d)
 
-  def run(self, source):
-    if not source in self.config:
-      raise ConfigException, "Source %s not specified" %(src_name)
-    src_cfg = self.config[source]
+  def drop(self):
+    self.cursor().execute("DROP TABLE " + self.my_config['sources-table'])
 
-    for k in ['directory', 'components', 'distribution', 'release', 'sources-table']:
-      if not k in src_cfg:
-	raise ConfigException(k + ' not specified for source ' + source)
-    
+  def run(self):
+    src_cfg = self.my_config
+
     table = src_cfg['sources-table']
-	
 
     aux.debug = self.config['general']['debug']
 
@@ -147,6 +144,17 @@ class sources_gatherer(gatherer):
       cur.execute("DEALLOCATE source_insert")
 
     self.print_warnings()
+
+  def setup(self):
+    if 'schema-dir' in self.config['general']:
+      schema_dir = self.config['general']['schema-dir']
+      if 'sources-schema' in self.my_config:
+	schema = schema_dir + '/' + self.my_config['sources-schema']
+	self.eval_sql_file(schema, self.my_config)
+      else:
+	raise Exception("'packages-schema' not specified for source " + self.source)
+    else:
+      raise Exception("'schema-dir' not specified")
 
   def print_warnings(self):
     for key in sources_gatherer.warned_about:

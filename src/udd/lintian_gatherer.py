@@ -9,8 +9,8 @@ from aux import quote
 from gatherer import gatherer
 import re
 
-def get_gatherer(connection, config):
-  return lintian_gatherer(connection, config)
+def get_gatherer(connection, config, source):
+  return lintian_gatherer(connection, config, source)
 
 class lintian_gatherer(gatherer):
   #RE to parse lintian output, pushing the tag code to $1, package name
@@ -26,19 +26,12 @@ class lintian_gatherer(gatherer):
     "O": "overriden",
   }
 
-  def __init__(self, connection, config):
-    gatherer.__init__(self, connection, config)
+  def __init__(self, connection, config, source):
+    gatherer.__init__(self, connection, config, source)
+    self.assert_my_config('path', 'table')
 
-  def run(self, source):
-    try:
-      my_config = self.config[source]
-    except:
-      raise
-
-    #check that the config contains everything we need:
-    for key in ['path', 'table']:
-      if not key in my_config:
-        raise aux.ConfigException, "%s not configured for source %s" % (key, source)
+  def run(self):
+    my_config = self.my_config
 
     #start harassing the DB, preparing the final inserts and making place
     #for the new data:

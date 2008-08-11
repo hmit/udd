@@ -1,0 +1,17 @@
+CREATE TABLE %(emails-table)s
+ (id int, email text);
+
+CREATE TABLE %(names-table)s
+ (id int, name text);
+
+CREATE TABLE %(keys-table)s
+ (id int, key text, key_type text);
+
+CREATE TABLE %(login-table)s
+ (id int, login text,
+   PRIMARY KEY(id));
+
+GRANT SELECT on %(emails-table)s TO PUBLIC;
+GRANT SELECT on %(names-table)s TO PUBLIC;
+GRANT SELECT on %(keys-table)s TO PUBLIC;
+GRANT SELECT on %(login-table)s TO PUBLIC;

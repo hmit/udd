@@ -1,4 +1,4 @@
-# Last-Modified: <Sat 09 Aug 2008 18:32:29 CEST>
+# Last-Modified: <Sun Aug 10 15:21:06 2008>
 # This file is part of the Ultimate Debian Database Project
 
 from gatherer import gatherer
@@ -8,29 +8,24 @@ import gzip
 import psycopg2
 import sys
 
-date_translation = {
-    'Deb': 'Feb',
-    'Augl': 'Aug',
-    'Fev': 'Feb' }
-
-def get_gatherer(config, connection):
-  return upload_history_gatherer(config, connection)
+def get_gatherer(config, connection, source):
+  return upload_history_gatherer(config, connection, source)
 
 class upload_history_gatherer(gatherer):
-  def __init__(self, connection, config):
-    gatherer.__init__(self, connection, config)
-
-  def run(self, source):
-    if not 'path' in self.config[source]:
+  def __init__(self, connection, config, source):
+    gatherer.__init__(self, connection, config, source)
+    if not 'path' in self.my_config:
       raise aux.ConfigException('path not specified for source ' + source)
-    path = self.config[source]['path']
+
+  def run(self):
+    path = self.my_config['path']
 
     cursor = self.cursor()
 
-    cursor.execute("DELETE FROM upload_history")
+    cursor.execute("DELETE FROM " + self.my_config['table'])
 
-    cursor.execute("PREPARE uh_insert AS INSERT INTO upload_history VALUES \
-	($1, $2, $3, $4, $5, $6, $7, $8)")
+    cursor.execute("PREPARE uh_insert AS INSERT INTO %s VALUES \
+	($1, $2, $3, $4, $5, $6, $7, $8)" % self.my_config['table'])
 
     for name in glob(path + '/debian-devel-*'):
       print name

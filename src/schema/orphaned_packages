@@ -1,0 +1,9 @@
+CREATE TABLE %(table)s (
+  source TEXT PRIMARY KEY,
+  type TEXT,
+  bug INT,
+  description TEXT,
+  orphaned_time TIMESTAMP
+);
+
+GRANT SELECT ON %(table)s TO PUBLIC;

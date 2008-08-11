@@ -8,12 +8,13 @@ import aux
 from gatherer import gatherer
 import re
 
-def get_gatherer(connection, config):
-  return orphaned_packages_gatherer(connection, config)
+def get_gatherer(connection, config, source):
+  return orphaned_packages_gatherer(connection, config, source)
 
 class orphaned_packages_gatherer(gatherer):
-  def __init__(self, connection, config):
-    gatherer.__init__(self, connection, config)
+  def __init__(self, connection, config, source):
+    gatherer.__init__(self, connection, config, source)
+    self.assert_my_config('bugs-path', 'table', 'unarchived-table')
 
   title_re = re.compile('^(ITA|RFA|O): ([^\s]*) [-]+ (.*)$')
   otime_re = re.compile('^<!-- time:([0-9]+) ')
@@ -33,8 +34,7 @@ class orphaned_packages_gatherer(gatherer):
         otime = int(m.group(1))
     return None
 
-  def run(self, source):
-    self.my_config = self.config[source]
+  def run(self):
     #check that the config contains everything we need:
     for key in ['bugs-path']:
       if not key in self.my_config:
@@ -44,11 +44,11 @@ class orphaned_packages_gatherer(gatherer):
     #for the new data:
     cur = self.cursor()
     cur2 = self.cursor()
-    cur.execute("SELECT id, title, arrival FROM bugs WHERE package = 'wnpp' AND status != 'done' AND title ~* '^(ITA|RFA|O):' AND id NOT IN (SELECT id from bug_merged_with WHERE id > merged_with)")
+    cur.execute("SELECT id, title, arrival FROM %s WHERE package = 'wnpp' AND status != 'done' AND title ~* '^(ITA|RFA|O):' AND id NOT IN (SELECT id from bug_merged_with WHERE id > merged_with)" % self.my_config['unarchived-table'])
     rows = cur.fetchall()
 
-    cur2.execute("DELETE FROM orphaned_packages")
-    cur2.execute("PREPARE opkgs_insert AS INSERT INTO orphaned_packages VALUES ($1, $2, $3, $4, $5)")
+    cur2.execute("DELETE FROM %s" % self.my_config['table'])
+    cur2.execute("PREPARE opkgs_insert AS INSERT INTO %s VALUES ($1, $2, $3, $4, $5)" % self.my_config['table'])
 
     for row in rows:
       m = self.title_re.match(row[1])

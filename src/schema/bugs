@@ -1,0 +1,96 @@
+CREATE TABLE %(table)s
+  (id int PRIMARY KEY, package text, source text, arrival timestamp, status text,
+     severity text, submitter text, owner text, title text,
+     last_modified timestamp, affects_stable boolean,
+    affects_testing boolean, affects_unstable boolean);
+
+CREATE TABLE %(table)s_merged_with
+  (id int, merged_with int,
+PRIMARY KEY(id, merged_with));
+
+CREATE TABLE %(table)s_found_in
+  (id int, version text,
+   PRIMARY KEY(id, version));
+
+CREATE TABLE %(table)s_fixed_in
+  (id int, version text,
+   PRIMARY KEY(id, version));
+
+CREATE TABLE %(table)s_tags
+  (id int, tag text, PRIMARY KEY (id, tag));
+
+CREATE TABLE %(archived-table)s
+  (id int PRIMARY KEY, package text, source text, arrival timestamp, status text,
+     severity text, submitter text, owner text, title text,
+     last_modified timestamp, affects_sarchived_table boolean,
+    affects_testing boolean, affects_unsarchived_table boolean);
+
+CREATE TABLE %(archived-table)s_merged_with
+  (id int, merged_with int,
+PRIMARY KEY(id, merged_with));
+
+CREATE TABLE %(archived-table)s_found_in
+  (id int, version text,
+   PRIMARY KEY(id, version));
+
+CREATE TABLE %(archived-table)s_fixed_in
+  (id int, version text,
+   PRIMARY KEY(id, version));
+
+CREATE TABLE %(archived-table)s_tags
+  (id int, tag text, PRIMARY KEY (id, tag));
+
+CREATE VIEW bugs_rt_affects_stable AS
+SELECT id, package, source FROM %(table)s
+WHERE affects_stable
+AND (id NOT IN (SELECT id FROM %(table)s_tags WHERE tag IN ('sid', 'sarge', 'lenny', 'experimental'))
+OR id IN (SELECT id FROM %(table)s_tags WHERE tag = 'etch'))
+AND id IN (select id FROM %(table)s_tags WHERE tag = 'etch-ignore')
+AND ( package IN (SELECT DISTINCT package FROM %(packages-table)s p WHERE release = 'etch')
+OR source IN (SELECT DISTINCT package FROM %(sources-table)s WHERE release = 'etch'));
+
+CREATE VIEW bugs_rt_affects_testing AS
+SELECT id, package, source FROM %(table)s
+WHERE affects_testing 
+AND (id NOT IN (SELECT id FROM %(table)s_tags WHERE tag IN ('sid', 'sarge', 'etch', 'experimental'))
+OR id IN (SELECT id FROM %(table)s_tags WHERE tag = 'lenny'))
+AND id IN (select id FROM %(table)s_tags WHERE tag = 'lenny-ignore')
+AND ( package IN (SELECT DISTINCT package FROM %(packages-table)s p WHERE release = 'lenny')
+OR source IN (SELECT DISTINCT package FROM %(sources-table)s WHERE release = 'lenny'));
+
+CREATE VIEW bugs_rt_affects_unstable AS
+SELECT id, package, source FROM %(table)s
+WHERE affects_unstable 
+AND (id NOT IN (SELECT id FROM %(table)s_tags WHERE tag IN ('lenny', 'sarge', 'etch', 'experimental'))
+OR id IN (SELECT id FROM %(table)s_tags WHERE tag = 'sid'))
+AND ( package IN (SELECT DISTINCT package FROM %(packages-table)s p WHERE release = 'sid')
+OR source IN (SELECT DISTINCT package FROM %(sources-table)s WHERE release = 'sid'));
+
+CREATE VIEW bugs_rt_affects_testing_and_unstable AS
+SELECT id, package, source FROM %(table)s
+WHERE affects_unstable AND affects_testing
+AND (id NOT IN (SELECT id FROM %(table)s_tags WHERE tag IN ('sarge', 'etch', 'experimental'))
+OR (id IN (SELECT id FROM %(table)s_tags WHERE tag = 'sid') AND id IN (SELECT id FROM %(table)s_tags WHERE tag = 'lenny')))
+AND ( package IN (SELECT DISTINCT package FROM %(packages-table)s p WHERE release = 'sid')
+OR source IN (SELECT DISTINCT package FROM %(sources-table)s WHERE release = 'sid'))
+AND ( package IN (SELECT DISTINCT package FROM %(packages-table)s p WHERE release = 'lenny')
+OR source IN (SELECT DISTINCT package FROM %(sources-table)s WHERE release = 'lenny'));
+
+CREATE TABLE %(usertags-table)s
+  (email text, tag text, id int);
+
+GRANT SELECT ON %(table)s TO PUBLIC;
+GRANT SELECT ON %(table)s_merged_with TO PUBLIC;
+GRANT SELECT ON %(table)s_found_in TO PUBLIC;
+GRANT SELECT ON %(table)s_fixed_in TO PUBLIC;
+GRANT SELECT ON %(table)s_tags TO PUBLIC;
+GRANT SELECT ON %(archived-table)s TO PUBLIC;
+GRANT SELECT ON %(archived-table)s_merged_with TO PUBLIC;
+GRANT SELECT ON %(archived-table)s_found_in TO PUBLIC;
+GRANT SELECT ON %(archived-table)s_fixed_in TO PUBLIC;
+GRANT SELECT ON %(archived-table)s_tags TO PUBLIC;
+GRANT SELECT ON bugs_rt_affects_stable TO PUBLIC;
+GRANT SELECT ON bugs_rt_affects_testing_and_unstable TO PUBLIC;
+GRANT SELECT ON bugs_rt_affects_unstable TO PUBLIC;
+GRANT SELECT ON bugs_rt_affects_testing TO PUBLIC;
+GRANT SELECT ON %(usertags-table)s TO PUBLIC;

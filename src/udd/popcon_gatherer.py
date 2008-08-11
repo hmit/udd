@@ -11,22 +11,22 @@ import gzip
 from gatherer import gatherer
 import re
 
-def get_gatherer(connection, config):
-  return popcon_gatherer(connection, config)
+def get_gatherer(connection, config, source):
+  return popcon_gatherer(connection, config, source)
 
 class popcon_gatherer(gatherer):
-  def __init__(self, connection, config):
-    gatherer.__init__(self, connection, config)
+  def __init__(self, connection, config, source):
+    gatherer.__init__(self, connection, config, source)
 
-  def run(self, source):
-    try:
-      my_config = self.config[source]
-    except:
-      raise
+    self.assert_my_config('path', 'table', 'packages-table', 'schema')
 
-    for k in ['path', 'table', 'packages-table']:
-      if k not in my_config:
-	raise aux.ConfigException(k + ' not specified in ' + source)
+  def drop(self):
+    cur = self.cursor()
+    for sub in ('', '_src', '_src_average'):
+      cur.execute("DROP TABLE %s%s" % (self.my_config['table'], sub))
+
+  def run(self):
+    my_config = self.my_config
 
     table = my_config['table']
     table_src = table + "_src"

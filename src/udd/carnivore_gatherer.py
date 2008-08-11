@@ -11,8 +11,8 @@ import gzip
 from gatherer import gatherer
 import re
 
-def get_gatherer(connection, config):
-  return carnivore_gatherer(connection, config)
+def get_gatherer(connection, config, source):
+  return carnivore_gatherer(connection, config, source)
 
 class carnivore_gatherer(gatherer):
   field_ignores = ["Packages", "X-MIA", "X-Warning"]
@@ -26,19 +26,17 @@ class carnivore_gatherer(gatherer):
     "Key in removed":  {"name": "removed_key", "content-type": "multiple entries"},
   }
 
-  def __init__(self, connection, config):
-    gatherer.__init__(self, connection, config)
+  def __init__(self, connection, config, source):
+    gatherer.__init__(self, connection, config, source)
+    self.assert_my_config('path', 'emails-table', 'names-table', 'keys-table', 'login-table')
 
-  def run(self, source):
-    try:
-      my_config = self.config[source]
-    except:
-      raise
+  def drop(self):
+    cur = self.cursor()
+    for table in ['emails', 'names', 'keys', 'login']:
+      cur.execute("DROP TABLE %s" % self.my_config["%s-table" % table])
 
-    #check that the config contains everything we need:
-    for key in ['path', 'emails-table', 'names-table', 'keys-table', 'login-table']:
-      if not key in my_config:
-        raise aux.ConfigException, "%s not configured for source %s" % (key, source)
+  def run(self):
+    my_config = self.my_config
 
     #start harassing the DB, preparing the final inserts and making place
     #for the new data:
