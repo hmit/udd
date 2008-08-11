@@ -9,6 +9,11 @@ CREATE TABLE packages
     distribution text, release text, component text,
   PRIMARY KEY (package, version, architecture, distribution, release, component));
 
+CREATE TABLE packages_summary ( package text, version text, source text,
+source_version text, maintainer text, distribution text, release text,
+component text,
+PRIMARY KEY (package, version, distribution, release, component));
+
 CREATE TABLE ubuntu_packages
   (package text, version text, architecture text, maintainer text, description
     text, source text, source_version text, essential text, depends text,
@@ -19,6 +24,11 @@ CREATE TABLE ubuntu_packages
     provides text, conflicts text, sha256 text, original_maintainer text,
     distribution text, release text, component text,
   PRIMARY KEY (package, version, architecture, distribution, release, component));
+
+CREATE TABLE ubuntu_packages_summary ( package text, version text, source text,
+source_version text, maintainer text, distribution text, release text,
+component text,
+PRIMARY KEY (package, version, distribution, release, component));
 
 CREATE TABLE sources
   (source text, version text, maintainer text, format text, files text,
@@ -118,8 +128,8 @@ SELECT id, package, source FROM bugs
 WHERE affects_stable
 AND (id NOT IN (SELECT id FROM bug_tags WHERE tag IN ('sid', 'sarge', 'lenny', 'experimental'))
 OR id IN (SELECT id FROM bug_tags WHERE tag = 'etch'))
-AND id IN (select id FROM bug_tags WHERE tag = 'etch-ignore')
-AND ( package IN (SELECT DISTINCT package FROM packages p WHERE release = 'etch')
+AND id NOT IN (select id FROM bug_tags WHERE tag = 'etch-ignore')
+AND ( package IN (SELECT DISTINCT package FROM packages_summary p WHERE release = 'etch')
 OR source IN (SELECT DISTINCT package FROM sources WHERE release = 'etch'));
 
 CREATE VIEW bugs_rt_affects_testing AS
@@ -127,8 +137,8 @@ SELECT id, package, source FROM bugs
 WHERE affects_testing 
 AND (id NOT IN (SELECT id FROM bug_tags WHERE tag IN ('sid', 'sarge', 'etch', 'experimental'))
 OR id IN (SELECT id FROM bug_tags WHERE tag = 'lenny'))
-AND id IN (select id FROM bug_tags WHERE tag = 'lenny-ignore')
-AND ( package IN (SELECT DISTINCT package FROM packages p WHERE release = 'lenny')
+AND id NOT IN (select id FROM bug_tags WHERE tag = 'lenny-ignore')
+AND ( package IN (SELECT DISTINCT package FROM packages_summary p WHERE release = 'lenny')
 OR source IN (SELECT DISTINCT package FROM sources WHERE release = 'lenny'));
 
 CREATE VIEW bugs_rt_affects_unstable AS
@@ -136,18 +146,8 @@ SELECT id, package, source FROM bugs
 WHERE affects_unstable 
 AND (id NOT IN (SELECT id FROM bug_tags WHERE tag IN ('lenny', 'sarge', 'etch', 'experimental'))
 OR id IN (SELECT id FROM bug_tags WHERE tag = 'sid'))
-AND ( package IN (SELECT DISTINCT package FROM packages p WHERE release = 'sid')
+AND ( package IN (SELECT DISTINCT package FROM packages_summary p WHERE release = 'sid')
 OR source IN (SELECT DISTINCT package FROM sources WHERE release = 'sid'));
-
-CREATE VIEW bugs_rt_affects_testing_and_unstable AS
-SELECT id, package, source FROM bugs
-WHERE affects_unstable AND affects_testing
-AND (id NOT IN (SELECT id FROM bug_tags WHERE tag IN ('sarge', 'etch', 'experimental'))
-OR (id IN (SELECT id FROM bug_tags WHERE tag = 'sid') AND id IN (SELECT id FROM bug_tags WHERE tag = 'lenny')))
-AND ( package IN (SELECT DISTINCT package FROM packages p WHERE release = 'sid')
-OR source IN (SELECT DISTINCT package FROM sources WHERE release = 'sid'))
-AND ( package IN (SELECT DISTINCT package FROM packages p WHERE release = 'lenny')
-OR source IN (SELECT DISTINCT package FROM sources WHERE release = 'lenny'));
 
 CREATE TABLE carnivore_emails
  (id int, email text);
@@ -230,10 +230,11 @@ GRANT SELECT ON bug_user_tags TO PUBLIC;
 GRANT SELECT ON bugs_rt_affects_unstable TO PUBLIC;
 GRANT SELECT ON bugs_rt_affects_testing TO PUBLIC;
 GRANT SELECT ON bugs_rt_affects_stable TO PUBLIC;
-GRANT SELECT ON bugs_rt_affects_testing_and_unstable TO PUBLIC;
 GRANT SELECT ON carnivore_emails TO PUBLIC;
 GRANT SELECT ON carnivore_names TO PUBLIC;
 GRANT SELECT ON carnivore_keys TO PUBLIC;
 GRANT SELECT ON carnivore_login TO PUBLIC;
 GRANT SELECT ON lintian TO PUBLIC;
 GRANT SELECT ON orphaned_packages TO PUBLIC;
+GRANT SELECT ON packages_summary TO PUBLIC;
+GRANT SELECT ON ubuntu_packages_summary TO PUBLIC;
