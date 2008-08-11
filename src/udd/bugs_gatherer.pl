@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# Last-Modified: <Mon Aug 11 13:55:12 2008>
+# Last-Modified: <Mon Aug 11 13:57:07 2008>
 
 use strict;
 use warnings;
@@ -24,8 +24,8 @@ use Debbugs::User;
 $YAML::Syck::ImplicitTyping = 1;
 
 #Used for measuring time
-my $t;
-my $timing = 1;
+our $t;
+our $timing = 1;
 
 # Return the list of usernames
 sub get_bugs_users {
