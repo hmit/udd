@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# Last-Modified: <Mon Aug 11 18:12:20 2008>
+# Last-Modified: <Mon Aug 11 18:17:46 2008>
 
 use strict;
 use warnings;
@@ -255,6 +255,7 @@ sub run {
 		# be a source package name (or the source package has the same
 		# name as the binary package). See #480818 for ex.
 			$source = $bug{package};
+		}
 
 		#Calculate bug presence in distributions
 		my ($present_in_stable, $present_in_testing, $present_in_unstable);
