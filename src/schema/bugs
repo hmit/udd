@@ -46,7 +46,7 @@ SELECT id, package, source FROM %(table)s
 WHERE affects_stable
 AND (id NOT IN (SELECT id FROM %(table)s_tags WHERE tag IN ('sid', 'sarge', 'lenny', 'experimental'))
 OR id IN (SELECT id FROM %(table)s_tags WHERE tag = 'etch'))
-AND id IN (select id FROM %(table)s_tags WHERE tag = 'etch-ignore')
+AND id NOT IN (select id FROM %(table)s_tags WHERE tag = 'etch-ignore')
 AND ( package IN (SELECT DISTINCT package FROM %(packages-table)s_summary p WHERE release = 'etch')
 OR source IN (SELECT DISTINCT package FROM %(sources-table)s WHERE release = 'etch'));
 
@@ -55,7 +55,7 @@ SELECT id, package, source FROM %(table)s
 WHERE affects_testing 
 AND (id NOT IN (SELECT id FROM %(table)s_tags WHERE tag IN ('sid', 'sarge', 'etch', 'experimental'))
 OR id IN (SELECT id FROM %(table)s_tags WHERE tag = 'lenny'))
-AND id IN (select id FROM %(table)s_tags WHERE tag = 'lenny-ignore')
+AND id NOT IN (select id FROM %(table)s_tags WHERE tag = 'lenny-ignore')
 AND ( package IN (SELECT DISTINCT package FROM %(packages-table)s_summary p WHERE release = 'lenny')
 OR source IN (SELECT DISTINCT package FROM %(sources-table)s WHERE release = 'lenny'));
 
