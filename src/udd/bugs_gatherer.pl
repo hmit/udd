@@ -1,5 +1,5 @@
-#!/usr/bin/perl
-# Last-Modified: <Mon Aug 11 13:35:58 2008>
+#!/usr/bin/perl -w
+# Last-Modified: <Mon Aug 11 13:55:12 2008>
 
 use strict;
 use warnings;
@@ -321,6 +321,9 @@ sub main {
 		print STDERR "Usage: $0 <config> <command> <source>\n";
 		exit 1;
 	}
+
+	our $t;
+	our $timing;
 
 	my $config = LoadFile($ARGV[0]) or die "Could not load configuration: $!";
 	my $command = $ARGV[1];
