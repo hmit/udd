@@ -174,6 +174,13 @@ class packages_gatherer(gatherer):
 	except IOError, (e, message):
 	  print "Could not read packages from %s: %s" % (path, message)
 	cur.execute("DEALLOCATE package_insert")
+	# Fill the summary tables
+	cur.execute("TRUNCATE %s" % (table + '_summary'));
+	cur.execute("""INSERT INTO %s SELECT DISTINCT ON (package, version,
+	  distribution, release, component) package, version, source,
+	  source_version, maintainer, distribution, release, component FROM %s""" %
+	  (table + '_summary', table));
+
 
     self.connection.commit()
 
