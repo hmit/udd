@@ -8,16 +8,16 @@ use CGI;
 
 my $s = <<EOF
 select sources.source, id, insts, arrival, last_modified, title
-from sources, bugs_unarchived AS bugs, popcon_src
+from sources, bugs AS bugs, popcon_src
 where sources.distribution = 'debian' and sources.release = 'lenny'
 and bugs.source = sources.source
-and bugs.affects_testing = true
-and bugs.affects_unstable = true
+and id in (select id from bugs_rt_affects_testing)
+and id in (select id from bugs_rt_affects_unstable)
 and bugs.severity in ('serious', 'grave', 'critical')
 and arrival < (NOW() - interval '14 DAYS')
 and sources.source = popcon_src.source
 and popcon_src.insts < 2000
-order by source;
+order by insts ASC
 EOF
 ;
 
