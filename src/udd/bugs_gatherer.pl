@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# Last-Modified: <Mon Aug 11 13:57:07 2008>
+# Last-Modified: <Mon Aug 11 18:12:20 2008>
 
 use strict;
 use warnings;
@@ -229,10 +229,9 @@ sub run {
 		my %bug = %{get_bug_status(bug => $bug_nr, status => $bug_ref)};
 		
 		# Convert data where necessary
-		map { $bug{$_} = $dbh->quote($bug{$_}) } qw(subject originator owner pending);
-		my @found_versions = map { $dbh->quote($_) } @{$bug{found_versions}};
-		my @fixed_versions = map { $dbh->quote($_) } @{$bug{fixed_versions}};
-		my @tags = map {$dbh->quote($_) } split / /, $bug{keywords};
+		my @found_versions = @{$bug{found_versions}};
+		my @fixed_versions = @{$bug{fixed_versions}};
+		my @tags = split / /, $bug{keywords};
 
 		# log_modified and date are not necessarily set. If they are not available, they
 		# are assumed to be epoch (i.e. bug #4170)
@@ -255,10 +254,7 @@ sub run {
 		# if source is not defined, then we $bug{package} is likely to
 		# be a source package name (or the source package has the same
 		# name as the binary package). See #480818 for ex.
-			$source = $dbh->quote($bug{package});
-		} else {
-			$source = $dbh->quote($source);
-		}
+			$source = $bug{package};
 
 		#Calculate bug presence in distributions
 		my ($present_in_stable, $present_in_testing, $present_in_unstable);
@@ -322,7 +318,7 @@ sub main {
 		exit 1;
 	}
 
-	our $t;
+	our $t = time();
 	our $timing;
 
 	my $config = LoadFile($ARGV[0]) or die "Could not load configuration: $!";
