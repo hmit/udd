@@ -1,4 +1,4 @@
-# Last-Modified: <Sun Aug 10 15:21:06 2008>
+# Last-Modified: <Mon Aug 11 15:55:07 2008>
 # This file is part of the Ultimate Debian Database Project
 
 from gatherer import gatherer
@@ -44,9 +44,9 @@ class upload_history_gatherer(gatherer):
 	# Stupid multi-line maintainer fields *grml*
 	if line == '':
 	  query = "EXECUTE uh_insert(%(Source)s, %(Version)s, %(Date)s, %(Changed-By)s, \
-	      %(Maintainer)s, %(NMU)s, %(Key)s, %(Signed-By)s)" % current
+	      %(Maintainer)s, %(NMU)s, %(Key)s, %(Signed-By)s)"
 	  try:
-	    cursor.execute(query)
+	    cursor.execute(query, current)
 	  except psycopg2.ProgrammingError, s:
 	    print "Error at line %d of file %s" % (line_count, name)
 	    raise

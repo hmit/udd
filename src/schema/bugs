@@ -4,6 +4,7 @@ CREATE TABLE %(table)s
      last_modified timestamp, affects_stable boolean,
     affects_testing boolean, affects_unstable boolean);
 
+
 CREATE TABLE %(table)s_merged_with
   (id int, merged_with int,
 PRIMARY KEY(id, merged_with));
@@ -46,7 +47,7 @@ WHERE affects_stable
 AND (id NOT IN (SELECT id FROM %(table)s_tags WHERE tag IN ('sid', 'sarge', 'lenny', 'experimental'))
 OR id IN (SELECT id FROM %(table)s_tags WHERE tag = 'etch'))
 AND id IN (select id FROM %(table)s_tags WHERE tag = 'etch-ignore')
-AND ( package IN (SELECT DISTINCT package FROM %(packages-table)s p WHERE release = 'etch')
+AND ( package IN (SELECT DISTINCT package FROM %(packages-table)s_summary p WHERE release = 'etch')
 OR source IN (SELECT DISTINCT package FROM %(sources-table)s WHERE release = 'etch'));
 
 CREATE VIEW bugs_rt_affects_testing AS
@@ -55,7 +56,7 @@ WHERE affects_testing
 AND (id NOT IN (SELECT id FROM %(table)s_tags WHERE tag IN ('sid', 'sarge', 'etch', 'experimental'))
 OR id IN (SELECT id FROM %(table)s_tags WHERE tag = 'lenny'))
 AND id IN (select id FROM %(table)s_tags WHERE tag = 'lenny-ignore')
-AND ( package IN (SELECT DISTINCT package FROM %(packages-table)s p WHERE release = 'lenny')
+AND ( package IN (SELECT DISTINCT package FROM %(packages-table)s_summary p WHERE release = 'lenny')
 OR source IN (SELECT DISTINCT package FROM %(sources-table)s WHERE release = 'lenny'));
 
 CREATE VIEW bugs_rt_affects_unstable AS
@@ -63,7 +64,7 @@ SELECT id, package, source FROM %(table)s
 WHERE affects_unstable 
 AND (id NOT IN (SELECT id FROM %(table)s_tags WHERE tag IN ('lenny', 'sarge', 'etch', 'experimental'))
 OR id IN (SELECT id FROM %(table)s_tags WHERE tag = 'sid'))
-AND ( package IN (SELECT DISTINCT package FROM %(packages-table)s p WHERE release = 'sid')
+AND ( package IN (SELECT DISTINCT package FROM %(packages-table)s_summary p WHERE release = 'sid')
 OR source IN (SELECT DISTINCT package FROM %(sources-table)s WHERE release = 'sid'));
 
 CREATE VIEW bugs_rt_affects_testing_and_unstable AS
