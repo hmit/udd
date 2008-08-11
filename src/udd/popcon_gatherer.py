@@ -72,34 +72,20 @@ class popcon_gatherer(gatherer):
     cur.execute("DEALLOCATE pop_insert")
 
     #calculate _src and _src_avg
-    cur.execute("PREPARE pop_insert AS INSERT INTO %s VALUES ($1, $2, $3, $4, $5, $6)" % table_src)
     cur.execute("""
-    SELECT packages.source, max(insts) AS insts, max(vote) AS vote, max(olde) AS old,
+    INSERT INTO %s SELECT DISTINCT packages.source, max(insts) AS insts, max(vote) AS vote, max(olde) AS old,
            max(recent) AS recent, max(nofiles) as nofiles
-      FROM %(table)s,
-	    (SELECT DISTINCT %(packages-table)s.package, %(packages-table)s.source FROM %(packages-table)s)
-	          as packages
-      WHERE 
-	    %(table)s.package = packages.package
-      GROUP BY packages.source;
-      """ % my_config)
-    for line in cur.fetchall():
-      cur.execute("EXECUTE pop_insert (%s, %s, %s, %s, %s, %s)", line)
-    cur.execute("DEALLOCATE pop_insert");
-    cur.execute("PREPARE pop_insert AS INSERT INTO %s VALUES ($1, $2, $3, $4, $5, $6)" % table_src_average)
+      FROM %(table)s, %(packages-table)s_summary AS pkgs
+      WHERE %(table)s.package = pkgs.package
+      GROUP BY pkgs.source;
+      """ % (table_src, my_config))
     cur.execute("""
-    SELECT packages.source, avg(insts) AS insts, avg(vote) AS vote, avg(olde) AS old,
+    INSERT INTO %s SELECT packages.source, avg(insts) AS insts, avg(vote) AS vote, avg(olde) AS old,
            avg(recent) AS recent, avg(nofiles) as nofiles
-      FROM %(table)s,
-	    (SELECT DISTINCT %(packages-table)s.package, %(packages-table)s.source FROM %(packages-table)s)
-	          as packages
-      WHERE 
-	    %(table)s.package = packages.package
-      GROUP BY packages.source;
-      """ % my_config)
-    for line in cur.fetchall():
-      cur.execute("EXECUTE pop_insert (%s, %s, %s, %s, %s, %s)", line)
-    cur.execute("DEALLOCATE pop_insert");
+      FROM %(table)s, %(packages-table)s_summary AS pkgs
+      WHERE %(table)s.package = pkgs.package
+      GROUP BY pkgs.source;
+      """ % (table_src_average, my_config))
 
 if __name__ == '__main__':
   main()
