@@ -14,6 +14,11 @@ That's the first step towards world domination! (Universe is next! CvE)
   will talk to Ganneff.
 - (prio: high) add a (robust, working) lockfile system so that the same
   update process doesn't run twice.
+- (prio: high) user documentation, on the Debian wiki.
+  - what UDD is ("elevator pitch")
+  - how do I connect?
+  - tables structure, in a relatively friendly format
+  - some example queries
 
 packages/sources
 ----------------
@@ -22,7 +27,7 @@ packages/sources
 
 bugs.debian.org
 ---------------
-- (prio: high) compare rt_affects_* with bts.tz.net
+- (prio: medium) compare rt_affects_* with bts.tz.net
 - (prio: medium) generate output using bts2ldap format, and check that the
   result matches a fresh bts2ldap run done by Lucas
 - (prio: medium) Optimize bugs importing (again)
