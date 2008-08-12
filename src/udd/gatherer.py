@@ -1,6 +1,7 @@
 # This file is part of the Ultimate Debian Database project
 
 import aux
+import sys
 
 class gatherer:
   """

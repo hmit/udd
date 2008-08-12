@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Last-Modified: <Mon Aug 11 13:49:35 2008>
+# Last-Modified: <Tue Aug 12 16:20:44 2008>
 
 """Dispatch udd gatherers
 
@@ -46,14 +46,20 @@ if __name__ == '__main__':
 
     (src_command,rest) = types[type].split(None, 1)
     
-    if src_command == "exec":
-      system(rest + " " + sys.argv[1] + " " + sys.argv[2] + " " + src)
-    elif src_command == "module":
-      exec("import " + rest)
-      exec "gatherer = " + rest + ".get_gatherer(connection, config, src)"
-      exec "gatherer.%s()" % command
-    if 'timestamp-folder' in config['general']:
-      f = open(os.path.join(config['general']['timestamp-folder'], src+".dispatch"), "w")
-      f.write(asctime())
-      f.close()
+    udd.aux.lock(config, src)
+    try:
+      if src_command == "exec":
+	system(rest + " " + sys.argv[1] + " " + sys.argv[2] + " " + src)
+      elif src_command == "module":
+	exec("import " + rest)
+	exec "gatherer = " + rest + ".get_gatherer(connection, config, src)"
+	exec "gatherer.%s()" % command
+      if 'timestamp-folder' in config['general']:
+	f = open(os.path.join(config['general']['timestamp-folder'], src+".dispatch"), "w")
+	f.write(asctime())
+	f.close()
+    except:
+      udd.aux.unlock(config, src)
+      raise
   connection.commit()
+

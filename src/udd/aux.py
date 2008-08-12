@@ -3,6 +3,8 @@
 import syck
 import sys
 import psycopg2
+from os import path
+import fcntl
 
 # If debug is something that evaluates to True, then print_debug actually prints something
 debug = 0
@@ -30,6 +32,22 @@ def open_connection(config):
   """Open the connection to the database and return it"""
   return psycopg2.connect("dbname=" + config['general']['dbname'])
 
+__locks = {}
+def lock(config, source):
+  lock_dir = config['general']['lock-dir']
+  lock_path = path.join(lock_dir, source)
+  f = file(lock_path, "w+")
+  __locks[lock_path] = f
+  fcntl.flock(f.fileno(), fcntl.LOCK_EX)
+
+def unlock(config, source):
+  lock_dir = config['general']['lock-dir']
+  lock_path = path.join(lock_dir, source)
+  if lock_path in __locks:
+    f = file(lock_path)
+    fcntl.flock(f.fileno(), fcntl.LOCK_UN)
+    del __locks[lock_path]
+
 def load_config(str):
   """Load and check configuration from the string"""
   config = syck.load(str)
@@ -37,7 +55,7 @@ def load_config(str):
     raise ConfigException('general section not specified')
   
   general = config['general']
-  for k in ['dbname', 'archs', 'types']:
+  for k in ['dbname', 'archs', 'types', 'lock-dir']:
     if not k in general:
       raise ConfigException(k + ' not specified in node "general"')
   if not 'debug' in general:

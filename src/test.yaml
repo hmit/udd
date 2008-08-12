@@ -17,6 +17,7 @@ general:
   debug: 1
   update-timestamp-folder: ./timestamps/
   schema-dir: ./schema/
+  lock-dir: ./locks/
 
   archs:
    [alpha, amd64, arm, armeb, armel, hppa, hurd-i386,

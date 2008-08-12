@@ -1,4 +1,4 @@
-# Last-Modified: <Tue Aug 12 15:09:13 2008>
+# Last-Modified: <Tue Aug 12 16:01:29 2008>
 # This file is part of the Ultimate Debian Database Project
 
 from gatherer import gatherer
@@ -21,6 +21,7 @@ class upload_history_gatherer(gatherer):
     cur = self.cursor()
     cur.execute("DROP TABLE %s" % self.my_config['table'])
     cur.execute("DROP TABLE %s" % self.my_config['table'] + '_architecture')
+    cur.execute("DROP TABLE %s" % self.my_config['table'] + '_closes')
 
 
   def run(self):
@@ -30,11 +31,14 @@ class upload_history_gatherer(gatherer):
 
     cursor.execute("DELETE FROM " + self.my_config['table'])
     cursor.execute("DELETE FROM " + self.my_config['table'] + '_architecture')
+    cursor.execute("DELETE FROM " + self.my_config['table'] + '_closes')
 
     cursor.execute("PREPARE uh_insert AS INSERT INTO %s VALUES \
 	($1, $2, $3, $4, $5, $6, $7, $8, $9)" % self.my_config['table'])
     cursor.execute("PREPARE uh_arch_insert AS INSERT INTO %s VALUES \
 	($1, $2)" % (self.my_config['table'] + '_architecture'))
+    cursor.execute("PREPARE uh_close_insert AS INSERT INTO %s VALUES \
+	($1, $2)" % (self.my_config['table'] + '_closes'))
 
     id = 0
     for name in glob(path + '/debian-devel-*'):
@@ -53,17 +57,23 @@ class upload_history_gatherer(gatherer):
 	line = line.strip()
 	# Stupid multi-line maintainer fields *grml*
 	if line == '':
-	  for arch in set(current['Architecture'].split()):
-	    current['arch'] = arch
-	    query = "EXECUTE uh_arch_insert(%(id)s, %(arch)s)"
-	    cursor.execute(query, current)
-	  query = "EXECUTE uh_insert(%(id)s, %(Source)s, %(Version)s, %(Date)s, %(Changed-By)s, \
-	      %(Maintainer)s, %(NMU)s, %(Key)s, %(Signed-By)s)"
 	  try:
+	    for arch in set(current['Architecture'].split()):
+	      current['arch'] = arch
+	      query = "EXECUTE uh_arch_insert(%(id)s, %(arch)s)"
+	      cursor.execute(query, current)
+	    if current['Closes'] != 'N/A':
+	      for closes in set(current['Closes'].split()):
+		current['closes'] = closes
+		query = "EXECUTE uh_close_insert(%(id)s, %(closes)s)"
+		cursor.execute(query, current)
+	    query = "EXECUTE uh_insert(%(id)s, %(Source)s, %(Version)s, %(Date)s, %(Changed-By)s, \
+		%(Maintainer)s, %(NMU)s, %(Key)s, %(Signed-By)s)"
 	    cursor.execute(query, current)
 	  except psycopg2.ProgrammingError, s:
 	    print "Error at line %d of file %s" % (line_count, name)
-	    raise
+	    continue
+	    #raise
 	  id += 1
 	  current = {'id': id}
 	  last_field = None
@@ -78,11 +88,7 @@ class upload_history_gatherer(gatherer):
 
 	(field, data) = line.split(':', 1)
 	data = data.strip()
-
-	if field != 'NMU':
-	  current[field] = aux.quote(data)
-	else:
-	  current[field] = data
+	current[field] = data
 	
 	last_field = field
     

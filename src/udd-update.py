@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Last-Modified: <Thu Aug  7 19:07:48 2008>
+# Last-Modified: <Tue Aug 12 16:19:09 2008>
 
 """
 This script executes the update statements for selected sources
@@ -28,11 +28,16 @@ if __name__ == '__main__':
   for src in sys.argv[2:]:
     src_cfg = config[src]
     if "update-command" in src_cfg:
-      result = system(src_cfg['update-command']) 
-      if result != 0:
-	sys.exit(result)
-      if 'timestamp-folder' in config['general']:
-	f = open(os.path.join(config['general']['timestamp-folder'], src+".update"), "w")
-	f.write(asctime())
-	f.close()
+      udd.aux.lock(config, src)
+      try:
+	result = system(src_cfg['update-command']) 
+	if result != 0:
+	  sys.exit(result)
+	if 'timestamp-folder' in config['general']:
+	  f = open(os.path.join(config['general']['timestamp-folder'], src+".update"), "w")
+	  f.write(asctime())
+	  f.close()
+      except:
+	udd.aux.unlock(config, src)
+	raise
 
