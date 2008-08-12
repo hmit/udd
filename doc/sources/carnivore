@@ -1,0 +1,25 @@
+DESCRIPTION
+  The carnivore source type handles the data provided by the carnivore
+  QA-subproject, aiming to connect several identities of the same
+  person (ie, different mail addresses, variants of the same name,
+  OpenPGP key IDs) with each other.
+
+  The imported data is the carnivore report created on a regular basis
+  in merkel.debian.org:/org/qa.debian.org/carnivore (see the README
+  files there for more information on the project).
+
+  We import all relevant carnivore data, by assigning a unique integer
+  ID to each carnivore entity (who can have several names, mail addresses
+  and keys) ad then pushing all that data to the DB. Four tables are
+  created:
+   * emails-table: (ID, mail) mapping
+   * names-table: (ID, name) mapping
+   * keys-table: (ID, key) mapping
+   * login-table: (ID, login) mapping, login being the debian.org login
+
+  _keys and _login are only set for full Debian Developers.
+
+CONFIGURATION:
+  path: The path of the carnivore report to be read
+  emails-table, names-tables, key-table, login-table: The names of the
+   database tables used for the different mappings

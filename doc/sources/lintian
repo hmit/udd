@@ -1,0 +1,15 @@
+DESCRIPTION
+  The lintian source type handles lintian log files.
+
+  The raw data of a (full, hopefully) lintian run, for example from
+  http://lintian.debian.org/lintian.log, is parsed, all important
+  bits get extracted and put in the DB.
+
+  Each emitted tag is imported to the DB, together with it's type
+  (one of error, warning, information, experimental or overriden),
+  the affected package and the package type (source, udeb and NULL
+  for binary packages).
+
+CONFIGURATION:
+  path: The path of the lintian raw data to be read
+  table: The name of the database table
