@@ -12,8 +12,6 @@ Main objective: get UDD into a state where it can be used for QA purposes.
 That's the first step towards world domination! (Universe is next! CvE)
 - (prio: high) clarify debian-backports-etch and debian-volatile-etch. HE
   will talk to Ganneff.
-- (prio: high) add a (robust, working) lockfile system so that the same
-  update process doesn't run twice.
 - (prio: high) user documentation, on the Debian wiki.
   - what UDD is ("elevator pitch")
   - tables structure, in a relatively friendly format
