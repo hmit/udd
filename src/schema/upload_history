@@ -1,5 +1,12 @@
 CREATE TABLE %(table)s
- (package text, version text, date timestamp with time zone, changed_by text,
-  maintainer text, nmu boolean, signed_by text, key_id text);
+ (id serial, package text, version text, date timestamp with time zone,
+ changed_by text, maintainer text, nmu boolean, signed_by text, key_id text,
+ closes int);
+
+CREATE TABLE %(table)s_architecture
+ (id int, architecture text,
+ PRIMARY KEY (id, architecture));
+  
 
 GRANT SELECT ON %(table)s TO PUBLIC;
+GRANT SELECT ON %(table)s_architecture TO PUBLIC;

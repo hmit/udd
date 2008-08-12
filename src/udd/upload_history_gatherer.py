@@ -1,4 +1,4 @@
-# Last-Modified: <Mon Aug 11 15:55:07 2008>
+# Last-Modified: <Tue Aug 12 15:09:13 2008>
 # This file is part of the Ultimate Debian Database Project
 
 from gatherer import gatherer
@@ -17,16 +17,26 @@ class upload_history_gatherer(gatherer):
     if not 'path' in self.my_config:
       raise aux.ConfigException('path not specified for source ' + source)
 
+  def drop(self):
+    cur = self.cursor()
+    cur.execute("DROP TABLE %s" % self.my_config['table'])
+    cur.execute("DROP TABLE %s" % self.my_config['table'] + '_architecture')
+
+
   def run(self):
     path = self.my_config['path']
 
     cursor = self.cursor()
 
     cursor.execute("DELETE FROM " + self.my_config['table'])
+    cursor.execute("DELETE FROM " + self.my_config['table'] + '_architecture')
 
     cursor.execute("PREPARE uh_insert AS INSERT INTO %s VALUES \
-	($1, $2, $3, $4, $5, $6, $7, $8)" % self.my_config['table'])
+	($1, $2, $3, $4, $5, $6, $7, $8, $9)" % self.my_config['table'])
+    cursor.execute("PREPARE uh_arch_insert AS INSERT INTO %s VALUES \
+	($1, $2)" % (self.my_config['table'] + '_architecture'))
 
+    id = 0
     for name in glob(path + '/debian-devel-*'):
       print name
       f = None
@@ -35,7 +45,7 @@ class upload_history_gatherer(gatherer):
       else:
 	f = open(name)
       
-      current = {}
+      current = {'id': id}
       last_field = None
       line_count = 0
       for line in f:
@@ -43,14 +53,19 @@ class upload_history_gatherer(gatherer):
 	line = line.strip()
 	# Stupid multi-line maintainer fields *grml*
 	if line == '':
-	  query = "EXECUTE uh_insert(%(Source)s, %(Version)s, %(Date)s, %(Changed-By)s, \
+	  for arch in set(current['Architecture'].split()):
+	    current['arch'] = arch
+	    query = "EXECUTE uh_arch_insert(%(id)s, %(arch)s)"
+	    cursor.execute(query, current)
+	  query = "EXECUTE uh_insert(%(id)s, %(Source)s, %(Version)s, %(Date)s, %(Changed-By)s, \
 	      %(Maintainer)s, %(NMU)s, %(Key)s, %(Signed-By)s)"
 	  try:
 	    cursor.execute(query, current)
 	  except psycopg2.ProgrammingError, s:
 	    print "Error at line %d of file %s" % (line_count, name)
 	    raise
-	  current = {}
+	  id += 1
+	  current = {'id': id}
 	  last_field = None
 	  continue
 

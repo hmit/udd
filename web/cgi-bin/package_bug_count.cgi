@@ -8,10 +8,10 @@ use CGI;
 
 my $dbh = DBI->connect("dbi:Pg:dbname=udd") or die $!;
 my $sth = $dbh->prepare(<<EOF
-	SELECT package, COUNT(id) AS nr FROM bugs_unarchived as bugs
+	SELECT package, COUNT(id) AS nr FROM bugs
 	WHERE
 		NOT (affects_stable OR affects_testing OR affects_unstable)
-		AND NOT EXISTS (SELECT 1 FROM bug_tags WHERE bug_tags.id = bugs.id AND bug_tags.tag = 'fixed')
+		AND NOT EXISTS (SELECT 1 FROM bugs_tags WHERE bugs_tags.id = bugs.id AND bugs_tags.tag = 'fixed')
 	GROUP BY package ORDER BY nr DESC
 EOF
 	);

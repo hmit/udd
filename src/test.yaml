@@ -26,13 +26,6 @@ general:
     netbsd-i386, hurd-powerpc, kfreebsd-powerpc, netbsd-powerpc, hurd-sparc,
     kfreebsd-sparc, netbsd-sparc, darwin-i386, freebsd-i386, openbsd-i386, darwin-powerpc]
 
-delete:
-  type: delete
-
-setup:
-        type: setup
-        script: setup-db.sql
-
 debian-lenny:
   type: src-pkg
   archs: [alpha, amd64, arm, armel, hppa,
@@ -176,7 +169,7 @@ upload-history:
   path: /tmp/upload-history
   schema: upload_history
   table: upload_history
-  update-command: if [ ! -e /tmp/upload-history/ ]; then mkdir /tmp/upload-history/; fi; rm -rf /tmp/upload-history/*; wget -r --no-parent -nd -A debian-devel-* -P /tmp/upload-history http://giunched.web.cs.unibo.it/nokeys/
+  update-command: if [ ! -e /tmp/upload-history/ ]; then mkdir /tmp/upload-history/; fi; rm -rf /tmp/upload-history/*; wget -r --no-parent -nd -A debian-devel-* -P /tmp/upload-history http://qa.debian.org/~filippo/ddc/
 
 bugs:
   type: bugs
