@@ -13,18 +13,28 @@ sub pyformat {
 	return $string;
 }
 
-if (@ARGV != 1) {
-	print STDERR "Usage: $0 <config-file>\n";
+if (@ARGV == 0) {
+	print STDERR "Usage: $0 <config-file> [source 1 [source 2 ...]]\n";
 	exit 1;
 }
 
 my $config = LoadFile($ARGV[0]) or die "Could not load configuration: $!";
 
-my @sources = grep { !($_ eq 'general') } keys %{$config};
+my @sources = ();
+if (@ARGV == 1) {
+	@sources = grep { !($_ eq 'general') } keys %{$config};
+} else {
+	@sources = @ARGV[1, $#ARGV];
+}
+
 my $schema_dir = $config->{general}->{'schema-dir'} or die "schema-dir not specified";
 my %schemata = ();
 
 foreach my $source (@sources) {
+	if(not exists $config->{$source}) {
+		print STDERR "No such source: $source\n";
+		exit 1;
+	}
 	my %src_config = %{$config->{$source}};
 	foreach my $schema_tag (qw{schema packages-schema sources-schema}) {
 		if(not exists $src_config{$schema_tag}) {
