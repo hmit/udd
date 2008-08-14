@@ -3,11 +3,11 @@ CREATE TABLE %(table)s
  changed_by text, maintainer text, nmu boolean, signed_by text, key_id text);
 
 CREATE TABLE %(table)s_architecture
- (id int, architecture text,
+ (id int FOREIGN KEY %(table)s, architecture text,
  PRIMARY KEY (id, architecture));
   
 CREATE TABLE %(table)s_closes
- (id int, bug int,
+ (id int FOREIGN KEY %(table)s, bug int,
  PRIMARY KEY (id, bug));
 
 GRANT SELECT ON %(table)s TO PUBLIC;

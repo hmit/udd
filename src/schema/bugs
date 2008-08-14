@@ -4,21 +4,20 @@ CREATE TABLE %(table)s
      last_modified timestamp, affects_stable boolean,
     affects_testing boolean, affects_unstable boolean);
 
-
 CREATE TABLE %(table)s_merged_with
-  (id int, merged_with int,
+  (id int REFERENCES %(table)s, merged_with int,
 PRIMARY KEY(id, merged_with));
 
 CREATE TABLE %(table)s_found_in
-  (id int, version text,
+  (id int REFERENCES %(table)s, version text,
    PRIMARY KEY(id, version));
 
 CREATE TABLE %(table)s_fixed_in
-  (id int, version text,
+  (id int REFERENCES %(table)s, version text,
    PRIMARY KEY(id, version));
 
 CREATE TABLE %(table)s_tags
-  (id int, tag text, PRIMARY KEY (id, tag));
+  (id int REFERENCES %(table)s, tag text, PRIMARY KEY (id, tag));
 
 CREATE TABLE %(archived-table)s
   (id int PRIMARY KEY, package text, source text, arrival timestamp, status text,
@@ -27,19 +26,19 @@ CREATE TABLE %(archived-table)s
     affects_testing boolean, affects_unsarchived_table boolean);
 
 CREATE TABLE %(archived-table)s_merged_with
-  (id int, merged_with int,
+  (id int REFERENCES %(archived-table)s, merged_with int,
 PRIMARY KEY(id, merged_with));
 
 CREATE TABLE %(archived-table)s_found_in
-  (id int, version text,
+  (id int REFERENCES %(archived-table)s, version text,
    PRIMARY KEY(id, version));
 
 CREATE TABLE %(archived-table)s_fixed_in
-  (id int, version text,
+  (id int REFERENCES %(archived-table)s, version text,
    PRIMARY KEY(id, version));
 
 CREATE TABLE %(archived-table)s_tags
-  (id int, tag text, PRIMARY KEY (id, tag));
+  (id int REFERENCES %(archived-table)s, tag text, PRIMARY KEY (id, tag));
 
 CREATE VIEW bugs_rt_affects_stable AS
 SELECT id, package, source FROM %(table)s

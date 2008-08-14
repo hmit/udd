@@ -177,6 +177,7 @@ bugs:
   archived: false
   table: bugs
   schema: bugs
+  debug: 1
   archived-table: archived_bugs
   packages-table: packages
   usertags-table: bugs_usertags
