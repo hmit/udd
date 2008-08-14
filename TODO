@@ -20,6 +20,14 @@ packages/sources
 ----------------
 - (prio: medium) Add support for keeping history of Packages and Sources in
   separate tables.
+- (prio: low) Incremental updates, not full imports (use that to trigger
+   incremental bugs.d.o imports (for affects_* updates)
+- (prio: low) Push architecture lists to an extra table, so that packages
+   itself gets smaller
+- (prio: low) Add a pkg composite type (text version, text name). The
+   operator '=' used with type text should only check the package name,
+   with another pkg should check both pkg and version. Should be pretty
+   DWIM.
 
 bugs.debian.org
 ---------------
