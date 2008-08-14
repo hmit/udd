@@ -1,13 +1,14 @@
 CREATE TABLE %(table)s
  (id serial, package text, version text, date timestamp with time zone,
- changed_by text, maintainer text, nmu boolean, signed_by text, key_id text);
+ changed_by text, maintainer text, nmu boolean, signed_by text, key_id text,
+ PRIMARY KEY (id));
 
 CREATE TABLE %(table)s_architecture
- (id int FOREIGN KEY %(table)s, architecture text,
+ (id int REFERENCES %(table)s, architecture text,
  PRIMARY KEY (id, architecture));
   
 CREATE TABLE %(table)s_closes
- (id int FOREIGN KEY %(table)s, bug int,
+ (id int REFERENCES %(table)s, bug int,
  PRIMARY KEY (id, bug));
 
 GRANT SELECT ON %(table)s TO PUBLIC;
