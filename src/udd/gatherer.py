@@ -37,8 +37,13 @@ class gatherer:
       raise Exception("'schema-dir' not specified")
 
   def drop(self):
+    for table in self.tables():
+      self.cursor().execute("DROP TABLE " + table)
+
+  def tables(self):
     if 'table' in self.my_config:
-      self.cursor().execute("DROP TABLE " + self.my_config['table'])
+     return [self.my_config['table']]
+
 
   def eval_sql_file(self, path, d = None):
     """Load the SQL code from the file specified by <path>. Use pythons string

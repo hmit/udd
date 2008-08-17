@@ -23,3 +23,6 @@ class src_and_pkg_gatherer(gatherer.gatherer):
   def setup(self):
     self.src.setup()
     self.pkg.setup()
+
+  def tables(self):
+    return self.src.tables() + self.pkg.tables()

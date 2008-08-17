@@ -20,10 +20,11 @@ class popcon_gatherer(gatherer):
 
     self.assert_my_config('path', 'table', 'packages-table', 'schema')
 
-  def drop(self):
-    cur = self.cursor()
+  def tables(self):
+    ret = []
     for sub in ('', '_src', '_src_average'):
-      cur.execute("DROP TABLE %s%s" % (self.my_config['table'], sub))
+      ret.append(self.my_config['table'] + sub)
+    return ret
 
   def run(self):
     my_config = self.my_config

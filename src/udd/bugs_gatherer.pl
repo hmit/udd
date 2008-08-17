@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# Last-Modified: <Mon Aug 11 18:17:46 2008>
+# Last-Modified: <Sun Aug 17 12:20:19 2008>
 
 use strict;
 use warnings;
@@ -102,6 +102,19 @@ sub setup {
 	$dbh->prepare($command)->execute() or die $!;
 }
 
+sub tables {
+	my ($config, $source, $dbh) = @_;
+	my @ret = ();
+	foreach my $prefix ($config->{$source}->{table}, $config->{$source}->{'archived-table'}) {
+		foreach my $postfix (qw{_merged_with _found_in _fixed_in _tags}, '') {
+			push @ret, "$prefix$postfix";
+		}
+	}
+	unshift @ret, $config->{$source}->{'usertags-table'};
+	return @ret;
+}
+
+
 sub drop {
 	my ($config, $source, $dbh) = @_;
 	map {
@@ -109,12 +122,10 @@ sub drop {
 	}
 	qw{bugs_rt_affects_stable bugs_rt_affects_testing_and_unstable bugs_rt_affects_unstable bugs_rt_affects_testing};
 
-	foreach my $prefix ($config->{$source}->{table}, $config->{$source}->{'archived-table'}) {
-		foreach my $postfix ('', qw{_merged_with _found_in _fixed_in _tags}) {
-			$dbh->prepare("DROP TABLE $prefix$postfix")->execute() or die $!;
-		}
+	foreach my $table (tables($config, $source, $dbh)) {
+		print "$table\n";
+		$dbh->prepare("DROP TABLE $table")->execute() or die $!;
 	}
-	$dbh->prepare("DROP TABLE " . $config->{$source}->{'usertags-table'})->execute() or die $!;
 }
 
 sub run_usertags {
@@ -338,6 +349,8 @@ sub main {
 		setup($config, $source, $dbh);
 	} elsif ($command eq 'drop') {
 		drop($config, $source, $dbh);
+	} elsif ($command eq 'tables') {
+		print join "\n", tables($config, $source, $dbh)
 	} else {
 		print STDERR "<command> has to be one of run, drop and setup\n";
 		exit(1)

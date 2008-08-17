@@ -1,5 +1,5 @@
 # /usr/bin/env python
-# Last-Modified: <Sun Aug 17 11:29:52 2008>
+# Last-Modified: <Sun Aug 17 12:24:40 2008>
 # This file is a part of the Ultimate Debian Database project
 
 import debian_bundle.deb822
@@ -135,8 +135,10 @@ class packages_gatherer(gatherer):
     else:
       raise Exception("'schema-dir' not specified")
 
-  def drop(self):
-    self.cursor().execute("DROP TABLE " + self.my_config['packages-table'])
+  def tables(self):
+    return [
+      self.my_config['packages-table'],
+      self.my_config['packages-table'] + '_summary']
 
   def run(self):
     src_cfg = self.my_config

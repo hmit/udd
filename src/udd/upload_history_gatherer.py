@@ -1,4 +1,4 @@
-# Last-Modified: <Thu Aug 14 12:06:50 2008>
+# Last-Modified: <Sun Aug 17 12:13:02 2008>
 # This file is part of the Ultimate Debian Database Project
 
 from gatherer import gatherer
@@ -17,11 +17,11 @@ class upload_history_gatherer(gatherer):
     if not 'path' in self.my_config:
       raise aux.ConfigException('path not specified for source ' + source)
 
-  def drop(self):
-    cur = self.cursor()
-    cur.execute("DROP TABLE %s" % self.my_config['table'])
-    cur.execute("DROP TABLE %s" % self.my_config['table'] + '_architecture')
-    cur.execute("DROP TABLE %s" % self.my_config['table'] + '_closes')
+  def tables(self):
+    return [
+      self.my_config['table'] + '_architecture',
+      self.my_config['table'] + '_closes',
+      self.my_config['table']]
 
 
   def run(self):

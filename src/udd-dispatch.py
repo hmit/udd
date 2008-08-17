@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Last-Modified: <Tue Aug 12 16:20:44 2008>
+# Last-Modified: <Sun Aug 17 12:03:34 2008>
 
 """Dispatch udd gatherers
 
@@ -20,8 +20,8 @@ if __name__ == '__main__':
     sys.exit(1)
 
   command = sys.argv[2]
-  if command not in ('run', 'setup', 'drop'):
-    sys.stderr.write("command has to be one of 'run', 'setup', 'drop'\n")
+  if command not in ('run', 'setup', 'drop', 'tables'):
+    sys.stderr.write("command has to be one of 'run', 'setup', 'drop' and 'tables'\n")
     sys.exit(1)
 
   # Check the configuration
@@ -53,7 +53,11 @@ if __name__ == '__main__':
       elif src_command == "module":
 	exec("import " + rest)
 	exec "gatherer = " + rest + ".get_gatherer(connection, config, src)"
-	exec "gatherer.%s()" % command
+	if command == 'tables':
+	  exec "tables = gatherer.%s()" % command
+	  print "\n".join(tables)
+	else:
+	  exec "gatherer.%s()" % command
       if 'timestamp-folder' in config['general']:
 	f = open(os.path.join(config['general']['timestamp-folder'], src+".dispatch"), "w")
 	f.write(asctime())
@@ -61,5 +65,6 @@ if __name__ == '__main__':
     except:
       udd.aux.unlock(config, src)
       raise
+    udd.aux.unlock(config, src)
   connection.commit()
 

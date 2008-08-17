@@ -30,10 +30,12 @@ class carnivore_gatherer(gatherer):
     gatherer.__init__(self, connection, config, source)
     self.assert_my_config('path', 'emails-table', 'names-table', 'keys-table', 'login-table')
 
-  def drop(self):
+  def tables(self):
     cur = self.cursor()
+    ret = []
     for table in ['emails', 'names', 'keys', 'login']:
-      cur.execute("DROP TABLE %s" % self.my_config["%s-table" % table])
+      ret.append(self.my_config["%s-table" % table])
+    return ret
 
   def run(self):
     my_config = self.my_config

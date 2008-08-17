@@ -38,7 +38,7 @@ CREATE TABLE %(archived-table)s_fixed_in
    PRIMARY KEY(id, version));
 
 CREATE TABLE %(archived-table)s_tags
-  (id int REFERENCES %(archived-table)s, tag text, PRIMARY KEY (id, tag));
+  (id int, tag text, PRIMARY KEY (id, tag));
 
 CREATE VIEW bugs_rt_affects_stable AS
 SELECT id, package, source FROM %(table)s
@@ -77,7 +77,7 @@ AND ( package IN (SELECT DISTINCT package FROM %(packages-table)s p WHERE releas
 OR source IN (SELECT DISTINCT package FROM %(sources-table)s WHERE release = 'lenny'));
 
 CREATE TABLE %(usertags-table)s
-  (email text, tag text, id int);
+  (email text, tag text, id int REFERENCES %(table)s);
 
 GRANT SELECT ON %(table)s TO PUBLIC;
 GRANT SELECT ON %(table)s_merged_with TO PUBLIC;

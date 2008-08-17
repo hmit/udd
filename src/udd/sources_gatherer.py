@@ -1,5 +1,5 @@
 #/usr/bin/env python
-# Last-Modified: <Sun Aug 10 12:11:44 2008>
+# Last-Modified: <Sun Aug 17 12:07:25 2008>
 # This file is a part of the Ultimate Debian Database project
 
 import debian_bundle.deb822
@@ -97,8 +97,8 @@ class sources_gatherer(gatherer):
 	  """ 
       cur.execute(query, d)
 
-  def drop(self):
-    self.cursor().execute("DROP TABLE " + self.my_config['sources-table'])
+  def tables(self):
+    return [self.my_config['sources-table']]
 
   def run(self):
     src_cfg = self.my_config
