@@ -1,5 +1,5 @@
 # /usr/bin/env python
-# Last-Modified: <Sun Aug 10 12:11:38 2008>
+# Last-Modified: <Sun Aug 17 11:29:52 2008>
 # This file is a part of the Ultimate Debian Database project
 
 import debian_bundle.deb822
@@ -183,15 +183,12 @@ class packages_gatherer(gatherer):
 	except IOError, (e, message):
 	  print "Could not read packages from %s: %s" % (path, message)
 	cur.execute("DEALLOCATE package_insert")
-	# Fill the summary tables
-	cur.execute("TRUNCATE %s" % (table + '_summary'));
-	cur.execute("""INSERT INTO %s SELECT DISTINCT ON (package, version,
-	  distribution, release, component) package, version, source,
-	  source_version, maintainer, distribution, release, component FROM %s""" %
-	  (table + '_summary', table));
-
-
-    self.connection.commit()
+    # Fill the summary tables
+    cur.execute("TRUNCATE %s" % (table + '_summary'));
+    cur.execute("""INSERT INTO %s SELECT DISTINCT ON (package, version,
+      distribution, release, component) package, version, source,
+      source_version, maintainer, distribution, release, component FROM %s""" %
+      (table + '_summary', table));
 
     self.print_warnings()
 
