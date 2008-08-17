@@ -42,6 +42,7 @@ Other data sources
 - (prio: low) MIA
 - (prio: low) debtags
 - (prio: low) wanna-build
+- (prio: low) packages-arch-specific
 - (prio: low) edos.debian.net
 - (prio: low) version numbers, diffs and bugs for each package for each
   derivative distro 
