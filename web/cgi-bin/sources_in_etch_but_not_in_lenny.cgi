@@ -15,7 +15,6 @@ my $sth = $dbh->prepare(<<EOF
 	   (select source from sources where release='lenny')
 	   and sources.source = popcon_src.source
 	   order by insts desc;
-	);
 EOF
 );
 
