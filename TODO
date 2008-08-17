@@ -14,7 +14,6 @@ That's the first step towards world domination! (Universe is next! CvE)
   - tables structure, in a relatively friendly format
   - some example queries
 - (prio: medium) primary key for tables which have none yet
-- (prio: high) merge Status.pm with current Debbugs, then prepare a minimal patch with only our chages.
 
 packages/sources
 ----------------
