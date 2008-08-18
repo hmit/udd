@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# Last-Modified: <Sun Aug 17 12:20:19 2008>
+# Last-Modified: <Mon Aug 18 14:29:47 2008>
 
 use strict;
 use warnings;
@@ -25,7 +25,7 @@ $YAML::Syck::ImplicitTyping = 1;
 
 #Used for measuring time
 our $t;
-our $timing = 1;
+our $timing = 0;
 
 # Return the list of usernames
 sub get_bugs_users {
@@ -123,7 +123,6 @@ sub drop {
 	qw{bugs_rt_affects_stable bugs_rt_affects_testing_and_unstable bugs_rt_affects_unstable bugs_rt_affects_testing};
 
 	foreach my $table (tables($config, $source, $dbh)) {
-		print "$table\n";
 		$dbh->prepare("DROP TABLE $table")->execute() or die $!;
 	}
 }
