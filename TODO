@@ -14,7 +14,6 @@ That's the first step towards world domination! (Universe is next! CvE)
   - tables structure, in a relatively friendly format
   - some example queries
 - (prio: medium) primary key for tables which have none yet
-- (prio: high) merge udd-update.py into udd-dispatch.py, rename udd-dispatch.py to udd.py
 - (prio: high) make udd.py use a default config file, which can be overriden by "-f configfile".
 - (prio: high) merge doc/generate_db_schema.pl into udd-dispatch.py (or udd.py)
 
