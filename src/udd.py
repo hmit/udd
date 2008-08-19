@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Last-Modified: <Tue Aug 19 09:38:06 2008>
+# Last-Modified: <Tue Aug 19 13:55:40 2008>
 
 """Dispatch udd gatherers
 
@@ -20,8 +20,8 @@ if __name__ == '__main__':
     sys.exit(1)
 
   command = sys.argv[2]
-  if command not in ('run', 'setup', 'drop', 'tables', 'update'):
-    sys.stderr.write("command has to be one of 'run', 'setup', 'drop', 'update' and 'tables'\n")
+  if command not in ('run', 'setup', 'drop', 'tables', 'update', 'schema'):
+    sys.stderr.write("command has to be one of 'run', 'setup', 'drop', 'update', 'schema' and 'tables'\n")
     sys.exit(1)
 
   config = udd.aux.load_config(open(sys.argv[1]).read())
@@ -30,6 +30,7 @@ if __name__ == '__main__':
 
   connection = udd.aux.open_connection(config)
 
+  schemata = {}
   # Process the sources
   for src in sys.argv[3:]:
     src_config = config[src]
@@ -46,6 +47,12 @@ if __name__ == '__main__':
 	    f = open(os.path.join(config['general']['timestamp-folder'], src+".update"), "w")
 	    f.write(asctime())
 	    f.close()
+      elif command == 'schema':
+	for tag in ('schema', 'packages-schema', 'sources-schema'):
+	  if not tag in src_config:
+	    continue
+	  schema = config['general']['schema-dir'] + '/' + src_config[tag]
+	  print (open(schema).read() % src_config)
       else:
 	(src_command,rest) = types[type].split(None, 1)
 	if src_command == "exec":
