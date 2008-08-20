@@ -15,6 +15,8 @@ That's the first step towards world domination! (Universe is next! CvE)
   - some example queries
 - (prio: medium) primary key for tables which have none yet
 - (prio: high) make udd.py use a default config file, which can be overriden by "-f configfile".
+- (prio: medium) try to write http://qa.debian.org/~myon/sponsorstats/ (we should have all the data for that now)
+- (prio: high) find a way to only send mail after crons when there's something "interesting" to report
 
 packages/sources
 ----------------
