@@ -17,6 +17,8 @@ That's the first step towards world domination! (Universe is next! CvE)
 - (prio: high) make udd.py use a default config file, which can be overriden by "-f configfile".
 - (prio: medium) try to write http://qa.debian.org/~myon/sponsorstats/ (we should have all the data for that now)
 - (prio: high) find a way to only send mail after crons when there's something "interesting" to report
+  + log timing info to a file (udd.log?), for both update and run
+  + hide the uninteresting errors (like unable to open /org/bugs.debian.org/versions/pkg)
 
 packages/sources
 ----------------
