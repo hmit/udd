@@ -10,12 +10,11 @@ general:
     testing-migrations: module udd.testing_migrations_gatherer
     upload-history: module udd.upload_history_gatherer
     orphaned_packages: module udd.orphaned_packages_gatherer
-    bugs: exec DEBBUGS_CONFIG_FILE=/org/udd.debian.net/mirrors/bugs.debian.org/etc/config perl /org/udd.debian.net/udd/src/udd/bugs_gatherer.pl 
+    bugs: exec DEBBUGS_CONFIG_FILE=/org/udd.debian.net/mirrors/bugs.debian.org/etc/config perl /org/udd.debian.net/udd/udd/bugs_gatherer.pl 
     carnivore: module udd.carnivore_gatherer
     lintian: module udd.lintian_gatherer
   debug: 1
   timestamp-dir: /org/udd.debian.net/timestamps
-  schema-dir: /org/udd.debian.net/udd/src/schema
   lock-dir: /org/udd.debian.net/locks
 
   archs:
@@ -107,7 +106,7 @@ ubuntu-intrepid:
   sources-table: ubuntu_sources
   packages-schema: packages
   sources-schema: sources
-  update-command: /org/udd.debian.net/mirrors/ubuntu-rsync intrepid /org/udd.debian.net/mirrors/ubuntu
+  update-command: /org/udd.debian.net/udd/scripts/sync-dist.sh archive.ubuntu.com::ubuntu/dists/intrepid /org/udd.debian.net/mirrors/ubuntu/intrepid
 
 ubuntu-hardy:
   type: src-pkg
@@ -120,13 +119,12 @@ ubuntu-hardy:
   sources-table: ubuntu_sources
   packages-schema: packages
   sources-schema: sources
-  update-command: /org/udd.debian.net/mirrors/ubuntu-rsync hardy /org/udd.debian.net/mirrors/ubuntu
-
+  update-command: /org/udd.debian.net/udd/scripts/sync-dist.sh archive.ubuntu.com::ubuntu/dists/hardy /org/udd.debian.net/mirrors/ubuntu/hardy
 
 debian-popcon:
   type: popcon
   path: /org/udd.debian.net/tmp/all-popcon-results.txt.gz
-  update-command: wget -O /org/udd.debian.net/tmp/all-popcon-results.txt.gz http://popcon.debian.org/all-popcon-results.txt.gz
+  update-command: wget -q -O /org/udd.debian.net/tmp/all-popcon-results.txt.gz http://popcon.debian.org/all-popcon-results.txt.gz
   table: popcon
   schema: popcon
   packages-table: packages
@@ -134,7 +132,7 @@ debian-popcon:
 ubuntu-popcon:
   type: popcon
   path: /org/udd.debian.net/tmp/ubuntu-popcon-results.txt.gz
-  update-command: wget -O /org/udd.debian.net/tmp/ubuntu-popcon-results.txt.gz http://popcon.ubuntu.com/all-popcon-results.txt.gz
+  update-command: wget -q -O /org/udd.debian.net/tmp/ubuntu-popcon-results.txt.gz http://popcon.ubuntu.com/all-popcon-results.txt.gz
   table: ubuntu_popcon
   schema: popcon
   packages-table: ubuntu_packages
@@ -142,14 +140,14 @@ ubuntu-popcon:
 testing-migrations:
   type: testing-migrations
   path: /org/udd.debian.net/tmp/migrations
-  update-command: wget -O /org/udd.debian.net/tmp/migrations 'http://qa.debian.org/~lucas/testing-status.raw'
+  update-command: wget -q -O /org/udd.debian.net/tmp/migrations 'http://qa.debian.org/~lucas/testing-status.raw'
   schema: testing_migrations
   table: migrations
 
 upload-history:
   type: upload-history
   path: /org/udd.debian.net/tmp/upload-history
-  update-command: if [ ! -e /org/udd.debian.net/tmp/upload-history/ ]; then mkdir /org/udd.debian.net/tmp/upload-history/; fi; rm -rf /org/udd.debian.net/tmp/upload-history/*; wget -r --no-parent -nd -A debian-devel-* -P /org/udd.debian.net/tmp/upload-history http://qa.debian.org/~filippo/ddc/
+  update-command: if [ ! -e /org/udd.debian.net/tmp/upload-history/ ]; then mkdir /org/udd.debian.net/tmp/upload-history/; fi; rm -rf /org/udd.debian.net/tmp/upload-history/*; wget -q -r --no-parent -nd -A debian-devel-* -P /org/udd.debian.net/tmp/upload-history http://qa.debian.org/~filippo/ddc/
   schema: upload_history
   table: upload_history
 
@@ -196,7 +194,7 @@ carnivore:
 
 lintian:
   type: lintian
-  update-command: rm -f /org/udd.debian.net/mirrors/lintian.log && wget http://lintian.debian.org/lintian.log -O /org/udd.debian.net/mirrors/lintian.log
+  update-command: rm -f /org/udd.debian.net/mirrors/lintian.log && wget -q http://lintian.debian.org/lintian.log -O /org/udd.debian.net/mirrors/lintian.log
   path: /org/udd.debian.net/mirrors/lintian.log
   table: lintian
   schema: lintian
