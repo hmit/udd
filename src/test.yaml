@@ -14,7 +14,7 @@ general:
     carnivore: module udd.carnivore_gatherer
     lintian: module udd.lintian_gatherer
   debug: 1
-  timestamp-folder: /org/udd.debian.net/timestamps/
+  timestamp-dir: /org/udd.debian.net/timestamps
   schema-dir: /org/udd.debian.net/udd/src/schema
   lock-dir: /org/udd.debian.net/locks
 

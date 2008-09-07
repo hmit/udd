@@ -43,8 +43,8 @@ if __name__ == '__main__':
 	  result = system(src_config['update-command']) 
 	  if result != 0:
 	    sys.exit(result)
-	  if 'timestamp-folder' in config['general']:
-	    f = open(os.path.join(config['general']['timestamp-folder'], src+".update"), "w")
+	  if 'timestamp-dir' in config['general']:
+	    f = open(os.path.join(config['general']['timestamp-dir'], src+".update"), "w")
 	    f.write(asctime())
 	    f.close()
       elif command == 'schema':
@@ -65,8 +65,8 @@ if __name__ == '__main__':
 	    print "\n".join(tables)
 	  else:
 	    exec "gatherer.%s()" % command
-	if 'timestamp-folder' in config['general']:
-	  f = open(os.path.join(config['general']['timestamp-folder'], src+".dispatch"), "w")
+	if 'timestamp-dir' in config['general']:
+	  f = open(os.path.join(config['general']['timestamp-dir'], src+".dispatch"), "w")
 	  f.write(asctime())
 	  f.close()
     except:
