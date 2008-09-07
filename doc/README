@@ -11,11 +11,12 @@ and co-mentors being Stefano Zacchiroli and Marc Brockschmidt.
 Installation
 ------------
 - Download the code (from SVN)
-- install postgresql-8.3 python-syck python-psycopg2
+- install postgresql-8.3 python-syck python-psycopg2 libdbi-perl
+  libparams-validate-perl libdbd-pg-perl
 - setup postgresql-8.3 (see /usr/share/doc/postgresql-common/README.Debian.gz)
   and create a database (naming it 'udd' will make things easier later)
 - edit config.yaml (see README.config for details)
-- run ./udd.py <configuration> setup FIXME doesn't work
+- setup the DB: psql udd < sql/setup.sql
 
 Usage
 -----
