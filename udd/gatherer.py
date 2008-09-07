@@ -2,6 +2,7 @@
 
 import aux
 import sys
+import psycopg2
 
 class gatherer:
   """
@@ -24,37 +25,6 @@ class gatherer:
   def cursor(self):
     """Return the cursor for the current connection"""
     return self.connection.cursor()
-
-  def setup(self):
-    if 'schema-dir' in self.config['general']:
-      schema_dir = self.config['general']['schema-dir']
-      if 'schema' in self.my_config:
-	schema = schema_dir + '/' + self.my_config['schema']
-	self.eval_sql_file(schema, self.my_config)
-      else:
-	raise Exception("'schema' not specified for source " + self.source)
-    else:
-      raise Exception("'schema-dir' not specified")
-
-  def drop(self):
-    for table in self.tables():
-      self.cursor().execute("DROP TABLE " + table)
-
-  def tables(self):
-    if 'table' in self.my_config:
-     return [self.my_config['table']]
-
-
-  def eval_sql_file(self, path, d = None):
-    """Load the SQL code from the file specified by <path>. Use pythons string
-    formating for the dictionary <d> if it is not None
-    Warning: No quoting for the elements of d is done"""
-    c = file(path).read()
-    if d is not None:
-      c = c % d
-
-    cur = self.cursor()
-    cur.execute(c)
 
   def assert_my_config(self, *keywords):
     for k in keywords:

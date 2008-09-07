@@ -20,7 +20,7 @@ if __name__ == '__main__':
     sys.exit(1)
 
   command = sys.argv[2]
-  if command not in ('run', 'setup', 'drop', 'tables', 'update', 'schema'):
+  if command not in ('run', 'update'):
     sys.stderr.write("command has to be one of 'run', 'setup', 'drop', 'update', 'schema' and 'tables'\n")
     sys.exit(1)
 

@@ -15,14 +15,3 @@ class src_and_pkg_gatherer(gatherer.gatherer):
   def run(self):
     self.src.run()
     self.pkg.run()
-
-  def drop(self):
-    self.src.drop()
-    self.pkg.drop()
-
-  def setup(self):
-    self.src.setup()
-    self.pkg.setup()
-
-  def tables(self):
-    return self.src.tables() + self.pkg.tables()

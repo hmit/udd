@@ -92,41 +92,6 @@ sub without_duplicates {
 	return (grep { ($h{$_}++ == 0) || 0 } @_);
 }
 
-sub setup {
-	my ($config, $source, $dbh) = @_;
-	my $schema = $config->{general}->{'schema-dir'} . '/' . $config->{$source}->{schema};
-	open SQL, "<",  $schema or die $!;
-	my $command = join "", <SQL>;
-	close SQL;
-	$command =~ s/%\(([^)]+)\)s/$config->{$source}->{$1}/g;
-	$dbh->prepare($command)->execute() or die $!;
-}
-
-sub tables {
-	my ($config, $source, $dbh) = @_;
-	my @ret = ();
-	foreach my $prefix ($config->{$source}->{table}, $config->{$source}->{'archived-table'}) {
-		foreach my $postfix (qw{_merged_with _found_in _fixed_in _tags}, '') {
-			push @ret, "$prefix$postfix";
-		}
-	}
-	unshift @ret, $config->{$source}->{'usertags-table'};
-	return @ret;
-}
-
-
-sub drop {
-	my ($config, $source, $dbh) = @_;
-	map {
-		$dbh->prepare("DROP VIEW $_")->execute() or die $!;
-	}
-	qw{bugs_rt_affects_stable bugs_rt_affects_testing_and_unstable bugs_rt_affects_unstable bugs_rt_affects_testing};
-
-	foreach my $table (tables($config, $source, $dbh)) {
-		$dbh->prepare("DROP TABLE $table")->execute() or die $!;
-	}
-}
-
 sub run_usertags {
 	my ($config, $source, $dbh) = @_;
 	my %src_config = %{$config->{$source}};
@@ -344,12 +309,6 @@ sub main {
 
 	if($command eq 'run') {
 		run($config, $source, $dbh);
-	} elsif ($command eq 'setup') {
-		setup($config, $source, $dbh);
-	} elsif ($command eq 'drop') {
-		drop($config, $source, $dbh);
-	} elsif ($command eq 'tables') {
-		print join "\n", tables($config, $source, $dbh)
 	} else {
 		print STDERR "<command> has to be one of run, drop and setup\n";
 		exit(1)
