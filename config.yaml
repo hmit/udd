@@ -161,7 +161,7 @@ bugs:
   packages-table: packages
   usertags-table: bugs_usertags
   sources-table: sources
-  debug: false
+  debug: 0
 
 bugs-archive:
   type: bugs
