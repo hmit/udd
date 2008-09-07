@@ -47,12 +47,6 @@ if __name__ == '__main__':
 	    f = open(os.path.join(config['general']['timestamp-dir'], src+".update"), "w")
 	    f.write(asctime())
 	    f.close()
-      elif command == 'schema':
-	for tag in ('schema', 'packages-schema', 'sources-schema'):
-	  if not tag in src_config:
-	    continue
-	  schema = config['general']['schema-dir'] + '/' + src_config[tag]
-	  print (open(schema).read() % src_config)
       else:
 	(src_command,rest) = types[type].split(None, 1)
 	if src_command == "exec":
