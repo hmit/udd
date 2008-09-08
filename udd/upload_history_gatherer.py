@@ -42,7 +42,7 @@ class upload_history_gatherer(gatherer):
 
     id = 0
     for name in glob(path + '/debian-devel-*'):
-      print name
+      # print name
       f = None
       if name.endswith(".gz"):
 	f = gzip.open(name)
