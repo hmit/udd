@@ -159,7 +159,7 @@ upload-history:
 bugs:
   type: bugs
   archived: false
-  update-command: /org/udd.debian.net/udd/scripts/sync-data-from-udd.d.n.sh
+  update-command: /org/udd.debian.net/udd/scripts/sync-data-from-udd.d.n.sh /org/udd.debian.net/mirrors/
   table: bugs
   schema: bugs
   archived-table: archived_bugs
@@ -176,7 +176,7 @@ bugs-archive:
   packages-table: packages
   usertags-table: bugs_usertags
   sources-table: sources
-  update-command: /org/udd.debian.net/udd/scripts/sync-data-from-udd.d.n.sh
+  update-command: /org/udd.debian.net/udd/scripts/sync-data-from-udd.d.n.sh /org/udd.debian.net/mirrors/
 
 orphaned_packages:
   type: orphaned_packages
@@ -188,7 +188,7 @@ orphaned_packages:
 
 carnivore:
   type: carnivore
-  update-command: /org/udd.debian.net/mirrors/sync-carnivore
+  update-command: /org/udd.debian.net/udd/scripts/sync-data-from-udd.d.n.sh /org/udd.debian.net/mirrors/
   path: /org/udd.debian.net/mirrors/qa.debian.org/carnivore/report
   emails-table: carnivore_emails
   names-table: carnivore_names
