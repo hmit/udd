@@ -125,6 +125,8 @@ sub run {
 
 	our $t;
 	our $timing;
+
+	run_usertags($config, $source, $dbh);
 	print "Inserting usertags: ",(time() - $t),"s\n" if $timing;
 	$t = time();
 
@@ -135,14 +137,22 @@ sub run {
 	my @modified_bugs;
 
 	if($src_config{archived}) {
-		@modified_bugs = get_bugs(archive => 1);
+		# some bugs (the unarchived ones) are in both list. exclude them.
+		my %unarchived;
+		foreach my $b (get_bugs()) {
+			$unarchived{$b} = 1;
+		}
+		foreach my $b (get_bugs(archive => 1)) {
+			push(@modified_bugs, $b) if not $unarchived{$b};
+		}
 	} else {
 		@modified_bugs = get_bugs();
 	}
 	my @modified_bugs2;
 	if ($src_config{debug}) {
-		foreach $b (@modified_bugs) {
-			push(@modified_bugs2, $b) if ($b =~ /0$/);
+		print "Running in debug mode with restricted bug list!!\n";
+		foreach my $b (@modified_bugs) {
+			push(@modified_bugs2, $b) if ($b =~ /58$/);
 		}
 		@modified_bugs = @modified_bugs2;
 	}
@@ -163,9 +173,7 @@ sub run {
 
 	# Used to chache binary to source mappings
 	my %binarytosource = ();
-	# XXX What if a bug is in location 'db' (which currently 
 	my $location = $src_config{archived} ? 'archive' : 'db_h';
-	#my $table = $src_config{archived} ? 'bugs_archived' : 'bugs';
 	$table = $src_config{archived} ? $archived_table : $table;
 	# Read all bugs
 	my $insert_bugs_handle = $dbh->prepare("INSERT INTO $table VALUES (\$1, \$2, \$3, \$4::abstime, \$5, \$6, \$7, \$8, \$9, \$10::abstime, \$11, \$12, \$13)");
@@ -176,7 +184,6 @@ sub run {
 	$insert_bugs_handle->bind_param(4, undef, SQL_INTEGER);
 	$insert_bugs_handle->bind_param(10, undef, SQL_INTEGER);
 
-	print "Inserting bugs: ",(time() - $t),"s\n" if $timing;
 	$t = time();
 	foreach my $bug_nr (@modified_bugs) {
 		# Fetch bug using Debbugs
@@ -269,9 +276,7 @@ sub run {
 			$insert_bugs_tags_handle->execute($bug_nr, $tag) or die $!;
 		}
 	}
-	
-	# Also import usertags
-	run_usertags($config, $source, $dbh);
+	print "Inserting bugs: ",(time() - $t),"s\n" if $timing;
 }
 
 sub main {
