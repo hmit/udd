@@ -63,7 +63,7 @@ class popcon_gatherer(gatherer):
 	  exec 'd["%s"] = %s' % (k,k)
 	d['insts'] = vote + old + recent + nofiles
 	if ascii_match.match(name) == None:
-	  print "Skipping line %d of file %s as it contains illegal characters: %s" % (linenr, my_config['path'], line)
+#	  print "%s:%d - illegal package name %s" % (my_config['path'], linenr, line)
 	  continue
 	query = "EXECUTE pop_insert(%(name)s, %(insts)s, %(vote)s, %(old)s, %(recent)s, %(nofiles)s)"
 	cur.execute(query, d)

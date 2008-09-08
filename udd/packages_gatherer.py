@@ -172,7 +172,7 @@ class packages_gatherer(gatherer):
 	      $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28,
 	      $29, $30, $31, '%s', '%s', '%s')
 	    """ %  (table, self._distr, src_cfg['release'], comp))
-	  aux.print_debug("Reading file " + path)
+#	  aux.print_debug("Reading file " + path)
 	  # Copy content from gzipped file to temporary file, so that apt_pkg is
 	  # used by debian_bundle
 	  tmp = tempfile.NamedTemporaryFile()
@@ -180,7 +180,7 @@ class packages_gatherer(gatherer):
 	  tmp.write(file.read())
 	  file.close()
 	  tmp.seek(0)
-	  aux.print_debug("Importing from " + path)
+#	  aux.print_debug("Importing from " + path)
 	  self.import_packages(open(tmp.name), cur)
 	  tmp.close()
 	except IOError, (e, message):

@@ -128,7 +128,7 @@ class sources_gatherer(gatherer):
 	  % (table, src_cfg['distribution'], src_cfg['release'], comp)
 	cur.execute(query)
 
-	aux.print_debug("Reading file " + path)
+#	aux.print_debug("Reading file " + path)
 	# Copy content from gzipped file to temporary file, so that apt_pkg is
 	# used by debian_bundle
 	tmp = tempfile.NamedTemporaryFile()
@@ -136,7 +136,7 @@ class sources_gatherer(gatherer):
 	tmp.write(file.read())
 	file.close()
 	tmp.seek(0)
-	aux.print_debug("Importing from " + path)
+#	aux.print_debug("Importing from " + path)
 	self.import_sources(open(tmp.name))
 	tmp.close()
       except IOError, (e, message):
