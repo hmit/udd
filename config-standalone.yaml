@@ -38,6 +38,7 @@ debian-lenny:
   packages-schema: packages
   sources-schema: sources
   release: lenny
+  update-command: /org/udd.debian.net/udd/scripts/sync-dist.sh ftp.fr.debian.org::debian/dists/lenny/ /org/udd.debian.net/mirrors/debian/lenny
 
 debian-sid:
   type: src-pkg
@@ -52,6 +53,7 @@ debian-sid:
   packages-schema: packages
   sources-schema: sources
   release: sid
+  update-command: /org/udd.debian.net/udd/scripts/sync-dist.sh ftp.fr.debian.org::debian/dists/sid/ /org/udd.debian.net/mirrors/debian/sid  
   
 debian-etch:
   type: src-pkg
@@ -66,6 +68,7 @@ debian-etch:
   packages-schema: packages
   sources-schema: sources
   release: etch
+  update-command: /org/udd.debian.net/udd/scripts/sync-dist.sh ftp.fr.debian.org::debian/dists/etch/ /org/udd.debian.net/mirrors/debian/etch
 
 debian-backports-etch:
   type: src-pkg
@@ -80,6 +83,7 @@ debian-backports-etch:
   packages-schema: packages
   sources-schema: sources
   release: etch
+  update-command: /org/udd.debian.net/udd/scripts/sync-dist.sh ftp.backports.org::backports.org/dists/etch-backports/ /org/udd.debian.net/mirrors/debian-backports/etch-backports
 
 debian-volatile-etch:
   type: src-pkg
@@ -94,6 +98,7 @@ debian-volatile-etch:
   packages-schema: packages
   sources-schema: sources
   release: etch
+  update-command: /org/udd.debian.net/udd/scripts/sync-dist.sh volatile.debian.or.at::debian-volatile/dists/etch/ /org/udd.debian.net/mirrors/debian-volatile/etch
 
 ubuntu-intrepid:
   type: src-pkg
@@ -154,7 +159,7 @@ upload-history:
 bugs:
   type: bugs
   archived: false
-  update-command: /org/udd.debian.net/mirrors/sync-bugs.debian.org
+  update-command: /org/udd.debian.net/udd/scripts/sync-data-from-udd.d.n.sh
   table: bugs
   schema: bugs
   archived-table: archived_bugs
@@ -171,7 +176,7 @@ bugs-archive:
   packages-table: packages
   usertags-table: bugs_usertags
   sources-table: sources
-  update-command: /org/udd.debian.net/mirrors/sync-bugs.debian.org
+  update-command: /org/udd.debian.net/udd/scripts/sync-data-from-udd.d.n.sh
 
 orphaned_packages:
   type: orphaned_packages
