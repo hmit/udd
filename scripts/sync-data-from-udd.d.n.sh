@@ -14,6 +14,6 @@ if [ $# -ne 1 ]; then
 	exit 1
 fi
 
-rsync -avzP \
+rsync -avzP --delete \
 udd.debian.net:/org/udd.debian.net/mirrors/{qa.debian.org,bugs.debian.org} \
 $TARGET
