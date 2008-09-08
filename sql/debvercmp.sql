@@ -1,3 +1,5 @@
+CREATE LANGUAGE plperl;
+
 CREATE OR REPLACE FUNCTION debvercmp(v1 text, v2 text) RETURNS text AS $$
    sub parseversion
    {
