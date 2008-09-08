@@ -86,7 +86,7 @@ CREATE TABLE bugs
     affects_testing boolean, affects_unstable boolean);
 
 CREATE TABLE bugs_merged_with
-  (id int REFERENCES bugs, merged_with int REFERENCES bugs DEFERRABLE,
+  (id int REFERENCES bugs, merged_with int,
 PRIMARY KEY(id, merged_with));
 
 CREATE TABLE bugs_found_in
@@ -107,7 +107,7 @@ CREATE TABLE archived_bugs
     affects_testing boolean, affects_unsarchived_table boolean);
 
 CREATE TABLE archived_bugs_merged_with
-  (id int REFERENCES archived_bugs, merged_with int REFERENCES archived_bugs DEFERRABLE,
+  (id int REFERENCES archived_bugs, merged_with int,
 PRIMARY KEY(id, merged_with));
 
 CREATE TABLE archived_bugs_found_in
