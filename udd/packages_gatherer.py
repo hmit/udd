@@ -68,7 +68,7 @@ class packages_gatherer(gatherer):
 	  packages_gatherer.warned_about[k] += 1
     return d
 
-  def import_packages(self, sequence):
+  def import_packages(self, sequence, cur):
     """Import the packages from the sequence into the database-connection
     conn.
 
@@ -76,7 +76,6 @@ class packages_gatherer(gatherer):
     it is called.The Format of the sequence is expected to be that of a
     debian packages file."""
     # The fields that are to be read. Other fields are ignored
-    cur = self.connection.cursor()
     for control in debian_bundle.deb822.Packages.iter_paragraphs(sequence):
       # Check whether packages with architectue 'all' have already been
       # imported
@@ -150,6 +149,8 @@ class packages_gatherer(gatherer):
     self._distr = src_cfg['distribution']
 
     cur = self.cursor()
+    # defer constraints checking until the end of the transaction
+    cur.execute("SET CONSTRAINTS ALL DEFERRED")
 
     # For every part and every architecture, import the packages into the DB
     for comp in src_cfg['components']:
@@ -180,7 +181,7 @@ class packages_gatherer(gatherer):
 	  file.close()
 	  tmp.seek(0)
 	  aux.print_debug("Importing from " + path)
-	  self.import_packages(open(tmp.name))
+	  self.import_packages(open(tmp.name), cur)
 	  tmp.close()
 	except IOError, (e, message):
 	  print "Could not read packages from %s: %s" % (path, message)

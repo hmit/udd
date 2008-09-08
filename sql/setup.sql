@@ -14,6 +14,11 @@ GRANT SELECT ON sources TO PUBLIC;
 
 CREATE INDEX sources_distrelcomp_idx on sources(distribution, release, component);
 
+CREATE TABLE packages_summary ( package text, version text, source text,
+source_version text, maintainer text, distribution text, release text,
+component text,
+PRIMARY KEY (package, version, distribution, release, component));
+
 CREATE TABLE packages
   (package text, version text, architecture text, maintainer text, description
     text, source text, source_version text, essential text, depends text,
@@ -23,12 +28,8 @@ CREATE TABLE packages
     md5sum text, bugs text, priority text, tag text, task text, python_version text,
     provides text, conflicts text, sha256 text, original_maintainer text,
     distribution text, release text, component text,
-  PRIMARY KEY (package, version, architecture, distribution, release, component));
-
-CREATE TABLE packages_summary ( package text, version text, source text,
-source_version text, maintainer text, distribution text, release text,
-component text,
-PRIMARY KEY (package, version, distribution, release, component));
+  PRIMARY KEY (package, version, architecture, distribution, release, component),
+  FOREIGN KEY (package, version, distribution, release, component) REFERENCES packages_summary DEFERRABLE);
 
 GRANT SELECT ON packages TO PUBLIC;
 GRANT SELECT ON packages_summary TO PUBLIC;
@@ -51,6 +52,11 @@ CREATE TABLE ubuntu_sources
 
 CREATE INDEX ubuntu_sources_distrelcomp_idx on ubuntu_sources(distribution, release, component);
 
+CREATE TABLE ubuntu_packages_summary ( package text, version text, source text,
+source_version text, maintainer text, distribution text, release text,
+component text,
+PRIMARY KEY (package, version, distribution, release, component));
+
 CREATE TABLE ubuntu_packages
   (package text, version text, architecture text, maintainer text, description
     text, source text, source_version text, essential text, depends text,
@@ -60,12 +66,8 @@ CREATE TABLE ubuntu_packages
     md5sum text, bugs text, priority text, tag text, task text, python_version text,
     provides text, conflicts text, sha256 text, original_maintainer text,
     distribution text, release text, component text,
-  PRIMARY KEY (package, version, architecture, distribution, release, component));
-
-CREATE TABLE ubuntu_packages_summary ( package text, version text, source text,
-source_version text, maintainer text, distribution text, release text,
-component text,
-PRIMARY KEY (package, version, distribution, release, component));
+  PRIMARY KEY (package, version, architecture, distribution, release, component),
+  FOREIGN KEY (package, version, distribution, release, component) REFERENCES ubuntu_packages_summary DEFERRABLE);
 
 GRANT SELECT ON ubuntu_sources TO PUBLIC;
 GRANT SELECT ON ubuntu_packages TO PUBLIC;
@@ -84,7 +86,7 @@ CREATE TABLE bugs
     affects_testing boolean, affects_unstable boolean);
 
 CREATE TABLE bugs_merged_with
-  (id int REFERENCES bugs, merged_with int,
+  (id int REFERENCES bugs, merged_with int REFERENCES bugs DEFERRABLE,
 PRIMARY KEY(id, merged_with));
 
 CREATE TABLE bugs_found_in
@@ -105,7 +107,7 @@ CREATE TABLE archived_bugs
     affects_testing boolean, affects_unsarchived_table boolean);
 
 CREATE TABLE archived_bugs_merged_with
-  (id int REFERENCES archived_bugs, merged_with int,
+  (id int REFERENCES archived_bugs, merged_with int REFERENCES archived_bugs DEFERRABLE,
 PRIMARY KEY(id, merged_with));
 
 CREATE TABLE archived_bugs_found_in
@@ -117,10 +119,12 @@ CREATE TABLE archived_bugs_fixed_in
    PRIMARY KEY(id, version));
 
 CREATE TABLE archived_bugs_tags
-  (id int, tag text, PRIMARY KEY (id, tag));
+  (id int REFERENCES archived_bugs, tag text, PRIMARY KEY (id, tag));
 
+-- usertags are either for archived or unarchived bugs, so we can't add a
+-- foreign key here.
 CREATE TABLE bugs_usertags
-  (email text, tag text, id int REFERENCES bugs);
+  (email text, tag text, id int);
 
 CREATE VIEW bugs_rt_affects_stable AS
 SELECT id, package, source FROM bugs

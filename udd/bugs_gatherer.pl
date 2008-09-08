@@ -127,35 +127,18 @@ sub run {
 	our $timing;
 	print "Inserting usertags: ",(time() - $t),"s\n" if $timing;
 	$t = time();
-	run_usertags($config, $source, $dbh);
 
 	my %src_config = %{$config->{$source}};
 	my $table = $src_config{table};
 	my $archived_table = $src_config{'archived-table'};
 
 	my @modified_bugs;
-	####### XXX EXPERIMENT
-	####### XXX What to do with bugs both archived and unarchived
-	#my $max_last_modified = get_db_max_last_modified($dbh);
-	#my @modified_bugs;
-	#if($max_last_modified) {
-	#	@modified_bugs = @{get_modified_bugs($max_last_modified)};
-		# Delete modified bugs
-		#	for my $bug (@modified_bugs) {
-		#		map {
-		#			$dbh->prepare("DELETE FROM $_ WHERE id = $bug")->execute()
-		#		} qw{bugs bug_merged_with bug_found_in bug_fixed_in};
-		#	}
-		#} else {
-		#	@modified_bugs = get_bugs(archive => 'both');
-		#}
-		#@modified_bugs = without_duplicates(@modified_bugs);
+
 	if($src_config{archived}) {
 		@modified_bugs = get_bugs(archive => 1);
 	} else {
 		@modified_bugs = get_bugs();
 	}
-
 	my @modified_bugs2;
 	if ($src_config{debug}) {
 		foreach $b (@modified_bugs) {
@@ -168,7 +151,7 @@ sub run {
 	$t = time();
 
 	foreach my $prefix ($table, $archived_table) {
-		foreach my $postfix ('', qw{_merged_with _found_in _fixed_in _tags}) {
+		foreach my $postfix (qw{_merged_with _found_in _fixed_in _tags}, '') {
 			my $sth = $dbh->prepare("DELETE FROM $prefix$postfix WHERE id = \$1");
 			map {
 				$sth->execute($_) or die $!;
@@ -180,7 +163,7 @@ sub run {
 
 	# Used to chache binary to source mappings
 	my %binarytosource = ();
-	# XXX What if a bug is in location 'db' (which currently doesn't exist)
+	# XXX What if a bug is in location 'db' (which currently 
 	my $location = $src_config{archived} ? 'archive' : 'db_h';
 	#my $table = $src_config{archived} ? 'bugs_archived' : 'bugs';
 	$table = $src_config{archived} ? $archived_table : $table;
@@ -286,6 +269,9 @@ sub run {
 			$insert_bugs_tags_handle->execute($bug_nr, $tag) or die $!;
 		}
 	}
+	
+	# Also import usertags
+	run_usertags($config, $source, $dbh);
 }
 
 sub main {
@@ -306,6 +292,7 @@ sub main {
 	my $dbh = DBI->connect("dbi:Pg:dbname=$dbname");
 	# We want to commit the transaction as a hole at the end
 	$dbh->{AutoCommit} = 0;
+	$dbh->do('SET CONSTRAINTS ALL DEFERRED');
 
 	if($command eq 'run') {
 		run($config, $source, $dbh);

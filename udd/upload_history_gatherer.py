@@ -29,9 +29,9 @@ class upload_history_gatherer(gatherer):
 
     cursor = self.cursor()
 
-    cursor.execute("DELETE FROM " + self.my_config['table'])
     cursor.execute("DELETE FROM " + self.my_config['table'] + '_architecture')
     cursor.execute("DELETE FROM " + self.my_config['table'] + '_closes')
+    cursor.execute("DELETE FROM " + self.my_config['table'])
 
     cursor.execute("PREPARE uh_insert AS INSERT INTO %s VALUES \
 	($1, $2, $3, $4, $5, $6, $7, $8, $9)" % self.my_config['table'])
