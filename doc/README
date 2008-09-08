@@ -14,7 +14,10 @@ Installation
 - install postgresql-8.3 python-syck python-psycopg2 libdbi-perl
   libparams-validate-perl libdbd-pg-perl
 - setup postgresql-8.3 (see /usr/share/doc/postgresql-common/README.Debian.gz)
-  and create a database (naming it 'udd' will make things easier later)
+  and create a database:
+     createdb -U user -E SQL_ASCII udd
+  ASCII encoding is necessary because some of the data we will import might
+  contain invalid UTF-8 characters
 - edit config.yaml (see README.config for details)
 - setup the DB: psql udd < sql/setup.sql
 
@@ -22,7 +25,6 @@ Usage
 -----
 - run ./udd.py <configuration> update [ fetches the external data ]
 - run ./udd.py <configuration> run [ import the data into the DB ]
-FIXME document all commands.
 
 Detailed information
 --------------------
