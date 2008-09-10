@@ -48,7 +48,7 @@ class orphaned_packages_gatherer(gatherer):
     rows = cur.fetchall()
 
     cur2.execute("DELETE FROM %s" % self.my_config['table'])
-    cur2.execute("PREPARE opkgs_insert AS INSERT INTO %s VALUES ($1, $2, $3, $4, $5)" % self.my_config['table'])
+    cur2.execute("PREPARE opkgs_insert AS INSERT INTO %s (source, type, bug, description, orphaned_time) VALUES ($1, $2, $3, $4, $5)" % self.my_config['table'])
 
     for row in rows:
       m = self.title_re.match(row[1])

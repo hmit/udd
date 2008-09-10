@@ -74,15 +74,18 @@ class popcon_gatherer(gatherer):
 
     #calculate _src and _src_avg
     cur.execute("""
-    INSERT INTO %(table)s_src SELECT DISTINCT pkgs.source, max(insts) AS insts, max(vote) AS vote, max(olde) AS old,
-           max(recent) AS recent, max(nofiles) as nofiles
+    INSERT INTO %(table)s_src (source, insts, vote, olde, recent, nofiles)
+      SELECT DISTINCT pkgs.source, max(insts) AS insts, max(vote) AS vote,
+        max(olde) AS old, max(recent) AS recent, max(nofiles) as nofiles
       FROM %(table)s, %(packages-table)s_summary AS pkgs
       WHERE %(table)s.package = pkgs.package
       GROUP BY pkgs.source;
       """ % my_config)
     cur.execute("""
-    INSERT INTO %(table)s_src_average SELECT pkgs.source, avg(insts) AS insts, avg(vote) AS vote, avg(olde) AS old,
-           avg(recent) AS recent, avg(nofiles) as nofiles
+    INSERT INTO %(table)s_src_average (source, insts, vote, olde, recent,
+    	nofiles)
+      SELECT pkgs.source, avg(insts) AS insts, avg(vote) AS vote,
+        avg(olde) AS old, avg(recent) AS recent, avg(nofiles) as nofiles
       FROM %(table)s, %(packages-table)s_summary AS pkgs
       WHERE %(table)s.package = pkgs.package
       GROUP BY pkgs.source;

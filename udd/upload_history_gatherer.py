@@ -33,12 +33,14 @@ class upload_history_gatherer(gatherer):
     cursor.execute("DELETE FROM " + self.my_config['table'] + '_closes')
     cursor.execute("DELETE FROM " + self.my_config['table'])
 
-    cursor.execute("PREPARE uh_insert AS INSERT INTO %s VALUES \
+    cursor.execute("PREPARE uh_insert AS INSERT INTO %s (id, package, \
+        version, date, changed_by, maintainer, nmu, signed_by, key_id) VALUES \
 	($1, $2, $3, $4, $5, $6, $7, $8, $9)" % self.my_config['table'])
-    cursor.execute("PREPARE uh_arch_insert AS INSERT INTO %s VALUES \
+    cursor.execute("PREPARE uh_arch_insert AS INSERT INTO %s (id, \
+    	architecture) VALUES \
 	($1, $2)" % (self.my_config['table'] + '_architecture'))
-    cursor.execute("PREPARE uh_close_insert AS INSERT INTO %s VALUES \
-	($1, $2)" % (self.my_config['table'] + '_closes'))
+    cursor.execute("PREPARE uh_close_insert AS INSERT INTO %s (id, bug) \
+    	VALUES ($1, $2)" % (self.my_config['table'] + '_closes'))
 
     id = 0
     for name in glob(path + '/debian-devel-*'):

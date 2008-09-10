@@ -115,7 +115,7 @@ sub run_usertags {
 		$user = $dbh->quote($user);
 		foreach my $tag (keys %tags) {
 			my $qtag = $dbh->quote($tag);
-			map { $dbh->do("INSERT INTO $table VALUES ($user, $qtag, $_)") or die $! } @{$tags{$tag}};
+			map { $dbh->do("INSERT INTO $table (email, tag, id) VALUES ($user, $qtag, $_)") or die $! } @{$tags{$tag}};
 		}
 	}
 }
@@ -176,11 +176,11 @@ sub run {
 	my $location = $src_config{archived} ? 'archive' : 'db_h';
 	$table = $src_config{archived} ? $archived_table : $table;
 	# Read all bugs
-	my $insert_bugs_handle = $dbh->prepare("INSERT INTO $table VALUES (\$1, \$2, \$3, \$4::abstime, \$5, \$6, \$7, \$8, \$9, \$10::abstime, \$11, \$12, \$13)");
-	my $insert_bugs_found_handle = $dbh->prepare("INSERT INTO ${table}_found_in VALUES (\$1, \$2)");
-	my $insert_bugs_fixed_handle = $dbh->prepare("INSERT INTO ${table}_fixed_in VALUES (\$1, \$2)");
-	my $insert_bugs_merged_handle = $dbh->prepare("INSERT INTO ${table}_merged_with VALUES (\$1, \$2)");
-	my $insert_bugs_tags_handle = $dbh->prepare("INSERT INTO ${table}_tags VALUES (\$1, \$2)");
+	my $insert_bugs_handle = $dbh->prepare("INSERT INTO $table (id, package, source, arrival, status, severity, submitter, owner, title, last_modified, affects_stable, affects_testing, affects_unstable) VALUES (\$1, \$2, \$3, \$4::abstime, \$5, \$6, \$7, \$8, \$9, \$10::abstime, \$11, \$12, \$13)");
+	my $insert_bugs_found_handle = $dbh->prepare("INSERT INTO ${table}_found_in (id, version) VALUES (\$1, \$2)");
+	my $insert_bugs_fixed_handle = $dbh->prepare("INSERT INTO ${table}_fixed_in (id, version) VALUES (\$1, \$2)");
+	my $insert_bugs_merged_handle = $dbh->prepare("INSERT INTO ${table}_merged_with (id, merged_with) VALUES (\$1, \$2)");
+	my $insert_bugs_tags_handle = $dbh->prepare("INSERT INTO ${table}_tags (id, tag) VALUES (\$1, \$2)");
 	$insert_bugs_handle->bind_param(4, undef, SQL_INTEGER);
 	$insert_bugs_handle->bind_param(10, undef, SQL_INTEGER);
 

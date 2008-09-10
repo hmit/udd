@@ -27,7 +27,7 @@ class testing_migrations_gatherer(gatherer):
 
       c.execute("DELETE FROM migrations")
 
-      c.execute("PREPARE mig_insert AS INSERT INTO migrations VALUES ($1, $2, $3, $4, $5, $6, $7, $8)")
+      c.execute("PREPARE mig_insert AS INSERT INTO migrations (source, in_testing, testing_version, in_unstable, unstable_version, sync, sync_version, first_seen) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)")
       
       f = open(src_cfg['path'])
       for line in f:
