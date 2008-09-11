@@ -188,11 +188,12 @@ class packages_gatherer(gatherer):
 	cur.execute("DEALLOCATE package_insert")
     # Fill the summary tables
     cur.execute("DELETE FROM %s" % (table + '_summary'));
-    cur.execute("""INSERT INTO %s (package, version, distribution, release,
-      component) SELECT DISTINCT ON (package, version,
-      distribution, release, component) package, version, source,
-      source_version, maintainer, distribution, release, component FROM %s""" %
-      (table + '_summary', table));
+    cur.execute("""INSERT INTO %s (package, version, source, source_version,
+        maintainer, distribution, release, component)
+      SELECT DISTINCT ON (package, version, distribution, release, component)
+        package, version, source, source_version, maintainer, distribution,
+        release, component
+      FROM %s""" % (table + '_summary', table));
 
     self.print_warnings()
 
