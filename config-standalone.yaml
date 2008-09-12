@@ -40,6 +40,21 @@ debian-lenny:
   release: lenny
   update-command: /org/udd.debian.net/udd/scripts/sync-dist.sh ftp.fr.debian.org::debian/dists/lenny/ /org/udd.debian.net/mirrors/debian/lenny
 
+debian-experimental:
+  type: src-pkg
+  archs: [alpha, amd64, arm, armel, hppa, hurd-i386,
+          i386, ia64, m68k, mips,
+          mipsel, powerpc, s390, sparc]       
+  directory: /org/ftp.debian.org/dists/experimental/
+  components: [main, contrib, non-free]
+  distribution: debian
+  packages-table: packages
+  sources-table: sources
+  packages-schema: packages
+  sources-schema: sources
+  release: experimental
+  update-command: /org/udd.debian.net/udd/scripts/sync-dist.sh ftp.fr.debian.org::debian/dists/experimental/ /org/udd.debian.net/mirrors/debian/experimental
+
 debian-sid:
   type: src-pkg
   archs: [alpha, amd64, arm, armel, hppa, hurd-i386,
