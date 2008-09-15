@@ -13,6 +13,7 @@ general:
     bugs: exec DEBBUGS_CONFIG_FILE=/org/udd.debian.net/mirrors/bugs.debian.org/etc/config perl /org/udd.debian.net/udd/udd/bugs_gatherer.pl 
     carnivore: module udd.carnivore_gatherer
     lintian: module udd.lintian_gatherer
+    ubuntu-bugs: module udd.ubuntu_bugs_gatherer
   debug: 1
   timestamp-dir: /org/udd.debian.net/timestamps
   lock-dir: /org/udd.debian.net/locks
@@ -208,3 +209,6 @@ lintian:
   path: /org/udd.debian.net/mirrors/lintian.log
   table: lintian
   schema: lintian
+
+ubuntu-bugs:
+   type: ubuntu-bugs

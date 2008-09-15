@@ -295,3 +295,61 @@ CREATE TABLE upload_history_closes
 GRANT SELECT ON upload_history TO PUBLIC;
 GRANT SELECT ON upload_history_architecture TO PUBLIC;
 GRANT SELECT ON upload_history_closes TO PUBLIC;
+
+-- Ubuntu bugs
+CREATE TABLE ubuntu_bugs (
+bug int,
+title text,
+reporter_login text,
+reporter_name text,
+duplicate_of int,
+date_reported text,
+date_updated text,
+security boolean,
+PRIMARY KEY (bug));
+
+CREATE TABLE ubuntu_bugs_duplicates (
+bug int REFERENCES ubuntu_bugs,
+duplicate int,
+PRIMARY KEY (bug, duplicate));
+
+CREATE TABLE ubuntu_bugs_subscribers (
+bug int REFERENCES ubuntu_bugs,
+subscriber_login text,
+subscriber_name text);
+
+CREATE TABLE ubuntu_bugs_tags (
+bug int REFERENCES ubuntu_bugs,
+tag text,
+PRIMARY KEY (bug, tag));
+
+CREATE TABLE ubuntu_bugs_tasks (
+bug int REFERENCES ubuntu_bugs,
+package text,
+distro text,
+status text,
+importance text,
+component text,
+milestone text,
+date_created text,
+date_assigned text,
+date_closed text,
+date_incomplete text,
+date_confirmed text,
+date_inprogress text,
+date_fix_committed text,
+date_fix_released text,
+date_left_new text,
+date_triaged text,
+watch text,
+reporter_login text,
+reporter_name text,
+assignee_login text,
+assignee_name text,
+PRIMARY KEY (bug, package, distro));
+
+GRANT SELECT ON ubuntu_bugs TO PUBLIC;
+GRANT SELECT ON ubuntu_bugs_duplicates TO PUBLIC;
+GRANT SELECT ON ubuntu_bugs_subscribers TO PUBLIC;
+GRANT SELECT ON ubuntu_bugs_tags TO PUBLIC;
+GRANT SELECT ON ubuntu_bugs_tasks TO PUBLIC;

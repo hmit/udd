@@ -32,3 +32,8 @@ DROP TABLE migrations CASCADE;
 DROP TABLE upload_history CASCADE;
 DROP TABLE upload_history_architecture CASCADE;
 DROP TABLE upload_history_closes CASCADE;
+DROP TABLE ubuntu_bugs CASCADE;
+DROP TABLE ubuntu_bugs_duplicates CASCADE;
+DROP TABLE ubuntu_bugs_subscribers CASCADE;
+DROP TABLE ubuntu_bugs_tags CASCADE;
+DROP TABLE ubuntu_bugs_tasks CASCADE;
