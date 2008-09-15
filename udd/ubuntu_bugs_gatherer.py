@@ -57,7 +57,6 @@ class ubuntu_bugs_gatherer(gatherer):
           print "HTTPQ: ", httpq.qsize(), " DBQ: ", dbq.qsize()
         d = dbq.get(True, 5) # 10 secs timeout
         self.dbimport(c, d)
-        dbq.task_done()
       except Empty:
         if httpq.qsize() == 0:
           ok = False
@@ -109,24 +108,20 @@ class ubuntu_bugs_gatherer(gatherer):
             data = r.read()
             if data != '':
               dq.put(data)
-              hq.task_done()
             else:
               print "[", currentThread().getName(), "] Bug ", b, ": Empty data."
               ok = False
               hq.put(b)
-              hq.task_done()
           else:
             print "[", currentThread().getName(), "] Bug ", b, ": Wrong status: ", r.status, " ", r.reason
             ok = False
             hq.put(b)
-            hq.task_done()
         except httplib.BadStatusLine, line:
           print "[", currentThread().getName(), "] Bug ", b, ": BadStatusLine: ", line
           print str(r.getheaders())
           print r.read()
           ok = False
           hq.put(b)
-          hq.task_done()
 
   parre = re.compile('^\s*(.*) \(([^(]*)\)$')
   def splitpar(self, text):
