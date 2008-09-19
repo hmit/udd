@@ -12,8 +12,7 @@ from time import asctime
 import udd.aux
 import os.path
 
-available_commands = [ 'run', 'update' ]
-# available_commands = [ 'run', 'setup', 'drop', 'update', 'schema', 'tables' ]
+available_commands = [ 'run', 'setup', 'drop', 'update', 'schema', 'tables' ]
 
 def print_help():
   print "Usage: %s CONF_FILE COMMAND SOURCE [SOURCE ...]" % sys.argv[0]
@@ -62,6 +61,11 @@ if __name__ == '__main__':
 	if src_command == "exec":
 	  system(rest + " " + sys.argv[1] + " " + sys.argv[2] + " " + src)
 	elif src_command == "module":
+          # TODO XXX: using exec is hackish and prone to failures due
+          # to what is being written in the conffile. We should get
+          # rid of these lines and use the "imp" module, which is
+          # meant for these tasks:
+          # http://docs.python.org/lib/module-imp.html
 	  exec("import " + rest)
 	  exec "gatherer = " + rest + ".get_gatherer(connection, config, src)"
 	  if command == 'tables':
