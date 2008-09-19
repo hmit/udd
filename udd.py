@@ -1,18 +1,25 @@
 #!/usr/bin/env python
-# Last-Modified: <Tue Aug 19 13:55:40 2008>
+# $Date$
 
 """Dispatch udd gatherers
 
 This script is used to dispatch the source gatherers of the UDD project."""
 
+import string
 import sys
 from os import system
 from time import asctime
 import udd.aux
 import os.path
 
+available_commands = [ 'run', 'update' ]
+# available_commands = [ 'run', 'setup', 'drop', 'update', 'schema', 'tables' ]
+
 def print_help():
-  print "Usage: " + sys.argv[0] + " <configuration> <command> <source1> [source2 source3 ...]"
+  print "Usage: %s CONF_FILE COMMAND SOURCE [SOURCE ...]" % sys.argv[0]
+  print "Available commands:"
+  for cmd in available_commands:
+    print '  %s' % cmd
 
 if __name__ == '__main__':
   if len(sys.argv) < 4:
@@ -20,8 +27,9 @@ if __name__ == '__main__':
     sys.exit(1)
 
   command = sys.argv[2]
-  if command not in ('run', 'update'):
-    sys.stderr.write("command has to be one of 'run', 'setup', 'drop', 'update', 'schema' and 'tables'\n")
+  if command not in available_commands:
+    print >> sys.stderr, "command has to be one of: %s" % \
+        string.join(available_commands, ', ')
     sys.exit(1)
 
   config = udd.aux.load_config(open(sys.argv[1]).read())
@@ -37,14 +45,16 @@ if __name__ == '__main__':
     type = src_config['type']
     udd.aux.lock(config, src)
     try:
-      # If the command is update, we need a special case. Otherwise we can just use the gatherer's methods
+      # If the command is update, we need a special case. Otherwise we
+      # can just use the gatherer's methods
       if command == 'update':
 	if "update-command" in src_config:
 	  result = system(src_config['update-command']) 
 	  if result != 0:
 	    sys.exit(result)
 	  if 'timestamp-dir' in config['general']:
-	    f = open(os.path.join(config['general']['timestamp-dir'], src+".update"), "w")
+	    f = open(os.path.join(config['general']['timestamp-dir'],
+                                  src+".update"), "w")
 	    f.write(asctime())
 	    f.close()
       else:
@@ -60,7 +70,8 @@ if __name__ == '__main__':
 	  else:
 	    exec "gatherer.%s()" % command
 	if 'timestamp-dir' in config['general']:
-	  f = open(os.path.join(config['general']['timestamp-dir'], src+".dispatch"), "w")
+	  f = open(os.path.join(config['general']['timestamp-dir'],
+                                src+".dispatch"), "w")
 	  f.write(asctime())
 	  f.close()
     except:
@@ -68,4 +79,3 @@ if __name__ == '__main__':
       raise
     udd.aux.unlock(config, src)
   connection.commit()
-
