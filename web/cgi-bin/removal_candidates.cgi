@@ -13,7 +13,7 @@ where sources.distribution = 'debian' and sources.release = 'lenny'
 and bugs.source = sources.source
 and id in (select id from bugs_rt_affects_testing)
 and id in (select id from bugs_rt_affects_unstable)
-and bugs.severity in ('serious', 'grave', 'critical')
+and bugs.severity >= 'serious'
 and arrival < (NOW() - interval '14 DAYS')
 and sources.source = popcon_src.source
 and popcon_src.insts < 2000

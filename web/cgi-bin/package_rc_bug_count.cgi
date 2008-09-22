@@ -11,7 +11,7 @@ my $sth = $dbh->prepare(<<EOF
 SELECT b.package, COUNT(b.id)
 FROM bugs b
 WHERE 
-        (b.severity IN ('serious', 'grave', 'critical'))
+        (b.severity >= 'serious')
     AND 
         b.affects_testing
     AND(
