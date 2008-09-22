@@ -105,7 +105,7 @@ CREATE TABLE bugs_tags
 
 CREATE TABLE archived_bugs
   (id int PRIMARY KEY, package text, source text, arrival timestamp, status text,
-     severity text, submitter text, owner text, title text,
+     severity bugs_severity, submitter text, owner text, title text,
      last_modified timestamp, affects_stable boolean,
     affects_testing boolean, affects_unstable boolean,
     affects_experimental boolean);
