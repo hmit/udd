@@ -85,7 +85,8 @@ CREATE TABLE bugs
   (id int PRIMARY KEY, package text, source text, arrival timestamp, status text,
      severity bugs_severity, submitter text, owner text, title text,
      last_modified timestamp, affects_stable boolean,
-    affects_testing boolean, affects_unstable boolean);
+    affects_testing boolean, affects_unstable boolean,
+    affects_experimental boolean);
 
 CREATE TABLE bugs_merged_with
   (id int REFERENCES bugs, merged_with int,
@@ -106,7 +107,8 @@ CREATE TABLE archived_bugs
   (id int PRIMARY KEY, package text, source text, arrival timestamp, status text,
      severity text, submitter text, owner text, title text,
      last_modified timestamp, affects_sarchived_table boolean,
-    affects_testing boolean, affects_unsarchived_table boolean);
+    affects_testing boolean, affects_unsarchived_table boolean,
+    affects_experimental boolean);
 
 CREATE TABLE archived_bugs_merged_with
   (id int REFERENCES archived_bugs, merged_with int,
