@@ -176,7 +176,7 @@ sub run {
 	my $location = $src_config{archived} ? 'archive' : 'db_h';
 	$table = $src_config{archived} ? $archived_table : $table;
 	# Read all bugs
-	my $insert_bugs_handle = $dbh->prepare("INSERT INTO $table (id, package, source, arrival, status, severity, submitter, owner, title, last_modified, affects_stable, affects_testing, affects_unstable) VALUES (\$1, \$2, \$3, \$4::abstime, \$5, \$6, \$7, \$8, \$9, \$10::abstime, \$11, \$12, \$13)");
+	my $insert_bugs_handle = $dbh->prepare("INSERT INTO $table (id, package, source, arrival, status, severity, submitter, owner, title, last_modified, affects_stable, affects_testing, affects_unstable, affects_experimental) VALUES (\$1, \$2, \$3, \$4::abstime, \$5, \$6, \$7, \$8, \$9, \$10::abstime, \$11, \$12, \$13, \$14)");
 	my $insert_bugs_found_handle = $dbh->prepare("INSERT INTO ${table}_found_in (id, version) VALUES (\$1, \$2)");
 	my $insert_bugs_fixed_handle = $dbh->prepare("INSERT INTO ${table}_fixed_in (id, version) VALUES (\$1, \$2)");
 	my $insert_bugs_merged_handle = $dbh->prepare("INSERT INTO ${table}_merged_with (id, merged_with) VALUES (\$1, \$2)");
@@ -223,9 +223,9 @@ sub run {
 		}
 
 		#Calculate bug presence in distributions
-		my ($present_in_stable, $present_in_testing, $present_in_unstable);
+		my ($present_in_stable, $present_in_testing, $present_in_unstable, $present_in_experimental);
 		if($src_config{archived}) {
-			$present_in_stable = $present_in_testing = $present_in_unstable = 'FALSE';
+			$present_in_stable = $present_in_testing = $present_in_unstable = $present_in_experimental = 'FALSE';
 		} else {
 			$present_in_stable =
 				bug_presence(bug => $bug_nr, status => \%bug,
@@ -236,7 +236,10 @@ sub run {
 			$present_in_unstable =
 				bug_presence(bug => $bug_nr, status => \%bug,
 							 dist => 'unstable');
-			if(!defined($present_in_stable) or !defined($present_in_unstable) or !defined($present_in_testing)) {
+			$present_in_experimental =
+				bug_presence(bug => $bug_nr, status => \%bug,
+							 dist => 'experimental');
+			if(!defined($present_in_stable) or !defined($present_in_unstable) or !defined($present_in_testing) or !defined($present_in_experimental)) {
 				print "NUMBER: $bug_nr\n";
 			}
 		
@@ -255,12 +258,17 @@ sub run {
 			} else {
 				$present_in_unstable = 'TRUE';
 			}
+			if(defined($present_in_experimental) and ($present_in_experimental eq 'absent' or $present_in_experimental eq 'fixed')) {
+				$present_in_experimental = 'FALSE';
+			} else {
+				$present_in_experimental = 'TRUE';
+			}
 		}
 
 		# Insert data into bugs table
 		$insert_bugs_handle->execute($bug_nr, $bug{package}, $source, $bug{date}, $bug{pending},
 			$bug{severity}, $bug{originator}, $bug{owner}, $bug{subject}, $bug{log_modified},
-			$present_in_stable, $present_in_testing, $present_in_unstable) or die $!;
+			$present_in_stable, $present_in_testing, $present_in_unstable, $present_in_experimental) or die $!;
 
 		# insert data into bug_fixed_in and bug_found_in tables
 		foreach my $version (without_duplicates(@found_versions)) {
