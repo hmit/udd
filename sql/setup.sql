@@ -79,9 +79,11 @@ CREATE INDEX ubuntu_packages_distrelcomp_idx on ubuntu_packages(distribution, re
 
 -- Bugs (archived and unarchived)
 
+CREATE TYPE bugs_severity AS ENUM ('fixed', 'wishlist', 'minor', 'normal', 'important', 'serious', 'grave', 'critical');
+
 CREATE TABLE bugs
   (id int PRIMARY KEY, package text, source text, arrival timestamp, status text,
-     severity text, submitter text, owner text, title text,
+     severity bugs_severity, submitter text, owner text, title text,
      last_modified timestamp, affects_stable boolean,
     affects_testing boolean, affects_unstable boolean);
 
