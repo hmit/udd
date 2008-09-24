@@ -137,7 +137,7 @@ AND (id NOT IN (SELECT id FROM bugs_tags WHERE tag IN ('sid', 'sarge', 'lenny', 
 OR id IN (SELECT id FROM bugs_tags WHERE tag = 'etch'))
 AND id NOT IN (select id FROM bugs_tags WHERE tag = 'etch-ignore')
 AND ( package IN (SELECT DISTINCT package FROM packages_summary p WHERE release = 'etch')
-OR source IN (SELECT DISTINCT package FROM sources WHERE release = 'etch'));
+OR source IN (SELECT DISTINCT source FROM sources WHERE release = 'etch'));
 
 CREATE VIEW bugs_rt_affects_testing AS
 SELECT id, package, source FROM bugs
@@ -146,7 +146,7 @@ AND (id NOT IN (SELECT id FROM bugs_tags WHERE tag IN ('sid', 'sarge', 'etch', '
 OR id IN (SELECT id FROM bugs_tags WHERE tag = 'lenny'))
 AND id NOT IN (select id FROM bugs_tags WHERE tag = 'lenny-ignore')
 AND ( package IN (SELECT DISTINCT package FROM packages_summary p WHERE release = 'lenny')
-OR source IN (SELECT DISTINCT package FROM sources WHERE release = 'lenny'));
+OR source IN (SELECT DISTINCT source FROM sources WHERE release = 'lenny'));
 
 CREATE VIEW bugs_rt_affects_unstable AS
 SELECT id, package, source FROM bugs
@@ -154,7 +154,7 @@ WHERE affects_unstable
 AND (id NOT IN (SELECT id FROM bugs_tags WHERE tag IN ('lenny', 'sarge', 'etch', 'experimental'))
 OR id IN (SELECT id FROM bugs_tags WHERE tag = 'sid'))
 AND ( package IN (SELECT DISTINCT package FROM packages_summary p WHERE release = 'sid')
-OR source IN (SELECT DISTINCT package FROM sources WHERE release = 'sid'));
+OR source IN (SELECT DISTINCT source FROM sources WHERE release = 'sid'));
 
 CREATE VIEW bugs_rt_affects_testing_and_unstable AS
 SELECT id, package, source FROM bugs
