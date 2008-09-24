@@ -161,10 +161,10 @@ SELECT id, package, source FROM bugs
 WHERE affects_unstable AND affects_testing
 AND (id NOT IN (SELECT id FROM bugs_tags WHERE tag IN ('sarge', 'etch', 'experimental'))
 OR (id IN (SELECT id FROM bugs_tags WHERE tag = 'sid') AND id IN (SELECT id FROM bugs_tags WHERE tag = 'lenny')))
-AND ( package IN (SELECT DISTINCT package FROM packages p WHERE release = 'sid')
-OR source IN (SELECT DISTINCT package FROM sources WHERE release = 'sid'))
-AND ( package IN (SELECT DISTINCT package FROM packages p WHERE release = 'lenny')
-OR source IN (SELECT DISTINCT package FROM sources WHERE release = 'lenny'));
+AND ( package IN (SELECT DISTINCT source FROM packages p WHERE release = 'sid')
+OR source IN (SELECT DISTINCT source FROM sources WHERE release = 'sid'))
+AND ( package IN (SELECT DISTINCT source FROM packages p WHERE release = 'lenny')
+OR source IN (SELECT DISTINCT source FROM sources WHERE release = 'lenny'));
 
 GRANT SELECT ON bugs TO PUBLIC;
 GRANT SELECT ON bugs_merged_with TO PUBLIC;
