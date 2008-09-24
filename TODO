@@ -40,6 +40,15 @@ bugs.debian.org
 - (prio: medium) generate output using bts2ldap format, and check that the
   result matches a fresh bts2ldap run done by Lucas
 - (prio: medium) Optimize bugs importing (again)
+- (prio: high) the source column is broken for many bugs. We should do as
+bugreport.cgi does, that is, use getpkgsrc() to get the hash, and then use the
+hash (apprently, needs to be checked precisely). It would also be a good
+idea to compare both approaches.
+Example broken bugs:
+499945, 'libtasn1-3', 'libtasn1-2'
+00:40 < tomv_w> Q_: select package,source from bugs where id='301134';
+00:40 < tomv_w> is another data problem in udd: gcjwebplugin has always been built 
+                by classpath.
 
 Other data sources
 ------------------
