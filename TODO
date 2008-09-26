@@ -60,5 +60,3 @@ Other data sources
 - (prio: low) edos.debian.net
 - (prio: low) version numbers, diffs and bugs for each package for each
   derivative distro 
-- (prio: low) import data about Ubuntu bugs on launchpad. Lucas already
-  has a script importing this data to an SQLite DB (running on merkel).
