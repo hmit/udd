@@ -200,3 +200,10 @@ lintian:
   path: /org/udd.debian.net/mirrors/lintian.log
   table: lintian
   schema: lintian
+
+debtags:
+  type: debtags
+  update-command: rm -f /org/udd.debian.net/mirrors/debtags.txt && wget -q http://svn.debian.org/viewsvn/*checkout*/debtags/tagdb/tags -O /org/udd.debian.net/mirrors/debtags.txt
+  path: /org/udd.debian.net/mirrors/debtags.txt
+  table: debtags
+  schema: debtags

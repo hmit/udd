@@ -262,6 +262,18 @@ CREATE TABLE lintian (
 
 GRANT SELECT ON lintian TO PUBLIC;
 
+-- Debtags
+
+-- one row per <package, tag> *pair*
+CREATE TABLE debtags (
+  package TEXT NOT NULL,
+  tag TEXT NOT NULL
+);
+
+GRANT SELECT ON debtags TO PUBLIC;
+
+CREATE INDEX debtags_tag_idx ON debtags(tag);
+
 -- Orphaned packages
 
 CREATE TABLE orphaned_packages (

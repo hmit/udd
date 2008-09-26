@@ -13,6 +13,7 @@ general:
     bugs: exec DEBBUGS_CONFIG_FILE=/org/udd.debian.net/mirrors/bugs.debian.org/etc/config perl /org/udd.debian.net/udd/udd/bugs_gatherer.pl 
     carnivore: module udd.carnivore_gatherer
     lintian: module udd.lintian_gatherer
+    debtags: module udd.debtags_gatherer
     ubuntu-bugs: module udd.ubuntu_bugs_gatherer
   debug: 1
   timestamp-dir: /org/udd.debian.net/timestamps
@@ -209,6 +210,13 @@ lintian:
   path: /org/udd.debian.net/mirrors/lintian.log
   table: lintian
   schema: lintian
+
+debtags:
+  type: debtags
+  update-command: rm -f /org/udd.debian.net/mirrors/debtags.txt && wget -q http://svn.debian.org/viewsvn/*checkout*/debtags/tagdb/tags -O /org/udd.debian.net/mirrors/debtags.txt
+  path: /org/udd.debian.net/mirrors/debtags.txt
+  table: debtags
+  schema: debtags
 
 ubuntu-bugs:
    type: ubuntu-bugs

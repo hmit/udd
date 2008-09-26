@@ -27,6 +27,7 @@ DROP TABLE ubuntu_popcon_src CASCADE;
 DROP TABLE ubuntu_popcon_src_average CASCADE;
 DROP DOMAIN lintian_tag_type CASCADE;
 DROP TABLE lintian CASCADE;
+DROP TABLE debtags CASCADE;
 DROP TABLE orphaned_packages CASCADE;
 DROP TABLE migrations CASCADE;
 DROP TABLE upload_history CASCADE;
