@@ -66,6 +66,8 @@ class lintian_gatherer(gatherer):
       else:
         print "Can't parse line %d: %s" % (line_number, line)
 
+    cur.execute("DEALLOCATE lintian_insert")
+
 if __name__ == '__main__':
   main()
 
