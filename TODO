@@ -32,7 +32,6 @@ packages/sources
    operator '=' used with type text should only check the package name,
    with another pkg should check both pkg and version. Should be pretty
    DWIM.
-- (prio: high) Add Uploaders (zack want them to export that data to the BTS)
 
 bugs.debian.org
 ---------------

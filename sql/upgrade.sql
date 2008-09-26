@@ -16,3 +16,8 @@ ALTER TABLE archived_bugs add affects_experimental boolean;
 -- 2008-09-22: Properly name affects_stable and affects_unstable
 ALTER TABLE archived_bugs rename affects_sarchived_table to affects_stable;
 ALTER TABLE archived_bugs rename affects_unsarchived_table to affects_unstable;
+-- 2008-09-26: add maintainer_name and maintainer_email to sources.
+ALTER TABLE sources add maintainer_name text;
+ALTER TABLE sources add maintainer_email text;
+ALTER TABLE ubuntu_sources add maintainer_name text;
+ALTER TABLE ubuntu_sources add maintainer_email text;

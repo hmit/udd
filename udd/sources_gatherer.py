@@ -11,6 +11,7 @@ import tempfile
 from aux import ConfigException
 from aux import null_or_quote, quote
 from gatherer import gatherer
+import email.utils
 
 def get_gatherer(connection, config, source):
   return sources_gatherer(connection, config, source)
@@ -86,8 +87,10 @@ class sources_gatherer(gatherer):
     cur = self.cursor()
     for control in debian_bundle.deb822.Packages.iter_paragraphs(file):
       d = self.build_dict(control)
+      d['maintainer_name'], d['maintainer_email'] = email.utils.parseaddr(d['Maintainer'])
       query = """EXECUTE source_insert
-	  (%(Package)s, %(Version)s, %(Maintainer)s, %(Format)s, %(Files)s,
+	  (%(Package)s, %(Version)s, %(Maintainer)s,
+	  %(maintainer_name)s, %(maintainer_email)s, %(Format)s, %(Files)s,
 	  %(Uploaders)s, %(Binary)s, %(Architecture)s, %(Standards-Version)s,
 	  %(Homepage)s, %(Build-Depends)s, %(Build-Depends-Indep)s,
 	  %(Build-Conflicts)s, %(Build-Conflicts-Indep)s, %(Priority)s,
@@ -96,6 +99,16 @@ class sources_gatherer(gatherer):
 	  %(Original-Maintainer)s, %(Dm-Upload-Allowed)s)
 	  """ 
       cur.execute(query, d)
+      ud = {}
+      ud['Package'] = d['Package']
+      ud['Version'] = d['Version']
+      if d['Uploaders']:
+        for uploader in email.utils.getaddresses([d['Uploaders']]):
+          ud['Name'] = uploader[0]
+          ud['Email'] = uploader[1]
+	  query = """EXECUTE uploader_insert (%(Package)s, %(Version)s, %(Name)s,
+	    %(Email)s)"""
+	  cur.execute(query, ud)
 
   def tables(self):
     return [self.my_config['sources-table']]
@@ -104,6 +117,8 @@ class sources_gatherer(gatherer):
     src_cfg = self.my_config
 
     table = src_cfg['sources-table']
+
+    utable = src_cfg['uploaders-table']
 
     aux.debug = self.config['general']['debug']
 
@@ -114,9 +129,12 @@ class sources_gatherer(gatherer):
       cur.execute("DELETE from %s WHERE Distribution = '%s' AND\
 	release = '%s' AND component = '%s'"\
 	% (table, src_cfg['distribution'], src_cfg['release'], comp))
+      cur.execute("DELETE from %s WHERE Distribution = '%s' AND\
+	release = '%s' AND component = '%s'"\
+	% (utable, src_cfg['distribution'], src_cfg['release'], comp))
       try:
 	query = """PREPARE source_insert as INSERT INTO %s
-	  (Source, Version, Maintainer, Format, Files, Uploaders, Bin,
+	  (Source, Version, Maintainer, Maintainer_name, Maintainer_email, Format, Files, Uploaders, Bin,
 	  Architecture, Standards_Version, Homepage, Build_Depends,
 	  Build_Depends_Indep, Build_Conflicts, Build_Conflicts_Indep, Priority,
 	  Section, Vcs_Type, Vcs_Url, Vcs_Browser, python_version, checksums_sha1,
@@ -124,8 +142,13 @@ class sources_gatherer(gatherer):
 	  Distribution, Release, Component)
 	VALUES
 	  ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
-	  $17, $18, $19, $20, $21, $22, $23, $24, '%s', '%s', '%s')"""\
+	  $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, '%s', '%s', '%s')"""\
 	  % (table, src_cfg['distribution'], src_cfg['release'], comp)
+	cur.execute(query)
+	query = """PREPARE uploader_insert as INSERT INTO %s
+	  (Source, Version, Distribution, Release, Component, Name, Email) VALUES
+	  ($1, $2, '%s', '%s', '%s', $3, $4) """ % \
+	(utable, src_cfg['distribution'], src_cfg['release'], comp)
 	cur.execute(query)
 
 #	aux.print_debug("Reading file " + path)
@@ -142,6 +165,7 @@ class sources_gatherer(gatherer):
       except IOError, (e, message):
 	print "Could not read packages from %s: %s" % (path, message)
       cur.execute("DEALLOCATE source_insert")
+      cur.execute("DEALLOCATE uploader_insert")
 
     self.print_warnings()
 

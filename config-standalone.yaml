@@ -37,6 +37,7 @@ debian-lenny:
   distribution: debian
   packages-table: packages
   sources-table: sources
+  uploaders-table: uploaders
   packages-schema: packages
   sources-schema: sources
   release: lenny
@@ -52,6 +53,7 @@ debian-experimental:
   distribution: debian
   packages-table: packages
   sources-table: sources
+  uploaders-table: uploaders
   packages-schema: packages
   sources-schema: sources
   release: experimental
@@ -67,6 +69,7 @@ debian-sid:
   distribution: debian
   packages-table: packages
   sources-table: sources
+  uploaders-table: uploaders
   packages-schema: packages
   sources-schema: sources
   release: sid
@@ -81,6 +84,7 @@ debian-etch:
   distribution: debian
   packages-table: packages
   sources-table: sources
+  uploaders-table: uploaders
   packages-schema: packages
   sources-schema: sources
   release: etch
@@ -95,6 +99,7 @@ debian-backports-etch:
   distribution: debian-backports
   packages-table: packages
   sources-table: sources
+  uploaders-table: uploaders
   packages-schema: packages
   sources-schema: sources
   release: etch
@@ -109,6 +114,7 @@ debian-volatile-etch:
   distribution: debian-volatile
   packages-table: packages
   sources-table: sources
+  uploaders-table: uploaders
   packages-schema: packages
   sources-schema: sources
   release: etch
@@ -123,6 +129,7 @@ ubuntu-intrepid:
   release: intrepid
   packages-table: ubuntu_packages
   sources-table: ubuntu_sources
+  uploaders-table: ubuntu_uploaders
   packages-schema: packages
   sources-schema: sources
   update-command: /org/udd.debian.net/udd/scripts/sync-dist.sh archive.ubuntu.com::ubuntu/dists/intrepid/ /org/udd.debian.net/mirrors/ubuntu/intrepid
@@ -136,6 +143,7 @@ ubuntu-hardy:
   release: hardy
   packages-table: ubuntu_packages
   sources-table: ubuntu_sources
+  uploaders-table: ubuntu_uploaders
   packages-schema: packages
   sources-schema: sources
   update-command: /org/udd.debian.net/udd/scripts/sync-dist.sh archive.ubuntu.com::ubuntu/dists/hardy/ /org/udd.debian.net/mirrors/ubuntu/hardy

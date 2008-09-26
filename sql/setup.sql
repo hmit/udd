@@ -1,6 +1,7 @@
 -- Sources and Packages
 CREATE TABLE sources
-  (source text, version text, maintainer text, format text, files text,
+  (source text, version text, maintainer text,
+    maintainer_name text, maintainer_email text, format text, files text,
     uploaders text, bin text, architecture text, standards_version text,
     homepage text, build_depends text, build_depends_indep text,
     build_conflicts text, build_conflicts_indep text, priority text, section
@@ -11,6 +12,13 @@ CREATE TABLE sources
     PRIMARY KEY (source, version, distribution, release, component));
 
 GRANT SELECT ON sources TO PUBLIC;
+
+-- no primary key possible: duplicate rows are possible because duplicate entries
+-- in Uploaders: are allowed. yes.
+CREATE TABLE uploaders (source text, version text, distribution text,
+	release text, component text, name text, email text);
+   
+GRANT SELECT ON uploaders TO PUBLIC;
 
 CREATE INDEX sources_distrelcomp_idx on sources(distribution, release, component);
 
@@ -40,7 +48,8 @@ CREATE INDEX packages_distrelcomp_idx on packages(distribution, release, compone
 -- Ubuntu sources and packages
 
 CREATE TABLE ubuntu_sources
-  (source text, version text, maintainer text, format text, files text,
+  (source text, version text, maintainer text,
+    maintainer_name text, maintainer_email text, format text, files text,
     uploaders text, bin text, architecture text, standards_version text,
     homepage text, build_depends text, build_depends_indep text,
     build_conflicts text, build_conflicts_indep text, priority text, section
@@ -51,6 +60,13 @@ CREATE TABLE ubuntu_sources
     PRIMARY KEY (source, version, distribution, release, component));
 
 CREATE INDEX ubuntu_sources_distrelcomp_idx on ubuntu_sources(distribution, release, component);
+
+-- no primary key possible: duplicate rows are possible because duplicate entries
+-- in Uploaders: are allowed. yes.
+CREATE TABLE ubuntu_uploaders (source text, version text, distribution text,
+	release text, component text, name text, email text);
+   
+GRANT SELECT ON ubuntu_uploaders TO PUBLIC;
 
 CREATE TABLE ubuntu_packages_summary ( package text, version text, source text,
 source_version text, maintainer text, distribution text, release text,
