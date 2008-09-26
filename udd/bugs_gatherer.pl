@@ -16,7 +16,7 @@ use Time::Local;
 
 use Debbugs::Bugs qw{get_bugs};
 use Debbugs::Status qw{read_bug get_bug_status bug_presence};
-use Debbugs::Packages qw{binarytosource};
+use Debbugs::Packages qw{binarytosource getpkgsrc};
 use Debbugs::Config qw{:globals};
 use Debbugs::User;
 #use Debbugs::User qw{read_usertags};
@@ -134,6 +134,8 @@ sub run {
 	my $table = $src_config{table};
 	my $archived_table = $src_config{'archived-table'};
 
+	my %pkgsrc = %{getpkgsrc()};
+
 	my @modified_bugs;
 
 	if($src_config{archived}) {
@@ -214,6 +216,10 @@ sub run {
 			$binarytosource{$bug{package}} = (binarytosource($bug{package}))[0];
 		}
 		my $source = $binarytosource{$bug{package}};
+		my $psource = exists($pkgsrc{$bug{package}}) ? $pkgsrc{$bug{package}} : "(unknown)";
+		if ($source ne $psource) {
+			print "DIFFSRC: ".$bug_nr." ".$bug{package}." ".$source." ".$psource."\n";
+		}
 
 		if(not defined $source) {
 		# if source is not defined, then we $bug{package} is likely to
