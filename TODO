@@ -8,17 +8,11 @@ Priorities:
 
 General
 -------
-Main objective: get UDD into a state where it can be used for QA purposes.
-That's the first step towards world domination! (Universe is next! CvE)
-- (prio: high) user documentation, on the Debian wiki.
-  - tables structure, in a relatively friendly format
-  - some example queries
-- (prio: medium) primary key for tables which have none yet
 - (prio: high) make udd.py use a default config file, which can be overriden by "-f configfile".
-- (prio: medium) try to write http://qa.debian.org/~myon/sponsorstats/ (we should have all the data for that now)
 - (prio: high) find a way to only send mail after crons when there's something "interesting" to report
   + log timing info to a file (udd.log?), for both update and run
   + hide the uninteresting errors (like unable to open /org/bugs.debian.org/versions/pkg)
+- (prio: medium) do we want a "version" type?
 
 packages/sources
 ----------------
@@ -35,27 +29,12 @@ packages/sources
 
 bugs.debian.org
 ---------------
-- (prio: medium) compare rt_affects_* with bts.tz.net
-- (prio: medium) generate output using bts2ldap format, and check that the
-  result matches a fresh bts2ldap run done by Lucas
 - (prio: medium) Optimize bugs importing (again)
-- (prio: high) the source column is broken for many bugs. We should do as
-bugreport.cgi does, that is, use getpkgsrc() to get the hash, and then use the
-hash (apprently, needs to be checked precisely). It would also be a good
-idea to compare both approaches.
-Example broken bugs:
-499945, 'libtasn1-3', 'libtasn1-2'
-00:40 < tomv_w> Q_: select package,source from bugs where id='301134';
-00:40 < tomv_w> is another data problem in udd: gcjwebplugin has always been built 
-                by classpath.
 
 Other data sources
 ------------------
 - (prio: medium) DEHS
 - (prio: low) MIA
-- (prio: low) debtags
 - (prio: low) wanna-build
 - (prio: low) packages-arch-specific
 - (prio: low) edos.debian.net
-- (prio: low) version numbers, diffs and bugs for each package for each
-  derivative distro 
