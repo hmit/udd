@@ -173,8 +173,6 @@ sub run {
 	print "Deleting bugs: ",(time() - $t),"s\n" if $timing;
 	$t = time();
 
-	# Used to chache binary to source mappings
-	my %binarytosource = ();
 	my $location = $src_config{archived} ? 'archive' : 'db_h';
 	$table = $src_config{archived} ? $archived_table : $table;
 	# Read all bugs
@@ -212,21 +210,7 @@ sub run {
 		} qw{date log_modified};
 
 
-		if(not exists $binarytosource{$bug{package}}) {
-			$binarytosource{$bug{package}} = (binarytosource($bug{package}))[0];
-		}
-		my $source = $binarytosource{$bug{package}};
-		my $psource = exists($pkgsrc{$bug{package}}) ? $pkgsrc{$bug{package}} : "(unknown)";
-		if ($source ne $psource) {
-			print "DIFFSRC: ".$bug_nr." ".$bug{package}." ".$source." ".$psource."\n";
-		}
-
-		if(not defined $source) {
-		# if source is not defined, then we $bug{package} is likely to
-		# be a source package name (or the source package has the same
-		# name as the binary package). See #480818 for ex.
-			$source = $bug{package};
-		}
+		my $source = exists($pkgsrc{$bug{package}}) ? $pkgsrc{$bug{package}} : $bug{package};
 
 		#Calculate bug presence in distributions
 		my ($present_in_stable, $present_in_testing, $present_in_unstable, $present_in_experimental);
