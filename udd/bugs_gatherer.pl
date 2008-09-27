@@ -163,7 +163,7 @@ sub run {
 	$t = time();
 
 	foreach my $prefix ($table, $archived_table) {
-		foreach my $postfix (qw{_merged_with _found_in _fixed_in _tags}, '') {
+		foreach my $postfix (qw{_packages _merged_with _found_in _fixed_in _tags}, '') {
 			my $sth = $dbh->prepare("DELETE FROM $prefix$postfix WHERE id = \$1");
 			map {
 				$sth->execute($_) or die $!;
