@@ -11,7 +11,7 @@ import tempfile
 from aux import ConfigException
 from aux import null_or_quote, quote
 from gatherer import gatherer
-import email.utils
+import email.Utils
 
 def get_gatherer(connection, config, source):
   return sources_gatherer(connection, config, source)
@@ -87,7 +87,7 @@ class sources_gatherer(gatherer):
     cur = self.cursor()
     for control in debian_bundle.deb822.Packages.iter_paragraphs(file):
       d = self.build_dict(control)
-      d['maintainer_name'], d['maintainer_email'] = email.utils.parseaddr(d['Maintainer'])
+      d['maintainer_name'], d['maintainer_email'] = email.Utils.parseaddr(d['Maintainer'])
       query = """EXECUTE source_insert
 	  (%(Package)s, %(Version)s, %(Maintainer)s,
 	  %(maintainer_name)s, %(maintainer_email)s, %(Format)s, %(Files)s,
@@ -103,7 +103,7 @@ class sources_gatherer(gatherer):
       ud['Package'] = d['Package']
       ud['Version'] = d['Version']
       if d['Uploaders']:
-        for uploader in email.utils.getaddresses([d['Uploaders']]):
+        for uploader in email.Utils.getaddresses([d['Uploaders']]):
           ud['Name'] = uploader[0]
           ud['Email'] = uploader[1]
 	  query = """EXECUTE uploader_insert (%(Package)s, %(Version)s, %(Name)s,
