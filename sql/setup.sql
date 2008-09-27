@@ -104,6 +104,10 @@ CREATE TABLE bugs
     affects_testing boolean, affects_unstable boolean,
     affects_experimental boolean);
 
+CREATE TABLE bugs_packages
+  (id int REFERENCES bugs, package text, source text,
+	PRIMARY KEY (id, package));
+
 CREATE TABLE bugs_merged_with
   (id int REFERENCES bugs, merged_with int,
 PRIMARY KEY(id, merged_with));
@@ -125,6 +129,10 @@ CREATE TABLE archived_bugs
      last_modified timestamp, affects_stable boolean,
     affects_testing boolean, affects_unstable boolean,
     affects_experimental boolean);
+
+CREATE TABLE archived_bugs_packages
+  (id int REFERENCES archived_bugs, package text, source text,
+	PRIMARY KEY (id, package));
 
 CREATE TABLE archived_bugs_merged_with
   (id int REFERENCES archived_bugs, merged_with int,
@@ -183,11 +191,13 @@ AND ( package IN (SELECT DISTINCT package FROM packages p WHERE release = 'lenny
 OR source IN (SELECT DISTINCT source FROM sources WHERE release = 'lenny'));
 
 GRANT SELECT ON bugs TO PUBLIC;
+GRANT SELECT ON bugs_packages TO PUBLIC;
 GRANT SELECT ON bugs_merged_with TO PUBLIC;
 GRANT SELECT ON bugs_found_in TO PUBLIC;
 GRANT SELECT ON bugs_fixed_in TO PUBLIC;
 GRANT SELECT ON bugs_tags TO PUBLIC;
 GRANT SELECT ON archived_bugs TO PUBLIC;
+GRANT SELECT ON archived_bugs_packages TO PUBLIC;
 GRANT SELECT ON archived_bugs_merged_with TO PUBLIC;
 GRANT SELECT ON archived_bugs_found_in TO PUBLIC;
 GRANT SELECT ON archived_bugs_fixed_in TO PUBLIC;
