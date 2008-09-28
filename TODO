@@ -33,7 +33,18 @@ bugs.debian.org
 
 Other data sources
 ------------------
-- (prio: medium) DEHS
+- (prio: low) DEHS
+  table schema:
+  package
+  release # unstable, experimental
+  status # status (outdated, uptodate, newer, error) for unstable
+  version # version in unstable as seen by dehs
+  mangled_version # version in unstable after transformation
+  upstream # upstream version as seen by the unstable watch file
+  url # url for the detected tarball
+  last_check # 
+  Rest of the work pending an easy way to access the data (Atomo64 not really
+  willing to help, apparently)
 - (prio: low) MIA
 - (prio: low) wanna-build
 - (prio: low) packages-arch-specific
