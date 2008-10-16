@@ -13,6 +13,7 @@ Installation
 - Download the code (from SVN)
 - install postgresql-8.3 python-syck python-psycopg2 libdbi-perl
   libparams-validate-perl libdbd-pg-perl
+- install python-debian (if running etch, from backports)
 - setup postgresql-8.3 (see /usr/share/doc/postgresql-common/README.Debian.gz)
   and create a database:
      createdb -U user -E SQL_ASCII udd

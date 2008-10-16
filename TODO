@@ -26,10 +26,19 @@ packages/sources
    operator '=' used with type text should only check the package name,
    with another pkg should check both pkg and version. Should be pretty
    DWIM.
+-  (prio: high) configuration is currently annoying to do, because of the way
+   we describe each distribution separately. It would be easier to have a tree-like
+   description of what we want to import.
+- (prio: high) check that we really import everything we can (-proposed, etc)
 
 bugs.debian.org
 ---------------
 - (prio: medium) Optimize bugs importing (again)
+
+upload-history
+--------------
+- (prio: medium) < Rhonda> lucas: Can you propably add bpo upload history to udd?
+  godog prepared the data in http://qa.debian.org/~filippo/bpo/
 
 Other data sources
 ------------------
