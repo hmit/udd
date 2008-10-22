@@ -2,6 +2,8 @@
 
 require 'dbi'
 
+puts "Content-type: text/html\n\n"
+
 dbh = DBI::connect('DBI:Pg:udd')
 sth = dbh.prepare("select s.source, s.version, u.changed_by, nmu, key_id, cl.login
 from sources s, upload_history u, carnivore_emails ce1, carnivore_emails ce2, carnivore_login cl
@@ -29,9 +31,9 @@ while row = sth.fetch do
   uploaders[row['login']][row['changed_by']] << [ row['source'], row['version'], row['nmu'] ]
 end
 
-puts "Content-type: text/html\n"
 puts "<html><body>"
 puts "<h1>Sponsoring stats, powered by UDD!</h2>"
+puts "<p>Uploads in <b>bold</b> were NMUs.</p>"
 puts '<a href="http://svn.debian.org/wsvn/collab-qa/udd/web/cgi-bin/sponsorstats.cgi?op=file&rev=0&sc=0">source code</a><br/>'
 
 puts "<ul>"
