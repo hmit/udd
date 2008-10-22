@@ -17,7 +17,7 @@ use Time::Local;
 use Debbugs::Bugs qw{get_bugs};
 use Debbugs::Status qw{read_bug get_bug_status bug_presence};
 use Debbugs::Packages qw{binarytosource getpkgsrc};
-use Debbugs::Config qw{:globals};
+use Debbugs::Config qw{:globals %config};
 use Debbugs::User;
 #use Debbugs::User qw{read_usertags};
 
@@ -26,6 +26,7 @@ $YAML::Syck::ImplicitTyping = 1;
 #Used for measuring time
 our $t;
 our $timing = 0;
+our @archs = grep {  !/(^m68k$|^kfreebsd|^hurd)/ } @{$config{default_architectures}};
 
 # Return the list of usernames
 sub get_bugs_users {
@@ -220,16 +221,21 @@ sub run {
 		} else {
 			$present_in_stable =
 				bug_presence(bug => $bug_nr, status => \%bug,
-							 dist => 'stable');
+							 dist => 'stable',
+							 arch => @archs);
 			$present_in_testing =
 				bug_presence(bug => $bug_nr, status => \%bug,
-							 dist => 'testing');
+							 dist => 'testing',
+							 arch => @archs);
 			$present_in_unstable =
 				bug_presence(bug => $bug_nr, status => \%bug,
-							 dist => 'unstable');
+							 dist => 'unstable',
+							 arch => @archs);
 			$present_in_experimental =
 				bug_presence(bug => $bug_nr, status => \%bug,
-							 dist => 'experimental');
+							 dist => 'experimental',
+							 arch => @archs);
+
 			if(!defined($present_in_stable) or !defined($present_in_unstable) or !defined($present_in_testing) or !defined($present_in_experimental)) {
 				print "NUMBER: $bug_nr\n";
 			}
