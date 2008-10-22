@@ -222,19 +222,19 @@ sub run {
 			$present_in_stable =
 				bug_presence(bug => $bug_nr, status => \%bug,
 							 dist => 'stable',
-							 arch => @archs);
+							 arch => \@archs);
 			$present_in_testing =
 				bug_presence(bug => $bug_nr, status => \%bug,
 							 dist => 'testing',
-							 arch => @archs);
+							 arch => \@archs);
 			$present_in_unstable =
 				bug_presence(bug => $bug_nr, status => \%bug,
 							 dist => 'unstable',
-							 arch => @archs);
+							 arch => \@archs);
 			$present_in_experimental =
 				bug_presence(bug => $bug_nr, status => \%bug,
 							 dist => 'experimental',
-							 arch => @archs);
+							 arch => \@archs);
 
 			if(!defined($present_in_stable) or !defined($present_in_unstable) or !defined($present_in_testing) or !defined($present_in_experimental)) {
 				print "NUMBER: $bug_nr\n";

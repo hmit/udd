@@ -324,6 +324,7 @@ GRANT SELECT ON migrations TO PUBLIC;
 CREATE TABLE upload_history
  (id serial, package text, version text, date timestamp with time zone,
  changed_by text, maintainer text, nmu boolean, signed_by text, key_id text,
+ fingerprint text,
  PRIMARY KEY (id));
 
 CREATE TABLE upload_history_architecture

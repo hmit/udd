@@ -174,7 +174,7 @@ testing-migrations:
 upload-history:
   type: upload-history
   path: /org/udd.debian.net/tmp/upload-history
-  update-command: if [ ! -e /org/udd.debian.net/tmp/upload-history/ ]; then mkdir /org/udd.debian.net/tmp/upload-history/; fi; rm -rf /org/udd.debian.net/tmp/upload-history/*; wget -q -r --no-parent -nd -A debian-devel-* -P /org/udd.debian.net/tmp/upload-history http://qa.debian.org/~filippo/ddc/
+  update-command: if [ ! -e /org/udd.debian.net/tmp/upload-history/ ]; then mkdir /org/udd.debian.net/tmp/upload-history/; fi; lftp -c 'mirror -e -P http://qa.debian.org/~filippo/ddc/ /org/udd.debian.net/tmp/upload-history'
   schema: upload_history
   table: upload_history
 

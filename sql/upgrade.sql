@@ -21,3 +21,5 @@ ALTER TABLE sources add maintainer_name text;
 ALTER TABLE sources add maintainer_email text;
 ALTER TABLE ubuntu_sources add maintainer_name text;
 ALTER TABLE ubuntu_sources add maintainer_email text;
+-- 2008-10-05: add fingerprint column in upload_history
+ALTER TABLE upload_history add fingerprint text;

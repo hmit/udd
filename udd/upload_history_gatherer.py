@@ -34,8 +34,8 @@ class upload_history_gatherer(gatherer):
     cursor.execute("DELETE FROM " + self.my_config['table'])
 
     cursor.execute("PREPARE uh_insert AS INSERT INTO %s (id, package, \
-        version, date, changed_by, maintainer, nmu, signed_by, key_id) VALUES \
-	($1, $2, $3, $4, $5, $6, $7, $8, $9)" % self.my_config['table'])
+        version, date, changed_by, maintainer, nmu, signed_by, key_id, fingerprint) VALUES \
+	($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)" % self.my_config['table'])
     cursor.execute("PREPARE uh_arch_insert AS INSERT INTO %s (id, \
     	architecture) VALUES \
 	($1, $2)" % (self.my_config['table'] + '_architecture'))
@@ -43,7 +43,7 @@ class upload_history_gatherer(gatherer):
     	VALUES ($1, $2)" % (self.my_config['table'] + '_closes'))
 
     id = 0
-    for name in glob(path + '/debian-devel-*'):
+    for name in glob(path + '/debian-devel-changes.*'):
       # print name
       f = None
       if name.endswith(".gz"):
@@ -52,6 +52,7 @@ class upload_history_gatherer(gatherer):
 	f = open(name)
       
       current = {'id': id}
+      current['Fingerprint'] = 'N/A' # hack: some entries don't have fp
       last_field = None
       line_count = 0
       for line in f:
@@ -61,7 +62,7 @@ class upload_history_gatherer(gatherer):
 	if line == '':
 	  try:
 	    query = "EXECUTE uh_insert(%(id)s, %(Source)s, %(Version)s, %(Date)s, %(Changed-By)s, \
-		%(Maintainer)s, %(NMU)s, %(Key)s, %(Signed-By)s)"
+		%(Maintainer)s, %(NMU)s, %(Signed-By)s, %(Key)s, %(Fingerprint)s)"
 	    cursor.execute(query, current)
 	    for arch in set(current['Architecture'].split()):
 	      current['arch'] = arch
@@ -78,6 +79,7 @@ class upload_history_gatherer(gatherer):
 	    #raise
 	  id += 1
 	  current = {'id': id}
+	  current['Fingerprint'] = 'N/A' # hack: some entries don't have fp
 	  last_field = None
 	  continue
 
