@@ -26,7 +26,7 @@ class ubuntu_bugs_gatherer(gatherer):
 
   def run(self):
     my_config = self.my_config
-    num_fetchers = 8
+    num_fetchers = 3
     num_writers = 1
     bugs = self.fetch_all_bugs()
     httpq = Queue()
