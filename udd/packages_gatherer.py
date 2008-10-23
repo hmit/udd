@@ -105,8 +105,8 @@ class packages_gatherer(gatherer):
 	if len(split) == 1:
 	  d['Source_Version'] = d['Version']
 	else:
-	  d['Source'] = aux.quote(split[0])
-	  d['Source_Version'] = aux.quote(split[1].strip("()"))
+	  d['Source'] = split[0]
+	  d['Source_Version'] = split[1].strip("()")
 
       query = """EXECUTE package_insert
 	  (%(Package)s, %(Version)s, %(Architecture)s, %(Maintainer)s,
