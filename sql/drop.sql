@@ -42,3 +42,4 @@ DROP TABLE ubuntu_bugs_duplicates CASCADE;
 DROP TABLE ubuntu_bugs_subscribers CASCADE;
 DROP TABLE ubuntu_bugs_tags CASCADE;
 DROP TABLE ubuntu_bugs_tasks CASCADE;
+DROP TYPE bugs_severity CASCADE;
