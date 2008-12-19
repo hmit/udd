@@ -25,12 +25,12 @@ class packages_gatherer(gatherer):
   mandatory = {'Package': 0, 'Version': 0, 'Architecture': 0, 'Maintainer': 0,
       'Description': 0}
   non_mandatory = {'Source': 0, 'Essential': 0, 'Depends': 0, 'Recommends': 0,
-      'Suggests': 0, 'Enhances': 0, 'Pre-Depends': 0, 'Installed-Size': 0,
+      'Suggests': 0, 'Enhances': 0, 'Pre-Depends': 0, 'Breaks':0, 'Installed-Size': 0,
       'Homepage': 0, 'Size': 0, 'Build-Essential':0, 'Origin':0,
       'SHA1':0, 'Replaces':0, 'Section':0, 'MD5sum':0, 'Bugs':0, 'Priority':0,
       'Tag':0, 'Task':0, 'Python-Version':0, 'Provides':0, 'Conflicts':0,
       'SHA256':0, 'Original-Maintainer':0}
-  ignorable = {'Filename':0}
+  ignorable = {'Filename':0, 'Npp-Name':0, 'Npp-Mimetype':0, 'Npp-Applications':0, 'Python-Runtime':0, 'Npp-File':0, 'Npp-Description':0, 'Url':0, 'Gstreamer-Elements':0, 'Gstreamer-Version':0, 'Gstreamer-Decoders':0, 'Gstreamer-Uri-Sinks':0, 'Gstreamer-Encoders':0, 'Gstreamer-Uri-Sources':0 }
 
   warned_about = {}
   # A mapping from <package-name><version> to 1 If <package-name><version> is
@@ -112,7 +112,7 @@ class packages_gatherer(gatherer):
 	  (%(Package)s, %(Version)s, %(Architecture)s, %(Maintainer)s,
 	  %(Description)s, %(Source)s, %(Source_Version)s, %(Essential)s,
 	  %(Depends)s, %(Recommends)s, %(Suggests)s, %(Enhances)s,
-	  %(Pre-Depends)s, %(Installed-Size)s, %(Homepage)s, %(Size)s,
+	  %(Pre-Depends)s, %(Breaks)s, %(Installed-Size)s, %(Homepage)s, %(Size)s,
 	  %(Build-Essential)s, %(Origin)s, %(SHA1)s,
 	  %(Replaces)s, %(Section)s, %(MD5sum)s, %(Bugs)s, %(Priority)s,
 	  %(Tag)s, %(Task)s, %(Python-Version)s, %(Provides)s,
@@ -162,7 +162,7 @@ class packages_gatherer(gatherer):
 	  cur.execute("""PREPARE package_insert AS INSERT INTO %s
 	    (Package, Version, Architecture, Maintainer, Description, Source,
 	    Source_Version, Essential, Depends, Recommends, Suggests, Enhances,
-	    Pre_Depends, Installed_Size, Homepage, Size,
+	    Pre_Depends, Breaks, Installed_Size, Homepage, Size,
 	    build_essential, origin, sha1, replaces, section,
             md5sum, bugs, priority, tag, task, python_version,
             provides, conflicts, sha256, original_maintainer,

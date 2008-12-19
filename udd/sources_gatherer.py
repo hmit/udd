@@ -26,9 +26,11 @@ class sources_gatherer(gatherer):
       'Checksums-Sha256':0, 'Original-Maintainer':0, 'Dm-Upload-Allowed':0} 
   ignorable = {'Vcs-Arch': 0, 'Vcs-Bzr': 0,
       'Vcs-Cvs': 0, 'Vcs-Darcs': 0, 'Vcs-Git': 0, 'Vcs-Hg': 0, 'Vcs-Svn': 0,
-      'X-Vcs-Browser': 0, 'Vcs-Browser': 0, 'X-Vcs-Bzr': 0, 'X-Vcs-Darcs': 0, 'X-Vcs-Svn': 0,
-      'Directory':0}
-  vcs = { 'Arch':0, 'Bzr':0, 'Cvs':0, 'Darcs':0, 'Git':0, 'Hg':0, 'Svn':0}
+      'Vcs-Mtn':0,
+      'X-Vcs-Browser': 0, 'Vcs-Browser': 0, 'X-Vcs-Bzr': 0, 'X-Vcs-Darcs': 0, 'X-Vcs-Svn': 0, 'Vcs-Browse':0,
+      'Directory':0, 'Comment':0, 'Origin':0, 'Url':0, 'X-Collab-Maint':0, 'Autobuild':0, 'Vcs-Cvs:':0, 'Python-Standards-Version':0}
+      #Vcs-Cvs: is caused by a bug in python-debian, apparently.
+  vcs = { 'Arch':0, 'Bzr':0, 'Cvs':0, 'Darcs':0, 'Git':0, 'Hg':0, 'Svn':0, 'Mtn':0}
 
   warned_about = {}
 
@@ -67,6 +69,8 @@ class sources_gatherer(gatherer):
         d['Vcs-Browser'] = control["Vcs-Browser"]
     elif control.has_key("X-Vcs-Browser"):  
         d['Vcs-Browser'] = control["X-Vcs-Browser"]
+    if control.has_key("Vcs-Browse"):  # common typo
+        d['Vcs-Browser'] = control["Vcs-Browse"]
     else:
         d['Vcs-Browser'] = None
     
