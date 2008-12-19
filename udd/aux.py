@@ -30,7 +30,11 @@ class ConfigException(Exception):
 
 def open_connection(config):
   """Open the connection to the database and return it"""
-  return psycopg2.connect("dbname=" + config['general']['dbname'])
+  if config['general']['dbport']:
+    p = " port=" + str(config['general']['dbport'])
+  else:
+    p = ""
+  return psycopg2.connect("dbname=" + config['general']['dbname'] + p)
 
 __locks = {}
 def lock(config, source):

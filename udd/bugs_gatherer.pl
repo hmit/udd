@@ -304,8 +304,14 @@ sub main {
 	my $source = $ARGV[2];
 
 	my $dbname = $config->{general}->{dbname};
+	my $dbport;
+	if ($config->{general}->{dbport} ne '') {
+	  $dbport = ";port=".$config->{general}->{dbport};
+	} else {
+	  $dbport = "";
+	}
 	# Connection to DB
-	my $dbh = DBI->connect("dbi:Pg:dbname=$dbname");
+	my $dbh = DBI->connect("dbi:Pg:dbname=$dbname".$dbport);
 	# We want to commit the transaction as a hole at the end
 	$dbh->{AutoCommit} = 0;
 	$dbh->do('SET CONSTRAINTS ALL DEFERRED');
