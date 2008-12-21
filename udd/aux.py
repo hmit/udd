@@ -30,7 +30,7 @@ class ConfigException(Exception):
 
 def open_connection(config):
   """Open the connection to the database and return it"""
-  if config['general']['dbport']:
+  if 'dbport' in config['general']:
     p = " port=" + str(config['general']['dbport'])
   else:
     p = ""
