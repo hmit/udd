@@ -232,13 +232,18 @@ class ubuntu_bugs_gatherer(gatherer):
           time.strptime(tm['date-triaged'], "%a, %d %b %Y %H:%M:%S -0000"))
       else:
         triaged = ''
+      if tm['date-left-closed']:
+        leftclosed = time.strftime("%a, %d %b %Y %H:%M:%S +0000",
+          time.strptime(tm['date-left-closed'], "%a, %d %b %Y %H:%M:%S -0000"))
+      else:
+        leftclosed = ''
       # check for missing headers
-      s = set(tm.keys()) - set(['task', 'reporter', 'assignee', 'status', 'date-created', 'importance', 'component', 'milestone', 'date-assigned', 'date-closed', 'date-incomplete', 'date-confirmed', 'date-inprogress', 'date-fix-committed', 'date-fix-released', 'watch', 'date-left-new', 'date-triaged'])
+      s = set(tm.keys()) - set(['task', 'reporter', 'assignee', 'status', 'date-created', 'importance', 'component', 'milestone', 'date-assigned', 'date-closed', 'date-incomplete', 'date-confirmed', 'date-inprogress', 'date-fix-committed', 'date-fix-released', 'watch', 'date-left-new', 'date-triaged', 'date-left-closed'])
       if len(s) > 0:
         print s
         print t
-      c.execute('insert into ubuntu_bugs_tasks values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', (bugno, pkg, distro,
+      c.execute('insert into ubuntu_bugs_tasks values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', (bugno, pkg, distro,
         tm['status'], tm['importance'], tm['component'], tm['milestone'], created,
-        assigned, closed, incomplete, confirmed, inprogress, fixcommitted, fixreleased, leftnew, triaged, tm['watch'],
+        assigned, closed, incomplete, confirmed, inprogress, fixcommitted, fixreleased, leftnew, triaged, leftclosed, tm['watch'],
         rep_login, rep_name, ass_login, ass_name))
 
