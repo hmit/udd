@@ -25,3 +25,4 @@ ALTER TABLE ubuntu_sources add maintainer_email text;
 ALTER TABLE upload_history add fingerprint text;
 -- 2008-12-19: add breaks column in packages
 ALTER TABLE packages add breaks text;
+ALTER TABLE ubuntu_packages add breaks text;
