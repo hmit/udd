@@ -18,6 +18,8 @@ class lintian_gatherer(gatherer):
   # (stolen from Russ Allbery, thanks dude)
   output_re = re.compile("([EWIXO]): (\S+)(?: (\S+))?: (\S+)(?:\s+(.*))?");
 
+  ignore_re = re.compile("^((gpg|secmem usage|warning|(/bin/)?tar|internal error|/usr/bin/xgettext|ERROR): |     )");
+
   code_to_tag_type_map = {
     "E": "error",
     "W": "warning",
@@ -63,8 +65,8 @@ class lintian_gatherer(gatherer):
 
         cur.execute("EXECUTE lintian_insert (%s, %s, %s, %s)"\
           % (quote(pkg), pkg_type, quote(tag), quote(lintian_gatherer.code_to_tag_type_map[code])));
-      else:
-        print "Can't parse line %d: %s" % (line_number, line)
+      elif not lintian_gatherer.ignore_re.match(line):
+        print "Can't parse line %d: %s" % (line_number, line.rstrip())
 
     cur.execute("DEALLOCATE lintian_insert")
 
