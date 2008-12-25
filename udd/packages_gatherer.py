@@ -11,6 +11,7 @@ import tempfile
 from aux import ConfigException
 import psycopg2
 from gatherer import gatherer
+import re
 
 def get_gatherer(connection, config, source):
   return packages_gatherer(connection, config, source)
@@ -30,7 +31,8 @@ class packages_gatherer(gatherer):
       'SHA1':0, 'Replaces':0, 'Section':0, 'MD5sum':0, 'Bugs':0, 'Priority':0,
       'Tag':0, 'Task':0, 'Python-Version':0, 'Provides':0, 'Conflicts':0,
       'SHA256':0, 'Original-Maintainer':0}
-  ignorable = {'Filename':0, 'Npp-Name':0, 'Npp-Mimetype':0, 'Npp-Applications':0, 'Python-Runtime':0, 'Npp-File':0, 'Npp-Description':0, 'Url':0, 'Gstreamer-Elements':0, 'Gstreamer-Version':0, 'Gstreamer-Decoders':0, 'Gstreamer-Uri-Sinks':0, 'Gstreamer-Encoders':0, 'Gstreamer-Uri-Sources':0 }
+  ignorable = {'Filename':0, 'Npp-Name':0, 'Npp-Mimetype':0, 'Npp-Applications':0, 'Python-Runtime':0, 'Npp-File':0, 'Npp-Description':0, 'Url':0, 'Gstreamer-Elements':0, 'Gstreamer-Version':0, 'Gstreamer-Decoders':0, 'Gstreamer-Uri-Sinks':0, 'Gstreamer-Encoders':0, 'Gstreamer-Uri-Sources':0, 'url':0, 'Vdr-PatchLevel':0, 'originalmaintainer':0 }
+  ignorable_re = re.compile("^(Original-|Origianl-|Debian-|X-Original-|Upstream-)")
 
   warned_about = {}
   # A mapping from <package-name><version> to 1 If <package-name><version> is
@@ -62,10 +64,11 @@ class packages_gatherer(gatherer):
 	d[k] = control[k]
     for k in control.keys():
       if k not in packages_gatherer.non_mandatory and k not in packages_gatherer.mandatory and k not in packages_gatherer.ignorable:
-	if k not in packages_gatherer.warned_about:
-	  packages_gatherer.warned_about[k] = 1
-	else:
-	  packages_gatherer.warned_about[k] += 1
+        if not packages_gatherer.ignorable_re.match(k):
+	  if k not in packages_gatherer.warned_about:
+	    packages_gatherer.warned_about[k] = 1
+	  else:
+	    packages_gatherer.warned_about[k] += 1
     return d
 
   def import_packages(self, sequence, cur):
@@ -199,4 +202,4 @@ class packages_gatherer(gatherer):
 
   def print_warnings(self):
     for key in packages_gatherer.warned_about:
-      print("Unknown key: %s appeared %d times" % (key, packages_gatherer.warned_about[key]))
+      print("[Packages] Unknown key %s appeared %d times" % (key, packages_gatherer.warned_about[key]))

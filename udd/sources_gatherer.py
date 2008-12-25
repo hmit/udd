@@ -12,6 +12,7 @@ from aux import ConfigException
 from aux import null_or_quote, quote
 from gatherer import gatherer
 import email.Utils
+import re
 
 def get_gatherer(connection, config, source):
   return sources_gatherer(connection, config, source)
@@ -27,9 +28,10 @@ class sources_gatherer(gatherer):
   ignorable = {'Vcs-Arch': 0, 'Vcs-Bzr': 0,
       'Vcs-Cvs': 0, 'Vcs-Darcs': 0, 'Vcs-Git': 0, 'Vcs-Hg': 0, 'Vcs-Svn': 0,
       'Vcs-Mtn':0,
-      'X-Vcs-Browser': 0, 'Vcs-Browser': 0, 'X-Vcs-Bzr': 0, 'X-Vcs-Darcs': 0, 'X-Vcs-Svn': 0, 'Vcs-Browse':0,
-      'Directory':0, 'Comment':0, 'Origin':0, 'Url':0, 'X-Collab-Maint':0, 'Autobuild':0, 'Vcs-Cvs:':0, 'Python-Standards-Version':0}
+      'X-Vcs-Browser': 0, 'Vcs-Browser': 0, 'X-Vcs-Bzr': 0, 'X-Vcs-Darcs': 0, 'X-Vcs-Svn': 0, 'X-Vcs-Hg':0, 'X-Vcs-Git':0, 'Vcs-Browse':0,
+      'Directory':0, 'Comment':0, 'Origin':0, 'Url':0, 'X-Collab-Maint':0, 'Autobuild':0, 'Vcs-Cvs:':0, 'Python-Standards-Version':0, 'url':0, 'originalmaintainer':0}
       #Vcs-Cvs: is caused by a bug in python-debian, apparently.
+  ignorable_re = re.compile("^(Original-|Origianl-|Debian-|X-Original-|Upstream-)")
   vcs = { 'Arch':0, 'Bzr':0, 'Cvs':0, 'Darcs':0, 'Git':0, 'Hg':0, 'Svn':0, 'Mtn':0}
 
   warned_about = {}
@@ -76,10 +78,11 @@ class sources_gatherer(gatherer):
     
     for k in control.keys():
       if k not in sources_gatherer.mandatory and k not in sources_gatherer.non_mandatory and k not in sources_gatherer.ignorable:
-	if k not in sources_gatherer.warned_about:
-	  sources_gatherer.warned_about[k] = 1
-	else:
-	  sources_gatherer.warned_about[k] += 1
+        if not sources_gatherer.ignorable_re.match(k):
+          if k not in sources_gatherer.warned_about:
+            sources_gatherer.warned_about[k] = 1
+          else:
+            sources_gatherer.warned_about[k] += 1
     return d
 
   def import_sources(self, file):
@@ -93,7 +96,7 @@ class sources_gatherer(gatherer):
       d = self.build_dict(control)
       d['maintainer_name'], d['maintainer_email'] = email.Utils.parseaddr(d['Maintainer'])
       query = """EXECUTE source_insert
-	  (%(Package)s, %(Version)s, %(Maintainer)s,
+         (%(Package)s, %(Version)s, %(Maintainer)s,
 	  %(maintainer_name)s, %(maintainer_email)s, %(Format)s, %(Files)s,
 	  %(Uploaders)s, %(Binary)s, %(Architecture)s, %(Standards-Version)s,
 	  %(Homepage)s, %(Build-Depends)s, %(Build-Depends-Indep)s,
@@ -186,4 +189,4 @@ class sources_gatherer(gatherer):
 
   def print_warnings(self):
     for key in sources_gatherer.warned_about:
-      print "Unknown key %s appeared %d times" % (key, sources_gatherer.warned_about[key])
+      print "[Sources] Unknown key %s appeared %d times" % (key, sources_gatherer.warned_about[key])
