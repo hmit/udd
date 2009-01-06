@@ -12,7 +12,8 @@ Installation
 ------------
 - Download the code (from SVN)
 - install postgresql-8.3 python-syck python-psycopg2 libdbi-perl
-  libparams-validate-perl libdbd-pg-perl
+  libparams-validate-perl libdbd-pg-perl postgresql-autodoc
+  libdbi-ruby libdbd-pg-ruby
 - install python-debian (if running etch, from backports)
 - setup postgresql-8.3 (see /usr/share/doc/postgresql-common/README.Debian.gz)
   and create a database:
