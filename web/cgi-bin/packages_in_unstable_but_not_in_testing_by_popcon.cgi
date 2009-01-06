@@ -6,7 +6,7 @@ use warnings;
 use DBI;
 use CGI;
 
-my $dbh = DBI->connect("dbi:Pg:dbname=udd") or die $!;
+my $dbh = DBI->connect("dbi:Pg:dbname=udd;port=5441;host=localhost", "guest") or die $!;
 my $sth = $dbh->prepare(<<EOF
 SELECT DISTINCT pkgs.package, insts
 FROM packages_summary pkgs, popcon

@@ -21,7 +21,7 @@ order by insts ASC
 EOF
 ;
 
-my $dbh = DBI->connect("dbi:Pg:dbname=udd") or die $!;
+my $dbh = DBI->connect("dbi:Pg:dbname=udd;port=5441;host=localhost", "guest") or die $!;
 my $sth = $dbh->prepare($s);
 
 $sth->execute() or die $!;

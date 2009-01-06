@@ -4,7 +4,7 @@ require 'dbi'
 
 puts "Content-type: text/plain\n\n"
 
-dbh = DBI::connect('DBI:Pg:udd')
+dbh = DBI::connect('DBI:Pg:dbname=udd;port=5441;host=localhost', 'guest')
 sth = dbh.prepare("select package, count(distinct bugs.bug)
 from ubuntu_bugs_tasks tasks,ubuntu_bugs bugs
 where tasks.bug = bugs.bug
