@@ -93,6 +93,10 @@ class packages_gatherer(gatherer):
       # We just use the first line of the description
       if 'Description' in d:
 	d['Description'] = d['Description'].split("\n",1)[0]
+	if len(d['Description'].split("\n",1)) > 1:
+	  d['Long_Description'] = d['Description'].split("\n",1)[1]
+	else:
+	  d['Long_Description'] = ''
 
       # Convert numbers to numbers
       for f in ['Installed-Size', 'Size']:
@@ -113,7 +117,7 @@ class packages_gatherer(gatherer):
 
       query = """EXECUTE package_insert
 	  (%(Package)s, %(Version)s, %(Architecture)s, %(Maintainer)s,
-	  %(Description)s, %(Source)s, %(Source_Version)s, %(Essential)s,
+	  %(Description)s, %(Long_Description)s, %(Source)s, %(Source_Version)s, %(Essential)s,
 	  %(Depends)s, %(Recommends)s, %(Suggests)s, %(Enhances)s,
 	  %(Pre-Depends)s, %(Breaks)s, %(Installed-Size)s, %(Homepage)s, %(Size)s,
 	  %(Build-Essential)s, %(Origin)s, %(SHA1)s,
@@ -163,7 +167,7 @@ class packages_gatherer(gatherer):
 	path = os.path.join(src_cfg['directory'], comp, 'binary-' + arch, 'Packages.gz')
 	try:
 	  cur.execute("""PREPARE package_insert AS INSERT INTO %s
-	    (Package, Version, Architecture, Maintainer, Description, Source,
+	    (Package, Version, Architecture, Maintainer, Description, Long_Description, Source,
 	    Source_Version, Essential, Depends, Recommends, Suggests, Enhances,
 	    Pre_Depends, Breaks, Installed_Size, Homepage, Size,
 	    build_essential, origin, sha1, replaces, section,
@@ -173,7 +177,7 @@ class packages_gatherer(gatherer):
 	  VALUES
 	    ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15,
 	      $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28,
-	      $29, $30, $31, $32, '%s', '%s', '%s')
+	      $29, $30, $31, $32, $33, '%s', '%s', '%s')
 	    """ %  (table, self._distr, src_cfg['release'], comp))
 #	  aux.print_debug("Reading file " + path)
 	  # Copy content from gzipped file to temporary file, so that apt_pkg is

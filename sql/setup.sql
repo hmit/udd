@@ -29,7 +29,7 @@ PRIMARY KEY (package, version, distribution, release, component));
 
 CREATE TABLE packages
   (package text, version text, architecture text, maintainer text, description
-    text, source text, source_version text, essential text, depends text,
+    text, long_description text, source text, source_version text, essential text, depends text,
     recommends text, suggests text, enhances text, pre_depends text, breaks text,
     installed_size int, homepage text, size int,
     build_essential text, origin text, sha1 text, replaces text, section text,
@@ -75,7 +75,7 @@ PRIMARY KEY (package, version, distribution, release, component));
 
 CREATE TABLE ubuntu_packages
   (package text, version text, architecture text, maintainer text, description
-    text, source text, source_version text, essential text, depends text,
+    text, long_description text, source text, source_version text, essential text, depends text,
     recommends text, suggests text, enhances text, pre_depends text, breaks text,
     installed_size int, homepage text, size int,
     build_essential text, origin text, sha1 text, replaces text, section text,

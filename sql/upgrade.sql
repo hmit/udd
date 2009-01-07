@@ -26,3 +26,6 @@ ALTER TABLE upload_history add fingerprint text;
 -- 2008-12-19: add breaks column in packages
 ALTER TABLE packages add breaks text;
 ALTER TABLE ubuntu_packages add breaks text;
+-- 2009-01-07: add long_description column
+ALTER TABLE packages add long_description text;
+ALTER TABLE ubuntu_packages add long_description text;
