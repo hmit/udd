@@ -397,3 +397,14 @@ GRANT SELECT ON ubuntu_bugs_duplicates TO PUBLIC;
 GRANT SELECT ON ubuntu_bugs_subscribers TO PUBLIC;
 GRANT SELECT ON ubuntu_bugs_tags TO PUBLIC;
 GRANT SELECT ON ubuntu_bugs_tasks TO PUBLIC;
+
+CREATE VIEW all_sources AS
+SELECT * FROM sources
+UNION ALL SELECT * FROM ubuntu_sources;
+
+CREATE VIEW all_packages AS
+SELECT * FROM packages
+UNION ALL SELECT * FROM ubuntu_packages;
+
+GRANT SELECT ON all_sources TO PUBLIC;
+GRANT SELECT ON all_packages TO PUBLIC;

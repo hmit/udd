@@ -29,3 +29,11 @@ ALTER TABLE ubuntu_packages add breaks text;
 -- 2009-01-07: add long_description column
 ALTER TABLE packages add long_description text;
 ALTER TABLE ubuntu_packages add long_description text;
+CREATE VIEW all_sources AS
+SELECT * FROM sources
+UNION ALL SELECT * FROM ubuntu_sources;
+CREATE VIEW all_packages AS
+SELECT * FROM packages
+UNION ALL SELECT * FROM ubuntu_packages;
+GRANT SELECT ON all_sources TO PUBLIC;
+GRANT SELECT ON all_packages TO PUBLIC;
