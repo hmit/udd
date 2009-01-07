@@ -27,6 +27,9 @@ source_version text, maintainer text, distribution text, release text,
 component text,
 PRIMARY KEY (package, version, distribution, release, component));
 
+CREATE TABLE all_packages_distrelcomparch (distribution text, release text,
+component text, architecture text);
+
 CREATE TABLE packages
   (package text, version text, architecture text, maintainer text, description
     text, long_description text, source text, source_version text, essential text, depends text,
@@ -41,6 +44,7 @@ CREATE TABLE packages
 
 GRANT SELECT ON packages TO PUBLIC;
 GRANT SELECT ON packages_summary TO PUBLIC;
+GRANT SELECT ON all_packages_distrelcomparch TO PUBLIC;
 
 CREATE INDEX packages_source_idx on packages(source);
 CREATE INDEX packages_distrelcomp_idx on packages(distribution, release, component);

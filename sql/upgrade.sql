@@ -37,3 +37,7 @@ SELECT * FROM packages
 UNION ALL SELECT * FROM ubuntu_packages;
 GRANT SELECT ON all_sources TO PUBLIC;
 GRANT SELECT ON all_packages TO PUBLIC;
+
+CREATE TABLE all_packages_distrelcomparch (distribution text, release text,
+component text, architecture text);
+GRANT SELECT ON all_packages_distrelcomparch TO PUBLIC;

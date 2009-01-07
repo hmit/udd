@@ -201,6 +201,11 @@ class packages_gatherer(gatherer):
         package, version, source, source_version, maintainer, distribution,
         release, component
       FROM %s""" % (table + '_summary', table));
+    cur.execute("DELETE FROM all_packages_distrelcomparch");
+    cur.execute("""INSERT INTO all_packages_distrelcomparch
+      (distribution, release, component, architecture)
+      SELECT DISTINCT distribution, release, component, architecture
+      FROM all_packages""")
 
     self.print_warnings()
 
