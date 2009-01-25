@@ -31,8 +31,8 @@ class packages_gatherer(gatherer):
       'SHA1':0, 'Replaces':0, 'Section':0, 'MD5sum':0, 'Bugs':0, 'Priority':0,
       'Tag':0, 'Task':0, 'Python-Version':0, 'Provides':0, 'Conflicts':0,
       'SHA256':0, 'Original-Maintainer':0}
-  ignorable = {'Filename':0, 'Npp-Name':0, 'Npp-Mimetype':0, 'Npp-Applications':0, 'Python-Runtime':0, 'Npp-File':0, 'Npp-Description':0, 'Url':0, 'Gstreamer-Elements':0, 'Gstreamer-Version':0, 'Gstreamer-Decoders':0, 'Gstreamer-Uri-Sinks':0, 'Gstreamer-Encoders':0, 'Gstreamer-Uri-Sources':0, 'url':0, 'Vdr-PatchLevel':0, 'originalmaintainer':0 }
-  ignorable_re = re.compile("^(Original-|Origianl-|Debian-|X-Original-|Upstream-)")
+  ignorable = {'Filename':0, 'Npp-Name':0, 'Npp-Mimetype':0, 'Npp-Applications':0, 'Python-Runtime':0, 'Npp-File':0, 'Npp-Description':0, 'Url':0, 'Gstreamer-Elements':0, 'Gstreamer-Version':0, 'Gstreamer-Decoders':0, 'Gstreamer-Uri-Sinks':0, 'Gstreamer-Encoders':0, 'Gstreamer-Uri-Sources':0, 'url':0, 'Vdr-PatchLevel':0, 'Vdr-Patchlevel':0, 'originalmaintainer':0, 'Originalmaintainer':0, 'Build-Recommends':0 }
+  ignorable_re = re.compile("^(Original-|Origianl-|Orginal-|Debian-|X-Original-|Upstream-)")
 
   warned_about = {}
   # A mapping from <package-name><version> to 1 If <package-name><version> is
@@ -92,11 +92,11 @@ class packages_gatherer(gatherer):
 
       # We just use the first line of the description
       if 'Description' in d:
-	d['Description'] = d['Description'].split("\n",1)[0]
 	if len(d['Description'].split("\n",1)) > 1:
 	  d['Long_Description'] = d['Description'].split("\n",1)[1]
 	else:
 	  d['Long_Description'] = ''
+	d['Description'] = d['Description'].split("\n",1)[0]
 
       # Convert numbers to numbers
       for f in ['Installed-Size', 'Size']:

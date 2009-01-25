@@ -18,7 +18,7 @@ class lintian_gatherer(gatherer):
   # (stolen from Russ Allbery, thanks dude)
   output_re = re.compile("([EWIXO]): (\S+)(?: (\S+))?: (\S+)(?:\s+(.*))?");
 
-  ignore_re = re.compile("^((gpg|secmem usage|warning|(/bin/)?tar|internal error|/usr/bin/xgettext|ERROR): |     )");
+  ignore_re = re.compile("^((gpg|secmem usage|warning|(/bin/)?tar|internal error|/usr/bin/xgettext|ERROR): |     |Use of uninitialized value in numeric lt .*)");
 
   code_to_tag_type_map = {
     "E": "error",

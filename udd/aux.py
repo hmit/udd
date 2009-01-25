@@ -1,6 +1,6 @@
 """Auxillary methods for the UDD"""
 
-import syck
+import yaml
 import sys
 import psycopg2
 from os import path
@@ -54,7 +54,7 @@ def unlock(config, source):
 
 def load_config(str):
   """Load and check configuration from the string"""
-  config = syck.load(str)
+  config = yaml.load(str)
   if not 'general' in config:
     raise ConfigException('general section not specified')
   

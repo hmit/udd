@@ -29,9 +29,9 @@ class sources_gatherer(gatherer):
       'Vcs-Cvs': 0, 'Vcs-Darcs': 0, 'Vcs-Git': 0, 'Vcs-Hg': 0, 'Vcs-Svn': 0,
       'Vcs-Mtn':0,
       'X-Vcs-Browser': 0, 'Vcs-Browser': 0, 'X-Vcs-Bzr': 0, 'X-Vcs-Darcs': 0, 'X-Vcs-Svn': 0, 'X-Vcs-Hg':0, 'X-Vcs-Git':0, 'Vcs-Browse':0,
-      'Directory':0, 'Comment':0, 'Origin':0, 'Url':0, 'X-Collab-Maint':0, 'Autobuild':0, 'Vcs-Cvs:':0, 'Python-Standards-Version':0, 'url':0, 'originalmaintainer':0}
+      'Directory':0, 'Comment':0, 'Origin':0, 'Url':0, 'X-Collab-Maint':0, 'Autobuild':0, 'Vcs-Cvs:':0, 'Python-Standards-Version':0, 'url':0, 'originalmaintainer':0, 'Originalmaintainer':0, 'Build-Recommends':0}
       #Vcs-Cvs: is caused by a bug in python-debian, apparently.
-  ignorable_re = re.compile("^(Original-|Origianl-|Debian-|X-Original-|Upstream-)")
+  ignorable_re = re.compile("^(Original-|Origianl-|Orginal-|Debian-|X-Original-|Upstream-)")
   vcs = { 'Arch':0, 'Bzr':0, 'Cvs':0, 'Darcs':0, 'Git':0, 'Hg':0, 'Svn':0, 'Mtn':0}
 
   warned_about = {}
