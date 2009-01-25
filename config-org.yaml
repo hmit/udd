@@ -121,7 +121,7 @@ ubuntu-jaunty:
   directory: /org/mirrors/ubuntu.com/ftp/dists/jaunty/
   components: [main, multiverse, universe, restricted]
   distribution: ubuntu
-  release: intrepid
+  release: jaunty
   packages-table: ubuntu_packages
   sources-table: ubuntu_sources
   uploaders-table: ubuntu_uploaders
