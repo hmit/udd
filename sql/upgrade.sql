@@ -41,3 +41,6 @@ GRANT SELECT ON all_packages TO PUBLIC;
 CREATE TABLE all_packages_distrelcomparch (distribution text, release text,
 component text, architecture text);
 GRANT SELECT ON all_packages_distrelcomparch TO PUBLIC;
+
+-- 2009-01-10
+CREATE INDEX debtags_package_idx ON debtags(package);

@@ -303,6 +303,7 @@ CREATE TABLE debtags (
 GRANT SELECT ON debtags TO PUBLIC;
 
 CREATE INDEX debtags_tag_idx ON debtags(tag);
+CREATE INDEX debtags_package_idx ON debtags(package);
 
 -- Orphaned packages
 
