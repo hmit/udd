@@ -8,32 +8,22 @@ Priorities:
 
 General
 -------
-- (prio: high) make udd.py use a default config file, which can be overriden by "-f configfile".
-- (prio: high) find a way to only send mail after crons when there's something "interesting" to report
-  + log timing info to a file (udd.log?), for both update and run
-  + hide the uninteresting errors (like unable to open /org/bugs.debian.org/versions/pkg)
 - (prio: medium) do we want a "version" type?
+  ACTION: talk with rleigh
 
 packages/sources
 ----------------
 - (prio: medium) Add support for keeping history of Packages and Sources in
   separate tables. (zack wants that, but shouldn't we use snapshot.d.o for that
   instead?)
-- (prio: low, not sure if it's a good idea) Incremental updates, not full
-  imports (use that to trigger incremental bugs.d.o imports (for affects_*
-  updates)
-- (prio: low) Add a pkg composite type (text version, text name). The
-   operator '=' used with type text should only check the package name,
-   with another pkg should check both pkg and version. Should be pretty
-   DWIM.
 -  (prio: high) configuration is currently annoying to do, because of the way
    we describe each distribution separately. It would be easier to have a tree-like
    description of what we want to import.
-- (prio: high) check that we really import everything we can (-proposed, etc)
 
 bugs.debian.org
 ---------------
 - (prio: medium) Optimize bugs importing (again)
+  posix_fadvise?
 
 upload-history
 --------------
@@ -58,3 +48,7 @@ Other data sources
 - (prio: low) wanna-build
 - (prio: low) packages-arch-specific
 - (prio: low) edos.debian.net
+- watch files + DEHS (andreas tille is interested)
+- DDTP translations (andreas tille is interested as well)
+- screenshots.d.n (andreas tille again)
+- NEW, from http://ftp-master.debian.org/new.822 (andreas :-))
