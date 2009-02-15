@@ -23,6 +23,7 @@ packages/sources
 bugs.debian.org
 ---------------
 - (prio: medium) Optimize bugs importing (again)
+- missing stuff: blocks, found_date/fixed_date, blockedby, unarchived, summary, affects
   posix_fadvise?
 
 upload-history
