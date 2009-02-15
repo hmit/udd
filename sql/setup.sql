@@ -103,8 +103,8 @@ CREATE TYPE bugs_severity AS ENUM ('fixed', 'wishlist', 'minor', 'normal', 'impo
 
 CREATE TABLE bugs
   (id int PRIMARY KEY, package text, source text, arrival timestamp, status text,
-     severity bugs_severity, submitter text, owner text, title text,
-     last_modified timestamp, affects_stable boolean,
+     severity bugs_severity, submitter text, owner text, done text, title text,
+     last_modified timestamp, forwarded text, affects_stable boolean,
     affects_testing boolean, affects_unstable boolean,
     affects_experimental boolean);
 
@@ -129,8 +129,8 @@ CREATE TABLE bugs_tags
 
 CREATE TABLE archived_bugs
   (id int PRIMARY KEY, package text, source text, arrival timestamp, status text,
-     severity bugs_severity, submitter text, owner text, title text,
-     last_modified timestamp, affects_stable boolean,
+     severity bugs_severity, submitter text, owner text, done text, title text,
+     last_modified timestamp, forwarded text, affects_stable boolean,
     affects_testing boolean, affects_unstable boolean,
     affects_experimental boolean);
 
@@ -161,25 +161,25 @@ CREATE TABLE bugs_usertags
 CREATE VIEW bugs_rt_affects_stable AS
 SELECT id, package, source FROM bugs
 WHERE affects_stable
-AND (id NOT IN (SELECT id FROM bugs_tags WHERE tag IN ('sid', 'sarge', 'lenny', 'experimental'))
-OR id IN (SELECT id FROM bugs_tags WHERE tag = 'etch'))
-AND id NOT IN (select id FROM bugs_tags WHERE tag = 'etch-ignore')
-AND ( package IN (SELECT DISTINCT package FROM packages_summary p WHERE release = 'etch')
-OR source IN (SELECT DISTINCT source FROM sources WHERE release = 'etch'));
-
-CREATE VIEW bugs_rt_affects_testing AS
-SELECT id, package, source FROM bugs
-WHERE affects_testing 
-AND (id NOT IN (SELECT id FROM bugs_tags WHERE tag IN ('sid', 'sarge', 'etch', 'experimental'))
+AND (id NOT IN (SELECT id FROM bugs_tags WHERE tag IN ('sid', 'sarge', 'etch', 'squeeze', 'experimental'))
 OR id IN (SELECT id FROM bugs_tags WHERE tag = 'lenny'))
 AND id NOT IN (select id FROM bugs_tags WHERE tag = 'lenny-ignore')
 AND ( package IN (SELECT DISTINCT package FROM packages_summary p WHERE release = 'lenny')
 OR source IN (SELECT DISTINCT source FROM sources WHERE release = 'lenny'));
 
+CREATE VIEW bugs_rt_affects_testing AS
+SELECT id, package, source FROM bugs
+WHERE affects_testing 
+AND (id NOT IN (SELECT id FROM bugs_tags WHERE tag IN ('sid', 'sarge', 'etch', 'lenny', 'experimental'))
+OR id IN (SELECT id FROM bugs_tags WHERE tag = 'squeeze'))
+AND id NOT IN (select id FROM bugs_tags WHERE tag = 'squeeze-ignore')
+AND ( package IN (SELECT DISTINCT package FROM packages_summary p WHERE release = 'squeeze')
+OR source IN (SELECT DISTINCT source FROM sources WHERE release = 'squeeze'));
+
 CREATE VIEW bugs_rt_affects_unstable AS
 SELECT id, package, source FROM bugs
 WHERE affects_unstable 
-AND (id NOT IN (SELECT id FROM bugs_tags WHERE tag IN ('lenny', 'sarge', 'etch', 'experimental'))
+AND (id NOT IN (SELECT id FROM bugs_tags WHERE tag IN ('lenny', 'sarge', 'etch', 'squeeze', 'experimental'))
 OR id IN (SELECT id FROM bugs_tags WHERE tag = 'sid'))
 AND ( package IN (SELECT DISTINCT package FROM packages_summary p WHERE release = 'sid')
 OR source IN (SELECT DISTINCT source FROM sources WHERE release = 'sid'));
@@ -187,12 +187,12 @@ OR source IN (SELECT DISTINCT source FROM sources WHERE release = 'sid'));
 CREATE VIEW bugs_rt_affects_testing_and_unstable AS
 SELECT id, package, source FROM bugs
 WHERE affects_unstable AND affects_testing
-AND (id NOT IN (SELECT id FROM bugs_tags WHERE tag IN ('sarge', 'etch', 'experimental'))
-OR (id IN (SELECT id FROM bugs_tags WHERE tag = 'sid') AND id IN (SELECT id FROM bugs_tags WHERE tag = 'lenny')))
+AND (id NOT IN (SELECT id FROM bugs_tags WHERE tag IN ('sarge', 'etch', 'lenny', 'experimental'))
+OR (id IN (SELECT id FROM bugs_tags WHERE tag = 'sid') AND id IN (SELECT id FROM bugs_tags WHERE tag = 'squeeze')))
 AND ( package IN (SELECT DISTINCT package FROM packages p WHERE release = 'sid')
 OR source IN (SELECT DISTINCT source FROM sources WHERE release = 'sid'))
-AND ( package IN (SELECT DISTINCT package FROM packages p WHERE release = 'lenny')
-OR source IN (SELECT DISTINCT source FROM sources WHERE release = 'lenny'));
+AND ( package IN (SELECT DISTINCT package FROM packages p WHERE release = 'squeeze')
+OR source IN (SELECT DISTINCT source FROM sources WHERE release = 'squeeze'));
 
 GRANT SELECT ON bugs TO PUBLIC;
 GRANT SELECT ON bugs_packages TO PUBLIC;
@@ -411,5 +411,10 @@ CREATE VIEW all_packages AS
 SELECT * FROM packages
 UNION ALL SELECT * FROM ubuntu_packages;
 
+CREATE VIEW all_bugs AS
+SELECT * FROM bugs
+UNION ALL SELECT * FROM archived_bugs;
+
 GRANT SELECT ON all_sources TO PUBLIC;
 GRANT SELECT ON all_packages TO PUBLIC;
+GRANT SELECT ON all_bugs TO PUBLIC;
