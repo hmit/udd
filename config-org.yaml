@@ -28,51 +28,6 @@ general:
     netbsd-i386, hurd-powerpc, kfreebsd-powerpc, netbsd-powerpc, hurd-sparc,
     kfreebsd-sparc, netbsd-sparc, darwin-i386, freebsd-i386, openbsd-i386, darwin-powerpc]
 
-debian-lenny:
-  type: src-pkg
-  archs: [alpha, amd64, arm, armel, hppa,
-          i386, ia64, mips,
-          mipsel, powerpc, s390, sparc]       
-  directory: /org/mirrors/ftp.debian.org/ftp/dists/lenny/
-  components: [main, contrib, non-free]
-  distribution: debian
-  packages-table: packages
-  sources-table: sources
-  uploaders-table: uploaders
-  packages-schema: packages
-  sources-schema: sources
-  release: lenny
-
-debian-experimental:
-  type: src-pkg
-  archs: [alpha, amd64, arm, armel, hppa, hurd-i386,
-          i386, ia64, mips,
-          mipsel, powerpc, s390, sparc]       
-  directory: /org/mirrors/ftp.debian.org/ftp/dists/experimental/
-  components: [main, contrib, non-free]
-  distribution: debian
-  packages-table: packages
-  sources-table: sources
-  uploaders-table: uploaders
-  packages-schema: packages
-  sources-schema: sources
-  release: experimental
-
-debian-sid:
-  type: src-pkg
-  archs: [alpha, amd64, arm, armel, hppa, hurd-i386,
-          i386, ia64, mips,
-          mipsel, powerpc, s390, sparc]       
-  directory: /org/mirrors/ftp.debian.org/ftp/dists/sid/
-  components: [main, contrib, non-free]
-  distribution: debian
-  packages-table: packages
-  sources-table: sources
-  uploaders-table: uploaders
-  packages-schema: packages
-  sources-schema: sources
-  release: sid
-  
 debian-etch:
   type: src-pkg
   archs: [alpha, amd64, arm, hppa, i386, ia64,  mips,
@@ -86,6 +41,20 @@ debian-etch:
   packages-schema: packages
   sources-schema: sources
   release: etch
+
+debian-etch-proposed-updates:
+  type: src-pkg
+  archs: [alpha, amd64, arm, hppa, i386, ia64,  mips,
+          mipsel, powerpc, s390, sparc]       
+  directory: /org/mirrors/ftp.debian.org/ftp/dists/etch-proposed-updates/
+  components: [main, contrib, non-free]
+  distribution: debian
+  packages-table: packages
+  sources-table: sources
+  uploaders-table: uploaders
+  packages-schema: packages
+  sources-schema: sources
+  release: etch-proposed-updates
 
 debian-backports-etch:
   type: src-pkg
@@ -114,6 +83,168 @@ debian-volatile-etch:
   packages-schema: packages
   sources-schema: sources
   release: etch
+
+debian-etch-security:
+  type: src-pkg
+  archs: [alpha, amd64, arm, hppa, i386, ia64,  mips,
+          mipsel, powerpc, s390, sparc]       
+  directory: /org/mirrors/security.debian.org/ftp/dists/etch/updates/
+  components: [main, contrib, non-free]
+  distribution: debian
+  packages-table: packages
+  sources-table: sources
+  uploaders-table: uploaders
+  packages-schema: packages
+  sources-schema: sources
+  release: etch-security
+
+debian-lenny:
+  type: src-pkg
+  archs: [alpha, amd64, arm, armel, hppa,
+          i386, ia64, mips,
+          mipsel, powerpc, s390, sparc]       
+  directory: /org/mirrors/ftp.debian.org/ftp/dists/lenny/
+  components: [main, contrib, non-free]
+  distribution: debian
+  packages-table: packages
+  sources-table: sources
+  uploaders-table: uploaders
+  packages-schema: packages
+  sources-schema: sources
+  release: lenny
+
+debian-lenny-security:
+  type: src-pkg
+  archs: [alpha, amd64, arm, armel, hppa,
+          i386, ia64, mips,
+          mipsel, powerpc, s390, sparc]       
+  directory: /org/mirrors/security.debian.org/ftp/dists/lenny/updates/
+  components: [main, contrib, non-free]
+  distribution: debian
+  packages-table: packages
+  sources-table: sources
+  uploaders-table: uploaders
+  packages-schema: packages
+  sources-schema: sources
+  release: lenny-security
+
+debian-lenny-proposed-updates:
+  type: src-pkg
+  archs: [alpha, amd64, arm, armel, hppa,
+          i386, ia64, mips,
+          mipsel, powerpc, s390, sparc]       
+  directory: /org/mirrors/ftp.debian.org/ftp/dists/lenny-proposed-updates/
+  components: [main, contrib, non-free]
+  distribution: debian
+  packages-table: packages
+  sources-table: sources
+  uploaders-table: uploaders
+  packages-schema: packages
+  sources-schema: sources
+  release: lenny-proposed-updates
+
+debian-backports-lenny:
+  type: src-pkg
+  archs: [alpha, amd64, arm, hppa, i386, ia64,  mips,
+          mipsel, powerpc, s390, sparc]       
+  directory: /org/mirrors/backports.org/ftp/dists/lenny-backports/
+  components: [main, contrib, non-free]
+  distribution: debian-backports
+  packages-table: packages
+  sources-table: sources
+  uploaders-table: uploaders
+  packages-schema: packages
+  sources-schema: sources
+  release: lenny
+
+debian-volatile-lenny:
+  type: src-pkg
+  archs: [alpha, amd64, arm, hppa, i386, ia64,  mips,
+          mipsel, powerpc, s390, sparc]       
+  directory: /org/mirrors/volatile.debian.org/ftp/dists/lenny/volatile/
+  components: [main, contrib, non-free]
+  distribution: debian-volatile
+  packages-table: packages
+  sources-table: sources
+  uploaders-table: uploaders
+  packages-schema: packages
+  sources-schema: sources
+  release: lenny
+
+debian-squeeze:
+  type: src-pkg
+  archs: [alpha, amd64, arm, armel, hppa,
+          i386, ia64, mips,
+          mipsel, powerpc, s390, sparc]       
+  directory: /org/mirrors/ftp.debian.org/ftp/dists/squeeze/
+  components: [main, contrib, non-free]
+  distribution: debian
+  packages-table: packages
+  sources-table: sources
+  uploaders-table: uploaders
+  packages-schema: packages
+  sources-schema: sources
+  release: squeeze
+
+debian-squeeze-security:
+  type: src-pkg
+  archs: [alpha, amd64, arm, armel, hppa,
+          i386, ia64, mips,
+          mipsel, powerpc, s390, sparc]       
+  directory: /org/mirrors/security.debian.org/ftp/dists/squeeze/updates/
+  components: [main, contrib, non-free]
+  distribution: debian
+  packages-table: packages
+  sources-table: sources
+  uploaders-table: uploaders
+  packages-schema: packages
+  sources-schema: sources
+  release: squeeze-security
+
+debian-squeeze-proposed-updates:
+  type: src-pkg
+  archs: [alpha, amd64, arm, armel, hppa,
+          i386, ia64, mips,
+          mipsel, powerpc, s390, sparc]       
+  directory: /org/mirrors/ftp.debian.org/ftp/dists/squeeze-proposed-updates/
+  components: [main, contrib, non-free]
+  distribution: debian
+  packages-table: packages
+  sources-table: sources
+  uploaders-table: uploaders
+  packages-schema: packages
+  sources-schema: sources
+  release: squeeze-proposed-updates
+
+debian-sid:
+  type: src-pkg
+  archs: [alpha, amd64, arm, armel, hppa, hurd-i386,
+          i386, ia64, mips,
+          mipsel, powerpc, s390, sparc]       
+  directory: /org/mirrors/ftp.debian.org/ftp/dists/sid/
+  components: [main, contrib, non-free]
+  distribution: debian
+  packages-table: packages
+  sources-table: sources
+  uploaders-table: uploaders
+  packages-schema: packages
+  sources-schema: sources
+  release: sid
+
+debian-experimental:
+  type: src-pkg
+  archs: [alpha, amd64, arm, armel, hppa, hurd-i386,
+          i386, ia64, mips,
+          mipsel, powerpc, s390, sparc]       
+  directory: /org/mirrors/ftp.debian.org/ftp/dists/experimental/
+  components: [main, contrib, non-free]
+  distribution: debian
+  packages-table: packages
+  sources-table: sources
+  uploaders-table: uploaders
+  packages-schema: packages
+  sources-schema: sources
+  release: experimental
 
 ubuntu-jaunty:
   type: src-pkg
