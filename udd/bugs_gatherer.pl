@@ -177,14 +177,14 @@ sub run {
 	my $location = $src_config{archived} ? 'archive' : 'db_h';
 	$table = $src_config{archived} ? $archived_table : $table;
 	# Read all bugs
-	my $insert_bugs_handle = $dbh->prepare("INSERT INTO $table (id, package, source, arrival, status, severity, submitter, owner, title, last_modified, affects_stable, affects_testing, affects_unstable, affects_experimental) VALUES (\$1, \$2, \$3, \$4::abstime, \$5, \$6, \$7, \$8, \$9, \$10::abstime, \$11, \$12, \$13, \$14)");
+	my $insert_bugs_handle = $dbh->prepare("INSERT INTO $table (id, package, source, arrival, status, severity, submitter, owner, done, title, forwarded, last_modified, affects_stable, affects_testing, affects_unstable, affects_experimental) VALUES (\$1, \$2, \$3, \$4::abstime, \$5, \$6, \$7, \$8, \$9, \$10, \$11, \$12::abstime, \$13, \$14, \$15, \$16)");
 	my $insert_bugs_packages_handle = $dbh->prepare("INSERT INTO ${table}_packages (id, package, source) VALUES (\$1, \$2, \$3)");
 	my $insert_bugs_found_handle = $dbh->prepare("INSERT INTO ${table}_found_in (id, version) VALUES (\$1, \$2)");
 	my $insert_bugs_fixed_handle = $dbh->prepare("INSERT INTO ${table}_fixed_in (id, version) VALUES (\$1, \$2)");
 	my $insert_bugs_merged_handle = $dbh->prepare("INSERT INTO ${table}_merged_with (id, merged_with) VALUES (\$1, \$2)");
 	my $insert_bugs_tags_handle = $dbh->prepare("INSERT INTO ${table}_tags (id, tag) VALUES (\$1, \$2)");
 	$insert_bugs_handle->bind_param(4, undef, SQL_INTEGER);
-	$insert_bugs_handle->bind_param(10, undef, SQL_INTEGER);
+	$insert_bugs_handle->bind_param(12, undef, SQL_INTEGER);
 
 	$t = time();
 	foreach my $bug_nr (@modified_bugs) {
@@ -264,7 +264,7 @@ sub run {
 
 		# Insert data into bugs table
 		$insert_bugs_handle->execute($bug_nr, $bug{package}, $source, $bug{date}, $bug{pending},
-			$bug{severity}, $bug{originator}, $bug{owner}, $bug{subject}, $bug{log_modified},
+			$bug{severity}, $bug{originator}, $bug{owner}, $bug{done}, $bug{subject}, $bug{forwarded}, $bug{log_modified},
 			$present_in_stable, $present_in_testing, $present_in_unstable, $present_in_experimental) or die $!;
 
 		my $src;

@@ -44,3 +44,15 @@ GRANT SELECT ON all_packages_distrelcomparch TO PUBLIC;
 
 -- 2009-01-10
 CREATE INDEX debtags_package_idx ON debtags(package);
+
+-- 2009-01-26
+ALTER TABLE bugs ADD forwarded text;
+ALTER TABLE archived_bugs ADD forwarded text;
+
+-- 2009-02-04
+ALTER TABLE bugs ADD done text;
+ALTER TABLE archived_bugs ADD done text;
+CREATE VIEW all_bugs AS
+SELECT * FROM bugs
+UNION ALL SELECT * FROM archived_bugs;
+GRANT SELECT ON all_bugs TO PUBLIC;
