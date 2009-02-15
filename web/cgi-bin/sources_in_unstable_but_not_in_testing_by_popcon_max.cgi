@@ -14,7 +14,7 @@ WHERE distribution = 'debian' and release = 'sid')
 AS unstable,
 popcon_src
 WHERE unstable.source NOT IN (SELECT source FROM sources WHERE distribution = 'debian'
-AND release = 'lenny')
+AND release = 'squeeze')
 AND popcon_src.source = unstable.source ORDER BY insts DESC;
 EOF
 	);

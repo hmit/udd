@@ -15,15 +15,15 @@ WHERE
     AND 
         b.affects_testing
     AND(
-            NOT EXISTS (SELECT tag FROM bugs_tags t WHERE b.id=t.id AND t.tag IN ('sid', 'sarge', 'etch', 'experimental'))
+            NOT EXISTS (SELECT tag FROM bugs_tags t WHERE b.id=t.id AND t.tag IN ('sid', 'sarge', 'etch', 'lenny', 'experimental'))
         OR
-                EXISTS (SELECT tag FROM bugs_tags t WHERE b.id=t.id AND t.tag = 'lenny')
+                EXISTS (SELECT tag FROM bugs_tags t WHERE b.id=t.id AND t.tag = 'squeeze')
     )
-    AND NOT EXISTS (SELECT tag FROM bugs_tags t WHERE b.id=t.id AND t.tag = 'lenny-ignore')
+    AND NOT EXISTS (SELECT tag FROM bugs_tags t WHERE b.id=t.id AND t.tag = 'squeeze-ignore')
     AND(
-            EXISTS (SELECT package FROM packages p WHERE p.package = b.package AND p.distribution = 'debian' AND p.release = 'lenny')
+            EXISTS (SELECT package FROM packages p WHERE p.package = b.package AND p.distribution = 'debian' AND p.release = 'squeeze')
         OR
-            EXISTS (SELECT source FROM sources s WHERE s.source = b.package AND s.distribution = 'debian' AND s.release = 'lenny')
+            EXISTS (SELECT source FROM sources s WHERE s.source = b.package AND s.distribution = 'debian' AND s.release = 'squeeze')
     )
 GROUP BY b.package
 EOF
