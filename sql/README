@@ -1,0 +1,3 @@
+To check if vacuum is working:
+SELECT relname, reltuples, relpages FROM pg_class ORDER BY relpages DESC;
+(thanks Q_)
