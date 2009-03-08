@@ -56,3 +56,21 @@ CREATE VIEW all_bugs AS
 SELECT * FROM bugs
 UNION ALL SELECT * FROM archived_bugs;
 GRANT SELECT ON all_bugs TO PUBLIC;
+
+-- 2009-03-08
+ALTER TABLE sources ALTER COLUMN version TYPE debversion;
+ALTER TABLE ubuntu_sources ALTER COLUMN version TYPE debversion;
+ALTER TABLE packages_summary ALTER COLUMN version TYPE debversion;
+ALTER TABLE packages_summary ALTER COLUMN source_version TYPE debversion;
+ALTER TABLE packages ALTER COLUMN version TYPE debversion;
+ALTER TABLE packages ALTER COLUMN source_version TYPE debversion;
+ALTER TABLE ubuntu_packages ALTER COLUMN version TYPE debversion;
+ALTER TABLE ubuntu_packages ALTER COLUMN source_version TYPE debversion;
+ALTER TABLE ubuntu_packages_summary ALTER COLUMN version TYPE debversion;
+ALTER TABLE ubuntu_packages_summary ALTER COLUMN source_version TYPE debversion;
+ALTER TABLE uploaders ALTER COLUMN version TYPE debversion;
+ALTER TABLE ubuntu_uploaders ALTER COLUMN version TYPE debversion;
+ALTER TABLE migrations ALTER COLUMN testing_version TYPE debversion;
+ALTER TABLE migrations ALTER COLUMN unstable_version TYPE debversion;
+ALTER TABLE migrations ALTER COLUMN sync_version TYPE debversion;
+ALTER TABLE upload_history ALTER COLUMN version TYPE debversion;

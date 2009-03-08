@@ -1,6 +1,6 @@
 -- Sources and Packages
 CREATE TABLE sources
-  (source text, version text, maintainer text,
+  (source text, version debversion, maintainer text,
     maintainer_name text, maintainer_email text, format text, files text,
     uploaders text, bin text, architecture text, standards_version text,
     homepage text, build_depends text, build_depends_indep text,
@@ -15,15 +15,15 @@ GRANT SELECT ON sources TO PUBLIC;
 
 -- no primary key possible: duplicate rows are possible because duplicate entries
 -- in Uploaders: are allowed. yes.
-CREATE TABLE uploaders (source text, version text, distribution text,
+CREATE TABLE uploaders (source text, version debversion, distribution text,
 	release text, component text, name text, email text);
    
 GRANT SELECT ON uploaders TO PUBLIC;
 
 CREATE INDEX sources_distrelcomp_idx on sources(distribution, release, component);
 
-CREATE TABLE packages_summary ( package text, version text, source text,
-source_version text, maintainer text, distribution text, release text,
+CREATE TABLE packages_summary ( package text, version debversion, source text,
+source_version debversion, maintainer text, distribution text, release text,
 component text,
 PRIMARY KEY (package, version, distribution, release, component));
 
@@ -31,8 +31,8 @@ CREATE TABLE all_packages_distrelcomparch (distribution text, release text,
 component text, architecture text);
 
 CREATE TABLE packages
-  (package text, version text, architecture text, maintainer text, description
-    text, long_description text, source text, source_version text, essential text, depends text,
+  (package text, version debversion, architecture text, maintainer text, description
+    text, long_description text, source text, source_version debversion, essential text, depends text,
     recommends text, suggests text, enhances text, pre_depends text, breaks text,
     installed_size int, homepage text, size int,
     build_essential text, origin text, sha1 text, replaces text, section text,
@@ -52,7 +52,7 @@ CREATE INDEX packages_distrelcomp_idx on packages(distribution, release, compone
 -- Ubuntu sources and packages
 
 CREATE TABLE ubuntu_sources
-  (source text, version text, maintainer text,
+  (source text, version debversion, maintainer text,
     maintainer_name text, maintainer_email text, format text, files text,
     uploaders text, bin text, architecture text, standards_version text,
     homepage text, build_depends text, build_depends_indep text,
@@ -67,19 +67,19 @@ CREATE INDEX ubuntu_sources_distrelcomp_idx on ubuntu_sources(distribution, rele
 
 -- no primary key possible: duplicate rows are possible because duplicate entries
 -- in Uploaders: are allowed. yes.
-CREATE TABLE ubuntu_uploaders (source text, version text, distribution text,
+CREATE TABLE ubuntu_uploaders (source text, version debversion, distribution text,
 	release text, component text, name text, email text);
    
 GRANT SELECT ON ubuntu_uploaders TO PUBLIC;
 
-CREATE TABLE ubuntu_packages_summary ( package text, version text, source text,
-source_version text, maintainer text, distribution text, release text,
+CREATE TABLE ubuntu_packages_summary ( package text, version debversion, source text,
+source_version debversion, maintainer text, distribution text, release text,
 component text,
 PRIMARY KEY (package, version, distribution, release, component));
 
 CREATE TABLE ubuntu_packages
-  (package text, version text, architecture text, maintainer text, description
-    text, long_description text, source text, source_version text, essential text, depends text,
+  (package text, version debversion, architecture text, maintainer text, description
+    text, long_description text, source text, source_version debversion, essential text, depends text,
     recommends text, suggests text, enhances text, pre_depends text, breaks text,
     installed_size int, homepage text, size int,
     build_essential text, origin text, sha1 text, replaces text, section text,
@@ -320,14 +320,14 @@ GRANT SELECT ON orphaned_packages TO PUBLIC;
 -- Testing migrations
 
 CREATE TABLE migrations
-  (source text PRIMARY KEY, in_testing date, testing_version text, in_unstable date, unstable_version text, sync date, sync_version text, first_seen date);
+  (source text PRIMARY KEY, in_testing date, testing_version debversion, in_unstable date, unstable_version debversion, sync date, sync_version debversion, first_seen date);
 
 GRANT SELECT ON migrations TO PUBLIC;
 
 -- Upload history
 
 CREATE TABLE upload_history
- (id serial, package text, version text, date timestamp with time zone,
+ (id serial, package text, version debversion, date timestamp with time zone,
  changed_by text, maintainer text, nmu boolean, signed_by text, key_id text,
  fingerprint text,
  PRIMARY KEY (id));
