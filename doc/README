@@ -20,6 +20,7 @@ Installation
      createdb -U user -E SQL_ASCII udd
   ASCII encoding is necessary because some of the data we will import might
   contain invalid UTF-8 characters
+- install postgresql-8.3-debversion to get the debversion type
 - edit config.yaml (see README.config for details)
 - setup the DB: psql udd < sql/setup.sql
 
