@@ -1,0 +1,19 @@
+general:
+  dbname: udd
+  types:
+    ddtp: module udd.ddtp_gatherer
+  debug: 1
+  lock-dir: /org/udd.debian.net/locks
+
+  archs:
+   [i386]
+
+ddtp:
+  type: ddtp
+  update-command: /org/udd.debian.net/udd/scripts/fetch_ddtp_translations.sh
+  path: /org/udd.debian.net/mirrors/ddtp
+  mirror: ftp.de.debian.org
+  files: Translation-.*\.gz
+  releases: sid testing stable
+  table: ddtp
+  schema: ddtp
