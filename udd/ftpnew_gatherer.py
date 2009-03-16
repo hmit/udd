@@ -20,12 +20,16 @@ from psycopg2 import IntegrityError
 def get_gatherer(connection, config, source):
   return ftpnew_gatherer(connection, config, source)
 
+DEBUG=0
+
 # When parsing src html pages we have to get rid of certain html strings
 def de_html(string):
-  string= re.sub("</?span[^>]*>", "", string)
-  string= re.sub("&lt;", "<", string)
-  string= re.sub("&gt;", ">", string)
-  string= re.sub("</?pre>", "", string)
+  string= re.sub("</?span[^>]*>", '',  string)
+  string= re.sub("&quot;",        '"', string)
+  string= re.sub("&amp;",         '&', string)
+  string= re.sub("&lt;",          '<', string)
+  string= re.sub("&gt;",          '>', string)
+  string= re.sub("</?pre>",       '',  string)
   return string
 
 # These fields are not forewarded to UDD tables for the moment
@@ -145,8 +149,9 @@ class ftpnew_gatherer(gatherer):
       cur.execute(query)
       in_udd = cur.fetchone()[0]
       if in_udd:
-        print >>stderr, "Binary package %s is %i times in UDD - no interest in just known binaries (queue = %s)" \
-    	             % (value, int(in_udd), queue)
+        if DEBUG != 0:
+    	  print >>stderr, "Binary package %s is %i times in UDD - no interest in just known binaries (queue = %s)" \
+      	             % (value, int(in_udd), queue)
     	return 1
     return 0
 
@@ -201,8 +206,9 @@ class ftpnew_gatherer(gatherer):
       cur.execute(query)
       in_udd = cur.fetchone()[0]
       if in_udd:
-        print >>stderr, "%s is %i times in UDD - no interest in just known sources (queue = %s)" \
-    	    % (srcpkg.s['Source'], int(in_udd), srcpkg.s['Source'])
+        if DEBUG != 0:
+          print >>stderr, "%s is %i times in UDD - no interest in just known sources (queue = %s)" \
+    	                  % (srcpkg.s['Source'], int(in_udd), srcpkg.s['Source'])
         continue
 
       src_info_base = srcpkg.s['Source'] + '_' + srcpkg.s['Version']
@@ -249,9 +255,9 @@ class ftpnew_gatherer(gatherer):
             print >>srco, "%s: %s" % (field, value)
     	  elif field == 'Description':
             if in_source:
-              srcpkg.s[field]  = value
+              srcpkg.s[field]  = de_html(value)
             else:
-              binpkg.b[field]  = value
+              binpkg.b[field]  = de_html(value)
             print >>srco, "%s: %s" % (field, value)
     	  elif field == 'Architecture':
             if in_source:
@@ -368,21 +374,20 @@ class ftpnew_gatherer(gatherer):
           if match:
             if match.groups()[0][0] != ' ':
               description += ' '
-            description += match.groups()[0]
+            description += de_html(match.groups()[0])
             in_description = 0
             if not in_source: # binpkg and binpkg.b:
-              binpkg.b['Description']      = description
-              binpkg.b['Long_Description'] = description.split("\n",1)[1]
-            print >>srco, "Description: %s\n" % (description)
+              (binpkg.b['Description'], binpkg.b['Long_Description']) = description.split("\n",1)
+              print >>srco, "Description: %s\n%s" % (binpkg.b['Description'], binpkg.b['Long_Description'])
           else:
             if line[0] != ' ':
               description += ' '
-            description += line
+            description += de_html(line)
         else:
           match = ftpnew_gatherer.src_html_has_description_start_re.match(line)
           if match:
             in_description = 1
-            description = match.groups()[0] + "\n"
+            description = de_html(match.groups()[0]) + "\n"
       srci.close()
       srco.close()      
 #        cur.execute("EXECUTE ftpnew_insert (%s, %s, %s, %s)"\
