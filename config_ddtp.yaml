@@ -12,8 +12,8 @@ ddtp:
   type: ddtp
   update-command: /org/udd.debian.net/udd/scripts/fetch_ddtp_translations.sh
   path: /org/udd.debian.net/mirrors/ddtp
-  mirror: ftp.de.debian.org
+  mirror: ddtp.debian.net/Translation_udd
   files: Translation-.*\.gz
-  releases: sid testing stable
+  releases: sid lenny squeeze
   table: ddtp
   schema: ddtp
