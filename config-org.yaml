@@ -368,3 +368,13 @@ debtags:
 
 ubuntu-bugs:
    type: ubuntu-bugs
+
+ddtp:
+   type: ddtp
+   update-command: /org/udd.debian.net/udd/scripts/fetch_ddtp_translations.sh
+   path: /org/udd.debian.net/mirrors/ddtp
+   mirror: ddtp.debian.net/Translation_udd
+   files: Translation-.*\.gz
+   releases: sid lenny squeeze
+   table: ddtp
+   schema: ddtp
