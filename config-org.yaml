@@ -16,6 +16,7 @@ general:
     lintian: module udd.lintian_gatherer
     debtags: module udd.debtags_gatherer
     ubuntu-bugs: module udd.ubuntu_bugs_gatherer
+    ddtp: module udd.ddtp_gatherer
   debug: 1
   timestamp-dir: /org/udd.debian.org/timestamps
   lock-dir: /org/udd.debian.org/locks
@@ -371,8 +372,8 @@ ubuntu-bugs:
 
 ddtp:
    type: ddtp
-   update-command: /org/udd.debian.net/udd/scripts/fetch_ddtp_translations.sh
-   path: /org/udd.debian.net/mirrors/ddtp
+   update-command: /org/udd.debian.org/udd/scripts/fetch_ddtp_translations.sh /org/udd.debian.org/mirrors/ddtp ddtp.debian.net/Translation_udd sid lenny squeeze
+   path: /org/udd.debian.org/mirrors/ddtp
    mirror: ddtp.debian.net/Translation_udd
    files: Translation-.*\.gz
    releases: sid lenny squeeze

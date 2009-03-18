@@ -1,7 +1,12 @@
 #!/bin/sh
-TARGETPATH=`grep "^\s*path:" /org/udd.debian.net/udd/config_ddtp.yaml | sed 's/^\s*path:\s*//'`
-RELEASES=`grep "^\s*releases:" /org/udd.debian.net/udd/config_ddtp.yaml | sed 's/^\s*releases:\s*//'`
-MIRROR=`grep "^\s*mirror:" /org/udd.debian.net/udd/config_ddtp.yaml | sed 's/^\s*mirror:\s*//'`
+
+set -e
+
+TARGETPATH=$1
+MIRROR=$2
+shift
+shift
+RELEASES=$*
 HTTPMIRROR="http://$MIRROR"
 # RSYNCMIRROR="$MIRROR::debian/"
 # rm -rf "$TARGETPATH"
