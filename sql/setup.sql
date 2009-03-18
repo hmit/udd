@@ -424,7 +424,7 @@ CREATE TABLE ddtp (
        distribution text,
        release      text,
        component    text,   -- == 'main' for the moment
-       version      text,   -- different versions for a package might exist because some archs
+       version      debversion,   -- different versions for a package might exist because some archs
                             -- might have problems with newer versions if a new version comes
                             -- with a new description we might have different translations for
                             -- a (package, distribution, release, component, language) key so

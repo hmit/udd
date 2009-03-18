@@ -99,3 +99,4 @@ CREATE TABLE ddtp (
 );
 
 GRANT SELECT ON ddtp TO PUBLIC;
+ALTER TABLE ddtp ALTER COLUMN version TYPE debversion;
