@@ -42,7 +42,11 @@ def lock(config, source):
   lock_path = path.join(lock_dir, source)
   f = file(lock_path, "w+")
   __locks[lock_path] = f
-  fcntl.flock(f.fileno(), fcntl.LOCK_EX)
+  try:
+    fcntl.flock(f.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+  except IOError:
+    print source+": lockfile found, exiting."
+    exit(1)
 
 def unlock(config, source):
   lock_dir = config['general']['lock-dir']
