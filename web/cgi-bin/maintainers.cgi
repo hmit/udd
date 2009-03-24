@@ -69,13 +69,13 @@ puts <<-EOF
 <tr><th>Source packages</th><td>#{srcpkgs['etch']}</td><td>#{srcpkgs['lenny']}</td><td>#{srcpkgs['sid']}</td></tr>
 <tr><th>Co-maintained source packages (at least one uploader)</th><td>#{com_srcpkgs['etch']} (#{(com_srcpkgs['etch'].to_f/srcpkgs['etch']*100).to_i}%)</td><td>#{com_srcpkgs['lenny']} (#{(com_srcpkgs['lenny'].to_f/srcpkgs['lenny']*100).to_i}%)</td><td>#{com_srcpkgs['sid']} (#{(com_srcpkgs['sid'].to_f/srcpkgs['sid']*100).to_i}%)</td></tr>
 <tr><th>Maintainers (=different emails in Maintainer:) ; Packages per maintainer</th>
-<td>#{maints['etch']} (#{srcpkgs['etch'].to_f/maints['etch']})</td>
-<td>#{maints['lenny']} (#{srcpkgs['lenny'].to_f/maints['lenny']})</td>
-<td>#{maints['sid']} (#{srcpkgs['sid'].to_f/maints['sid']})</td></tr>
+<td>#{maints['etch']} (#{"%.2f"%(srcpkgs['etch'].to_f/maints['etch'])})</td>
+<td>#{maints['lenny']} (#{"%.2f"%(srcpkgs['lenny'].to_f/maints['lenny'])})</td>
+<td>#{maints['sid']} (#{"%.2f"%(srcpkgs['sid'].to_f/maints['sid'])})</td></tr>
 <tr><th>Maintainers, inc. Uploaders (different emails in Maintainer: or Uploaders:) ; Packages per maintainer</th>
-<td>#{comaints['etch']} (#{srcpkgs['etch'].to_f/comaints['etch']})</td>
-<td>#{comaints['lenny']} (#{srcpkgs['lenny'].to_f/comaints['lenny']})</td>
-<td>#{comaints['sid']} (#{srcpkgs['sid'].to_f/comaints['sid']})</td></tr>
+<td>#{comaints['etch']} (#{"%.2f"%(srcpkgs['etch'].to_f/comaints['etch'])})</td>
+<td>#{comaints['lenny']} (#{"%.2f"%(srcpkgs['lenny'].to_f/comaints['lenny'])})</td>
+<td>#{comaints['sid']} (#{"%.2f"%(srcpkgs['sid'].to_f/comaints['sid'])})</td></tr>
 </table>
 EOF
 
@@ -145,7 +145,7 @@ group by email having sum(cost) >= 10 order by total_cost desc limit 70")
 sth.execute
 puts "<table border='1'><tr><th>email</th><th>total <i>cost</i> of all (co-)maintained packages</th></tr>"
 sth.fetch_all.each do |r|
-puts "<tr><td>#{r[0]}</td><td>#{r[1]}</td></tr>"
+puts "<tr><td>#{r[0]}</td><td>#{"%.2f"%(r[1])}</td></tr>"
 end
 puts "</table>"
 puts "</body></html>"
