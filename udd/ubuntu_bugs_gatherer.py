@@ -32,9 +32,11 @@ class ubuntu_bugs_gatherer(gatherer):
     httpq = Queue()
     dbq = Queue()
     for b in bugs:
-      if self.debug:
-        if b > 10000:
-          continue
+      if b == 310331:
+        continue # this bug is buggy: two identical tasks
+#      if self.debug:
+#        if b != 310331:
+#          continue
       httpq.put(b)
 
     # start workers
@@ -242,6 +244,8 @@ class ubuntu_bugs_gatherer(gatherer):
       if len(s) > 0:
         print s
         print t
+      if self.debug:
+        print str(bugno)+"\n"
       c.execute('insert into ubuntu_bugs_tasks values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', (bugno, pkg, distro,
         tm['status'], tm['importance'], tm['component'], tm['milestone'], created,
         assigned, closed, incomplete, confirmed, inprogress, fixcommitted, fixreleased, leftnew, triaged, leftclosed, tm['watch'],
