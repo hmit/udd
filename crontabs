@@ -1,6 +1,6 @@
 # m h  dom mon dow   command
 MAILTO=lucas@debian.org
-UAR=/org/udd.debian.org/update-and-run.sh
+UAR=/org/udd.debian.org/udd/update-and-run.sh
 # Debian Sources/Packages
 0 */6 * * * $UAR debian-squeeze debian-sid debian-experimental
 0 3 * * * $UAR debian-etch debian-backports-etch debian-volatile-etch debian-etch-proposed-updates debian-etch-security debian-lenny debian-backports-lenny debian-volatile-lenny debian-lenny-proposed-updates debian-lenny-security debian-squeeze-proposed-updates debian-squeeze-security
