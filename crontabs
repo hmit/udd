@@ -2,18 +2,21 @@
 MAILTO=lucas@debian.org
 UAR=/org/udd.debian.org/udd/update-and-run.sh
 # Debian Sources/Packages
-0 */6 * * * $UAR debian-squeeze debian-sid debian-experimental
-0 3 * * * $UAR debian-etch debian-backports-etch debian-volatile-etch debian-etch-proposed-updates debian-etch-security debian-lenny debian-backports-lenny debian-volatile-lenny debian-lenny-proposed-updates debian-lenny-security debian-squeeze-proposed-updates debian-squeeze-security
+0 */12 * * * $UAR debian-squeeze debian-sid debian-experimental
+0 3 * * * $UAR debian-etch debian-backports-etch debian-volatile-etch debian-etch-proposed-updates debian-etch-security
+0 15 * * * $UAR debian-lenny debian-backports-lenny debian-volatile-lenny debian-lenny-proposed-updates debian-lenny-security debian-squeeze-proposed-updates debian-squeeze-security
 # Ubuntu Sources/Packages
 0 1 * * * $UAR ubuntu-jaunty
-15 2 */2 * * $UAR ubuntu-hardy ubuntu-intrepid
+30 2 */2 * * $UAR ubuntu-hardy ubuntu-intrepid
 # Various simple things
-0 2 * * * $UAR debian-popcon ubuntu-popcon upload-history orphaned_packages lintian debtags
-15 2 * * * $UAR carnivore
+0 4 * * * $UAR debian-popcon ubuntu-popcon upload-history orphaned_packages lintian debtags carnivore
 0 */12 * * * $UAR testing-migrations
 # Debian bugs
-0 */4 * * * $UAR bugs 2>&1 | /org/udd.debian.org/udd/scripts/filter-bugs-output.sh
-0 13 * * * $UAR bugs-archive 2>&1 | /org/udd.debian.org/udd/scripts/filter-bugs-output.sh
+0 1,7,13,19 * * * $UAR bugs 2>&1 | /org/udd.debian.org/udd/scripts/filter-bugs-output.sh
+0 15 * * * $UAR bugs-archive 2>&1 | /org/udd.debian.org/udd/scripts/filter-bugs-output.sh
+
+# DDTP
+0 2 * * * $UAR ddtp
 
 # Ubuntu bugs
 0 4 * * * $UAR ubuntu-bugs
