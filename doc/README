@@ -11,9 +11,13 @@ and co-mentors being Stefano Zacchiroli and Marc Brockschmidt.
 Installation
 ------------
 - Download the code (from SVN)
-- install postgresql-8.3 python-syck python-psycopg2 libdbi-perl
+- install postgresql-8.3 python-yaml python-psycopg2 libdbi-perl
   libparams-validate-perl libdbd-pg-perl postgresql-autodoc
   libdbi-ruby libdbd-pg-ruby curl
+- If you want to import bugs, you also need:
+  libyaml-syck-perl libio-stringy-perl libmime-tools-perl
+  liblist-moreutils-perl libparams-validate-perl libsafe-hole-perl
+  libtext-template-perl libcgi-simple-perl libmldbm-perl
 - install python-debian (if running etch, from backports)
 - setup postgresql-8.3 (see /usr/share/doc/postgresql-common/README.Debian.gz)
   and create a database:
@@ -28,6 +32,10 @@ Usage
 -----
 - run ./udd.py <configuration> update [ fetches the external data ]
 - run ./udd.py <configuration> run [ import the data into the DB ]
+
+To initialize the DB, do something like:
+----------------------------------------
+for i in $(cat config-org.yaml |grep -v "^ " |grep ":" |grep -v general |sed 's/://'); do /org/udd.debian.org/udd/update-and-run.sh $i ; done
 
 Detailed information
 --------------------
