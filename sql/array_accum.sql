@@ -18,7 +18,7 @@ CREATE AGGREGATE array_accum (anyelement) (
  * Example:                                                                  *
  *                                                                           *
    SELECT av.version, array_to_string(array_accum(architecture),',') FROM
-     ( SELECT architecture AS architecture, version FROM packages
+     ( SELECT architecture, version FROM packages
           WHERE package = 'gcc' GROUP BY architecture, version ORDER BY architecture
      ) AS av
      GROUP BY version ORDER BY version DESC;
