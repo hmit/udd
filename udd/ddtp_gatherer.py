@@ -60,6 +60,13 @@ class ddtp_gatherer(gatherer):
                     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)""" % (my_config['table'])
     cur.execute(query)
 
+    query = """PREPARE ddtp_check_before_insert (text, text, text, text, text, text) AS
+                  SELECT COUNT(*) FROM %s
+                    WHERE package = $1 AND distribution = $2 AND component = $3 AND
+                          release = $4 AND language = $5 AND version = $6""" % (my_config['table'])
+    cur.execute(query)
+
+
     # Query for english package description, its md5 sum and package version
 # Not used any more because the Translation files now contain version numbers
 # but keep the query as comment to store the knowledge how to calculate MD5 sums
@@ -107,15 +114,25 @@ class ddtp_gatherer(gatherer):
             self.pkg.description = lines[0]
             for line in lines[1:]:
               self.pkg.long_description += line + "\n"
-    	    query = "EXECUTE ddtp_insert (%s, '%s', '%s', '%s', '%s', '%s', %s, %s, %s)" % \
+            query = "EXECUTE ddtp_check_before_insert ('%s', '%s', '%s', '%s', '%s', '%s')" % \
+                    (self.pkg.package, self.pkg.distribution, self.pkg.component, \
+                     self.pkg.release, self.pkg.language, self.pkg.version)
+            cur.execute(query)
+            if cur.fetchone()[0] > 0:
+              print >>stderr, "Duplicated key in language %s: " % self.pkg.language, \
+                  self.pkg.package, self.pkg.distribution, self.pkg.component, self.pkg.release, \
+                  self.pkg.version, self.pkg.description, self.pkg.md5sum
+              continue
+            query = "EXECUTE ddtp_insert (%s, '%s', '%s', '%s', '%s', '%s', %s, %s, %s)" % \
                         (quote(self.pkg.package), self.pkg.distribution, self.pkg.component, self.pkg.release, \
                          self.pkg.language, self.pkg.version, quote(self.pkg.description), \
                          quote(self.pkg.long_description), \
                          quote(self.pkg.md5sum))
-    	    try:
+            try:
               cur.execute(query)
             except IntegrityError, err:
-              print "Key is duplicated but not fetched before:", key
+              print "Duplicated key in language %s: " % self.pkg.language, \
+                    (self.pkg.package, self.pkg.version, self.pkg.description, self.pkg.md5sum)
         except IOError, err:
           print >>stderr, "Error reading %s (%s)" % (dir+filename, err)
 
