@@ -11,7 +11,7 @@ general:
     testing-migrations: module udd.testing_migrations_gatherer
     upload-history: module udd.upload_history_gatherer
     orphaned_packages: module udd.orphaned_packages_gatherer
-    bugs: exec DEBBUGS_CONFIG_FILE=/org/bugs.debian.org/etc/config perl /org/udd.debian.org/udd/udd/bugs_gatherer.pl 
+    bugs: exec DEBBUGS_CONFIG_FILE=/org/udd.debian.org/bugs/bugs.debian.org/etc/config perl /org/udd.debian.org/udd/udd/bugs_gatherer.pl 
     carnivore: module udd.carnivore_gatherer
     lintian: module udd.lintian_gatherer
     debtags: module udd.debtags_gatherer
@@ -246,6 +246,19 @@ debian-experimental:
   sources-schema: sources
   release: experimental
 
+ubuntu-karmic:
+  type: src-pkg
+  archs: [amd64, i386]
+  directory: /org/mirrors/ubuntu.com/ftp/dists/karmic/
+  components: [main, multiverse, universe, restricted]
+  distribution: ubuntu
+  release: karmic
+  packages-table: ubuntu_packages
+  sources-table: ubuntu_sources
+  uploaders-table: ubuntu_uploaders
+  packages-schema: packages
+  sources-schema: sources
+
 ubuntu-jaunty:
   type: src-pkg
   archs: [amd64, i386]
@@ -324,6 +337,7 @@ bugs:
   packages-table: packages
   usertags-table: bugs_usertags
   sources-table: sources
+  update-command: cd /org/udd.debian.org/bugs ; ./bugsync
 
 bugs-archive:
   type: bugs
@@ -334,6 +348,7 @@ bugs-archive:
   packages-table: packages
   usertags-table: bugs_usertags
   sources-table: sources
+  update-command: cd /org/udd.debian.org/bugs ; ./bugsync
 
 orphaned_packages:
   type: orphaned_packages
