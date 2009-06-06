@@ -46,11 +46,7 @@ class ubuntu_bugs_gatherer(gatherer):
       t.start()
 
     c = self.cursor()
-    c.execute("delete from ubuntu_bugs_subscribers")
-    c.execute("delete from ubuntu_bugs_duplicates")
-    c.execute("delete from ubuntu_bugs_tags")
-    c.execute("delete from ubuntu_bugs_tasks")
-    c.execute("delete from ubuntu_bugs")
+    c.execute("truncate ubuntu_bugs_subscribers, ubuntu_bugs_duplicates, ubuntu_bugs_tags, ubuntu_bugs_tasks, ubuntu_bugs")
 
     ok = True
     while ok:
