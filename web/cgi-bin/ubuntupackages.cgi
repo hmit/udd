@@ -2,7 +2,7 @@
 
 require 'dbi'
 
-RELEASE='jaunty'
+RELEASE='karmic'
 
 puts "Content-type: text/plain\n\n"
 
