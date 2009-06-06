@@ -1,3 +1,3 @@
 #!/bin/sh
 
-grep -v -e ': unable to open /org/bugs.debian.org/versions/pkg/' -e 'Use of uninitialized value in hash slice at '
+grep -v -e ': unable to open /org/bugs.debian.org/versions/pkg/' -e 'Use of uninitialized value in hash slice at ' -e 'Could not read file for bug '
