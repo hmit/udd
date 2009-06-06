@@ -11,8 +11,7 @@ select sources.source, id, insts, arrival, last_modified, title
 from sources, bugs, popcon_src
 where sources.distribution = 'debian' and sources.release = 'squeeze'
 and bugs.source = sources.source
-and id in (select id from bugs_rt_affects_testing)
-and id in (select id from bugs_rt_affects_unstable)
+and id in (select id from bugs_rt_affects_testing_and_unstable)
 and bugs.severity >= 'serious'
 and arrival < (NOW() - interval '14 DAYS')
 and sources.source = popcon_src.source
