@@ -182,8 +182,8 @@ class ftpnew_gatherer(gatherer):
     query = """PREPARE ftpnew_insert_package
       AS INSERT INTO %s (package, version, architecture, maintainer, description, source,
          depends, recommends, suggests, enhances, pre_depends, breaks, replaces, provides, conflicts,
-                         installed_size, homepage, section, long_description, license)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)""" % (my_config['table_packages'])
+                         installed_size, homepage, section, long_description, distribution, license)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)""" % (my_config['table_packages'])
     cur.execute(query)
 
     ftpnew_data      = open(my_config['path']+'/new.822')
@@ -245,6 +245,7 @@ class ftpnew_gatherer(gatherer):
               binpkgs.append(binpkg)
             binpkg = bin_pkg(value, srcpkg.s['Source'])
             print >>srco, "\nPackage: %s" % (value)
+            binpkg.b['Distribution'] = srcpkg.s['Distribution']
     	  elif field == 'Maintainer':
     	    # print "DEBUG %s: %s" % (field, value)
             if in_source:
@@ -410,7 +411,7 @@ class ftpnew_gatherer(gatherer):
                      %(Depends)s, %(Recommends)s, %(Suggests)s, %(Enhances)s,
                      %(Pre-Depends)s, %(Breaks)s, %(Replaces)s, %(Provides)s, %(Conflicts)s,
                      %(Installed-Size)s, %(Homepage)s, %(Section)s,
-                     %(Long_Description)s, %(License)s)"""
+                     %(Long_Description)s, %(Distribution)s, %(License)s)"""
           try:
             cur.execute(query, binpkg.b)
           except IntegrityError, err:

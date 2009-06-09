@@ -49,6 +49,7 @@ CREATE TABLE new_packages (
        homepage text,
        section text,
        long_description text,
+       distribution text,
        license text,              -- trying to parse http://ftp-master.debian.org/new/<package>_<version>.html#binary-<package>-copyright field "License:"
     PRIMARY KEY (package, version, architecture)
 );
