@@ -60,5 +60,8 @@ CREATE TABLE new_packages (
     PRIMARY KEY (package, version, architecture)
 );
 
+GRANT SELECT ON new_packages TO PUBLIC;
+GRANT SELECT ON new_sources TO PUBLIC;
+
 COMMIT;
 
