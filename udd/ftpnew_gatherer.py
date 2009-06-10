@@ -104,14 +104,14 @@ class ftpnew_gatherer(gatherer):
   s_non_mandatory = {'Uploaders': 0, 'Bin': 0, 'Architecture': 0,
                      'Homepage': 0, 'Build-Depends': 0, 'Vcs-Arch': 0, 'Vcs-Bzr': 0,
                      'Vcs-Cvs': 0, 'Vcs-Darcs': 0, 'Vcs-Git': 0, 'Vcs-Hg': 0, 'Vcs-Svn': 0,
-                     'Vcs-Mtn':0, 'Vcs-Browser': 0, 'License': 0
+                     'Vcs-Mtn':0, 'Vcs-Browser': 0, 'License': 0, 'Section': 0
                     }
   s_ignorable = {'X-Vcs-Browser': 0, 'X-Vcs-Bzr': 0, 'X-Vcs-Darcs': 0, 'X-Vcs-Svn': 0, 'X-Vcs-Hg':0, 'X-Vcs-Git':0,
                  'Directory':0, 'Comment':0, 'Origin':0, 'Url':0, 'X-Collab-Maint':0, 'Autobuild':0, 'Vcs-Cvs:':0,
                  'Python-Standards-Version':0, 'url':0, 'originalmaintainer':0, 'Originalmaintainer':0,
                  'Build-Recommends':0,
                  'Build-Depends-Indep': 0, 'Build-Conflicts': 0, 'Build-Conflicts-Indep': 0,
-                 'Priority': 0, 'Section': 0, 'Python-Version': 0, 'Checksums-Sha1':0,
+                 'Priority': 0, 'Python-Version': 0, 'Checksums-Sha1':0,
                  'Checksums-Sha256':0, 'Original-Maintainer':0, 'Dm-Upload-Allowed':0,
                  'Standards-Version': 0, 
                 }
@@ -176,18 +176,21 @@ class ftpnew_gatherer(gatherer):
     query = """PREPARE ftpnew_insert_source
       AS INSERT INTO %s (source, version, maintainer, maintainer_name, maintainer_email, binaries, 
                          changed_by, architecture, homepage,
-                         vcs_type, vcs_url, vcs_browser, distribution, closes, license, last_modified, queue)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)""" % (my_config['table_sources'])
+                         vcs_type, vcs_url, vcs_browser,
+                         section, distribution, component, closes, license, last_modified, queue)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)""" % (my_config['table_sources'])
     cur.execute(query)
     query = """PREPARE ftpnew_insert_package
       AS INSERT INTO %s (package, version, architecture, maintainer, description, source,
          depends, recommends, suggests, enhances, pre_depends, breaks, replaces, provides, conflicts,
-                         installed_size, homepage, section, long_description, distribution, license)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)""" % (my_config['table_packages'])
+                         installed_size, homepage, section, long_description, distribution, component, license)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)""" \
+            % (my_config['table_packages'])
     cur.execute(query)
 
     ftpnew_data      = open(my_config['path']+'/new.822')
 
+    has_warned_about_missing_section_key = 0
     for stanza in deb822.Sources.iter_paragraphs(ftpnew_data, shared_storage=False):
       if stanza['queue'] == 'accepted' or stanza['queue'] == 'proposedupdates' :
         continue
@@ -200,6 +203,20 @@ class ftpnew_gatherer(gatherer):
       srcpkg.s['Last_modified'] = ctime(int(stanza['last-modified'])) # We want a real time object instead of an epoch
       srcpkg.s['Distribution']  = stanza['distribution']
       srcpkg.s['Changed-By']    = stanza['changed-by']
+      try:
+        srcpkg.s['Section']       = stanza['section']
+        if stanza['section'].startswith('non-free'):
+          srcpkg.s['Component'] = 'non-free'
+        elif stanza['section'].startswith('contrib'):
+          srcpkg.s['Component'] = 'contrib'
+        else:
+          srcpkg.s['Component'] = 'main'
+      except KeyError:
+        srcpkg.s['Section']     = ''
+        srcpkg.s['Component']   = ''
+        if has_warned_about_missing_section_key == 0:
+          has_warned_about_missing_section_key = 1
+          print >>stderr, "Warning: Because of a bug in DAK code the Section field is currently missing."
 
       # Check UDD for existing source packages of this name
       query = "SELECT count(*) FROM sources WHERE source = '%s'" % (srcpkg.s['Source'])
@@ -353,6 +370,9 @@ class ftpnew_gatherer(gatherer):
               if not binpkg:
                 print >>stderr, "This should not happen", srcpkg, field, value
                 exit(-1)
+              else:
+                binpkg.b[field] = value
+                binpkg.b['Component'] = srcpkg.s['Component']
           elif field == 'Vcs-Browser':
             srcpkg.s[field] = value
           elif binpkg != None and field in dependencies_to_accept:
@@ -400,7 +420,7 @@ class ftpnew_gatherer(gatherer):
                   %(Maintainer)s, %(maintainer_name)s, %(maintainer_email)s,
                   %(Bin)s, %(Changed-By)s, %(Architecture)s, %(Homepage)s,
                   %(Vcs-Type)s, %(Vcs-Url)s, %(Vcs-Browser)s,
-                  %(Distribution)s, %(Closes)s, %(License)s,
+                  %(Section)s, %(Distribution)s, %(Component)s, %(Closes)s, %(License)s,
                   %(Last_modified)s, %(Queue)s)"""
         cur.execute(query, srcpkg.s)
         for binpkg in binpkgs:
@@ -411,7 +431,7 @@ class ftpnew_gatherer(gatherer):
                      %(Depends)s, %(Recommends)s, %(Suggests)s, %(Enhances)s,
                      %(Pre-Depends)s, %(Breaks)s, %(Replaces)s, %(Provides)s, %(Conflicts)s,
                      %(Installed-Size)s, %(Homepage)s, %(Section)s,
-                     %(Long_Description)s, %(Distribution)s, %(License)s)"""
+                     %(Long_Description)s, %(Distribution)s, %(Component)s, %(License)s)"""
           try:
             cur.execute(query, binpkg.b)
           except IntegrityError, err:

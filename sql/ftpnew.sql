@@ -2,6 +2,9 @@
 
 BEGIN;
 
+DROP TABLE IF EXISTS new_sources CASCADE;
+DROP TABLE IF EXISTS new_packages CASCADE;
+
 -- Sources
 CREATE TABLE new_sources (
        source text,
@@ -19,6 +22,8 @@ CREATE TABLE new_sources (
        vcs_type text,             -- by parsing http://ftp-master.debian.org/new/<src>_<version>.html#dsc field "Vcs-*:"
        vcs_url text,              -- by parsing http://ftp-master.debian.org/new/<src>_<version>.html#dsc field "Vcs-*:"
        vcs_browser text,          -- by parsing http://ftp-master.debian.org/new/<src>_<version>.html#dsc field "Vcs-Browser:"
+       section text,
+       component text,
        distribution text,
        closes int,                -- WNPP bug #
        license text,              -- trying to parse http://ftp-master.debian.org/new/<bin1>_<version>.html#binary-<bin1>-copyright field "License:"
@@ -47,8 +52,9 @@ CREATE TABLE new_packages (
        conflicts text,
        installed_size integer,
        homepage text,
-       section text,
        long_description text,
+       section text,
+       component text,
        distribution text,
        license text,              -- trying to parse http://ftp-master.debian.org/new/<package>_<version>.html#binary-<package>-copyright field "License:"
     PRIMARY KEY (package, version, architecture)
