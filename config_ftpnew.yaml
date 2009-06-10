@@ -3,16 +3,16 @@ general:
   types:
     ftpnew: module udd.ftpnew_gatherer
   debug: 1
-  lock-dir: /org/udd.debian.net/locks
+  lock-dir: /org/udd.debian.org/locks
 
   archs:
    [i386]
 
 ftpnew:
   type: ftpnew
-  update-command: /org/udd.debian.net/udd/scripts/fetch_ftpnew.sh
-  path: /org/udd.debian.net/mirrors/ftpnew
-  cache: /org/udd.debian.net/mirrors/cache
+  update-command: /org/udd.debian.org/udd/scripts/fetch_ftpnew.sh
+  path: /org/udd.debian.org/mirrors/ftpnew
+  cache: /org/udd.debian.org/mirrors/cache
   ftpmasterURL: http://ftp-master.debian.org/new/
   table_sources:  new_sources
   table_packages: new_packages
