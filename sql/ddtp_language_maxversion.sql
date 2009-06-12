@@ -17,9 +17,9 @@ CREATE TYPE DdtpRecordType AS (
 );
 
 CREATE OR REPLACE FUNCTION DdtpLanguageMaxVersion(text)
-   RETURNS SETOF DdtpRecordType AS \$\$
+   RETURNS SETOF DdtpRecordType AS $$
    DECLARE
-     pkg ALIAS FOR \$1 ;
+     pkg ALIAS FOR $1 ;
      lang      RECORD ;
      max       RECORD ;
      ret       DdtpRecordType%rowtype ;
@@ -43,6 +43,6 @@ CREATE OR REPLACE FUNCTION DdtpLanguageMaxVersion(text)
      END LOOP ;
 
      RETURN;
-END; \$\$ LANGUAGE 'plpgsql';
+END; $$ LANGUAGE 'plpgsql';
 
 COMMIT ;
