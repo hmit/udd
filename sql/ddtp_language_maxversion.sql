@@ -34,7 +34,7 @@ CREATE OR REPLACE FUNCTION DdtpLanguageMaxVersion(text)
      FOR lang IN EXECUTE query LOOP
      	 query2 = 'SELECT MAX(version) AS version FROM ddtp WHERE package = ''' || pkg || ''' AND language = ''' || lang.language || '''' ;
          FOR max IN EXECUTE query2 LOOP
-     	    query3 = 'SELECT * FROM ddtp WHERE package = ''' || pkg || ''' AND language = ''' || lang.language || ''' AND version = ''' || max.version ||
+     	    query3 = 'SELECT * FROM ddtp WHERE package = ''' || pkg || ''' AND language = ''' || lang.language || ''' AND version = ''' || CAST(max.version AS text) ||
      	             ''' LIMIT 1 '; -- make sure we really get only one result per language, even if there should not be more anyway
      	    FOR ret in EXECUTE query3 LOOP
      		RETURN NEXT ret;
