@@ -410,9 +410,9 @@ class ftpnew_gatherer(gatherer):
             in_description = 1
             description = de_html(match.groups()[0]) + "\n"
       srci.close()
-      srco.close()      
-#        cur.execute("EXECUTE ftpnew_insert (%s, %s, %s, %s)"\
-#          % (quote(pkg), pkg_type, quote(tag), quote(ftpnew_gatherer.code_to_tag_type_map[code])));
+      srco.close()
+      # Append last read binary package to list of binary packages
+      binpkgs.append(binpkg)
       if srcpkg.s['Queue'] != 'ignore':
         # print srcpkg
         srcpkg.check_dict()
