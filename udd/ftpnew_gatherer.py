@@ -439,6 +439,9 @@ class ftpnew_gatherer(gatherer):
             print >>stderr, binpkg
             print >>stderr, binpkg.b
             continue
+          except KeyError, err:
+            print >>stderr, "Missing information field for binary package %s: %s" % (binpkg.b['Package'], err)
+            continue
 
     cur.execute("DEALLOCATE ftpnew_insert_source")
     cur.execute("DEALLOCATE ftpnew_insert_package")
