@@ -18,6 +18,7 @@ general:
     ubuntu-bugs: module udd.ubuntu_bugs_gatherer
     ddtp: module udd.ddtp_gatherer
     ftpnew: module udd.ftpnew_gatherer
+    screenshots: module udd.screenshot_gatherer
   debug: 1
   timestamp-dir: /org/udd.debian.org/timestamps
   lock-dir: /org/udd.debian.org/locks
@@ -406,3 +407,10 @@ ftpnew:
   table_packages: new_packages
   releases_ignore: "'etch'"
 
+screenshots:
+  type: screenshots
+  update-command: /org/udd.debian.org/udd/scripts/fetch_screenshots.sh
+  path: /org/udd.debian.org/mirrors/screenshots
+  cache: /org/udd.debian.org/mirrors/cache
+  table:  screenshots
+  screenshots_json: /org/udd.debian.org/mirrors/screenshots/screenshots.json
