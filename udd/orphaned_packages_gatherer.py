@@ -16,7 +16,7 @@ class orphaned_packages_gatherer(gatherer):
     gatherer.__init__(self, connection, config, source)
     self.assert_my_config('bugs-path', 'table', 'unarchived-table')
 
-  title_re = re.compile('^(ITA|RFA|O): ([^\s]*) [-]+ (.*)$')
+  title_re = re.compile('^(ITA|RFA|O): ([^\s]*)( [-]+ (.*))?$')
   otime_re = re.compile('^<!-- time:([0-9]+) ')
   chtitle_re = re.compile('^<strong>Changed Bug title to `O:.*$')
   
@@ -59,10 +59,10 @@ class orphaned_packages_gatherer(gatherer):
         if time_orphaned == None:
           cur2.execute("EXECUTE opkgs_insert(%s,%s,%s,%s,%s)", (
             m.group(2), m.group(1), row[0],
-            m.group(3), row[2]))
+            m.group(4), row[2]))
         else:
           cur2.execute("EXECUTE opkgs_insert(%s,%s,%s,%s,%s::abstime)", (
             m.group(2), m.group(1), row[0],
-            m.group(3), time_orphaned))
+            m.group(4), time_orphaned))
 
 # vim:set et tabstop=2:
