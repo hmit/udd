@@ -100,7 +100,7 @@ class ubuntu_bugs_gatherer(gatherer):
           exit(1)
 
         try:
-          conn.request('GET', 'https://edge.launchpad.net/bugs/' + str(b) + '/+text')
+          conn.request('GET', 'https://launchpad.net/bugs/' + str(b) + '/+text')
           r = conn.getresponse()
           if r.status == 200:
             data = r.read()
@@ -112,6 +112,9 @@ class ubuntu_bugs_gatherer(gatherer):
               hq.put(b)
           else:
             print "[", currentThread().getName(), "] Bug ", b, ": Wrong status: ", r.status, " ", r.reason
+            if r.status == 302:
+              print "Exiting."
+              exit(1)
             ok = False
             hq.put(b)
         except httplib.BadStatusLine, line:
