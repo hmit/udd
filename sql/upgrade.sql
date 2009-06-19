@@ -100,3 +100,16 @@ CREATE TABLE ddtp (
 
 GRANT SELECT ON ddtp TO PUBLIC;
 ALTER TABLE ddtp ALTER COLUMN version TYPE debversion;
+
+--- 2009-06-19
+DROP DOMAIN lintian_tag_type;
+CREATE DOMAIN lintian_tag_type AS TEXT
+NOT NULL
+CHECK(
+     VALUE = 'error'
+  OR VALUE = 'warning'
+  OR VALUE = 'information'
+  OR VALUE = 'experimental'
+  OR VALUE = 'overriden'
+  OR VALUE = 'pedantic'
+);

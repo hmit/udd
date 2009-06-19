@@ -281,6 +281,7 @@ CHECK(
   OR VALUE = 'information'
   OR VALUE = 'experimental'
   OR VALUE = 'overriden'
+  OR VALUE = 'pedantic'
 );
 
 CREATE TABLE lintian (
