@@ -16,7 +16,7 @@ class lintian_gatherer(gatherer):
   #RE to parse lintian output, pushing the tag code to $1, package name
   #to $2, pkg type to $3, tag name to $4 and extra info to $5
   # (stolen from Russ Allbery, thanks dude)
-  output_re = re.compile("([EWIXO]): (\S+)(?: (\S+))?: (\S+)(?:\s+(.*))?");
+  output_re = re.compile("([EWIXOP]): (\S+)(?: (\S+))?: (\S+)(?:\s+(.*))?");
 
   ignore_re = re.compile("^((gpg|secmem usage|warning|(/bin/)?tar|internal error|/usr/bin/xgettext|ERROR): |     |Use of uninitialized value in numeric lt .*)");
 
@@ -26,6 +26,7 @@ class lintian_gatherer(gatherer):
     "I": "information",
     "X": "experimental",
     "O": "overriden",
+    "P": "pedantic",
   }
 
   def __init__(self, connection, config, source):
