@@ -7,6 +7,7 @@ This script imports the list of orphaned, ITAed and RFAed packages into the DB
 import aux
 from gatherer import gatherer
 import re
+from psycopg2 import IntegrityError 
 
 def get_gatherer(connection, config, source):
   return orphaned_packages_gatherer(connection, config, source)
@@ -55,14 +56,19 @@ class orphaned_packages_gatherer(gatherer):
       if m == None:
         print "Invalid bug: #" + str(row[0]) + ": " + row[1]
       else:
+        #print "bug: #" + str(row[0]) + ": " + row[1]
         time_orphaned = self.get_time_orphaned(row[0])
-        if time_orphaned == None:
-          cur2.execute("EXECUTE opkgs_insert(%s,%s,%s,%s,%s)", (
-            m.group(2), m.group(1), row[0],
-            m.group(4), row[2]))
-        else:
-          cur2.execute("EXECUTE opkgs_insert(%s,%s,%s,%s,%s::abstime)", (
-            m.group(2), m.group(1), row[0],
-            m.group(4), time_orphaned))
+        try:
+          if time_orphaned == None:
+            cur2.execute("EXECUTE opkgs_insert(%s,%s,%s,%s,%s)", (
+              m.group(2), m.group(1), row[0],
+              m.group(4), row[2]))
+          else:
+            cur2.execute("EXECUTE opkgs_insert(%s,%s,%s,%s,%s::abstime)", (
+              m.group(2), m.group(1), row[0],
+              m.group(4), time_orphaned))
+        except IntegrityError, message:
+          print "Integrity Error inserting bug " + str(row[0]) + " " + m.group(2)
+          continue
 
 # vim:set et tabstop=2:

@@ -4,8 +4,9 @@
 This script imports the Ubuntu bugs from Launchpad
 """
 
-from aux import quote
 import sys
+from aux import quote
+from os import _exit
 from gatherer import gatherer
 import re
 import urllib
@@ -26,7 +27,7 @@ class ubuntu_bugs_gatherer(gatherer):
 
   def run(self):
     my_config = self.my_config
-    num_fetchers = 3
+    num_fetchers = 4
     num_writers = 1
     bugs = self.fetch_all_bugs()
     httpq = Queue()
@@ -46,8 +47,11 @@ class ubuntu_bugs_gatherer(gatherer):
       t.start()
 
     c = self.cursor()
-    c.execute("truncate ubuntu_bugs_subscribers, ubuntu_bugs_duplicates, ubuntu_bugs_tags, ubuntu_bugs_tasks, ubuntu_bugs")
-
+    c.execute("delete from ubuntu_bugs_subscribers")
+    c.execute("delete from ubuntu_bugs_duplicates")
+    c.execute("delete from ubuntu_bugs_tags")
+    c.execute("delete from ubuntu_bugs_tasks")
+    c.execute("delete from ubuntu_bugs")
     ok = True
     while ok:
       try:
@@ -82,6 +86,7 @@ class ubuntu_bugs_gatherer(gatherer):
 #        print "Duplicate bug: " +  str(n)
       on = n
     fh.close()
+    #print nbugs
     return nbugs
 
   # "worker". Fetch a specific bug as text from launchpad.
@@ -97,7 +102,7 @@ class ubuntu_bugs_gatherer(gatherer):
           return
         except:
           print "Other exception raised in bugfetcher. exiting."
-          exit(1)
+          _exit(1)
 
         try:
           conn.request('GET', 'https://launchpad.net/bugs/' + str(b) + '/+text')
@@ -114,7 +119,7 @@ class ubuntu_bugs_gatherer(gatherer):
             print "[", currentThread().getName(), "] Bug ", b, ": Wrong status: ", r.status, " ", r.reason
             if r.status == 302:
               print "Exiting."
-              exit(1)
+              _exit(1)
             ok = False
             hq.put(b)
         except httplib.BadStatusLine, line:
@@ -123,6 +128,10 @@ class ubuntu_bugs_gatherer(gatherer):
           print r.read()
           ok = False
           hq.put(b)
+        except:
+          print "[", currentThread().getName(), "] Bug ", b, ": error, exiting"
+          print sys.exc_info()
+          _exit(1)
 
   parre = re.compile('^\s*(.*) \(([^(]*)\)$')
   def splitpar(self, text):
