@@ -398,6 +398,11 @@ assignee_login text,
 assignee_name text,
 PRIMARY KEY (bug, package, distro));
 
+CREATE INDEX ubuntu_bugs_tags_idx on ubuntu_bugs_tags(bug);
+CREATE INDEX ubuntu_bugs_tasks_idx on ubuntu_bugs_tasks(bug);
+CREATE INDEX ubuntu_bugs_duplicates_idx on ubuntu_bugs_duplicates(bug);
+CREATE INDEX ubuntu_bugs_subscribers_idx on ubuntu_bugs_subscribers(bug);
+
 GRANT SELECT ON ubuntu_bugs TO PUBLIC;
 GRANT SELECT ON ubuntu_bugs_duplicates TO PUBLIC;
 GRANT SELECT ON ubuntu_bugs_subscribers TO PUBLIC;
