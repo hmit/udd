@@ -76,9 +76,9 @@ debian-volatile-etch:
   type: src-pkg
   archs: [alpha, amd64, arm, hppa, i386, ia64,  mips,
           mipsel, powerpc, s390, sparc]       
-  directory: /org/mirrors/volatile.debian.org/ftp/dists/etch/volatile/
+  directory: /org/mirrors/volatile.debian.org/ftp/dists/etch/
   components: [main, contrib, non-free]
-  distribution: debian-volatile
+  distribution: etch-volatile
   packages-table: packages
   sources-table: sources
   uploaders-table: uploaders
@@ -90,7 +90,7 @@ debian-etch-security:
   type: src-pkg
   archs: [alpha, amd64, arm, hppa, i386, ia64,  mips,
           mipsel, powerpc, s390, sparc]       
-  directory: /org/mirrors/security.debian.org/ftp/dists/etch/updates/
+  directory: /org/mirrors/security.debian.org/ftp/dists/etch/
   components: [main, contrib, non-free]
   distribution: debian
   packages-table: packages
@@ -120,7 +120,7 @@ debian-lenny-security:
   archs: [alpha, amd64, arm, armel, hppa,
           i386, ia64, mips,
           mipsel, powerpc, s390, sparc]       
-  directory: /org/mirrors/security.debian.org/ftp/dists/lenny/updates/
+  directory: /org/mirrors/security.debian.org/ftp/dists/lenny/
   components: [main, contrib, non-free]
   distribution: debian
   packages-table: packages
@@ -163,9 +163,9 @@ debian-volatile-lenny:
   type: src-pkg
   archs: [alpha, amd64, arm, hppa, i386, ia64,  mips,
           mipsel, powerpc, s390, sparc]       
-  directory: /org/mirrors/volatile.debian.org/ftp/dists/lenny/volatile/
+  directory: /org/mirrors/volatile.debian.org/ftp/dists/lenny/
   components: [main, contrib, non-free]
-  distribution: debian-volatile
+  distribution: lenny-volatile
   packages-table: packages
   sources-table: sources
   uploaders-table: uploaders
@@ -193,7 +193,7 @@ debian-squeeze-security:
   archs: [alpha, amd64, armel, hppa,
           i386, ia64, mips,
           mipsel, powerpc, s390, sparc]       
-  directory: /org/mirrors/security.debian.org/ftp/dists/squeeze/updates/
+  directory: /org/mirrors/security.debian.org/ftp/dists/squeeze/
   components: [main, contrib, non-free]
   distribution: debian
   packages-table: packages
