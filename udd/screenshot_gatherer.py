@@ -25,7 +25,7 @@ class screenshot_gatherer(gatherer):
     my_config = self.my_config
 
     cur = self.cursor()
-    query = "TRUNCATE %s" % my_config['table']
+    query = "DELETE FROM %s" % my_config['table']
     cur.execute(query)
     query = """PREPARE screenshots_insert (text, text, text, text, text, text, text, text, text, text) AS
                    INSERT INTO %s
