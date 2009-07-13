@@ -6,20 +6,31 @@ UAR=/org/udd.debian.org/udd/update-and-run.sh
 0 3 * * * $UAR debian-etch debian-backports-etch debian-volatile-etch debian-etch-proposed-updates debian-etch-security
 0 15 * * * $UAR debian-lenny debian-backports-lenny debian-volatile-lenny debian-lenny-proposed-updates debian-lenny-security debian-squeeze-proposed-updates debian-squeeze-security
 # Ubuntu Sources/Packages
-0 1 * * * $UAR ubuntu-jaunty
-30 2 */2 * * $UAR ubuntu-hardy ubuntu-intrepid
+30 1 * * * $UAR ubuntu-karmic
+30 2 * * * $UAR ubuntu-hardy ubuntu-intrepid ubuntu-jaunty
 # Various simple things
-0 4 * * * $UAR debian-popcon ubuntu-popcon upload-history orphaned_packages lintian debtags carnivore
+0 4 * * * $UAR debian-popcon ubuntu-popcon upload-history lintian debtags carnivore orphaned_packages | /org/udd.debian.org/udd/scripts/filter-output.rb
 0 */12 * * * $UAR testing-migrations
 # Debian bugs
 0 1,7,13,19 * * * $UAR bugs 2>&1 | /org/udd.debian.org/udd/scripts/filter-bugs-output.sh
 0 15 * * * $UAR bugs-archive 2>&1 | /org/udd.debian.org/udd/scripts/filter-bugs-output.sh
 
 # DDTP
-0 2 * * * $UAR ddtp
+0 2 * * * $UAR ddtp | /org/udd.debian.org/udd/scripts/filter-output.rb
+
+# FTP new queue
+0 3 * * * $UAR ftpnew | /org/udd.debian.org/udd/scripts/filter-output.rb
+
+# screenshots.debian.net
+30 3 * * * $UAR screenshots | /org/udd.debian.org/udd/scripts/filter-output.rb
 
 # Ubuntu bugs
 0 4 * * * $UAR ubuntu-bugs
 
 # Dump DB
 0 8 */2 * * /org/udd.debian.org/udd/scripts/dump-db.sh
+
+# checks
+*/5 * * * * /org/udd.debian.org/udd/scripts/monitor_locks
+0 * * * * /org/udd.debian.org/udd/scripts/check_timestamps
+0 * * * * /org/udd.debian.org/udd/scripts/check_timestamps > /org/udd.debian.org/udd/web/timestamps.txt
