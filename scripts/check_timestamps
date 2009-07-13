@@ -1,0 +1,1 @@
+ls -l --time-style=full-iso /org/udd.debian.org/timestamps/ |sort -n -k 6 | grep -v $(date --iso) | grep -v $(date --iso -d '1 day ago') | grep -v "^total"

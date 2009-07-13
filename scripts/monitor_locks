@@ -1,0 +1,17 @@
+#!/bin/bash
+
+set -e
+ungranted=$(echo "select locktype, database, relation, pid, mode, granted from pg_locks where granted='f';" | psql -A -q udd | grep row | awk '{print $1}' | cut -c 2-)
+
+if [ -z "$ungranted" ]; then
+echo "select locktype, database, relation, pid, mode, granted from pg_locks where granted='f';" | psql -A -q udd
+fi
+[ "$ungranted" -eq 0 ] || echo "select locktype, database, relation, pid, mode, granted from pg_locks where granted='f';" | psql -A -q udd
+
+if [ "$ungranted" -ne 0 ]; then
+  echo "select locktype, database, relation, pid, mode, granted from pg_locks;" | psql -q udd
+  echo "##########################"
+  ps fx
+  echo "##########################"
+  ps afx
+fi
