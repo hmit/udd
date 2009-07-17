@@ -78,6 +78,16 @@ class packages_gatherer(gatherer):
     Sequence has to have an iterator interface, that yields a line every time
     it is called.The Format of the sequence is expected to be that of a
     debian packages file."""
+    pkgs = ()
+    query = """EXECUTE package_insert
+      (%(Package)s, %(Version)s, %(Architecture)s, %(Maintainer)s,
+      %(Description)s, %(Long_Description)s, %(Source)s, %(Source_Version)s, %(Essential)s,
+      %(Depends)s, %(Recommends)s, %(Suggests)s, %(Enhances)s,
+      %(Pre-Depends)s, %(Breaks)s, %(Installed-Size)s, %(Homepage)s, %(Size)s,
+      %(Build-Essential)s, %(Origin)s, %(SHA1)s,
+      %(Replaces)s, %(Section)s, %(MD5sum)s, %(Bugs)s, %(Priority)s,
+      %(Tag)s, %(Task)s, %(Python-Version)s, %(Provides)s,
+      %(Conflicts)s, %(SHA256)s, %(Original-Maintainer)s)"""
     # The fields that are to be read. Other fields are ignored
     for control in debian_bundle.deb822.Packages.iter_paragraphs(sequence):
       # Check whether packages with architectue 'all' have already been
@@ -114,21 +124,13 @@ class packages_gatherer(gatherer):
 	else:
 	  d['Source'] = split[0]
 	  d['Source_Version'] = split[1].strip("()")
+        pkgs += (d,)
 
-      query = """EXECUTE package_insert
-	  (%(Package)s, %(Version)s, %(Architecture)s, %(Maintainer)s,
-	  %(Description)s, %(Long_Description)s, %(Source)s, %(Source_Version)s, %(Essential)s,
-	  %(Depends)s, %(Recommends)s, %(Suggests)s, %(Enhances)s,
-	  %(Pre-Depends)s, %(Breaks)s, %(Installed-Size)s, %(Homepage)s, %(Size)s,
-	  %(Build-Essential)s, %(Origin)s, %(SHA1)s,
-	  %(Replaces)s, %(Section)s, %(MD5sum)s, %(Bugs)s, %(Priority)s,
-	  %(Tag)s, %(Task)s, %(Python-Version)s, %(Provides)s,
-	  %(Conflicts)s, %(SHA256)s, %(Original-Maintainer)s)"""
-      try:
-	cur.execute(query, d)
-      except psycopg2.ProgrammingError:
-	print query
-	raise
+    try:
+      cur.executemany(query, pkgs)
+    except psycopg2.ProgrammingError:
+      print query
+      raise
 
   def setup(self):
     if 'schema-dir' in self.config['general']:
@@ -201,11 +203,11 @@ class packages_gatherer(gatherer):
         package, version, source, source_version, maintainer, distribution,
         release, component
       FROM %s""" % (table + '_summary', table));
-    cur.execute("DELETE FROM all_packages_distrelcomparch");
-    cur.execute("""INSERT INTO all_packages_distrelcomparch
+    cur.execute("DELETE FROM %s" % (table + '_distrelcomparch'));
+    cur.execute("""INSERT INTO %s
       (distribution, release, component, architecture)
       SELECT DISTINCT distribution, release, component, architecture
-      FROM all_packages""")
+      FROM %s""" % (table + '_distrelcomparch', table))
 
     self.print_warnings()
 

@@ -92,20 +92,23 @@ class sources_gatherer(gatherer):
     is called.The Format of the file is expected to be that of a debian
     source file."""
     cur = self.cursor()
+    pkgs = ()
+    query = """EXECUTE source_insert
+      (%(Package)s, %(Version)s, %(Maintainer)s,
+      %(maintainer_name)s, %(maintainer_email)s, %(Format)s, %(Files)s,
+      %(Uploaders)s, %(Binary)s, %(Architecture)s, %(Standards-Version)s,
+      %(Homepage)s, %(Build-Depends)s, %(Build-Depends-Indep)s,
+      %(Build-Conflicts)s, %(Build-Conflicts-Indep)s, %(Priority)s,
+      %(Section)s, %(Vcs-Type)s, %(Vcs-Url)s, %(Vcs-Browser)s,
+      %(Python-Version)s, %(Checksums-Sha1)s, %(Checksums-Sha256)s,
+      %(Original-Maintainer)s, %(Dm-Upload-Allowed)s)"""
+    query_uploaders = """EXECUTE uploader_insert (%(Package)s, %(Version)s, %(Name)s, %(Email)s)"""
+    uploaders = ()
     for control in debian_bundle.deb822.Packages.iter_paragraphs(file):
       d = self.build_dict(control)
       d['maintainer_name'], d['maintainer_email'] = email.Utils.parseaddr(d['Maintainer'])
-      query = """EXECUTE source_insert
-         (%(Package)s, %(Version)s, %(Maintainer)s,
-	  %(maintainer_name)s, %(maintainer_email)s, %(Format)s, %(Files)s,
-	  %(Uploaders)s, %(Binary)s, %(Architecture)s, %(Standards-Version)s,
-	  %(Homepage)s, %(Build-Depends)s, %(Build-Depends-Indep)s,
-	  %(Build-Conflicts)s, %(Build-Conflicts-Indep)s, %(Priority)s,
-	  %(Section)s, %(Vcs-Type)s, %(Vcs-Url)s, %(Vcs-Browser)s,
-	  %(Python-Version)s, %(Checksums-Sha1)s, %(Checksums-Sha256)s,
-	  %(Original-Maintainer)s, %(Dm-Upload-Allowed)s)
-	  """ 
-      cur.execute(query, d)
+      pkgs += (d,)
+
       ud = {}
       ud['Package'] = d['Package']
       ud['Version'] = d['Version']
@@ -113,9 +116,9 @@ class sources_gatherer(gatherer):
         for uploader in email.Utils.getaddresses([d['Uploaders']]):
           ud['Name'] = uploader[0]
           ud['Email'] = uploader[1]
-	  query = """EXECUTE uploader_insert (%(Package)s, %(Version)s, %(Name)s,
-	    %(Email)s)"""
-	  cur.execute(query, ud)
+          uploaders += (ud,)
+    cur.executemany(query, pkgs)
+    cur.executemany(query_uploaders, uploaders)
 
   def tables(self):
     return [self.my_config['sources-table']]
