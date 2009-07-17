@@ -35,8 +35,6 @@ if __name__ == '__main__':
 
   types = config['general']['types']
 
-  connection = udd.aux.open_connection(config)
-
   schemata = {}
   # Process the sources
   for src in sys.argv[3:]:
@@ -61,6 +59,7 @@ if __name__ == '__main__':
 	if src_command == "exec":
 	  system(rest + " " + sys.argv[1] + " " + sys.argv[2] + " " + src)
 	elif src_command == "module":
+          connection = udd.aux.open_connection(config)
           # TODO XXX: using exec is hackish and prone to failures due
           # to what is being written in the conffile. We should get
           # rid of these lines and use the "imp" module, which is
@@ -73,6 +72,7 @@ if __name__ == '__main__':
 	    print "\n".join(tables)
 	  else:
 	    exec "gatherer.%s()" % command
+	  connection.commit()
 	if 'timestamp-dir' in config['general']:
 	  f = open(os.path.join(config['general']['timestamp-dir'],
                                 src+".dispatch"), "w")
@@ -82,4 +82,3 @@ if __name__ == '__main__':
       udd.aux.unlock(config, src)
       raise
     udd.aux.unlock(config, src)
-  connection.commit()
