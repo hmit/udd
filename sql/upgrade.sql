@@ -119,3 +119,37 @@ CREATE INDEX ubuntu_bugs_tags_idx on ubuntu_bugs_tags(bug);
 CREATE INDEX ubuntu_bugs_tasks_idx on ubuntu_bugs_tasks(bug);
 CREATE INDEX ubuntu_bugs_duplicates_idx on ubuntu_bugs_duplicates(bug);
 CREATE INDEX ubuntu_bugs_subscribers_idx on ubuntu_bugs_subscribers(bug);
+
+-- 2009-07-16
+-- turn release columns into ENUMs
+-- you probably want to drop and re-create the tables here, altering
+-- them won't work well
+CREATE TYPE release AS ENUM ('hardy', 'intrepid', 'jaunty', 'karmic', 'etch', 'etch-security', 'etch-proposed-updates', 'lenny', 'lenny-security', 'lenny-proposed-updates', 'squeeze', 'squeeze-security', 'squeeze-proposed-updates', 'sid', 'experimental');
+ALTER TABLE packages ALTER COLUMN release TYPE release USING release::release;
+ALTER TABLE sources ALTER COLUMN release TYPE release USING release::release;
+ALTER TABLE packages_summary ALTER COLUMN release TYPE release USING release::release;
+ALTER TABLE uploaders ALTER COLUMN release TYPE release USING release::release;
+ALTER TABLE ubuntu_packages ALTER COLUMN release TYPE release USING release::release;
+ALTER TABLE ubuntu_sources ALTER COLUMN release TYPE release USING release::release;
+ALTER TABLE ubuntu_packages_summary ALTER COLUMN release TYPE release USING release::release;
+ALTER TABLE ubuntu_uploaders ALTER COLUMN release TYPE release USING release::release;
+ALTER TABLE ddtp ALTER COLUMN release TYPE release USING release::release;
+-- replace all_packages_distrelcomparch with two tables and a view
+DROP TABLE all_packages_distrelcomparch;
+CREATE TABLE packages_distrelcomparch (distribution text, release release,
+component text, architecture text);
+CREATE TABLE ubuntu_packages_distrelcomparch (distribution text, release release,
+component text, architecture text);
+GRANT SELECT ON ubuntu_packages_distrelcomparch TO PUBLIC;
+GRANT SELECT ON packages_distrelcomparch TO PUBLIC;
+CREATE VIEW all_packages_distrelcomparch AS
+SELECT * FROM packages_distrelcomparch
+UNION ALL SELECT * FROM ubuntu_packages_distrelcomparch;
+-- turn lintian tag_type to enum
+CREATE TYPE lintian_tagtype AS ENUM('experimental', 'overriden', 'pedantic', 'information', 'warning', 'error');
+ALTER TABLE lintian ALTER COLUMN tag_type TYPE lintian_tagtype USING tag_type::lintian_tagtype;
+-- add indices needed for enrico's work
+CREATE INDEX uploaders_distrelcompsrcver_idx on uploaders(distribution, release, component, source, version);
+CREATE INDEX ubuntu_uploaders_distrelcompsrcver_idx on ubuntu_uploaders(distribution, release, component, source, version);
+CREATE INDEX packages_summary_distrelcompsrcver_idx on packages_summary(distribution, release, component, source, source_version);
+CREATE INDEX ubuntu_packages_summary_distrelcompsrcver_idx on ubuntu_packages_summary(distribution, release, component, source, source_version);
