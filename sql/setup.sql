@@ -17,7 +17,7 @@ GRANT SELECT ON sources TO PUBLIC;
 -- no primary key possible: duplicate rows are possible because duplicate entries
 -- in Uploaders: are allowed. yes.
 CREATE TABLE uploaders (source text, version debversion, distribution text,
-	release release, component text, name text, email text);
+	release release, component text, uploader text, name text, email text);
    
 GRANT SELECT ON uploaders TO PUBLIC;
 
@@ -26,7 +26,7 @@ CREATE INDEX uploaders_distrelcompsrcver_idx on uploaders(distribution, release,
 CREATE INDEX sources_distrelcomp_idx on sources(distribution, release, component);
 
 CREATE TABLE packages_summary ( package text, version debversion, source text,
-source_version debversion, maintainer text, distribution text, release release,
+source_version debversion, maintainer text, maintainer_name text, maintainer_email text, distribution text, release release,
 component text,
 PRIMARY KEY (package, version, distribution, release, component));
 
@@ -36,7 +36,7 @@ CREATE TABLE packages_distrelcomparch (distribution text, release release,
 component text, architecture text);
 
 CREATE TABLE packages
-  (package text, version debversion, architecture text, maintainer text, description
+  (package text, version debversion, architecture text, maintainer text, maintainer_name text, maintainer_email text, description
     text, long_description text, source text, source_version debversion, essential text, depends text,
     recommends text, suggests text, enhances text, pre_depends text, breaks text,
     installed_size int, homepage text, size int,
@@ -72,14 +72,14 @@ CREATE INDEX ubuntu_sources_distrelcomp_idx on ubuntu_sources(distribution, rele
 -- no primary key possible: duplicate rows are possible because duplicate entries
 -- in Uploaders: are allowed. yes.
 CREATE TABLE ubuntu_uploaders (source text, version debversion, distribution text,
-	release release, component text, name text, email text);
+	release release, component text, uploader text, name text, email text);
    
 GRANT SELECT ON ubuntu_uploaders TO PUBLIC;
 
 CREATE INDEX ubuntu_uploaders_distrelcompsrcver_idx on ubuntu_uploaders(distribution, release, component, source, version);
 
 CREATE TABLE ubuntu_packages_summary ( package text, version debversion, source text,
-source_version debversion, maintainer text, distribution text, release release,
+source_version debversion, maintainer text, maintainer_name text, maintainer_email text, distribution text, release release,
 component text,
 PRIMARY KEY (package, version, distribution, release, component));
 
@@ -89,7 +89,7 @@ CREATE TABLE ubuntu_packages_distrelcomparch (distribution text, release release
 component text, architecture text);
 
 CREATE TABLE ubuntu_packages
-  (package text, version debversion, architecture text, maintainer text, description
+  (package text, version debversion, architecture text, maintainer text, maintainer_name text, maintainer_email text, description
     text, long_description text, source text, source_version debversion, essential text, depends text,
     recommends text, suggests text, enhances text, pre_depends text, breaks text,
     installed_size int, homepage text, size int,
@@ -330,7 +330,7 @@ GRANT SELECT ON migrations TO PUBLIC;
 
 CREATE TABLE upload_history
  (id serial, package text, version debversion, date timestamp with time zone,
- changed_by text, maintainer text, nmu boolean, signed_by text, key_id text,
+ changed_by text, changed_by_name text, changed_by_email text, maintainer text, maintainer_name text, maintainer_email text, nmu boolean, signed_by text, signed_by_name text, signed_by_email text, key_id text,
  fingerprint text,
  PRIMARY KEY (id));
 
@@ -428,6 +428,7 @@ UNION ALL SELECT * FROM archived_bugs;
 
 GRANT SELECT ON all_sources TO PUBLIC;
 GRANT SELECT ON all_packages TO PUBLIC;
+GRANT SELECT ON all_packages_distrelcomparch TO PUBLIC;
 GRANT SELECT ON all_bugs TO PUBLIC;
 
 CREATE TABLE ddtp (
@@ -454,3 +455,12 @@ CREATE TABLE ddtp (
 );
 
 GRANT SELECT ON ddtp TO PUBLIC;
+
+-- active_dds view
+CREATE VIEW active_dds AS
+SELECT DISTINCT carnivore_login.id, login
+FROM carnivore_login, carnivore_keys
+WHERE carnivore_keys.id = carnivore_login.id
+AND key_type = 'keyring';
+
+GRANT SELECT ON active_dds TO PUBLIC;

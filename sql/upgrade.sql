@@ -145,6 +145,7 @@ GRANT SELECT ON packages_distrelcomparch TO PUBLIC;
 CREATE VIEW all_packages_distrelcomparch AS
 SELECT * FROM packages_distrelcomparch
 UNION ALL SELECT * FROM ubuntu_packages_distrelcomparch;
+GRANT SELECT ON all_packages_distrelcomparch TO PUBLIC;
 -- turn lintian tag_type to enum
 CREATE TYPE lintian_tagtype AS ENUM('experimental', 'overriden', 'pedantic', 'information', 'warning', 'error');
 ALTER TABLE lintian ALTER COLUMN tag_type TYPE lintian_tagtype USING tag_type::lintian_tagtype;
@@ -153,3 +154,32 @@ CREATE INDEX uploaders_distrelcompsrcver_idx on uploaders(distribution, release,
 CREATE INDEX ubuntu_uploaders_distrelcompsrcver_idx on ubuntu_uploaders(distribution, release, component, source, version);
 CREATE INDEX packages_summary_distrelcompsrcver_idx on packages_summary(distribution, release, component, source, source_version);
 CREATE INDEX ubuntu_packages_summary_distrelcompsrcver_idx on ubuntu_packages_summary(distribution, release, component, source, source_version);
+
+-- 2009-07-17
+ALTER TABLE uploaders add uploader text;
+ALTER TABLE ubuntu_uploaders add uploader text;
+ALTER TABLE packages ADD maintainer_name text;
+ALTER TABLE packages ADD maintainer_email text;
+ALTER TABLE packages_summary ADD maintainer_name text;
+ALTER TABLE packages_summary ADD maintainer_email text;
+ALTER TABLE ubuntu_packages ADD maintainer_name text;
+ALTER TABLE ubuntu_packages ADD maintainer_email text;
+ALTER TABLE ubuntu_packages_summary ADD maintainer_name text;
+ALTER TABLE ubuntu_packages_summary ADD maintainer_email text;
+
+ALTER TABLE upload_history ADD changed_by_name text;
+ALTER TABLE upload_history ADD changed_by_email text;
+ALTER TABLE upload_history ADD maintainer_name text;
+ALTER TABLE upload_history ADD maintainer_email text;
+ALTER TABLE upload_history ADD signed_by_name text;
+ALTER TABLE upload_history ADD signed_by_email text;
+
+-- 2009-07-23
+-- active_dds view
+CREATE VIEW active_dds AS
+SELECT DISTINCT carnivore_login.id, login
+FROM carnivore_login, carnivore_keys
+WHERE carnivore_keys.id = carnivore_login.id
+AND key_type = 'keyring';
+
+GRANT SELECT ON active_dds TO PUBLIC;
