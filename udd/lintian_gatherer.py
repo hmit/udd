@@ -70,6 +70,7 @@ class lintian_gatherer(gatherer):
         print "Can't parse line %d: %s" % (line_number, line.rstrip())
 
     cur.execute("DEALLOCATE lintian_insert")
+    cur.execute("ANALYZE %s" % my_config["table"])
 
 if __name__ == '__main__':
   main()

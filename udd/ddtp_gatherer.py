@@ -137,6 +137,7 @@ class ddtp_gatherer(gatherer):
           print >>stderr, "Error reading %s (%s)" % (dir+filename, err)
 
     cur.execute("DEALLOCATE ddtp_insert")
+    cur.execute("ANALYZE %s" % my_config['table'])
 
 if __name__ == '__main__':
   main()

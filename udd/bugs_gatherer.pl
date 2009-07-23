@@ -288,6 +288,19 @@ sub run {
 		}
 	}
 	print "Inserting bugs: ",(time() - $t),"s\n" if $timing;
+
+	$dbh->commit();
+	print "Committing bugs: ",(time() - $t),"s\n" if $timing;
+
+	foreach my $postfix (qw{_packages _merged_with _found_in _fixed_in _tags}, '') {
+		my $sth = $dbh->prepare("ANALYZE $table$postfix");
+		$sth->execute() or die $!;
+	}
+
+	my $sth = $dbh->prepare("ANALYZE ".$src_config{'usertags-table'});
+	$sth->execute() or die $!;
+
+	print "Analyzing bugs: ",(time() - $t),"s\n" if $timing;
 }
 
 sub main {
@@ -323,8 +336,6 @@ sub main {
 		exit(1)
 	}
 
-	$dbh->commit();
-	print "Committing bugs: ",(time() - $t),"s\n" if $timing;
 }
 
 main();

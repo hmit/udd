@@ -446,6 +446,8 @@ class ftpnew_gatherer(gatherer):
     cur.execute("DEALLOCATE ftpnew_insert_source")
     cur.execute("DEALLOCATE ftpnew_insert_package")
     cur.execute("DEALLOCATE ftpnew_check_existing_package")
+    cur.execute("ANALYZE %s" % my_config["table_sources"])
+    cur.execute("ANALYZE %s" % my_config["table_packages"])
 
 if __name__ == '__main__':
   main()

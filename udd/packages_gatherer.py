@@ -211,6 +211,10 @@ class packages_gatherer(gatherer):
       SELECT DISTINCT distribution, release, component, architecture
       FROM %s""" % (table + '_distrelcomparch', table))
 
+    cur.execute("ANALYZE %s" % table)
+    cur.execute("ANALYZE %s" % table + '_summary')
+    cur.execute("ANALYZE %s" % table + '_distrelcomparch')
+
     self.print_warnings()
 
   def print_warnings(self):

@@ -113,3 +113,6 @@ class upload_history_gatherer(gatherer):
     cursor.executemany(query_archs, uploads_archs)
     cursor.executemany(query_closes, uploads_closes)
     cursor.execute("DEALLOCATE uh_insert")
+    cursor.execute("ANALYZE " + self.my_config['table'] + '_architecture')
+    cursor.execute("ANALYZE " + self.my_config['table'] + '_closes')
+    cursor.execute("ANALYZE " + self.my_config['table'])

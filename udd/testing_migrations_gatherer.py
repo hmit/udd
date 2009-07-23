@@ -21,35 +21,36 @@ class testing_migrations_gatherer(gatherer):
     self.assert_my_config('path')
 
   def run(self):
-      src_cfg = self.my_config
+    src_cfg = self.my_config
 
-      c = self.connection.cursor()
+    c = self.connection.cursor()
 
-      c.execute("DELETE FROM migrations")
+    c.execute("DELETE FROM migrations")
 
-      c.execute("PREPARE mig_insert AS INSERT INTO migrations (source, in_testing, testing_version, in_unstable, unstable_version, sync, sync_version, first_seen) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)")
+    c.execute("PREPARE mig_insert AS INSERT INTO migrations (source, in_testing, testing_version, in_unstable, unstable_version, sync, sync_version, first_seen) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)")
       
-      f = open(src_cfg['path'])
-      for line in f:
-	(package, in_testing, testing_version, in_unstable, unstable_version, sync, sync_version, first_seen) = line.split()
-	for field in ('in_testing', 'in_unstable', 'sync', 'first_seen'):
-	  is_null = False
-	  exec "is_null = %s == ZERO_DATE" % field
-	  if is_null:
-	    exec "%s = 'NULL'" % field
-	  else:
-	    exec "%s = quote(%s)" % (field, field)
+    f = open(src_cfg['path'])
+    for line in f:
+      (package, in_testing, testing_version, in_unstable, unstable_version, sync, sync_version, first_seen) = line.split()
+      for field in ('in_testing', 'in_unstable', 'sync', 'first_seen'):
+        is_null = False
+        exec "is_null = %s == ZERO_DATE" % field
+        if is_null:
+          exec "%s = 'NULL'" % field
+        else:
+          exec "%s = quote(%s)" % (field, field)
 
-	for field in ('package', 'testing_version', 'unstable_version', 'sync_version'):
-	  is_null = False
-	  exec "is_null = %s == '-'" % field
-	  if is_null:
-	    exec "%s = 'NULL'" % field
-	  else:
-	    exec "%s = quote(%s)" % (field, field)
-	  
-	c.execute("EXECUTE mig_insert(%s, %s, %s, %s, %s, %s, %s, %s)" \
-	    % (package, in_testing, testing_version, in_unstable, unstable_version, sync, sync_version, first_seen))
+      for field in ('package', 'testing_version', 'unstable_version', 'sync_version'):
+        is_null = False
+        exec "is_null = %s == '-'" % field
+        if is_null:
+          exec "%s = 'NULL'" % field
+        else:
+          exec "%s = quote(%s)" % (field, field)
+        
+      c.execute("EXECUTE mig_insert(%s, %s, %s, %s, %s, %s, %s, %s)" \
+         % (package, in_testing, testing_version, in_unstable, unstable_version, sync, sync_version, first_seen))
 
-      c.execute("DEALLOCATE mig_insert")
+    c.execute("DEALLOCATE mig_insert")
+    c.execute("ANALYZE migrations")
 

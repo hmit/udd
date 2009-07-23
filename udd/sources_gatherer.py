@@ -48,25 +48,25 @@ class sources_gatherer(gatherer):
     d = {}
     for k in sources_gatherer.mandatory:
       if k not in control:
-	raise "Mandatory field %s not specified" % k
+        raise "Mandatory field %s not specified" % k
       d[k] = control[k]
     for k in sources_gatherer.non_mandatory:
       if k in control:
-	d[k] = control[k]
+        d[k] = control[k]
       else:
-	d[k] = None
+        d[k] = None
     
     d['Vcs-Type'] = None
     d['Vcs-Url'] = None
     for vcs in sources_gatherer.vcs:
       if control.has_key("Vcs-"+vcs):  
         d['Vcs-Type'] = vcs
-	d['Vcs-Url'] = control["Vcs-"+vcs]
-	break
+        d['Vcs-Url'] = control["Vcs-"+vcs]
+        break
       elif control.has_key("X-Vcs-"+vcs):  
         d['Vcs-Type'] = vcs
-	d['Vcs-Url'] = control["X-Vcs-"+vcs]
-	break
+        d['Vcs-Url'] = control["X-Vcs-"+vcs]
+        break
     if control.has_key("Vcs-Browser"):  
         d['Vcs-Browser'] = control["Vcs-Browser"]
     elif control.has_key("X-Vcs-Browser"):  
@@ -139,45 +139,48 @@ class sources_gatherer(gatherer):
     for comp in src_cfg['components']:
       path = os.path.join(src_cfg['directory'], comp, 'source', 'Sources.gz')
       cur.execute("DELETE from %s WHERE Distribution = '%s' AND\
-	release = '%s' AND component = '%s'"\
-	% (table, src_cfg['distribution'], src_cfg['release'], comp))
+        release = '%s' AND component = '%s'"\
+        % (table, src_cfg['distribution'], src_cfg['release'], comp))
       cur.execute("DELETE from %s WHERE Distribution = '%s' AND\
-	release = '%s' AND component = '%s'"\
-	% (utable, src_cfg['distribution'], src_cfg['release'], comp))
+        release = '%s' AND component = '%s'"\
+        % (utable, src_cfg['distribution'], src_cfg['release'], comp))
       try:
-	query = """PREPARE source_insert as INSERT INTO %s
-	  (Source, Version, Maintainer, Maintainer_name, Maintainer_email, Format, Files, Uploaders, Bin,
-	  Architecture, Standards_Version, Homepage, Build_Depends,
-	  Build_Depends_Indep, Build_Conflicts, Build_Conflicts_Indep, Priority,
-	  Section, Vcs_Type, Vcs_Url, Vcs_Browser, python_version, checksums_sha1,
-	  checksums_sha256, original_maintainer, dm_upload_allowed,
-	  Distribution, Release, Component)
-	VALUES
-	  ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
-	  $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, '%s', '%s', '%s')"""\
-	  % (table, src_cfg['distribution'], src_cfg['release'], comp)
-	cur.execute(query)
-	query = """PREPARE uploader_insert as INSERT INTO %s
-	  (Source, Version, Distribution, Release, Component, Uploader, Name, Email) VALUES
-	  ($1, $2, '%s', '%s', '%s', $3, $4, $5) """ % \
-	(utable, src_cfg['distribution'], src_cfg['release'], comp)
-	cur.execute(query)
+        query = """PREPARE source_insert as INSERT INTO %s
+          (Source, Version, Maintainer, Maintainer_name, Maintainer_email, Format, Files, Uploaders, Bin,
+          Architecture, Standards_Version, Homepage, Build_Depends,
+          Build_Depends_Indep, Build_Conflicts, Build_Conflicts_Indep, Priority,
+          Section, Vcs_Type, Vcs_Url, Vcs_Browser, python_version, checksums_sha1,
+          checksums_sha256, original_maintainer, dm_upload_allowed,
+          Distribution, Release, Component)
+        VALUES
+          ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
+          $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, '%s', '%s', '%s')"""\
+          % (table, src_cfg['distribution'], src_cfg['release'], comp)
+        cur.execute(query)
+        query = """PREPARE uploader_insert as INSERT INTO %s
+          (Source, Version, Distribution, Release, Component, Uploader, Name, Email) VALUES
+          ($1, $2, '%s', '%s', '%s', $3, $4, $5) """ % \
+        (utable, src_cfg['distribution'], src_cfg['release'], comp)
+        cur.execute(query)
 
-#	aux.print_debug("Reading file " + path)
-	# Copy content from gzipped file to temporary file, so that apt_pkg is
-	# used by debian_bundle
-	tmp = tempfile.NamedTemporaryFile()
-	file = gzip.open(path)
-	tmp.write(file.read())
-	file.close()
-	tmp.seek(0)
-#	aux.print_debug("Importing from " + path)
-	self.import_sources(open(tmp.name))
-	tmp.close()
+#        aux.print_debug("Reading file " + path)
+        # Copy content from gzipped file to temporary file, so that apt_pkg is
+        # used by debian_bundle
+        tmp = tempfile.NamedTemporaryFile()
+        file = gzip.open(path)
+        tmp.write(file.read())
+        file.close()
+        tmp.seek(0)
+#        aux.print_debug("Importing from " + path)
+        self.import_sources(open(tmp.name))
+        tmp.close()
       except IOError, (e, message):
-	print "Could not read packages from %s: %s" % (path, message)
+        print "Could not read packages from %s: %s" % (path, message)
       cur.execute("DEALLOCATE source_insert")
       cur.execute("DEALLOCATE uploader_insert")
+
+    cur.execute('ANALYZE %s' % table)
+    cur.execute('ANALYZE %s' % utable)
 
     self.print_warnings()
 
@@ -185,10 +188,10 @@ class sources_gatherer(gatherer):
     if 'schema-dir' in self.config['general']:
       schema_dir = self.config['general']['schema-dir']
       if 'sources-schema' in self.my_config:
-	schema = schema_dir + '/' + self.my_config['sources-schema']
-	self.eval_sql_file(schema, self.my_config)
+        schema = schema_dir + '/' + self.my_config['sources-schema']
+        self.eval_sql_file(schema, self.my_config)
       else:
-	raise Exception("'packages-schema' not specified for source " + self.source)
+        raise Exception("'packages-schema' not specified for source " + self.source)
     else:
       raise Exception("'schema-dir' not specified")
 
