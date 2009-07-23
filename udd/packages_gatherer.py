@@ -11,6 +11,7 @@ import tempfile
 from aux import ConfigException
 import psycopg2
 from gatherer import gatherer
+import email.Utils
 import re
 
 def get_gatherer(connection, config, source):
@@ -80,7 +81,7 @@ class packages_gatherer(gatherer):
     debian packages file."""
     pkgs = ()
     query = """EXECUTE package_insert
-      (%(Package)s, %(Version)s, %(Architecture)s, %(Maintainer)s,
+      (%(Package)s, %(Version)s, %(Architecture)s, %(Maintainer)s, %(maintainer_name)s, %(maintainer_email)s,
       %(Description)s, %(Long_Description)s, %(Source)s, %(Source_Version)s, %(Essential)s,
       %(Depends)s, %(Recommends)s, %(Suggests)s, %(Enhances)s,
       %(Pre-Depends)s, %(Breaks)s, %(Installed-Size)s, %(Homepage)s, %(Size)s,
@@ -124,8 +125,10 @@ class packages_gatherer(gatherer):
 	else:
 	  d['Source'] = split[0]
 	  d['Source_Version'] = split[1].strip("()")
-        pkgs += (d,)
 
+      pkgs += (d,)
+
+      d['maintainer_name'], d['maintainer_email'] = email.Utils.parseaddr(d['Maintainer'])
     try:
       cur.executemany(query, pkgs)
     except psycopg2.ProgrammingError:
@@ -169,7 +172,7 @@ class packages_gatherer(gatherer):
 	path = os.path.join(src_cfg['directory'], comp, 'binary-' + arch, 'Packages.gz')
 	try:
 	  cur.execute("""PREPARE package_insert AS INSERT INTO %s
-	    (Package, Version, Architecture, Maintainer, Description, Long_Description, Source,
+	    (Package, Version, Architecture, Maintainer, maintainer_name, maintainer_email, Description, Long_Description, Source,
 	    Source_Version, Essential, Depends, Recommends, Suggests, Enhances,
 	    Pre_Depends, Breaks, Installed_Size, Homepage, Size,
 	    build_essential, origin, sha1, replaces, section,
@@ -179,7 +182,7 @@ class packages_gatherer(gatherer):
 	  VALUES
 	    ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15,
 	      $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28,
-	      $29, $30, $31, $32, $33, '%s', '%s', '%s')
+	      $29, $30, $31, $32, $33, $34, $35, '%s', '%s', '%s')
 	    """ %  (table, self._distr, src_cfg['release'], comp))
 #	  aux.print_debug("Reading file " + path)
 	  # Copy content from gzipped file to temporary file, so that apt_pkg is
@@ -198,10 +201,9 @@ class packages_gatherer(gatherer):
     # Fill the summary tables
     cur.execute("DELETE FROM %s" % (table + '_summary'));
     cur.execute("""INSERT INTO %s (package, version, source, source_version,
-        maintainer, distribution, release, component)
+        maintainer, maintainer_name, maintainer_email, distribution, release, component)
       SELECT DISTINCT ON (package, version, distribution, release, component)
-        package, version, source, source_version, maintainer, distribution,
-        release, component
+        package, version, source, source_version, maintainer, maintainer_name, maintainer_email, distribution, release, component
       FROM %s""" % (table + '_summary', table));
     cur.execute("DELETE FROM %s" % (table + '_distrelcomparch'));
     cur.execute("""INSERT INTO %s

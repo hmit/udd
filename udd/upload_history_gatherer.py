@@ -7,6 +7,7 @@ from glob import glob
 import gzip
 import psycopg2
 import sys
+import email.Utils
 
 def get_gatherer(config, connection, source):
   return upload_history_gatherer(config, connection, source)
@@ -34,8 +35,8 @@ class upload_history_gatherer(gatherer):
     cursor.execute("DELETE FROM " + self.my_config['table'])
 
     cursor.execute("PREPARE uh_insert AS INSERT INTO %s (id, package, \
-        version, date, changed_by, maintainer, nmu, signed_by, key_id, fingerprint) VALUES \
-	($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)" % self.my_config['table'])
+        version, date, changed_by, changed_by_name, changed_by_email, maintainer, maintainer_name, maintainer_email, nmu, signed_by, signed_by_name, signed_by_email, key_id, fingerprint) VALUES \
+	($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)" % self.my_config['table'])
     cursor.execute("PREPARE uh_arch_insert AS INSERT INTO %s (id, \
     	architecture) VALUES \
 	($1, $2)" % (self.my_config['table'] + '_architecture'))
@@ -43,6 +44,16 @@ class upload_history_gatherer(gatherer):
     	VALUES ($1, $2)" % (self.my_config['table'] + '_closes'))
 
     id = 0
+    query = "EXECUTE uh_insert(%(id)s, %(Source)s, %(Version)s, %(Date)s, \
+      %(Changed-By)s, %(Changed-By_name)s, %(Changed-By_email)s, \
+      %(Maintainer)s, %(Maintainer_name)s, %(Maintainer_email)s, %(NMU)s, \
+      %(Signed-By)s, %(Signed-By_name)s, %(Signed-By_email)s, %(Key)s, \
+      %(Fingerprint)s)"
+    query_archs = "EXECUTE uh_arch_insert(%(id)s, %(arch)s)"
+    query_closes = "EXECUTE uh_close_insert(%(id)s, %(closes)s)"
+    uploads = ()
+    uploads_archs = ()
+    uploads_closes = ()
     for name in glob(path + '/debian-devel-changes.*'):
       # print name
       f = None
@@ -50,33 +61,36 @@ class upload_history_gatherer(gatherer):
 	f = gzip.open(name)
       else:
 	f = open(name)
-      
       current = {'id': id}
       current['Fingerprint'] = 'N/A' # hack: some entries don't have fp
       last_field = None
       line_count = 0
+
       for line in f:
 	line_count += 1
 	line = line.strip()
 	# Stupid multi-line maintainer fields *grml*
 	if line == '':
-	  try:
-	    query = "EXECUTE uh_insert(%(id)s, %(Source)s, %(Version)s, %(Date)s, %(Changed-By)s, \
-		%(Maintainer)s, %(NMU)s, %(Signed-By)s, %(Key)s, %(Fingerprint)s)"
-	    cursor.execute(query, current)
-	    for arch in set(current['Architecture'].split()):
-	      current['arch'] = arch
-	      query = "EXECUTE uh_arch_insert(%(id)s, %(arch)s)"
-	      cursor.execute(query, current)
-	    if current['Closes'] != 'N/A':
-	      for closes in set(current['Closes'].split()):
-		current['closes'] = closes
-		query = "EXECUTE uh_close_insert(%(id)s, %(closes)s)"
-		cursor.execute(query, current)
-	  except psycopg2.ProgrammingError, s:
-	    print "Error at line %d of file %s" % (line_count, name)
-	    continue
-	    #raise
+          current['Changed-By_name'], current['Changed-By_email'] = email.Utils.parseaddr(current['Changed-By'])
+          current['Maintainer_name'], current['Maintainer_email'] = email.Utils.parseaddr(current['Maintainer'])
+          current['Signed-By_name'], current['Signed-By_email'] = email.Utils.parseaddr(current['Signed-By'])
+          uploads += (current,)
+	  for arch in set(current['Architecture'].split()):
+	    current_arch = {'id': id}
+	    current_arch['arch'] = arch
+            uploads_archs += (current_arch,)
+	  if current['Closes'] != 'N/A':
+	    for closes in set(current['Closes'].split()):
+	      current_closes = {'id': id}
+	      current_closes['closes'] = closes
+              uploads_closes += (current_closes,)
+          if len(uploads) > 100:
+            cursor.executemany(query, uploads)
+            cursor.executemany(query_archs, uploads_archs)
+            cursor.executemany(query_closes, uploads_closes)
+            uploads = ()
+            uploads_archs = ()
+            uploads_closes = ()
 	  id += 1
 	  current = {'id': id}
 	  current['Fingerprint'] = 'N/A' # hack: some entries don't have fp
@@ -89,11 +103,13 @@ class upload_history_gatherer(gatherer):
 	  current[last_field] += line
 	  continue
 
-
 	(field, data) = line.split(':', 1)
 	data = data.strip()
 	current[field] = data
 	
 	last_field = field
-    
+      
+    cursor.executemany(query, uploads)
+    cursor.executemany(query_archs, uploads_archs)
+    cursor.executemany(query_closes, uploads_closes)
     cursor.execute("DEALLOCATE uh_insert")

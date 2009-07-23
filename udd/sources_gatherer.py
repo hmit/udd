@@ -102,18 +102,20 @@ class sources_gatherer(gatherer):
       %(Section)s, %(Vcs-Type)s, %(Vcs-Url)s, %(Vcs-Browser)s,
       %(Python-Version)s, %(Checksums-Sha1)s, %(Checksums-Sha256)s,
       %(Original-Maintainer)s, %(Dm-Upload-Allowed)s)"""
-    query_uploaders = """EXECUTE uploader_insert (%(Package)s, %(Version)s, %(Name)s, %(Email)s)"""
+    query_uploaders = """EXECUTE uploader_insert (%(Package)s, %(Version)s,
+      %(Uploader)s, %(Name)s, %(Email)s)"""
     uploaders = ()
     for control in debian_bundle.deb822.Packages.iter_paragraphs(file):
       d = self.build_dict(control)
       d['maintainer_name'], d['maintainer_email'] = email.Utils.parseaddr(d['Maintainer'])
       pkgs += (d,)
 
-      ud = {}
-      ud['Package'] = d['Package']
-      ud['Version'] = d['Version']
       if d['Uploaders']:
         for uploader in email.Utils.getaddresses([d['Uploaders']]):
+          ud = {}
+          ud['Package'] = d['Package']
+          ud['Version'] = d['Version']
+          ud['Uploader'] = email.Utils.formataddr(uploader)
           ud['Name'] = uploader[0]
           ud['Email'] = uploader[1]
           uploaders += (ud,)
@@ -156,8 +158,8 @@ class sources_gatherer(gatherer):
 	  % (table, src_cfg['distribution'], src_cfg['release'], comp)
 	cur.execute(query)
 	query = """PREPARE uploader_insert as INSERT INTO %s
-	  (Source, Version, Distribution, Release, Component, Name, Email) VALUES
-	  ($1, $2, '%s', '%s', '%s', $3, $4) """ % \
+	  (Source, Version, Distribution, Release, Component, Uploader, Name, Email) VALUES
+	  ($1, $2, '%s', '%s', '%s', $3, $4, $5) """ % \
 	(utable, src_cfg['distribution'], src_cfg['release'], comp)
 	cur.execute(query)
 
