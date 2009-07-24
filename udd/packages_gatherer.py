@@ -79,7 +79,7 @@ class packages_gatherer(gatherer):
     Sequence has to have an iterator interface, that yields a line every time
     it is called.The Format of the sequence is expected to be that of a
     debian packages file."""
-    pkgs = ()
+    pkgs = []
     query = """EXECUTE package_insert
       (%(Package)s, %(Version)s, %(Architecture)s, %(Maintainer)s, %(maintainer_name)s, %(maintainer_email)s,
       %(Description)s, %(Long_Description)s, %(Source)s, %(Source_Version)s, %(Essential)s,
@@ -126,7 +126,7 @@ class packages_gatherer(gatherer):
 	  d['Source'] = split[0]
 	  d['Source_Version'] = split[1].strip("()")
 
-      pkgs += (d,)
+      pkgs.append(d)
 
       d['maintainer_name'], d['maintainer_email'] = email.Utils.parseaddr(d['Maintainer'])
     try:

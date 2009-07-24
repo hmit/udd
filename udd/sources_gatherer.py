@@ -92,7 +92,7 @@ class sources_gatherer(gatherer):
     is called.The Format of the file is expected to be that of a debian
     source file."""
     cur = self.cursor()
-    pkgs = ()
+    pkgs = []
     query = """EXECUTE source_insert
       (%(Package)s, %(Version)s, %(Maintainer)s,
       %(maintainer_name)s, %(maintainer_email)s, %(Format)s, %(Files)s,
@@ -104,11 +104,11 @@ class sources_gatherer(gatherer):
       %(Original-Maintainer)s, %(Dm-Upload-Allowed)s)"""
     query_uploaders = """EXECUTE uploader_insert (%(Package)s, %(Version)s,
       %(Uploader)s, %(Name)s, %(Email)s)"""
-    uploaders = ()
+    uploaders = []
     for control in debian_bundle.deb822.Packages.iter_paragraphs(file):
       d = self.build_dict(control)
       d['maintainer_name'], d['maintainer_email'] = email.Utils.parseaddr(d['Maintainer'])
-      pkgs += (d,)
+      pkgs.append(d)
 
       if d['Uploaders']:
         for uploader in email.Utils.getaddresses([d['Uploaders']]):
@@ -118,7 +118,7 @@ class sources_gatherer(gatherer):
           ud['Uploader'] = email.Utils.formataddr(uploader)
           ud['Name'] = uploader[0]
           ud['Email'] = uploader[1]
-          uploaders += (ud,)
+          uploaders.append(ud)
     cur.executemany(query, pkgs)
     cur.executemany(query_uploaders, uploaders)
 
