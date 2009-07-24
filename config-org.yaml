@@ -10,7 +10,7 @@ general:
     popcon: module udd.popcon_gatherer
     testing-migrations: module udd.testing_migrations_gatherer
     upload-history: module udd.upload_history_gatherer
-    orphaned_packages: module udd.orphaned_packages_gatherer
+    orphaned-packages: module udd.orphaned_packages_gatherer
     bugs: exec DEBBUGS_CONFIG_FILE=/org/udd.debian.org/bugs/bugs.debian.org/etc/config perl /org/udd.debian.org/udd/udd/bugs_gatherer.pl 
     carnivore: module udd.carnivore_gatherer
     lintian: module udd.lintian_gatherer
@@ -20,6 +20,7 @@ general:
     ftpnew: module udd.ftpnew_gatherer
     screenshots: module udd.screenshot_gatherer
     dehs: module udd.dehs_gatherer
+    ldap: module udd.ldap_gatherer
   timestamp-dir: /org/udd.debian.org/timestamps
   lock-dir: /org/udd.debian.org/locks
   archs:
@@ -352,8 +353,8 @@ bugs-archive:
   sources-table: sources
   update-command: cd /org/udd.debian.org/bugs ; ./bugsync
 
-orphaned_packages:
-  type: orphaned_packages
+orphaned-packages:
+  type: orphaned-packages
   table: orphaned_packages
   setup: orphaned_packages
   unarchived-table: bugs
@@ -381,6 +382,9 @@ dehs:
   type: dehs
   update-command: rm -f /org/udd.debian.org/mirrors/dehs.txt && wget -q http://dehs.alioth.debian.org/udd_dump.txt  -O /org/udd.debian.org/mirrors/dehs.txt
   path: /org/udd.debian.org/mirrors/dehs.txt
+
+ldap:
+  type: ldap
 
 debtags:
   type: debtags

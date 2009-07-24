@@ -216,3 +216,7 @@ ALTER TABLE archived_bugs add owner_name TEXT;
 ALTER TABLE archived_bugs add owner_email TEXT;
 ALTER TABLE archived_bugs add done_name TEXT;
 ALTER TABLE archived_bugs add done_email TEXT;
+
+-- LDAP
+CREATE TABLE ldap ( uid numeric, login text, cn text, sn text, expire boolean, location text, country text, activity_from timestamp with time zone, activity_from_info text, activity_gpg timestamp with time zone, activity_gpg_info text, gecos text, birthdate date, gender numeric, PRIMARY KEY (uid));
+GRANT SELECT ON ldap TO guestdd;

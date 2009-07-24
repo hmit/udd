@@ -9,20 +9,20 @@ UAR=/org/udd.debian.org/udd/update-and-run.sh
 30 1 * * * $UAR ubuntu-karmic
 30 2 * * * $UAR ubuntu-hardy ubuntu-intrepid ubuntu-jaunty
 # Various simple things
-0 4 * * * $UAR debian-popcon ubuntu-popcon upload-history lintian debtags carnivore orphaned_packages | /org/udd.debian.org/udd/scripts/filter-output.rb
+0 4 * * * $UAR dehs debian-popcon ubuntu-popcon lintian debtags carnivore orphaned-packages upload-history ldap | /org/udd.debian.org/udd/scripts/filter-output.rb
 0 */12 * * * $UAR testing-migrations
 # Debian bugs
 0 1,7,13,19 * * * $UAR bugs 2>&1 | /org/udd.debian.org/udd/scripts/filter-bugs-output.sh
 0 15 * * * $UAR bugs-archive 2>&1 | /org/udd.debian.org/udd/scripts/filter-bugs-output.sh
 
 # DDTP
-0 2 * * * $UAR ddtp | /org/udd.debian.org/udd/scripts/filter-output.rb
+0 2 * * * $UAR ddtp | /org/udd.debian.org/udd/scripts/filter-output.rb 2>&1 | mail -e -s 'UDD ftpnew cron job' tille@debian.org
 
 # FTP new queue
-0 3 * * * $UAR ftpnew | /org/udd.debian.org/udd/scripts/filter-output.rb
+0 3 * * * $UAR ftpnew | /org/udd.debian.org/udd/scripts/filter-output.rb 2>&1 | mail -e -s 'UDD ftpnew cron job' tille@debian.org
 
 # screenshots.debian.net
-30 3 * * * $UAR screenshots | /org/udd.debian.org/udd/scripts/filter-output.rb
+30 3 * * * $UAR screenshots | /org/udd.debian.org/udd/scripts/filter-output.rb 2>&1 | mail -e -s 'UDD screenshots cron job' tille@debian.org
 
 # Ubuntu bugs
 0 4 * * * $UAR ubuntu-bugs
