@@ -46,8 +46,9 @@ class lintian_gatherer(gatherer):
       AS INSERT INTO %s (package, package_type, tag, tag_type, information)
       VALUES ($1, $2, $3, $4, $5)""" % (my_config['table']))
 
-    lintian_data = open(my_config['path'])
+    lintian_data = file(my_config['path'])
     line_number = 0
+    entries = []
     for line in lintian_data:
       line_number += 1
 
@@ -64,11 +65,11 @@ class lintian_gatherer(gatherer):
         else:
           pkg_type = 'NULL'
 
-        cur.execute("EXECUTE lintian_insert (%s, %s, %s, %s, %s)"\
-          % (quote(pkg), pkg_type, quote(tag), quote(lintian_gatherer.code_to_tag_type_map[code]), quote(extra)));
+        entries.append((pkg, pkg_type, tag, lintian_gatherer.code_to_tag_type_map[code], extra))
       elif not lintian_gatherer.ignore_re.match(line):
         print "Can't parse line %d: %s" % (line_number, line.rstrip())
 
+    cur.executemany("EXECUTE lintian_insert (%s, %s, %s, %s, %s)", entries)
     cur.execute("DEALLOCATE lintian_insert")
     cur.execute("ANALYZE %s" % my_config["table"])
 
