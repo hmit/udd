@@ -51,20 +51,19 @@ class upload_history_gatherer(gatherer):
       %(Fingerprint)s)"
     query_archs = "EXECUTE uh_arch_insert(%(id)s, %(arch)s)"
     query_closes = "EXECUTE uh_close_insert(%(id)s, %(closes)s)"
-    uploads = []
-    uploads_archs = []
-    uploads_closes = []
     for name in glob(path + '/debian-devel-changes.*'):
-      # print name
       f = None
       if name.endswith(".gz"):
         f = gzip.open(name)
       else:
-            f = open(name)
+        f = open(name)
       current = {'id': id}
       current['Fingerprint'] = 'N/A' # hack: some entries don't have fp
       last_field = None
       line_count = 0
+      uploads = []
+      uploads_archs = []
+      uploads_closes = []
 
       for line in f:
         line_count += 1
@@ -101,10 +100,11 @@ class upload_history_gatherer(gatherer):
         current[field] = data
         
         last_field = field
+
+      cursor.executemany(query, uploads)
+      cursor.executemany(query_archs, uploads_archs)
+      cursor.executemany(query_closes, uploads_closes)
       
-    cursor.executemany(query, uploads)
-    cursor.executemany(query_archs, uploads_archs)
-    cursor.executemany(query_closes, uploads_closes)
     cursor.execute("DEALLOCATE uh_insert")
     cursor.execute("ANALYZE " + self.my_config['table'] + '_architecture')
     cursor.execute("ANALYZE " + self.my_config['table'] + '_closes')
