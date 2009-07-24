@@ -115,7 +115,9 @@ CREATE TYPE bugs_severity AS ENUM ('fixed', 'wishlist', 'minor', 'normal', 'impo
 
 CREATE TABLE bugs
   (id int PRIMARY KEY, package text, source text, arrival timestamp, status text,
-     severity bugs_severity, submitter text, owner text, done text, title text,
+     severity bugs_severity, submitter text, submitter_name text,
+     submitter_email text, owner text, owner_name text, owner_email text,
+     done text, done_name text, done_email text, title text,
      last_modified timestamp, forwarded text, affects_stable boolean,
     affects_testing boolean, affects_unstable boolean,
     affects_experimental boolean);
@@ -141,7 +143,9 @@ CREATE TABLE bugs_tags
 
 CREATE TABLE archived_bugs
   (id int PRIMARY KEY, package text, source text, arrival timestamp, status text,
-     severity bugs_severity, submitter text, owner text, done text, title text,
+     severity bugs_severity, submitter text, submitter_name text,
+     submitter_email text, owner text, owner_name text, owner_email text,
+     done text, done_name text, done_email text, title text,
      last_modified timestamp, forwarded text, affects_stable boolean,
     affects_testing boolean, affects_unstable boolean,
     affects_experimental boolean);

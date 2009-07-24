@@ -20,7 +20,6 @@ general:
     ftpnew: module udd.ftpnew_gatherer
     screenshots: module udd.screenshot_gatherer
     dehs: module udd.dehs_gatherer
-  debug: 1
   timestamp-dir: /org/udd.debian.org/timestamps
   lock-dir: /org/udd.debian.org/locks
   archs:

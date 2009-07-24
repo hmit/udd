@@ -19,6 +19,7 @@ use Debbugs::Status qw{read_bug get_bug_status bug_presence};
 use Debbugs::Packages qw{binarytosource getpkgsrc};
 use Debbugs::Config qw{:globals %config};
 use Debbugs::User;
+use Mail::Address;
 #use Debbugs::User qw{read_usertags};
 
 $YAML::Syck::ImplicitTyping = 1;
@@ -126,14 +127,16 @@ sub run {
 
 	our $t;
 	our $timing;
-
-	run_usertags($config, $source, $dbh);
-	print "Inserting usertags: ",(time() - $t),"s\n" if $timing;
-	$t = time();
-
 	my %src_config = %{$config->{$source}};
 	my $table = $src_config{table};
 	my $archived_table = $src_config{'archived-table'};
+
+	if (!$src_config{debug}) {
+		run_usertags($config, $source, $dbh);
+		print "Inserting usertags: ",(time() - $t),"s\n" if $timing;
+		$t = time();
+	}
+
 
 	my %pkgsrc = %{getpkgsrc()};
 
@@ -177,14 +180,14 @@ sub run {
 	my $location = $src_config{archived} ? 'archive' : 'db_h';
 	$table = $src_config{archived} ? $archived_table : $table;
 	# Read all bugs
-	my $insert_bugs_handle = $dbh->prepare("INSERT INTO $table (id, package, source, arrival, status, severity, submitter, owner, done, title, forwarded, last_modified, affects_stable, affects_testing, affects_unstable, affects_experimental) VALUES (\$1, \$2, \$3, \$4::abstime, \$5, \$6, \$7, \$8, \$9, \$10, \$11, \$12::abstime, \$13, \$14, \$15, \$16)");
+	my $insert_bugs_handle = $dbh->prepare("INSERT INTO $table (id, package, source, arrival, status, severity, submitter, submitter_name, submitter_email, owner, owner_name, owner_email, done, done_name, done_email, title, forwarded, last_modified, affects_stable, affects_testing, affects_unstable, affects_experimental) VALUES (\$1, \$2, \$3, \$4::abstime, \$5, \$6, \$7, \$8, \$9, \$10, \$11, \$12, \$13, \$14, \$15, \$16, \$17, \$18::abstime, \$19, \$20, \$21, \$22)");
 	my $insert_bugs_packages_handle = $dbh->prepare("INSERT INTO ${table}_packages (id, package, source) VALUES (\$1, \$2, \$3)");
 	my $insert_bugs_found_handle = $dbh->prepare("INSERT INTO ${table}_found_in (id, version) VALUES (\$1, \$2)");
 	my $insert_bugs_fixed_handle = $dbh->prepare("INSERT INTO ${table}_fixed_in (id, version) VALUES (\$1, \$2)");
 	my $insert_bugs_merged_handle = $dbh->prepare("INSERT INTO ${table}_merged_with (id, merged_with) VALUES (\$1, \$2)");
 	my $insert_bugs_tags_handle = $dbh->prepare("INSERT INTO ${table}_tags (id, tag) VALUES (\$1, \$2)");
 	$insert_bugs_handle->bind_param(4, undef, SQL_INTEGER);
-	$insert_bugs_handle->bind_param(12, undef, SQL_INTEGER);
+	$insert_bugs_handle->bind_param(18, undef, SQL_INTEGER);
 
 	$t = time();
 	foreach my $bug_nr (@modified_bugs) {
@@ -204,7 +207,6 @@ sub run {
 		# are assumed to be epoch (i.e. bug #4170)
 		map {
 			if($bug{$_}) {
-				#$bug{$_} = "$bug{$_}::abstime";
 				$bug{$_} = int($bug{$_});
 			} else {
 				$bug{$_} = 0;
@@ -213,6 +215,30 @@ sub run {
 
 
 		my $source = exists($pkgsrc{$bug{package}}) ? $pkgsrc{$bug{package}} : $bug{package};
+
+		# split emails
+		my (@addr, $submitter_name, $submitter_email, $owner_name, $owner_email, $done_name, $done_email);
+		@addr = Mail::Address->parse($bug{originator});
+		$submitter_name = $addr[0]->phrase;
+		$submitter_email = $addr[0]->address;
+
+		if ($bug{owner}) {
+			@addr = Mail::Address->parse($bug{owner});
+			$owner_name = $addr[0]->phrase;
+			$owner_email = $addr[0]->address;
+		} else {
+			$owner_name = '';
+			$owner_email = '';
+		}
+
+		if ($bug{done}) {
+			@addr = Mail::Address->parse($bug{done});
+			$done_name = $addr[0]->phrase;
+			$done_email = $addr[0]->address;
+		} else {
+			$done_name = '';
+			$done_email = '';
+		}
 
 		#Calculate bug presence in distributions
 		my ($present_in_stable, $present_in_testing, $present_in_unstable, $present_in_experimental);
@@ -264,7 +290,9 @@ sub run {
 
 		# Insert data into bugs table
 		$insert_bugs_handle->execute($bug_nr, $bug{package}, $source, $bug{date}, $bug{pending},
-			$bug{severity}, $bug{originator}, $bug{owner}, $bug{done}, $bug{subject}, $bug{forwarded}, $bug{log_modified},
+			$bug{severity}, $bug{originator}, $submitter_name, $submitter_email, $bug{owner},
+		       	$owner_name, $owner_email, $bug{done}, $done_name, $done_email, $bug{subject},
+		       	$bug{forwarded}, $bug{log_modified},
 			$present_in_stable, $present_in_testing, $present_in_unstable, $present_in_experimental) or die $!;
 
 		my $src;

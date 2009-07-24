@@ -203,4 +203,16 @@ CREATE TABLE dehs (
 );
 GRANT SELECT ON lintian TO PUBLIC;
 
-
+-- split emails in bugs
+ALTER TABLE bugs add submitter_name TEXT;
+ALTER TABLE bugs add submitter_email TEXT;
+ALTER TABLE bugs add owner_name TEXT;
+ALTER TABLE bugs add owner_email TEXT;
+ALTER TABLE bugs add done_name TEXT;
+ALTER TABLE bugs add done_email TEXT;
+ALTER TABLE archived_bugs add submitter_name TEXT;
+ALTER TABLE archived_bugs add submitter_email TEXT;
+ALTER TABLE archived_bugs add owner_name TEXT;
+ALTER TABLE archived_bugs add owner_email TEXT;
+ALTER TABLE archived_bugs add done_name TEXT;
+ALTER TABLE archived_bugs add done_email TEXT;
