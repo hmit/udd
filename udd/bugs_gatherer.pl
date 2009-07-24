@@ -218,9 +218,14 @@ sub run {
 
 		# split emails
 		my (@addr, $submitter_name, $submitter_email, $owner_name, $owner_email, $done_name, $done_email);
-		@addr = Mail::Address->parse($bug{originator});
-		$submitter_name = $addr[0]->phrase;
-		$submitter_email = $addr[0]->address;
+		if ($bug{originator}) {
+			@addr = Mail::Address->parse($bug{originator});
+			$submitter_name = $addr[0]->phrase;
+			$submitter_email = $addr[0]->address;
+		} else {
+			$submitter_name = '';
+			$submitter_email = '';
+		}
 
 		if ($bug{owner}) {
 			@addr = Mail::Address->parse($bug{owner});
