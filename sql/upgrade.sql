@@ -183,3 +183,6 @@ WHERE carnivore_keys.id = carnivore_login.id
 AND key_type = 'keyring';
 
 GRANT SELECT ON active_dds TO PUBLIC;
+
+-- 2009-07-24
+ALTER TABLE lintian ADD information text;

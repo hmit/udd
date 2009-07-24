@@ -289,7 +289,8 @@ CREATE TABLE lintian (
   package TEXT NOT NULL,
   tag_type lintian_tagtype NOT NULL,
   package_type TEXT,
-  tag TEXT NOT NULL
+  tag TEXT NOT NULL,
+  information TEXT
 );
 
 GRANT SELECT ON lintian TO PUBLIC;
