@@ -8,13 +8,15 @@ dbh = DBI::connect('DBI:Pg:dbname=udd;port=5441;host=localhost', 'guest')
 puts "<html><body>"
 
 sth = dbh.prepare("select sources.source, insts, date(op.orphaned_time), op.type, op.bug
-from sources, popcon_src, orphaned_packages op
+from sources, popcon_src, orphaned_packages op, bugs b
 where sources.source = popcon_src.source
 and distribution = 'debian' and release = 'sid'
 and sources.source = op.source
+and b.id = op.bug
 and op.type in ('O', 'ITA')
-and insts < 1000
-and date(op.orphaned_time) < '2007-01-01'")
+and insts < 500
+and date(op.orphaned_time) < '2008-07-24'
+and date(b.last_modified) < '2008-07-24'")
 sth.execute
 puts "<table>"
 sth.fetch_all.each do |r|
