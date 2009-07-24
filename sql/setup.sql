@@ -465,3 +465,21 @@ WHERE carnivore_keys.id = carnivore_login.id
 AND key_type = 'keyring';
 
 GRANT SELECT ON active_dds TO PUBLIC;
+
+-- DEHS
+CREATE TYPE dehs_status AS ENUM('error', 'uptodate', 'outdated');
+CREATE TABLE dehs (
+  source TEXT NOT NULL,
+  unstable_version debversion,
+  unstable_upstream text,
+  unstable_parsed_version text,
+  unstable_status dehs_status,
+  experimental_version debversion,
+  experimental_upstream text,
+  experimental_parsed_version text,
+  experimental_status dehs_status,
+  PRIMARY KEY (source)
+);
+GRANT SELECT ON lintian TO PUBLIC;
+
+

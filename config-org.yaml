@@ -19,6 +19,7 @@ general:
     ddtp: module udd.ddtp_gatherer
     ftpnew: module udd.ftpnew_gatherer
     screenshots: module udd.screenshot_gatherer
+    dehs: module udd.dehs_gatherer
   debug: 1
   timestamp-dir: /org/udd.debian.org/timestamps
   lock-dir: /org/udd.debian.org/locks
@@ -376,6 +377,11 @@ lintian:
   path: /org/udd.debian.org/mirrors/lintian.log
   table: lintian
   schema: lintian
+
+dehs:
+  type: dehs
+  update-command: rm -f /org/udd.debian.org/mirrors/dehs.txt && wget -q http://dehs.alioth.debian.org/udd_dump.txt  -O /org/udd.debian.org/mirrors/dehs.txt
+  path: /org/udd.debian.org/mirrors/dehs.txt
 
 debtags:
   type: debtags
