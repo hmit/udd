@@ -8,10 +8,10 @@ dbh = DBI::connect('DBI:Pg:dbname=udd;port=5441;host=localhost', 'guest')
 sth = dbh.prepare("select s.source, s.version, u.changed_by, nmu, signed_by, cl.login
 from sources s, upload_history u, carnivore_emails ce1, carnivore_emails ce2, carnivore_login cl
 where s.distribution = 'debian' and s.release = 'sid'
-and s.source = u.package
+and s.source = u.source
 and s.version = u.version
-and substring(u.changed_by from '<(.*)>') = ce1.email
-and substring(u.signed_by from '<(.*)>') = ce2.email
+and u.changed_by_email = ce1.email
+and u.signed_by_email = ce2.email
 and ce1.id != ce2.id
 and ce2.id = cl.id")
 sth.execute
