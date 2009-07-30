@@ -27,7 +27,7 @@ class ldap_gatherer(gatherer):
 
     cur.execute("""PREPARE ldap_insert 
       AS INSERT INTO ldap
-      (uid, login, cn, sn, expire, location, country, activity_from, activity_from_info, activity_gpg, activity_gpg_info, gecos, birthdate, gender)
+      (uid, login, cn, sn, expire, location, country, activity_from, activity_from_info, activity_pgp, activity_pgp_info, gecos, birthdate, gender)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)""")
 
     entries = []
@@ -40,8 +40,8 @@ class ldap_gatherer(gatherer):
       else:
         af_date = None
         af_info = None
-      if 'activity-gpg' in f:
-        ag_date, ag_info = f['activity-gpg'][0].split('] ',2)
+      if 'activity-pgp' in f:
+        ag_date, ag_info = f['activity-pgp'][0].split('] ',2)
         ag_date = ag_date[1:]
       else:
         ag_date = None

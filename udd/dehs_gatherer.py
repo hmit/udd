@@ -40,21 +40,25 @@ class dehs_gatherer(gatherer):
 
     cur.execute("""PREPARE dehs_insert 
       AS INSERT INTO dehs
-      (source, unstable_version, unstable_upstream, unstable_parsed_version, unstable_status,
-      experimental_version, experimental_upstream, experimental_parsed_version, experimental_status)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)""")
+      (source, unstable_version, unstable_upstream, unstable_parsed_version, unstable_status, unstable_last_uptodate,
+      experimental_version, experimental_upstream, experimental_parsed_version, experimental_status, experimental_last_uptodate)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)""")
 
     line_number = 0
     entries = []
     for line in file(my_config['path']):
       line_number += 1
 
-      src, uu, eu, uv, ev, upv, epv, u_utd, e_utd, uf, ef = line.rstrip().split('|')
+      src, uu, eu, uv, ev, upv, epv, u_utd, e_utd, uf, ef, udate, edate = line.rstrip().split('|')
+      if udate == "":
+        udate = None
+      if edate == "":
+        edate = None
       ustat = 'error' if uf == 't' else ('uptodate' if u_utd == 't' else ('outdated' if u_utd == 'f' else None))
       estat = 'error' if ef == 't' else ('uptodate' if e_utd == 't' else ('outdated' if e_utd == 'f' else None))
-      entries.append((src, uv, uu, upv, ustat, ev, eu, epv, estat))
+      entries.append((src, uv, uu, upv, ustat, udate, ev, eu, epv, estat, edate))
 
-    cur.executemany("EXECUTE dehs_insert (%s, %s, %s, %s, %s, %s, %s, %s, %s)", entries)
+    cur.executemany("EXECUTE dehs_insert (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", entries)
     cur.execute("DEALLOCATE dehs_insert")
     cur.execute("ANALYZE dehs")
 
