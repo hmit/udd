@@ -34,30 +34,30 @@ class upload_history_gatherer(gatherer):
     cursor.execute("DELETE FROM " + self.my_config['table'] + '_closes')
     cursor.execute("DELETE FROM " + self.my_config['table'])
 
-    cursor.execute("PREPARE uh_insert AS INSERT INTO %s (id, package, \
+    cursor.execute("PREPARE uh_insert AS INSERT INTO %s (source, \
         version, date, changed_by, changed_by_name, changed_by_email, maintainer, maintainer_name, maintainer_email, nmu, signed_by, signed_by_name, signed_by_email, key_id, fingerprint) VALUES \
-        ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)" % self.my_config['table'])
-    cursor.execute("PREPARE uh_arch_insert AS INSERT INTO %s (id, \
-        architecture) VALUES \
-        ($1, $2)" % (self.my_config['table'] + '_architecture'))
-    cursor.execute("PREPARE uh_close_insert AS INSERT INTO %s (id, bug) \
-        VALUES ($1, $2)" % (self.my_config['table'] + '_closes'))
+        ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)" % self.my_config['table'])
+    cursor.execute("PREPARE uh_arch_insert AS INSERT INTO %s (source, \
+        version, architecture) VALUES \
+        ($1, $2, $3)" % (self.my_config['table'] + '_architecture'))
+    cursor.execute("PREPARE uh_close_insert AS INSERT INTO %s (source, version, bug) \
+        VALUES ($1, $2, $3)" % (self.my_config['table'] + '_closes'))
 
-    id = 0
-    query = "EXECUTE uh_insert(%(id)s, %(Source)s, %(Version)s, %(Date)s, \
+    query = "EXECUTE uh_insert(%(Source)s, %(Version)s, %(Date)s, \
       %(Changed-By)s, %(Changed-By_name)s, %(Changed-By_email)s, \
       %(Maintainer)s, %(Maintainer_name)s, %(Maintainer_email)s, %(NMU)s, \
       %(Signed-By)s, %(Signed-By_name)s, %(Signed-By_email)s, %(Key)s, \
       %(Fingerprint)s)"
-    query_archs = "EXECUTE uh_arch_insert(%(id)s, %(arch)s)"
-    query_closes = "EXECUTE uh_close_insert(%(id)s, %(closes)s)"
+    query_archs = "EXECUTE uh_arch_insert(%(Source)s, %(Version)s, %(arch)s)"
+    query_closes = "EXECUTE uh_close_insert(%(Source)s, %(Version)s, %(closes)s)"
+    added = {}
     for name in glob(path + '/debian-devel-changes.*'):
       f = None
       if name.endswith(".gz"):
         f = gzip.open(name)
       else:
         f = open(name)
-      current = {'id': id}
+      current = {}
       current['Fingerprint'] = 'N/A' # hack: some entries don't have fp
       last_field = None
       line_count = 0
@@ -73,18 +73,25 @@ class upload_history_gatherer(gatherer):
           current['Changed-By_name'], current['Changed-By_email'] = email.Utils.parseaddr(current['Changed-By'])
           current['Maintainer_name'], current['Maintainer_email'] = email.Utils.parseaddr(current['Maintainer'])
           current['Signed-By_name'], current['Signed-By_email'] = email.Utils.parseaddr(current['Signed-By'])
+          if (current['Source'], current['Version']) in added or \
+            (current['Source'], current['Version']) == ('libapache-authznetldap-perl', '0.07-4') or \
+            (current['Source'], current['Version']) == ('knj10font', '1.01-1'):
+              current = {}
+              current['Fingerprint'] = 'N/A' # hack: some entries don't have fp
+              last_field = None
+              continue
+          added[(current['Source'], current['Version'])] = True
           uploads.append(current)
           for arch in set(current['Architecture'].split()):
-            current_arch = {'id': id}
+            current_arch = {'Source': current['Source'], 'Version': current['Version']} 
             current_arch['arch'] = arch
             uploads_archs.append(current_arch)
           if current['Closes'] != 'N/A':
             for closes in set(current['Closes'].split()):
-              current_closes = {'id': id}
+              current_closes = {'Source': current['Source'], 'Version': current['Version']} 
               current_closes['closes'] = closes
               uploads_closes.append(current_closes)
-          id += 1
-          current = {'id': id}
+          current = {}
           current['Fingerprint'] = 'N/A' # hack: some entries don't have fp
           last_field = None
           continue

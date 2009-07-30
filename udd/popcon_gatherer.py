@@ -52,23 +52,23 @@ class popcon_gatherer(gatherer):
       linenr += 1
       name, data = line.split(None, 1)
       if name == "Submissions:":
-	d['data'] = int(data)
-	cur.execute("INSERT INTO " + table + " (package, vote) VALUES ('_submissions', %(data)s)", d)
-	continue
+        d['data'] = int(data)
+        cur.execute("INSERT INTO " + table + " (package, vote) VALUES ('_submissions', %(data)s)", d)
+        continue
       try:
-	(name, vote, old, recent, nofiles) = data.split()
-	d['name'] = name
-	for k in ['vote', 'old', 'recent', 'nofiles']:
-	  exec '%s = int(%s)' % (k,k)
-	  exec 'd["%s"] = %s' % (k,k)
-	d['insts'] = vote + old + recent + nofiles
-	if ascii_match.match(name) == None:
-#	  print "%s:%d - illegal package name %s" % (my_config['path'], linenr, line)
-	  continue
-	query = "EXECUTE pop_insert(%(name)s, %(insts)s, %(vote)s, %(old)s, %(recent)s, %(nofiles)s)"
-	cur.execute(query, d)
+        (name, vote, old, recent, nofiles) = data.split()
+        d['name'] = name
+        for k in ['vote', 'old', 'recent', 'nofiles']:
+          exec '%s = int(%s)' % (k,k)
+          exec 'd["%s"] = %s' % (k,k)
+        d['insts'] = vote + old + recent + nofiles
+        if ascii_match.match(name) == None:
+          print "%s:%d - illegal package name %s" % (my_config['path'], linenr, line)
+          continue
+        query = "EXECUTE pop_insert(%(name)s, %(insts)s, %(vote)s, %(old)s, %(recent)s, %(nofiles)s)"
+        cur.execute(query, d)
       except ValueError:
-	continue
+        continue
 
     cur.execute("DEALLOCATE pop_insert")
 
@@ -83,9 +83,9 @@ class popcon_gatherer(gatherer):
       """ % my_config)
     cur.execute("""
     INSERT INTO %(table)s_src_average (source, insts, vote, olde, recent,
-    	nofiles)
+      nofiles)
       SELECT pkgs.source, avg(insts) AS insts, avg(vote) AS vote,
-        avg(olde) AS old, avg(recent) AS recent, avg(nofiles) as nofiles
+      avg(olde) AS old, avg(recent) AS recent, avg(nofiles) as nofiles
       FROM %(table)s, %(packages-table)s_summary AS pkgs
       WHERE %(table)s.package = pkgs.package
       GROUP BY pkgs.source;
