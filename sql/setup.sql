@@ -334,22 +334,33 @@ GRANT SELECT ON migrations TO PUBLIC;
 -- Upload history
 
 CREATE TABLE upload_history
- (id serial, package text, version debversion, date timestamp with time zone,
+ (source text, version debversion, date timestamp with time zone,
  changed_by text, changed_by_name text, changed_by_email text, maintainer text, maintainer_name text, maintainer_email text, nmu boolean, signed_by text, signed_by_name text, signed_by_email text, key_id text,
  fingerprint text,
- PRIMARY KEY (id));
+ PRIMARY KEY (source, version));
 
 CREATE TABLE upload_history_architecture
- (id int REFERENCES upload_history, architecture text,
- PRIMARY KEY (id, architecture));
+ (source text, version debversion, architecture text,
+ PRIMARY KEY (source, version, architecture),
+FOREIGN KEY (source, version) REFERENCES upload_history DEFERRABLE);
   
 CREATE TABLE upload_history_closes
- (id int REFERENCES upload_history, bug int,
- PRIMARY KEY (id, bug));
+ (source text, version debversion, bug int,
+ PRIMARY KEY (source, version, bug),
+FOREIGN KEY (source, version) REFERENCES upload_history DEFERRABLE);
 
 GRANT SELECT ON upload_history TO PUBLIC;
 GRANT SELECT ON upload_history_architecture TO PUBLIC;
 GRANT SELECT ON upload_history_closes TO PUBLIC;
+
+CREATE VIEW upload_history_nmus AS
+select uh1.source, count(*) AS nmus
+from upload_history uh1, (select source, max(date) as date from upload_history where nmu = false group by source) uh2
+where uh1.nmu = true
+and uh1.source = uh2.source
+and uh1.date > uh2.date
+group by uh1.source;
+GRANT SELECT ON upload_history_nmus TO PUBLIC;
 
 -- Ubuntu bugs
 CREATE TABLE ubuntu_bugs (
@@ -478,13 +489,15 @@ CREATE TABLE dehs (
   unstable_upstream text,
   unstable_parsed_version text,
   unstable_status dehs_status,
+  unstable_last_uptodate timestamp,
   experimental_version debversion,
   experimental_upstream text,
   experimental_parsed_version text,
   experimental_status dehs_status,
+  experimental_last_uptodate timestamp,
   PRIMARY KEY (source)
 );
-GRANT SELECT ON lintian TO PUBLIC;
+GRANT SELECT ON dehs TO PUBLIC;
 
 -- LDAP
 CREATE TABLE ldap (
@@ -497,11 +510,50 @@ CREATE TABLE ldap (
   country text,
   activity_from timestamp with time zone,
   activity_from_info text,
-  activity_gpg timestamp with time zone,
-  activity_gpg_info text,
+  activity_pgp timestamp with time zone,
+  activity_pgp_info text,
   gecos text,
   birthdate date,
   gender numeric,
   PRIMARY KEY (uid)
 );
 GRANT SELECT ON ldap TO guestdd;
+
+-- views
+-- bugs_count
+create view bugs_count as
+select coalesce(b1.source, b2.source) as source, coalesce(rc_bugs, 0) as rc_bugs, coalesce(all_bugs, 0) as all_bugs from
+((select source, count(*) as rc_bugs
+from bugs
+where severity >= 'serious'
+and status='pending'
+and id not in (select id from bugs_merged_with where id > merged_with)
+group by source) b1
+FULL JOIN (select source, count(*) as all_bugs
+from bugs
+where status='pending'
+and id not in (select id from bugs_merged_with where id > merged_with)
+group by source) b2 ON (b1.source = b2.source));
+
+grant select on bugs_count to public;
+-- bapase
+drop view bapase;
+create view bapase as
+select s.source, s.version, type, bug, description,
+orphaned_time, (current_date - orphaned_time::date) as orphaned_age,
+in_testing, (current_date - in_testing) as testing_age, testing_version,
+in_unstable, (current_date - in_unstable) as unstable_age, unstable_version,
+sync, (current_date - sync) as sync_age, sync_version,
+first_seen, (current_date - first_seen) as first_seen_age,
+uh.date as upload_date, (current_date - uh.date::date) as upload_age,
+nmu, coalesce(nmus, 0) as nmus, coalesce(rc_bugs,0) as rc_bugs, coalesce(all_bugs,0) as all_bugs,
+coalesce(insts,0) as insts, coalesce(vote,0) as vote
+from sources s
+left join orphaned_packages op on s.source = op.source
+left join migrations tm on s.source = tm.source
+left join  upload_history uh on s.source = uh.source and s.version = uh.version
+left join  upload_history_nmus uhn on s.source = uhn.source
+left join bugs_count b on s.source = b.source
+left join popcon_src ps on s.source = ps.source
+where s.distribution='debian' and s.release='sid';
+GRANT SELECT ON bapase TO PUBLIC;

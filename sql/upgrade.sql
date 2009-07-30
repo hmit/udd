@@ -201,7 +201,7 @@ CREATE TABLE dehs (
   experimental_status dehs_status,
   PRIMARY KEY (source)
 );
-GRANT SELECT ON lintian TO PUBLIC;
+GRANT SELECT ON dehs TO PUBLIC;
 
 -- split emails in bugs
 ALTER TABLE bugs add submitter_name TEXT;
@@ -218,5 +218,39 @@ ALTER TABLE archived_bugs add done_name TEXT;
 ALTER TABLE archived_bugs add done_email TEXT;
 
 -- LDAP
-CREATE TABLE ldap ( uid numeric, login text, cn text, sn text, expire boolean, location text, country text, activity_from timestamp with time zone, activity_from_info text, activity_gpg timestamp with time zone, activity_gpg_info text, gecos text, birthdate date, gender numeric, PRIMARY KEY (uid));
+CREATE TABLE ldap ( uid numeric, login text, cn text, sn text, expire boolean, location text, country text, activity_from timestamp with time zone, activity_from_info text, activity_pgp timestamp with time zone, activity_pgp_info text, gecos text, birthdate date, gender numeric, PRIMARY KEY (uid));
 GRANT SELECT ON ldap TO guestdd;
+
+-- New layout for upload_history
+DROP TABLE upload_history CASCADE;
+CREATE TABLE upload_history
+ (source text, version debversion, date timestamp with time zone,
+ changed_by text, changed_by_name text, changed_by_email text, maintainer text, maintainer_name text, maintainer_email text, nmu boolean, signed_by text, signed_by_name text, signed_by_email text, key_id text,
+ fingerprint text,
+ PRIMARY KEY (source, version));
+
+CREATE TABLE upload_history_architecture
+ (source text, version debversion, architecture text,
+ PRIMARY KEY (source, version, architecture),
+FOREIGN KEY (source, version) REFERENCES upload_history DEFERRABLE);
+  
+CREATE TABLE upload_history_closes
+ (source text, version debversion, bug int,
+ PRIMARY KEY (source, version, bug),
+FOREIGN KEY (source, version) REFERENCES upload_history DEFERRABLE);
+
+GRANT SELECT ON upload_history TO PUBLIC;
+GRANT SELECT ON upload_history_architecture TO PUBLIC;
+GRANT SELECT ON upload_history_closes TO PUBLIC;
+
+CREATE VIEW upload_history_nmus AS
+select uh1.source, count(*) AS nmus
+from upload_history uh1, (select source, max(date) as date from upload_history where nmu = false group by source) uh2
+where uh1.nmu = true
+and uh1.source = uh2.source
+and uh1.date > uh2.date
+group by uh1.source;
+GRANT SELECT ON upload_history_nmus TO PUBLIC;
+
+ALTER TABLE dehs ADD unstable_last_uptodate timestamp;
+ALTER TABLE dehs ADD experimental_last_uptodate timestamp;
