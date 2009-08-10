@@ -242,6 +242,7 @@ class ftpnew_gatherer(gatherer):
       in_source          = 1
       binpkgs = []
       binpkg = None
+      binpkg_changes = None # In case we have only information about changes file which sometimes might happen
       for line in srci.readlines():
         if ftpnew_gatherer.src_html_failed_re.match(line):
           print >>stderr, "File %s not found." % (src_info_html)
@@ -268,10 +269,12 @@ class ftpnew_gatherer(gatherer):
             if in_source:
               srcpkg.s[field]   = value
               srcpkg.s['maintainer_name'], srcpkg.s['maintainer_email'] = email.Utils.parseaddr(srcpkg.s['Maintainer'])
+              binpkg_changes.b[field] = value
             else:
               binpkg.b[field]   = value
             print >>srco, "%s: %s" % (field, value)
     	  elif field == 'Description':
+    	    # This does not seem to be executed because description is parsed when src_html_has_description_start_re matches (see below)
             if in_source:
               srcpkg.s[field]  = de_html(value)
             else:
@@ -280,6 +283,7 @@ class ftpnew_gatherer(gatherer):
     	  elif field == 'Architecture':
             if in_source:
               srcpkg.s[field] = value
+              binpkg_changes.b[field] = value
             else:
               binpkg.b[field] = value
             print >>srco, "%s: %s" % (field, value)
@@ -295,7 +299,8 @@ class ftpnew_gatherer(gatherer):
               if srcpkg.has_several_versions == 0 and value != srcpkg.s[field]:
                 print >>stderr, "Incompatible version numbers between new.822(%s) and %s.html (%s)" % \
                     (srcpkg.s[field], src_info_base, value)
-              srcpkg.s[field]   = value
+              srcpkg.s[field]         = value
+              binpkg_changes.b[field] = value
             else:
               binpkg.b[field]   = value
             print >>srco, "%s: %s" % (field, value)
@@ -356,6 +361,11 @@ class ftpnew_gatherer(gatherer):
                     (srcpkg.s['Bin'], src_info_base, value)
               srcpkg.s['Bin'] = value
               print >>srco, "%s: %s" % (field, value)
+              binpkg_changes = bin_pkg(value.split(' ')[0], srcpkg.s['Source'])
+              binpkg_changes.b['Distribution']     = srcpkg.s['Distribution']
+              binpkg_changes.b['Description']      = 'binary package information is missing in new queue'
+              binpkg_changes.b['Long_Description'] = '' # no long description available in *.changes file
+              binpkg_changes.b['Component']        = srcpkg.s['Component']
             else:
               print >>stderr, "Binary should not mention Binary field in %s.html (%s)" % \
                   (src_info_base, value)
@@ -412,7 +422,13 @@ class ftpnew_gatherer(gatherer):
       srci.close()
       srco.close()
       # Append last read binary package to list of binary packages
-      binpkgs.append(binpkg)
+      if binpkg != None:
+        binpkgs.append(binpkg)
+      else: # ... if only .changes information available (for whatever reason other information might be missing in new queue
+        if srcpkg.s['Queue'] != 'ignore':
+          # fall back to some basic information
+          binpkgs.append(binpkg_changes)
+          print >>stderr, "Package %s is missing information for binary packages" % (binpkg_changes.b['Package'])
       if srcpkg.s['Queue'] != 'ignore':
         # print srcpkg
         srcpkg.check_dict()
