@@ -317,10 +317,11 @@ class ftpnew_gatherer(gatherer):
                 query = "SELECT id, package, source, title FROM bugs WHERE id = %i" % (ival)
                 cur.execute(query)
                 bug_info = cur.fetchone()
-                if not bug_info:
-            	  print >>stderr, "Bug %i which source package %s claims to close does not exist." % (ival, srcpkg.s['Source'])
-                else:
-                  print >>stderr, "Bug #%i of package %s and source %s is not against pseudopackage 'wnpp' and hast title '%s'" % bug_info
+                if DEBUG != 0:
+                  if not bug_info:
+            	    print >>stderr, "Bug %i which source package %s claims to close does not exist." % (ival, srcpkg.s['Source'])
+                  else:
+                    print >>stderr, "Bug #%i of package %s and source %s is not against pseudopackage 'wnpp' and hast title '%s'" % bug_info
               if not ftpnew_gatherer.closes_is_itp_re.match(wnpp_title):
                 print >>stderr, "Closed bug %i seems to be not ITPed (queue = %s; title = %s)" % (ival, srcpkg.s['Queue'], wnpp_title)
               else:
@@ -335,7 +336,7 @@ class ftpnew_gatherer(gatherer):
                 else: # stay with the ITP found first 
                   srcpkg.s['Closes'] = int(ival)
                 found_itp = 1
-            if not found_itp:
+            if not found_itp and DEBUG != 0:
               print >>stderr, "Most probably %s is not new." % (srcpkg.s['Source'])
             print >>srco, "%s: %s\n" % (field, value)
           elif field == 'Distribution':
