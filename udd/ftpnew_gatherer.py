@@ -326,13 +326,14 @@ class ftpnew_gatherer(gatherer):
                 print >>stderr, "Closed bug %i seems to be not ITPed (queue = %s; title = %s)" % (ival, srcpkg.s['Queue'], wnpp_title)
               else:
                 if found_itp:
-                  print >>stderr, "Warning: Package %s seems to have more than one ITP bugs (%i, %i). Only %i is stored in UDD (queue = %s)" % \
-                      (srcpkg.s['Source'], srcpkg.s['Closes'], ival, srcpkg.s['Closes'], srcpkg.s['Queue'])
-                  query = "SELECT count(*) FROM bugs_merged_with WHERE id = %i OR id = %i" % (srcpkg.s['Closes'], ival)
-                  cur.execute(query)
-                  is_merged = cur.fetchone()[0]
-                  if is_merged != 2 and DEBUG != 0:
-                    print >>stderr, "  --> Please verify whether bugs should could be merged in BTS!"
+                  if DEBUG != 0:
+                    print >>stderr, "Warning: Package %s seems to have more than one ITP bugs (%i, %i). Only %i is stored in UDD (title = %s)" % \
+                        (srcpkg.s['Source'], srcpkg.s['Closes'], ival, srcpkg.s['Closes'], wnpp_title)
+                    query = "SELECT count(*) FROM bugs_merged_with WHERE id = %i OR id = %i" % (srcpkg.s['Closes'], ival)
+                    cur.execute(query)
+                    is_merged = cur.fetchone()[0]
+                    if is_merged != 2:
+                      print >>stderr, "  --> Please verify whether bugs should could be merged in BTS!"
                 else: # stay with the ITP found first 
                   srcpkg.s['Closes'] = int(ival)
                 found_itp = 1
