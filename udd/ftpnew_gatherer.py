@@ -130,7 +130,7 @@ class ftpnew_gatherer(gatherer):
   src_html_has_tag_re = re.compile('^\s*<tr><td class="key">([-\w]+):</td><td class="val">(.+)</td></tr>$')
   src_html_has_description_start_re = re.compile('^\s*<tr><td class="key">Description:</td><td class="val"><pre>(.+)')
   src_html_has_description_end_re   = re.compile('(.+)</pre></td></tr>')
-  closes_is_itp_re    = re.compile('^\s*(ITP|RFP|ITA)')
+  closes_is_itp_re    = re.compile('^[\s"]*(ITP|RFP|ITA)')
   vcs_type_re         = re.compile('Vcs-(Svn|Git|Bzr|Darcs|Hg|Cvs|Arch|Mtn)')
 
   def __init__(self, connection, config, source):
