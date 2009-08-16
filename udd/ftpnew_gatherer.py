@@ -192,7 +192,11 @@ class ftpnew_gatherer(gatherer):
 
     has_warned_about_missing_section_key = 0
     for stanza in deb822.Sources.iter_paragraphs(ftpnew_data, shared_storage=False):
-      if stanza['queue'] == 'accepted' or stanza['queue'] == 'proposedupdates' :
+      try:
+        if stanza['queue'] == 'accepted' or stanza['queue'] == 'proposedupdates' :
+          continue
+      except KeyError, err:
+        print >>stderr, "No key queue found (%s), %s" % (err, str(stanza))
         continue
       srcpkg               = src_pkg(stanza['source'])
       versions             = stanza['version'].split(' ')        # the page lists more than one version
@@ -443,6 +447,9 @@ class ftpnew_gatherer(gatherer):
         cur.execute(query, srcpkg.s)
         for binpkg in binpkgs:
           # print binpkg
+          if not binpkg:
+            print >>stderr, "Undefined binpkg.  This is the info from changes:", str(binpkg_changes)
+            continue
           binpkg.check_dict()
           query = """EXECUTE ftpnew_insert_package (%(Package)s, %(Version)s,
                      %(Architecture)s, %(Maintainer)s, %(Description)s, %(Source)s,
