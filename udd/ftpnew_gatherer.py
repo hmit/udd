@@ -470,7 +470,7 @@ class ftpnew_gatherer(gatherer):
               print >>stderr, "Missing information field for binary package %s: %s" % (binpkg.b['Package'], err)
               continue
     except KeyError, err:
-      print >>stderr, "Unable to finish parsing %s: %s" % (ftpnew822file, err)
+      print >>stderr, "Unable to finish parsing %s because of unknown key %s" % (ftpnew822file, err)
 
     cur.execute("DEALLOCATE ftpnew_insert_source")
     cur.execute("DEALLOCATE ftpnew_insert_package")
