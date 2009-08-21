@@ -188,285 +188,289 @@ class ftpnew_gatherer(gatherer):
             % (my_config['table_packages'])
     cur.execute(query)
 
-    ftpnew_data      = open(my_config['path']+'/new.822')
+    ftpnew822file    = my_config['path']+'/new.822'
+    ftpnew_data      = open(ftpnew822file)
 
     has_warned_about_missing_section_key = 0
-    for stanza in deb822.Sources.iter_paragraphs(ftpnew_data, shared_storage=False):
-      try:
-        if stanza['queue'] == 'accepted' or stanza['queue'] == 'proposedupdates' :
+    try:
+      for stanza in deb822.Sources.iter_paragraphs(ftpnew_data, shared_storage=False):
+        try:
+          if stanza['queue'] == 'accepted' or stanza['queue'] == 'proposedupdates' :
+            continue
+        except KeyError, err:
+          print >>stderr, "No key queue found (%s), %s" % (err, str(stanza))
           continue
-      except KeyError, err:
-        print >>stderr, "No key queue found (%s), %s" % (err, str(stanza))
-        continue
-      srcpkg               = src_pkg(stanza['source'])
-      versions             = stanza['version'].split(' ')        # the page lists more than one version
-      srcpkg.has_several_versions = len(versions)-1              # some tests below fail if more than one version in in queue
-      srcpkg.s['Version']       = versions[srcpkg.has_several_versions]
-      srcpkg.s['Architecture']  = stanza['architectures']
-      srcpkg.s['Queue']         = stanza['queue']
-      srcpkg.s['Last_modified'] = ctime(int(stanza['last-modified'])) # We want a real time object instead of an epoch
-      srcpkg.s['Distribution']  = stanza['distribution']
-      srcpkg.s['Changed-By']    = stanza['changed-by']
-      try:
-        srcpkg.s['Section']       = stanza['section']
-        if stanza['section'].startswith('non-free'):
-          srcpkg.s['Component'] = 'non-free'
-        elif stanza['section'].startswith('contrib'):
-          srcpkg.s['Component'] = 'contrib'
-        else:
-          srcpkg.s['Component'] = 'main'
-      except KeyError:
-        srcpkg.s['Section']     = ''
-        srcpkg.s['Component']   = ''
-        if has_warned_about_missing_section_key == 0:
-          has_warned_about_missing_section_key = 1
-          print >>stderr, "Warning: Because of a bug in DAK code the Section field is currently missing."
+        srcpkg               = src_pkg(stanza['source'])
+        versions             = stanza['version'].split(' ')        # the page lists more than one version
+        srcpkg.has_several_versions = len(versions)-1              # some tests below fail if more than one version in in queue
+        srcpkg.s['Version']       = versions[srcpkg.has_several_versions]
+        srcpkg.s['Architecture']  = stanza['architectures']
+        srcpkg.s['Queue']         = stanza['queue']
+        srcpkg.s['Last_modified'] = ctime(int(stanza['last-modified'])) # We want a real time object instead of an epoch
+        srcpkg.s['Distribution']  = stanza['distribution']
+        srcpkg.s['Changed-By']    = stanza['changed-by']
+        try:
+          srcpkg.s['Section']       = stanza['section']
+          if stanza['section'].startswith('non-free'):
+            srcpkg.s['Component'] = 'non-free'
+          elif stanza['section'].startswith('contrib'):
+            srcpkg.s['Component'] = 'contrib'
+          else:
+            srcpkg.s['Component'] = 'main'
+        except KeyError:
+          srcpkg.s['Section']     = ''
+          srcpkg.s['Component']   = ''
+          if has_warned_about_missing_section_key == 0:
+            has_warned_about_missing_section_key = 1
+            print >>stderr, "Warning: Because of a bug in DAK code the Section field is currently missing."
 
-      # Check UDD for existing source packages of this name
-      query = "SELECT count(*) FROM sources WHERE source = '%s'" % (srcpkg.s['Source'])
-      cur.execute(query)
-      in_udd = cur.fetchone()[0]
-      if in_udd:
-        if DEBUG != 0:
-          print >>stderr, "%s is %i times in UDD - no interest in just known sources (queue = %s)" \
-    	                  % (srcpkg.s['Source'], int(in_udd), srcpkg.s['Queue'])
-        continue
+        # Check UDD for existing source packages of this name
+        query = "SELECT count(*) FROM sources WHERE source = '%s'" % (srcpkg.s['Source'])
+        cur.execute(query)
+        in_udd = cur.fetchone()[0]
+        if in_udd:
+          if DEBUG != 0:
+            print >>stderr, "%s is %i times in UDD - no interest in just known sources (queue = %s)" \
+                            % (srcpkg.s['Source'], int(in_udd), srcpkg.s['Queue'])
+          continue
 
-      src_info_base = srcpkg.s['Source'] + '_' + srcpkg.s['Version']
-      src_info_html = my_config['path'] + '/' + src_info_base + '.html'
-      src_info_822  = my_config['path'] + '/' + src_info_base + '.822'
+        src_info_base = srcpkg.s['Source'] + '_' + srcpkg.s['Version']
+        src_info_html = my_config['path'] + '/' + src_info_base + '.html'
+        src_info_822  = my_config['path'] + '/' + src_info_base + '.822'
 
-      try:
-        srci = open(src_info_html, 'r')
-      except IOError, err:
-        print >>stderr, "No html info for package %s in queue %s (%s)." % (srcpkg.s['Source'], stanza['queue'], err) 
-        continue
-      srco = open(src_info_822, 'w')
-      in_description     = 0
-      in_source          = 1
-      binpkgs = []
-      binpkg = None
-      binpkg_changes = None # In case we have only information about changes file which sometimes might happen
-      for line in srci.readlines():
-        if ftpnew_gatherer.src_html_failed_re.match(line):
-          print >>stderr, "File %s not found." % (src_info_html)
-          src_info_not_found = 1
-          break
-        match = ftpnew_gatherer.src_html_has_tag_re.match(line)
-        if match:
-    	  field = match.groups()[0]
-    	  value = de_html(match.groups()[1])
-          if field == 'Package':
-            # Here begins a new binary package
-            if self.check_existing_binaries((value,), srcpkg.s['Queue']):
-              srcpkg.s['Queue'] = 'ignore'
-              break
-            if in_source:
-              in_source = 0
-            if binpkg:
-              binpkgs.append(binpkg)
-            binpkg = bin_pkg(value, srcpkg.s['Source'])
-            print >>srco, "\nPackage: %s" % (value)
-            binpkg.b['Distribution'] = srcpkg.s['Distribution']
-    	  elif field == 'Maintainer':
-    	    # print "DEBUG %s: %s" % (field, value)
-            if in_source:
-              srcpkg.s[field]   = value
-              srcpkg.s['maintainer_name'], srcpkg.s['maintainer_email'] = email.Utils.parseaddr(srcpkg.s['Maintainer'])
-              binpkg_changes.b[field] = value
-            else:
-              binpkg.b[field]   = value
-            print >>srco, "%s: %s" % (field, value)
-    	  elif field == 'Description':
-    	    # This does not seem to be executed because description is parsed when src_html_has_description_start_re matches (see below)
-            if in_source:
-              srcpkg.s[field]  = de_html(value)
-            else:
-              binpkg.b[field]  = de_html(value)
-            print >>srco, "%s: %s" % (field, value)
-    	  elif field == 'Architecture':
-            if in_source:
-              srcpkg.s[field] = value
-              binpkg_changes.b[field] = value
-            else:
-              binpkg.b[field] = value
-            print >>srco, "%s: %s" % (field, value)
-    	  elif field == 'Source':
-            if in_source:
-              if value != srcpkg.s['Source']:
-                print >>stderr, "Incompatible source names between new.822(%s) and %s.html (%s)" % \
-                    (srcpkg.s['Source'], src_info_base, value)
-                srcpkg.s['Source']    = value
-            print >>srco, "%s: %s" % (field, value)
-    	  elif field == 'Version':
-            if in_source:
-              if srcpkg.has_several_versions == 0 and value != srcpkg.s[field]:
-                print >>stderr, "Incompatible version numbers between new.822(%s) and %s.html (%s)" % \
-                    (srcpkg.s[field], src_info_base, value)
-              srcpkg.s[field]         = value
-              binpkg_changes.b[field] = value
-            else:
-              binpkg.b[field]   = value
-            print >>srco, "%s: %s" % (field, value)
-          elif field == 'Closes':
-            values = value.split(' ')
-            found_itp = 0
-            for val in values:
-              ival = int(val)
-              query = "SELECT title from bugs where id = %i and package = 'wnpp' and source = 'wnpp'" % (ival)
-              cur.execute(query)
-              try:
-                wnpp_title = cur.fetchone()[0]
-              except TypeError, err:
-                query = "SELECT id, package, source, title FROM bugs WHERE id = %i" % (ival)
-                cur.execute(query)
-                bug_info = cur.fetchone()
-                if DEBUG != 0:
-                  if not bug_info:
-            	    print >>stderr, "Bug %i which source package %s claims to close does not exist." % (ival, srcpkg.s['Source'])
-                  else:
-                    print >>stderr, "Bug #%i of package %s and source %s is not against pseudopackage 'wnpp' and hast title '%s'" % bug_info
-              if not ftpnew_gatherer.closes_is_itp_re.match(wnpp_title):
-                print >>stderr, "Closed bug %i seems to be not ITPed (queue = %s; title = %s)" % (ival, srcpkg.s['Queue'], wnpp_title)
+        try:
+          srci = open(src_info_html, 'r')
+        except IOError, err:
+          print >>stderr, "No html info for package %s in queue %s (%s)." % (srcpkg.s['Source'], stanza['queue'], err) 
+          continue
+        srco = open(src_info_822, 'w')
+        in_description     = 0
+        in_source          = 1
+        binpkgs = []
+        binpkg = None
+        binpkg_changes = None # In case we have only information about changes file which sometimes might happen
+        for line in srci.readlines():
+          if ftpnew_gatherer.src_html_failed_re.match(line):
+            print >>stderr, "File %s not found." % (src_info_html)
+            src_info_not_found = 1
+            break
+          match = ftpnew_gatherer.src_html_has_tag_re.match(line)
+          if match:
+            field = match.groups()[0]
+            value = de_html(match.groups()[1])
+            if field == 'Package':
+              # Here begins a new binary package
+              if self.check_existing_binaries((value,), srcpkg.s['Queue']):
+                srcpkg.s['Queue'] = 'ignore'
+                break
+              if in_source:
+                in_source = 0
+              if binpkg:
+                binpkgs.append(binpkg)
+              binpkg = bin_pkg(value, srcpkg.s['Source'])
+              print >>srco, "\nPackage: %s" % (value)
+              binpkg.b['Distribution'] = srcpkg.s['Distribution']
+            elif field == 'Maintainer':
+              # print "DEBUG %s: %s" % (field, value)
+              if in_source:
+                srcpkg.s[field]   = value
+                srcpkg.s['maintainer_name'], srcpkg.s['maintainer_email'] = email.Utils.parseaddr(srcpkg.s['Maintainer'])
+                binpkg_changes.b[field] = value
               else:
-                if found_itp:
-                  if DEBUG != 0:
-                    print >>stderr, "Warning: Package %s seems to have more than one ITP bugs (%i, %i). Only %i is stored in UDD (title = %s)" % \
-                        (srcpkg.s['Source'], srcpkg.s['Closes'], ival, srcpkg.s['Closes'], wnpp_title)
-                    query = "SELECT count(*) FROM bugs_merged_with WHERE id = %i OR id = %i" % (srcpkg.s['Closes'], ival)
-                    cur.execute(query)
-                    is_merged = cur.fetchone()[0]
-                    if is_merged != 2:
-                      print >>stderr, "  --> Please verify whether bugs should could be merged in BTS!"
-                else: # stay with the ITP found first 
-                  srcpkg.s['Closes'] = int(ival)
-                found_itp = 1
-            if not found_itp and DEBUG != 0:
-              print >>stderr, "Most probably %s is not new." % (srcpkg.s['Source'])
-            print >>srco, "%s: %s\n" % (field, value)
-          elif field == 'Distribution':
-            if in_source:
-              if srcpkg.has_several_versions == 0 and value != srcpkg.s['Distribution']:
-                print >>stderr, "Incompatible distributions between new.822(%s) and %s.html (%s)" % \
-                    (srcpkg.s['Distribution'], src_info_base, value)
-              srcpkg.s['Distribution'] = value
+                binpkg.b[field]   = value
               print >>srco, "%s: %s" % (field, value)
-            else:
-              print >>stderr, "Binary should not mention distribution field in %s.html (%s)" % \
-                  (src_info_base, value)
-          elif field == 'Binary':
-            if in_source:
-              # Binaries are mentioned in different syntax in *.changes and *.dsc
-              value = re.sub(", +", " ", value)
-            if self.check_existing_binaries(value.split(' '), srcpkg.s['Queue']):
-              srcpkg.s['Queue'] = 'ignore'
-              break
-            if in_source:
-              if srcpkg.s['Bin'] != () and value != srcpkg.s['Bin']:
-                print >>stderr, "Incompatible binaries between new.822(%s) and %s.html (%s)" % \
-                    (srcpkg.s['Bin'], src_info_base, value)
-              srcpkg.s['Bin'] = value
+            elif field == 'Description':
+              # This does not seem to be executed because description is parsed when src_html_has_description_start_re matches (see below)
+              if in_source:
+                srcpkg.s[field]  = de_html(value)
+              else:
+                binpkg.b[field]  = de_html(value)
               print >>srco, "%s: %s" % (field, value)
-              binpkg_changes = bin_pkg(value.split(' ')[0], srcpkg.s['Source'])
-              binpkg_changes.b['Distribution']     = srcpkg.s['Distribution']
-              binpkg_changes.b['Description']      = 'binary package information is missing in new queue'
-              binpkg_changes.b['Long_Description'] = '' # no long description available in *.changes file
-              binpkg_changes.b['Component']        = srcpkg.s['Component']
-            else:
-              print >>stderr, "Binary should not mention Binary field in %s.html (%s)" % \
-                  (src_info_base, value)
-          elif field == 'Installed-Size':
-            if not in_source:
-              binpkg.b[field] = int(value)
-          elif field == 'Homepage':
-            if not in_source:
-              binpkg.b[field] = value
-          elif field == 'Section':
-            if not in_source:
-              if not binpkg:
-                print >>stderr, "This should not happen", srcpkg, field, value
-                exit(-1)
+            elif field == 'Architecture':
+              if in_source:
+                srcpkg.s[field] = value
+                binpkg_changes.b[field] = value
               else:
                 binpkg.b[field] = value
-                binpkg.b['Component'] = srcpkg.s['Component']
-          elif field == 'Vcs-Browser':
-            srcpkg.s[field] = value
-          elif binpkg != None and field in dependencies_to_accept:
-            binpkg.b[field] = value
-            print >>srco, "%s: %s" % (field, value)
-          elif field in fields_to_pass or field.startswith('Npp-'):
-            print >>srco, "%s: %s" % (field, value)
-          else:
-            matchvcs = ftpnew_gatherer.vcs_type_re.match(field)
-            if matchvcs:            
-    	      srcpkg.s['Vcs-Type'] = matchvcs.groups()[0]
-    	      srcpkg.s['Vcs-Url']  = value
+              print >>srco, "%s: %s" % (field, value)
+            elif field == 'Source':
+              if in_source:
+                if value != srcpkg.s['Source']:
+                  print >>stderr, "Incompatible source names between new.822(%s) and %s.html (%s)" % \
+                      (srcpkg.s['Source'], src_info_base, value)
+                  srcpkg.s['Source']    = value
+                print >>srco, "%s: %s" % (field, value)
+            elif field == 'Version':
+              if in_source:
+                if srcpkg.has_several_versions == 0 and value != srcpkg.s[field]:
+                  print >>stderr, "Incompatible version numbers between new.822(%s) and %s.html (%s)" % \
+                      (srcpkg.s[field], src_info_base, value)
+                srcpkg.s[field]         = value
+                binpkg_changes.b[field] = value
+              else:
+                binpkg.b[field]   = value
+              print >>srco, "%s: %s" % (field, value)
+            elif field == 'Closes':
+              values = value.split(' ')
+              found_itp = 0
+              for val in values:
+                ival = int(val)
+                query = "SELECT title from bugs where id = %i and package = 'wnpp' and source = 'wnpp'" % (ival)
+                cur.execute(query)
+                try:
+                  wnpp_title = cur.fetchone()[0]
+                except TypeError, err:
+                  query = "SELECT id, package, source, title FROM bugs WHERE id = %i" % (ival)
+                  cur.execute(query)
+                  bug_info = cur.fetchone()
+                  if DEBUG != 0:
+                    if not bug_info:
+                      print >>stderr, "Bug %i which source package %s claims to close does not exist." % (ival, srcpkg.s['Source'])
+                    else:
+                      print >>stderr, "Bug #%i of package %s and source %s is not against pseudopackage 'wnpp' and hast title '%s'" % bug_info
+                if not ftpnew_gatherer.closes_is_itp_re.match(wnpp_title):
+                  print >>stderr, "Closed bug %i seems to be not ITPed (queue = %s; title = %s)" % (ival, srcpkg.s['Queue'], wnpp_title)
+                else:
+                  if found_itp:
+                    if DEBUG != 0:
+                      print >>stderr, "Warning: Package %s seems to have more than one ITP bugs (%i, %i). Only %i is stored in UDD (title = %s)" % \
+                          (srcpkg.s['Source'], srcpkg.s['Closes'], ival, srcpkg.s['Closes'], wnpp_title)
+                      query = "SELECT count(*) FROM bugs_merged_with WHERE id = %i OR id = %i" % (srcpkg.s['Closes'], ival)
+                      cur.execute(query)
+                      is_merged = cur.fetchone()[0]
+                      if is_merged != 2:
+                        print >>stderr, "  --> Please verify whether bugs should could be merged in BTS!"
+                  else: # stay with the ITP found first 
+                    srcpkg.s[field] = int(ival)
+                  found_itp = 1
+              if not found_itp and DEBUG != 0:
+                print >>stderr, "Most probably %s is not new." % (srcpkg.s['Source'])
+              print >>srco, "%s: %s\n" % (field, value)
+            elif field == 'Distribution':
+              if in_source:
+                if srcpkg.has_several_versions == 0 and value != srcpkg.s['Distribution']:
+                  print >>stderr, "Incompatible distributions between new.822(%s) and %s.html (%s)" % \
+                      (srcpkg.s['Distribution'], src_info_base, value)
+                srcpkg.s[field] = value
+                print >>srco, "%s: %s" % (field, value)
+              else:
+                print >>stderr, "Binary should not mention distribution field in %s.html (%s)" % \
+                    (src_info_base, value)
+            elif field == 'Binary':
+              if in_source:
+                # Binaries are mentioned in different syntax in *.changes and *.dsc
+                value = re.sub(", +", " ", value)
+              if self.check_existing_binaries(value.split(' '), srcpkg.s['Queue']):
+                srcpkg.s['Queue'] = 'ignore'
+                break
+              if in_source:
+                if srcpkg.s['Bin'] != () and value != srcpkg.s['Bin']:
+                  print >>stderr, "Incompatible binaries between new.822(%s) and %s.html (%s)" % \
+                      (srcpkg.s['Bin'], src_info_base, value)
+                srcpkg.s['Bin'] = value
+                print >>srco, "%s: %s" % (field, value)
+                binpkg_changes = bin_pkg(value.split(' ')[0], srcpkg.s['Source'])
+                binpkg_changes.b['Distribution']     = srcpkg.s['Distribution']
+                binpkg_changes.b['Description']      = 'binary package information is missing in new queue'
+                binpkg_changes.b['Long_Description'] = '' # no long description available in *.changes file
+                binpkg_changes.b['Component']        = srcpkg.s['Component']
+              else:
+                print >>stderr, "Binary should not mention Binary field in %s.html (%s)" % \
+                    (src_info_base, value)
+            elif field == 'Installed-Size':
+              if not in_source:
+                binpkg.b[field] = int(value)
+            elif field == 'Homepage':
+              if not in_source:
+                binpkg.b[field] = value
+            elif field == 'Section':
+              if not in_source:
+                if not binpkg:
+                  print >>stderr, "This should not happen", srcpkg, field, value
+                  exit(-1)
+                else:
+                  binpkg.b[field] = value
+                  binpkg.b['Component'] = srcpkg.s['Component']
+            elif field == 'Vcs-Browser':
+              srcpkg.s[field] = value
+            elif binpkg != None and field in dependencies_to_accept:
+              binpkg.b[field] = value
+              print >>srco, "%s: %s" % (field, value)
+            elif field in fields_to_pass or field.startswith('Npp-'):
               print >>srco, "%s: %s" % (field, value)
             else:
-              print >>stderr, "Unknown field in %s: %s" % (srcpkg.s['Source'], field)
-              print >>srco, "*%s: %s" % (field, value)
-          continue
-        if in_description:
-          match = ftpnew_gatherer.src_html_has_description_end_re.match(line)
-          if match:
-            if match.groups()[0][0] != ' ':
-              description += ' '
-            description += de_html(match.groups()[0])
-            in_description = 0
-            if not in_source: # binpkg and binpkg.b:
-              (binpkg.b['Description'], binpkg.b['Long_Description']) = description.split("\n",1)
-              print >>srco, "Description: %s\n%s" % (binpkg.b['Description'], binpkg.b['Long_Description'])
+              matchvcs = ftpnew_gatherer.vcs_type_re.match(field)
+              if matchvcs:            
+                srcpkg.s['Vcs-Type'] = matchvcs.groups()[0]
+                srcpkg.s['Vcs-Url']  = value
+                print >>srco, "%s: %s" % (field, value)
+              else:
+                print >>stderr, "Unknown field in %s: %s" % (srcpkg.s['Source'], field)
+                print >>srco, "*%s: %s" % (field, value)
+            continue
+          if in_description:
+            match = ftpnew_gatherer.src_html_has_description_end_re.match(line)
+            if match:
+              if match.groups()[0][0] != ' ':
+                description += ' '
+              description += de_html(match.groups()[0])
+              in_description = 0
+              if not in_source: # binpkg and binpkg.b:
+                (binpkg.b['Description'], binpkg.b['Long_Description']) = description.split("\n",1)
+                print >>srco, "Description: %s\n%s" % (binpkg.b['Description'], binpkg.b['Long_Description'])
+            else:
+              if line[0] != ' ':
+                description += ' '
+              description += de_html(line)
           else:
-            if line[0] != ' ':
-              description += ' '
-            description += de_html(line)
-        else:
-          match = ftpnew_gatherer.src_html_has_description_start_re.match(line)
-          if match:
-            in_description = 1
-            description = de_html(match.groups()[0]) + "\n"
-      srci.close()
-      srco.close()
-      # Append last read binary package to list of binary packages
-      if binpkg != None:
-        binpkgs.append(binpkg)
-      else: # ... if only .changes information available (for whatever reason other information might be missing in new queue
+            match = ftpnew_gatherer.src_html_has_description_start_re.match(line)
+            if match:
+              in_description = 1
+              description = de_html(match.groups()[0]) + "\n"
+        srci.close()
+        srco.close()
+        # Append last read binary package to list of binary packages
+        if binpkg != None:
+          binpkgs.append(binpkg)
+        else: # ... if only .changes information available (for whatever reason other information might be missing in new queue
+          if srcpkg.s['Queue'] != 'ignore':
+            # fall back to some basic information
+            binpkgs.append(binpkg_changes)
+            print >>stderr, "Package %s is missing information for binary packages" % (binpkg_changes.b['Package'])
         if srcpkg.s['Queue'] != 'ignore':
-          # fall back to some basic information
-          binpkgs.append(binpkg_changes)
-          print >>stderr, "Package %s is missing information for binary packages" % (binpkg_changes.b['Package'])
-      if srcpkg.s['Queue'] != 'ignore':
-        # print srcpkg
-        srcpkg.check_dict()
-        query = """EXECUTE ftpnew_insert_source (%(Source)s, %(Version)s,
-                  %(Maintainer)s, %(maintainer_name)s, %(maintainer_email)s,
-                  %(Bin)s, %(Changed-By)s, %(Architecture)s, %(Homepage)s,
-                  %(Vcs-Type)s, %(Vcs-Url)s, %(Vcs-Browser)s,
-                  %(Section)s, %(Distribution)s, %(Component)s, %(Closes)s, %(License)s,
-                  %(Last_modified)s, %(Queue)s)"""
-        cur.execute(query, srcpkg.s)
-        for binpkg in binpkgs:
-          # print binpkg
-          if not binpkg:
-            print >>stderr, "Undefined binpkg.  This is the info from changes:", str(binpkg_changes)
-            continue
-          binpkg.check_dict()
-          query = """EXECUTE ftpnew_insert_package (%(Package)s, %(Version)s,
-                     %(Architecture)s, %(Maintainer)s, %(Description)s, %(Source)s,
-                     %(Depends)s, %(Recommends)s, %(Suggests)s, %(Enhances)s,
-                     %(Pre-Depends)s, %(Breaks)s, %(Replaces)s, %(Provides)s, %(Conflicts)s,
-                     %(Installed-Size)s, %(Homepage)s, %(Section)s,
-                     %(Long_Description)s, %(Distribution)s, %(Component)s, %(License)s)"""
-          try:
-            cur.execute(query, binpkg.b)
-          except IntegrityError, err:
-            print >>stderr, err, src_info_html
-            print >>stderr, binpkg
-            print >>stderr, binpkg.b
-            continue
-          except KeyError, err:
-            print >>stderr, "Missing information field for binary package %s: %s" % (binpkg.b['Package'], err)
-            continue
+          # print srcpkg
+          srcpkg.check_dict()
+          query = """EXECUTE ftpnew_insert_source (%(Source)s, %(Version)s,
+                    %(Maintainer)s, %(maintainer_name)s, %(maintainer_email)s,
+                    %(Bin)s, %(Changed-By)s, %(Architecture)s, %(Homepage)s,
+                    %(Vcs-Type)s, %(Vcs-Url)s, %(Vcs-Browser)s,
+                    %(Section)s, %(Distribution)s, %(Component)s, %(Closes)s, %(License)s,
+                    %(Last_modified)s, %(Queue)s)"""
+          cur.execute(query, srcpkg.s)
+          for binpkg in binpkgs:
+            # print binpkg
+            if not binpkg:
+              print >>stderr, "Undefined binpkg.  This is the info from changes:", str(binpkg_changes)
+              continue
+            binpkg.check_dict()
+            query = """EXECUTE ftpnew_insert_package (%(Package)s, %(Version)s,
+                       %(Architecture)s, %(Maintainer)s, %(Description)s, %(Source)s,
+                       %(Depends)s, %(Recommends)s, %(Suggests)s, %(Enhances)s,
+                       %(Pre-Depends)s, %(Breaks)s, %(Replaces)s, %(Provides)s, %(Conflicts)s,
+                       %(Installed-Size)s, %(Homepage)s, %(Section)s,
+                       %(Long_Description)s, %(Distribution)s, %(Component)s, %(License)s)"""
+            try:
+              cur.execute(query, binpkg.b)
+            except IntegrityError, err:
+              print >>stderr, err, src_info_html
+              print >>stderr, binpkg
+              print >>stderr, binpkg.b
+              continue
+            except KeyError, err:
+              print >>stderr, "Missing information field for binary package %s: %s" % (binpkg.b['Package'], err)
+              continue
+    except KeyError, err:
+      print >>stderr, "Unable to finish parsing %s: %s" % (ftpnew822file, err)
 
     cur.execute("DEALLOCATE ftpnew_insert_source")
     cur.execute("DEALLOCATE ftpnew_insert_package")
