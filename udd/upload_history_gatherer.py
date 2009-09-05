@@ -43,7 +43,7 @@ class upload_history_gatherer(gatherer):
     cursor.execute("PREPARE uh_close_insert AS INSERT INTO %s (source, version, bug) \
         VALUES ($1, $2, $3)" % (self.my_config['table'] + '_closes'))
 
-    query = "EXECUTE uh_insert(%(Source)s, %(Version)s, %(Date)s, \
+    query = "EXECUTE uh_insert(%(Source)s, %(Version)s, %(Message-Date)s, \
       %(Changed-By)s, %(Changed-By_name)s, %(Changed-By_email)s, \
       %(Maintainer)s, %(Maintainer_name)s, %(Maintainer_email)s, %(NMU)s, \
       %(Signed-By)s, %(Signed-By_name)s, %(Signed-By_email)s, %(Key)s, \
@@ -73,9 +73,12 @@ class upload_history_gatherer(gatherer):
           current['Changed-By_name'], current['Changed-By_email'] = email.Utils.parseaddr(current['Changed-By'])
           current['Maintainer_name'], current['Maintainer_email'] = email.Utils.parseaddr(current['Maintainer'])
           current['Signed-By_name'], current['Signed-By_email'] = email.Utils.parseaddr(current['Signed-By'])
+          current['Message-Date'] = current['Message-Date'].partition('(')[0].replace('+4200','+0000').replace('+4300','+0000').replace('+4100','+0000').replace('+4400','+0000').replace('+4000','+0000')
           if (current['Source'], current['Version']) in added or \
             (current['Source'], current['Version']) == ('libapache-authznetldap-perl', '0.07-4') or \
-            (current['Source'], current['Version']) == ('knj10font', '1.01-1'):
+            (current['Source'], current['Version']) == ('knj10font', '1.01-1') or \
+            current['Message-Date'] == 'None':
+              print "Skipping upload: "+current['Source']+" "+current['Version']+" "+current['Date']
               current = {}
               current['Fingerprint'] = 'N/A' # hack: some entries don't have fp
               last_field = None
