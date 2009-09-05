@@ -29,12 +29,100 @@ elsif type == 'nmu'
   query = "select * from bapase where nmu and nmus > 1 order by nmus desc"
 elsif type == 'testing'
   orphaned = true
-  query = "select * from bapase where testing_age > 1 order by testing_age desc"
+  query = "select * from bapase where source not in (select source from sources where distribution='debian' and release='squeeze') order by testing_age desc, first_seen asc"
+elsif type == 'nodd'
+  orphaned = true
+  query = <<EOF
+select * from bapase where source in (
+SELECT source
+FROM sources
+WHERE distribution = 'debian' AND release = 'sid'
+AND sources.source NOT IN (
+SELECT sources.source
+FROM sources
+LEFT OUTER JOIN uploaders ON (sources.source = uploaders.source AND sources.version = uploaders.version AND sources.distribution = uploaders.distribution AND sources.release = uploaders.release AND sources.component = uploaders.component)
+WHERE sources.distribution = 'debian' AND sources.release = 'sid'
+AND (maintainer_email in (SELECT email FROM carnivore_emails, active_dds WHERE active_dds.id = carnivore_emails.id)
+OR email in (SELECT email FROM carnivore_emails, active_dds WHERE active_dds.id = carnivore_emails.id)
+OR maintainer_email ~ '.*@lists.(alioth.)?debian.org'
+OR email ~ '.*@lists.(alioth.)?debian.org'))
+) order by upload_age desc
+EOF
+elsif type == 'maintnmu'
+  orphaned = true
+  query = <<EOF
+select * from bapase where source in (
+  select source from sources where distribution='debian' and release='squeeze' and maintainer_email in (
+select nmus.email from
+(select email, count(*) as tot from
+(select maintainer_email as email, source from sources
+where release = 'sid'
+and distribution = 'debian'
+and component = 'main'
+union
+select email, source from uploaders 
+where release = 'sid'
+and distribution = 'debian'
+and component = 'main') as foo
+group by email) as tot,
+(select email, count(*) as nmus from
+(select sources.maintainer_email as email, sources.source from sources, upload_history uh
+where release = 'sid'
+and distribution = 'debian'
+and component = 'main'
+and sources.source = uh.source and sources.version = uh.version
+and uh.nmu
+union
+select email, uploaders.source from uploaders, upload_history uh
+where release = 'sid'
+and distribution = 'debian'
+and component = 'main'
+and uploaders.source = uh.source and uploaders.version = uh.version
+and uh.nmu
+) as foo
+group by email) as nmus
+where nmus * 100 / tot >= 100
+and nmus.email = tot.email)
+union (select source from uploaders where distribution='debian' and release='squeeze' and email in (
+select nmus.email from
+(select email, count(*) as tot from
+(select maintainer_email as email, source from sources
+where release = 'sid'
+and distribution = 'debian'
+and component = 'main'
+union
+select email, source from uploaders 
+where release = 'sid'
+and distribution = 'debian'
+and component = 'main') as foo
+group by email) as tot,
+(select email, count(*) as nmus from
+(select sources.maintainer_email as email, sources.source from sources, upload_history uh
+where release = 'sid'
+and distribution = 'debian'
+and component = 'main'
+and sources.source = uh.source and sources.version = uh.version
+and uh.nmu
+union
+select email, uploaders.source from uploaders, upload_history uh
+where release = 'sid'
+and distribution = 'debian'
+and component = 'main'
+and uploaders.source = uh.source and uploaders.version = uh.version
+and uh.nmu
+) as foo
+group by email) as nmus
+where nmus * 100 / tot >= 100
+and nmus.email = tot.email
+))) order by nmus
+EOF
 else
   puts <<-EOF
   <a href="bapase.cgi?t=o">Orphaned packages</a><br/>
   <a href="bapase.cgi?t=nmu">Packages maintained with NMUs</a><br/>
   <a href="bapase.cgi?t=testing">Packages not in testing</a><br/>
+  <a href="bapase.cgi?t=nodd">Packages not maintained by DDs</a><br/>
+  <a href="bapase.cgi?t=maintnmu">Packages maintained or co-maintained by people with lots of NMUs</a><br/>
   </body></html>
   EOF
   exit(0)
