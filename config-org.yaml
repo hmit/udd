@@ -77,7 +77,7 @@ debian-volatile-etch:
   type: src-pkg
   archs: [alpha, amd64, arm, hppa, i386, ia64,  mips,
           mipsel, powerpc, s390, sparc]       
-  directory: /org/mirrors/volatile.debian.org/ftp/dists/etch/
+  directory: /org/mirrors/volatile.debian.org/archive/dists/etch/volatile/
   components: [main, contrib, non-free]
   distribution: etch-volatile
   packages-table: packages
@@ -91,7 +91,7 @@ debian-etch-security:
   type: src-pkg
   archs: [alpha, amd64, arm, hppa, i386, ia64,  mips,
           mipsel, powerpc, s390, sparc]       
-  directory: /org/mirrors/security.debian.org/ftp/dists/etch/
+  directory: /org/mirrors/security.debian.org/ftp/dists/etch/updates/
   components: [main, contrib, non-free]
   distribution: debian
   packages-table: packages
@@ -121,7 +121,7 @@ debian-lenny-security:
   archs: [alpha, amd64, arm, armel, hppa,
           i386, ia64, mips,
           mipsel, powerpc, s390, sparc]       
-  directory: /org/mirrors/security.debian.org/ftp/dists/lenny/
+  directory: /org/mirrors/security.debian.org/ftp/dists/lenny/updates/
   components: [main, contrib, non-free]
   distribution: debian
   packages-table: packages
@@ -164,7 +164,7 @@ debian-volatile-lenny:
   type: src-pkg
   archs: [alpha, amd64, arm, hppa, i386, ia64,  mips,
           mipsel, powerpc, s390, sparc]       
-  directory: /org/mirrors/volatile.debian.org/ftp/dists/lenny/
+  directory: /org/mirrors/volatile.debian.org/archive/dists/lenny/volatile/
   components: [main, contrib, non-free]
   distribution: lenny-volatile
   packages-table: packages
@@ -194,7 +194,7 @@ debian-squeeze-security:
   archs: [alpha, amd64, armel, hppa,
           i386, ia64, mips,
           mipsel, powerpc, s390, sparc]       
-  directory: /org/mirrors/security.debian.org/ftp/dists/squeeze/
+  directory: /org/mirrors/security.debian.org/ftp/dists/squeeze/updates/
   components: [main, contrib, non-free]
   distribution: debian
   packages-table: packages
