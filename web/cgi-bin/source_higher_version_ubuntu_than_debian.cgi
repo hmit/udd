@@ -38,6 +38,9 @@ conn.close()
 
 # print results
 
+# CGI Content-type
+print "Content-type: text/plain\n\n"
+
 # heading
 print "Source packages with a higher version in Ubuntu than in Debian\n"
 print "%30s %25s %25s" % ('Source Package Name', 'Debian Version', 'Ubuntu Version')

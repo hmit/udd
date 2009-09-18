@@ -36,6 +36,9 @@ conn.close()
 
 # print results
 
+# CGI Content-type
+print "Content-type: text/plain\n\n"
+
 # heading
 print "Source packages in Ubuntu but not in Debian\n"
 print "%35s %25s" % ('Source Package Name', 'Ubuntu Version')
