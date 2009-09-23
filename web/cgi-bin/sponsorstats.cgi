@@ -37,9 +37,11 @@ puts "<p>Uploads in <b>bold</b> were NMUs.</p>"
 puts '<a href="http://svn.debian.org/wsvn/collab-qa/udd/web/cgi-bin/sponsorstats.cgi?op=file&rev=0&sc=0">source code</a><br/>'
 
 puts "<ul>"
+rank = 0
 uploaders.to_a.sort { |a,b| uploads[a[0]] <=> uploads[b[0]] }.reverse.each do |k|
   k, v = k
-  puts "<li>#{k} -- #{names[k]} (#{uploads[k]} uploads)\n<ul>"
+  rank += 1
+  puts "<li>#{rank}. #{k} -- #{names[k]} (#{uploads[k]} uploads)\n<ul>"
   v.to_a.sort { |a,b| a[1].length <=> b[1].length }.reverse.each do |k2|
     k2, v = k2
     puts "<li>#{k2} (#{v.length} uploads)\n<ul>"
