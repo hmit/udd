@@ -16,7 +16,7 @@ use Time::Local;
 
 use Debbugs::Bugs qw{get_bugs};
 use Debbugs::Status qw{read_bug get_bug_status bug_presence};
-use Debbugs::Packages qw{binarytosource getpkgsrc};
+use Debbugs::Packages qw{getpkgsrc};
 use Debbugs::Config qw{:globals %config};
 use Debbugs::User;
 use Mail::Address;
@@ -213,8 +213,12 @@ sub run {
 			}
 		} qw{date log_modified};
 
-
-		my $source = exists($pkgsrc{$bug{package}}) ? $pkgsrc{$bug{package}} : $bug{package};
+		if ($bug{package} =~ /^src:(.*)/)
+		{
+			my $source = $1;
+		} else {
+			my $source = exists($pkgsrc{$bug{package}}) ? $pkgsrc{$bug{package}} : $bug{package};
+		}
 
 		# split emails
 		my (@addr, $submitter_name, $submitter_email, $owner_name, $owner_email, $done_name, $done_email);
@@ -302,7 +306,12 @@ sub run {
 
 		my $src;
 		foreach my $pkg (keys %{{ map { $_ => 1 } split(/\s*,\s*/, $bug{package})}}) {
-			$src = exists($pkgsrc{$pkg}) ? $pkgsrc{$pkg} : $pkg;
+			if ($pkg =~ /^src:(.*)/)
+			{
+				$src = $1;
+			} else {
+				$src = exists($pkgsrc{$pkg}) ? $pkgsrc{$pkg} : $pkg;
+			}
 			$insert_bugs_packages_handle->execute($bug_nr, $pkg, $src) or die $!;
 		}
 
