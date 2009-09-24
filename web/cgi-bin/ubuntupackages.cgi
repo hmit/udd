@@ -1,4 +1,5 @@
 #!/usr/bin/ruby -w
+# Used by DDPO
 
 require 'dbi'
 

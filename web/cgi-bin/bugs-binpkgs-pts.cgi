@@ -1,6 +1,6 @@
 #!/usr/bin/ruby -w
 
-# Used by DDPO and the PTS
+# Used by the PTS
 
 require 'dbi'
 
