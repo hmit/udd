@@ -317,6 +317,7 @@ class ftpnew_gatherer(gatherer):
                 ival = int(val)
                 query = "SELECT title from bugs where id = %i and package = 'wnpp' and source = 'wnpp'" % (ival)
                 cur.execute(query)
+                wnpp_title = ''
                 try:
                   wnpp_title = cur.fetchone()[0]
                 except TypeError, err:
