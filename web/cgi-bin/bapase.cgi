@@ -245,11 +245,14 @@ and nmus.email = tot.email
 EOF
 else
   puts <<-EOF
-  <a href="bapase.cgi?t=o">Orphaned packages</a><br/>
-  <a href="bapase.cgi?t=nmu">Packages maintained with NMUs</a><br/>
-  <a href="bapase.cgi?t=testing">Packages not in testing</a><br/>
-  <a href="bapase.cgi?t=nodd">Packages not maintained by DDs</a><br/>
-  <a href="bapase.cgi?t=maintnmu">Packages maintained or co-maintained by people with lots of NMUs</a><br/>
+  <h1>Bapase</h1>
+  <ul>
+  <li><a href="bapase.cgi?t=o">Orphaned packages</a></li>
+  <li><a href="bapase.cgi?t=nmu">Packages maintained with NMUs</a></li>
+  <li><a href="bapase.cgi?t=testing">Packages not in testing</a></li>
+  <li><a href="bapase.cgi?t=nodd">Packages not maintained by DDs</a></li>
+  <li><a href="bapase.cgi?t=maintnmu">Packages maintained or co-maintained by people with lots of NMUs</a></li>
+  </ul>
   </body></html>
   EOF
   exit(0)
