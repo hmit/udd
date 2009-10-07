@@ -1,0 +1,2 @@
+Kill all idle transactions:
+udd=> select * from dsa_kill_all_idle_transactions();

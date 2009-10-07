@@ -213,11 +213,12 @@ sub run {
 			}
 		} qw{date log_modified};
 
+		my $srcpkg;
 		if ($bug{package} =~ /^src:(.*)/)
 		{
-			my $source = $1;
+			$srcpkg = $1;
 		} else {
-			my $source = exists($pkgsrc{$bug{package}}) ? $pkgsrc{$bug{package}} : $bug{package};
+			$srcpkg = exists($pkgsrc{$bug{package}}) ? $pkgsrc{$bug{package}} : $bug{package};
 		}
 
 		# split emails
@@ -298,14 +299,14 @@ sub run {
 		}
 
 		# Insert data into bugs table
-		$insert_bugs_handle->execute($bug_nr, $bug{package}, $source, $bug{date}, $bug{pending},
+		$insert_bugs_handle->execute($bug_nr, $bug{package}, $srcpkg, $bug{date}, $bug{pending},
 			$bug{severity}, $bug{originator}, $submitter_name, $submitter_email, $bug{owner},
 		       	$owner_name, $owner_email, $bug{done}, $done_name, $done_email, $bug{subject},
 		       	$bug{forwarded}, $bug{log_modified},
 			$present_in_stable, $present_in_testing, $present_in_unstable, $present_in_experimental) or die $!;
 
 		my $src;
-		foreach my $pkg (keys %{{ map { $_ => 1 } split(/\s*,\s*/, $bug{package})}}) {
+		foreach my $pkg (keys %{{ map { $_ => 1 } split(/\s*[, ]\s*/, $bug{package})}}) {
 			if ($pkg =~ /^src:(.*)/)
 			{
 				$src = $1;

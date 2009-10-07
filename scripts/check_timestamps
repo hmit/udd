@@ -1,3 +1,3 @@
-ls -l --time-style=full-iso /org/udd.debian.org/timestamps/ |sort -n -k 6 | grep -v $(date --iso) | grep -v $(date --iso -d '1 day ago') | grep -v "^total"
+ls -l --time-style=full-iso /org/udd.debian.org/timestamps/*.insert-end |sort -n -k 6 | grep -v $(date --iso) | grep -v $(date --iso -d '1 day ago') | grep -v "^total"
 ls -l --time-style=full-iso /org/bugs.debian.org/www/project/trace/ |sort -n -k 6 | grep -v $(date --iso) | grep -v $(date --iso -d '1 day ago') | grep -v "^total"
 

@@ -557,3 +557,10 @@ left join bugs_count b on s.source = b.source
 left join popcon_src ps on s.source = ps.source
 where s.distribution='debian' and s.release='sid';
 GRANT SELECT ON bapase TO PUBLIC;
+
+-- really active dds
+CREATE VIEW really_active_dds AS
+    SELECT DISTINCT carnivore_login.id, carnivore_login.login FROM carnivore_login, carnivore_keys, ldap WHERE ((((carnivore_keys.id = carnivore_login.id) AND (carnivore_keys.key_type = 'keyring'::text)) AND (carnivore_login.login = ldap.login)) AND (ldap.activity_pgp > '2009-01-01 00:00:00+00'::timestamp with time zone));
+GRANT SELECT ON TABLE really_active_dds TO guestdd;
+
+

@@ -46,15 +46,25 @@ if __name__ == '__main__':
       # can just use the gatherer's methods
       if command == 'update':
 	if "update-command" in src_config:
+	  if 'timestamp-dir' in config['general']:
+	    f = open(os.path.join(config['general']['timestamp-dir'],
+                                  src+".update-start"), "w")
+	    f.write(asctime())
+	    f.close()
 	  result = system(src_config['update-command']) 
 	  if result != 0:
 	    sys.exit(result)
 	  if 'timestamp-dir' in config['general']:
 	    f = open(os.path.join(config['general']['timestamp-dir'],
-                                  src+".update"), "w")
+                                  src+".update-end"), "w")
 	    f.write(asctime())
 	    f.close()
       else:
+	if 'timestamp-dir' in config['general']:
+	  f = open(os.path.join(config['general']['timestamp-dir'],
+                                src+".insert-start"), "w")
+	  f.write(asctime())
+	  f.close()
 	(src_command,rest) = types[type].split(None, 1)
 	if src_command == "exec":
 	  system(rest + " " + sys.argv[1] + " " + sys.argv[2] + " " + src)
@@ -75,7 +85,7 @@ if __name__ == '__main__':
 	  connection.commit()
 	if 'timestamp-dir' in config['general']:
 	  f = open(os.path.join(config['general']['timestamp-dir'],
-                                src+".dispatch"), "w")
+                                src+".insert-end"), "w")
 	  f.write(asctime())
 	  f.close()
     except:
