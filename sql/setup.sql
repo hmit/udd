@@ -9,7 +9,7 @@ CREATE TABLE sources
     text, distribution text, release release, component text, vcs_type text,
     vcs_url text, vcs_browser text,
     python_version text, checksums_sha1 text, checksums_sha256 text,
-    original_maintainer text, dm_upload_allowed text,
+    original_maintainer text, dm_upload_allowed boolean,
     PRIMARY KEY (source, version, distribution, release, component));
 
 GRANT SELECT ON sources TO PUBLIC;
@@ -64,7 +64,7 @@ CREATE TABLE ubuntu_sources
     text, distribution text, release release, component text, vcs_type text,
     vcs_url text, vcs_browser text,
     python_version text, checksums_sha1 text, checksums_sha256 text,
-    original_maintainer text, dm_upload_allowed text,
+    original_maintainer text, dm_upload_allowed boolean,
     PRIMARY KEY (source, version, distribution, release, component));
 
 CREATE INDEX ubuntu_sources_distrelcomp_idx on ubuntu_sources(distribution, release, component);

@@ -254,3 +254,9 @@ GRANT SELECT ON upload_history_nmus TO PUBLIC;
 
 ALTER TABLE dehs ADD unstable_last_uptodate timestamp;
 ALTER TABLE dehs ADD experimental_last_uptodate timestamp;
+
+-- 2009-10-07
+ALTER TABLE sources DROP dm_upload_allowed;
+ALTER TABLE sources ADD dm_upload_allowed boolean;
+ALTER TABLE ubuntu_sources DROP dm_upload_allowed;
+ALTER TABLE ubuntu_sources ADD dm_upload_allowed boolean;

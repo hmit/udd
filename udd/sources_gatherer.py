@@ -75,6 +75,9 @@ class sources_gatherer(gatherer):
         d['Vcs-Browser'] = control["Vcs-Browse"]
     else:
         d['Vcs-Browser'] = None
+    if control.has_key("Dm-Upload-Allowed"):
+        d['Dm-Upload-Allowed'] = (d['Dm-Upload-Allowed'].lower() == 'yes')
+
     
     for k in control.keys():
       if k not in sources_gatherer.mandatory and k not in sources_gatherer.non_mandatory and k not in sources_gatherer.ignorable:
