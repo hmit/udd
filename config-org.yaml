@@ -319,8 +319,8 @@ ubuntu-popcon:
 
 testing-migrations:
   type: testing-migrations
-  path: /org/udd.debian.org/tmp/migrations
-  update-command: wget -q -O /org/udd.debian.org/tmp/migrations 'http://qa.debian.org/~lucas/testing-status.raw'
+  path: /org/udd.debian.org/testing-status/testing-status.raw
+  update-command: /org/udd.debian.org/udd/scripts/testing-status-update
   schema: testing_migrations
   table: migrations
 

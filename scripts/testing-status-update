@@ -1,0 +1,219 @@
+#!/usr/bin/ruby -w
+
+require 'date'
+require 'thread'
+Thread::abort_on_exception = true
+
+MIRRORPATH = '/org/mirrors/ftp.debian.org/ftp/dists/'
+
+class PkgTestingStatus
+  @@datezero = Date::parse('0000-01-01')
+  @@curdate = Date::today
+
+  attr_accessor :intesting, :testingversion, :inunstable, :unstableversion, :sync, :syncversion, :firstinunstable
+  def initialize(t,tv,u,uv, s, sv, fu)
+    @intesting = t
+    @testingversion = tv
+    @inunstable = u
+    @unstableversion = uv
+    @sync = s
+    @syncversion = sv
+    @firstinunstable = fu
+  end
+
+  def to_s
+    "#{@intesting} #{@testingversion} #{@inunstable} #{@unstableversion} #{@sync} #{@syncversion} #{@firstinunstable}"
+  end
+
+  def testing_s
+    if @intesting == @@datezero
+      d = 'never'
+      v = ''
+      days = ''
+    else
+      d = @intesting
+      v = @testingversion
+      days = @@curdate - @intesting
+    end
+    return "<td>#{d}</td><td>#{days}</td><td>#{v}</td>"
+  end
+
+  def sync_s
+    if @sync == @@datezero
+      d = 'never'
+      v = ''
+      days = ''
+    else
+      d = @sync
+      v = @syncversion
+      days = @@curdate - @sync
+    end
+    return "<td>#{d}</td><td>#{days}</td><td>#{v}</td>"
+  end
+
+  def testingdays
+    if @intesting != @@datezero
+      return @@curdate - @intesting
+    else
+      return (@@curdate - @firstinunstable)
+    end
+  end
+
+  def testing_ok?(days)
+    return [true, nil] if @@curdate - @firstinunstable < days
+    return [true, nil] if @@curdate - @intesting < 2
+    
+    if @intesting != @@datezero
+      return [false, @@curdate - @intesting ]
+    else
+      return [false, @@curdate - @firstinunstable ]
+    end
+  end
+
+  def sync_ok?(days)
+    if @sync != @@datezero
+      if @@curdate - @sync > days
+        return [false, @@curdate - @sync]
+      else
+        return [true, nil]
+      end
+    else
+      if @@curdate - @firstinunstable > days
+        return [false, @@curdate - @firstinunstable ]
+      else
+        return [true, nil]
+      end
+    end
+  end
+  
+  def syncdays
+    if @sync != @@datezero
+      return @@curdate - @sync
+    else
+      return (@@curdate - @firstinunstable)
+    end
+  end
+
+  def to_row(pkg, orphaned = nil, comment = nil)
+    s = "<tr><td><a href=\"http://packages.qa.debian.org/#{pkg}\">#{pkg}</a>"
+    s += "<a href=\"http://bugs.debian.org/#{orphaned}\">(O)</a>" if orphaned
+    s += "</td>"
+    s += "#{testing_s}#{sync_s}"
+    s += "<td>#{@unstableversion}</td><td>#{@firstinunstable}</td><td>"
+    s += comment if comment
+    s += "</td></tr>"
+    return s
+  end
+
+  def update(curdate, testing, unstable)
+#    STDERR.puts "#{curdate} #{testing} #{unstable}" if testing != unstable
+    if testing
+      if curdate >= @intesting
+        @intesting = curdate 
+        @testingversion = testing
+      else
+        STDERR.puts "[testing] #{curdate} < #{@intesting}, skipping"
+      end
+    end
+    if unstable
+      if curdate >= @inunstable
+        @inunstable = curdate 
+        @unstableversion = unstable
+      else
+        STDERR.puts "[unstable] #{curdate} < #{@inunstable}, skipping"
+      end
+    end
+    if unstable and testing and unstable == testing
+      if curdate >= @sync
+        @sync = curdate 
+        @syncversion = unstable
+      else
+        STDERR.puts "[sync] #{curdate} < #{@sync}, skipping"
+      end
+    end
+  end
+
+  def PkgTestingStatus::read(io)
+    pkgs = {}
+    io.read.each_line do |l|
+      p, t, tv, u, uv, s, sv, fu = l.split(' ')
+      pkgs[p] = PkgTestingStatus::new(Date::parse(t), tv, Date::parse(u),
+                                      uv, Date::parse(s), sv, Date::parse(fu))
+    end
+    return pkgs
+  end
+end
+
+def readsources(file)
+  # read Sources
+  if file =~ /^http:\/\//
+    str = `wget -q -O - #{file} | gunzip`
+  else
+    str = IO::read(file)
+  end
+  pkg = nil
+  vers = nil
+  pkgsinfile = {}
+  str.each_line do |l|
+    if l =~ /^Package: /
+      pkg = l.split(' ')[1].chomp
+    elsif l =~ /^Version: /
+      vers = l.split(' ')[1].chomp
+      pkgsinfile[pkg] = vers
+    end
+  end
+  return pkgsinfile
+end
+
+Dir::chdir('/org/udd.debian.org/testing-status/')
+oldfile = Dir::glob('data.*').sort[-1]
+d = Date::today
+newfile = "data.#{d}"
+
+$datezero = Date::parse('0000-01-01')
+
+
+pkgs = PkgTestingStatus::read(File::open(oldfile))
+
+class PkgSrc
+  attr_accessor :testing, :unstable
+end
+
+pkgsrcs = {}
+ths = []
+mutex = Mutex::new
+['testing', 'unstable'].each do |dist|
+  ['non-free', 'contrib', 'main'].each do |sect|
+    ths << Thread::new(dist, sect) do |dist, sect|
+      srcs = readsources(MIRRORPATH + "/#{dist}/#{sect}/source/Sources.gz")
+      mutex.synchronize do
+	srcs.each_pair do |k, v|
+          pkgsrcs[k] = PkgSrc::new if not pkgsrcs.has_key?(k)
+          if dist == 'testing'
+	      pkgsrcs[k].testing = v
+          elsif dist == 'unstable'
+             pkgsrcs[k].unstable = v
+          end
+	end 
+      end
+    end
+  end
+end
+ths.each { |t| t.join }
+
+# combine data
+pkgsrcs.each_pair do |p, v|
+  if not pkgs.has_key?(p)
+    pkgs[p] = PkgTestingStatus::new($datezero, '-', $datezero, '-', $datezero, '-', date)
+  end
+  pkgs[p].update(date, v.testing, v.unstable)
+
+end
+
+# output
+of = File::new(newfile, 'w')
+pkgs.to_a.sort { |a,b| a[0] <=> b[0] }.each do |e|
+  of.puts "#{e[0]} #{e[1]}"
+end
+of.close
+system("cp #{newfile} testing-status.raw")
