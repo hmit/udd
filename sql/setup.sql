@@ -519,6 +519,23 @@ CREATE TABLE ldap (
 );
 GRANT SELECT ON ldap TO guestdd;
 
+-- wannabuild
+CREATE TABLE wannabuild (
+  source text,
+  distribution text,
+  architecture text,
+  version debversion,
+  state text,
+  installed_version debversion,
+  previous_state text,
+  state_change timestamp,
+  binary_nmu_version numeric,
+  notes text,
+  PRIMARY KEY (source, distribution, architecture)
+);
+GRANT SELECT ON wannabuild TO public;
+
+
 -- views
 -- bugs_count
 create view bugs_count as

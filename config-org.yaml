@@ -21,6 +21,7 @@ general:
     screenshots: module udd.screenshot_gatherer
     dehs: module udd.dehs_gatherer
     ldap: module udd.ldap_gatherer
+    wannabuild: module udd.wannabuild_gatherer
   timestamp-dir: /org/udd.debian.org/timestamps
   lock-dir: /org/udd.debian.org/locks
   archs:
@@ -423,3 +424,11 @@ screenshots:
   cache: /org/udd.debian.org/mirrors/cache
   table:  screenshots
   screenshots_json: /org/udd.debian.org/mirrors/screenshots/screenshots.json
+
+wannabuild:
+  type: wannabuild
+  wbdb: "dbname=wanna-build host=localhost port=5433 user=guest"
+  archs: [alpha, amd64, arm, armel, hppa, hurd-i386,
+    i386, ia64, kfreebsd-amd64, kfreebsd-i386, mips,
+    mipsel, powerpc, s390, sparc]
+
