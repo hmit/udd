@@ -148,6 +148,8 @@ def readsources(file)
   # read Sources
   if file =~ /^http:\/\//
     str = `wget -q -O - #{file} | gunzip`
+  elsif file =~ /\.gz$/
+    str = `zcat #{file}`
   else
     str = IO::read(file)
   end
@@ -204,9 +206,9 @@ ths.each { |t| t.join }
 # combine data
 pkgsrcs.each_pair do |p, v|
   if not pkgs.has_key?(p)
-    pkgs[p] = PkgTestingStatus::new($datezero, '-', $datezero, '-', $datezero, '-', date)
+    pkgs[p] = PkgTestingStatus::new($datezero, '-', $datezero, '-', $datezero, '-', d)
   end
-  pkgs[p].update(date, v.testing, v.unstable)
+  pkgs[p].update(d, v.testing, v.unstable)
 
 end
 
