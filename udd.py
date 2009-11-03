@@ -8,7 +8,7 @@ This script is used to dispatch the source gatherers of the UDD project."""
 import string
 import sys
 from os import system
-from time import asctime
+import time
 import udd.aux
 import os.path
 
@@ -19,6 +19,23 @@ def print_help():
   print "Available commands:"
   for cmd in available_commands:
     print '  %s' % cmd
+
+def insert_timestamps(config, source, command, start_time, end_time):
+    connection = udd.aux.open_connection(config)
+    cur = connection.cursor()
+    values = { 'source' : source,
+               'command' : command,
+               'start_time' : start_time,
+               'end_time' : end_time }
+    cur.execute("""INSERT INTO timestamps
+                            (source, command, start_time, end_time)
+                     VALUES (%(source)s, %(command)s, %(start_time)s,
+                             %(end_time)s)
+                """, values)
+    connection.commit()
+
+def get_timestamp():
+    return time.strftime('%Y-%m-%d %H:%M:%S')
 
 if __name__ == '__main__':
   if len(sys.argv) < 4:
@@ -44,27 +61,14 @@ if __name__ == '__main__':
     try:
       # If the command is update, we need a special case. Otherwise we
       # can just use the gatherer's methods
+      start_time = get_timestamp()
       if command == 'update':
 	if "update-command" in src_config:
-	  if 'timestamp-dir' in config['general']:
-	    f = open(os.path.join(config['general']['timestamp-dir'],
-                                  src+".update-start"), "w")
-	    f.write(asctime())
-	    f.close()
 	  result = system(src_config['update-command']) 
 	  if result != 0:
 	    sys.exit(result)
-	  if 'timestamp-dir' in config['general']:
-	    f = open(os.path.join(config['general']['timestamp-dir'],
-                                  src+".update-end"), "w")
-	    f.write(asctime())
-	    f.close()
+        end_time = get_timestamp()
       else:
-	if 'timestamp-dir' in config['general']:
-	  f = open(os.path.join(config['general']['timestamp-dir'],
-                                src+".insert-start"), "w")
-	  f.write(asctime())
-	  f.close()
 	(src_command,rest) = types[type].split(None, 1)
 	if src_command == "exec":
 	  system(rest + " " + sys.argv[1] + " " + sys.argv[2] + " " + src)
@@ -83,11 +87,8 @@ if __name__ == '__main__':
 	  else:
 	    exec "gatherer.%s()" % command
 	  connection.commit()
-	if 'timestamp-dir' in config['general']:
-	  f = open(os.path.join(config['general']['timestamp-dir'],
-                                src+".insert-end"), "w")
-	  f.write(asctime())
-	  f.close()
+	end_time = get_timestamp()
+      insert_timestamps(config, src, command, start_time, end_time)
     except:
       udd.aux.unlock(config, src)
       raise

@@ -535,6 +535,16 @@ CREATE TABLE wannabuild (
 );
 GRANT SELECT ON wannabuild TO public;
 
+-- timings of data operations
+CREATE TABLE timestamps (
+  id serial,
+  source text,
+  command text,
+  start_time timestamp,
+  end_time timestamp,
+  PRIMARY KEY (id)
+);
+GRANT SELECT ON timestamps TO public;
 
 -- views
 -- bugs_count
