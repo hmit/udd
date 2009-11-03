@@ -177,7 +177,7 @@ debian-volatile-lenny:
 
 debian-squeeze:
   type: src-pkg
-  archs: [alpha, amd64, armel, hppa,
+  archs: [amd64, armel, hppa,
           i386, ia64, mips,
           mipsel, powerpc, s390, sparc]       
   directory: /org/mirrors/ftp.debian.org/ftp/dists/squeeze/
@@ -192,7 +192,7 @@ debian-squeeze:
 
 debian-squeeze-security:
   type: src-pkg
-  archs: [alpha, amd64, armel, hppa,
+  archs: [amd64, armel, hppa,
           i386, ia64, mips,
           mipsel, powerpc, s390, sparc]       
   directory: /org/mirrors/security.debian.org/ftp/dists/squeeze/updates/
@@ -207,7 +207,7 @@ debian-squeeze-security:
 
 debian-squeeze-proposed-updates:
   type: src-pkg
-  archs: [alpha, amd64, armel, hppa,
+  archs: [amd64, armel, hppa,
           i386, ia64, mips,
           mipsel, powerpc, s390, sparc]       
   directory: /org/mirrors/ftp.debian.org/ftp/dists/squeeze-proposed-updates/
