@@ -21,21 +21,21 @@ def print_help():
     print '  %s' % cmd
 
 def insert_timestamps(config, source, command, start_time, end_time):
-    connection = udd.aux.open_connection(config)
-    cur = connection.cursor()
-    values = { 'source' : source,
-               'command' : command,
-               'start_time' : start_time,
-               'end_time' : end_time }
-    cur.execute("""INSERT INTO timestamps
-                            (source, command, start_time, end_time)
-                     VALUES (%(source)s, %(command)s, %(start_time)s,
-                             %(end_time)s)
-                """, values)
-    connection.commit()
+  connection = udd.aux.open_connection(config)
+  cur = connection.cursor()
+  values = { 'source' : source,
+             'command' : command,
+             'start_time' : start_time,
+             'end_time' : end_time }
+  cur.execute("""INSERT INTO timestamps
+                 (source, command, start_time, end_time)
+                 VALUES (%(source)s, %(command)s, %(start_time)s,
+                 %(end_time)s)""",
+              values)
+  connection.commit()
 
 def get_timestamp():
-    return time.strftime('%Y-%m-%d %H:%M:%S')
+  return time.strftime('%Y-%m-%d %H:%M:%S')
 
 if __name__ == '__main__':
   if len(sys.argv) < 4:
@@ -63,33 +63,35 @@ if __name__ == '__main__':
       # can just use the gatherer's methods
       start_time = get_timestamp()
       if command == 'update':
-	if "update-command" in src_config:
-	  result = system(src_config['update-command']) 
-	  if result != 0:
-	    sys.exit(result)
+        if "update-command" in src_config:
+          result = system(src_config['update-command']) 
+          if result != 0:
+            sys.exit(result)
         end_time = get_timestamp()
       else:
-	(src_command,rest) = types[type].split(None, 1)
-	if src_command == "exec":
-	  system(rest + " " + sys.argv[1] + " " + sys.argv[2] + " " + src)
-	elif src_command == "module":
+        (src_command,rest) = types[type].split(None, 1)
+        if src_command == "exec":
+          system(rest + " " + sys.argv[1] + " " + sys.argv[2] + " " + src)
+        elif src_command == "module":
           connection = udd.aux.open_connection(config)
           # TODO XXX: using exec is hackish and prone to failures due
           # to what is being written in the conffile. We should get
           # rid of these lines and use the "imp" module, which is
           # meant for these tasks:
           # http://docs.python.org/lib/module-imp.html
-	  exec("import " + rest)
-	  exec "gatherer = " + rest + ".get_gatherer(connection, config, src)"
-	  if command == 'tables':
-	    exec "tables = gatherer.%s()" % command
-	    print "\n".join(tables)
-	  else:
-	    exec "gatherer.%s()" % command
-	  connection.commit()
-	end_time = get_timestamp()
+          exec("import " + rest)
+          exec "gatherer = " + rest + ".get_gatherer(connection, config, src)"
+          if command == 'tables':
+            exec "tables = gatherer.%s()" % command
+            print "\n".join(tables)
+          else:
+            exec "gatherer.%s()" % command
+          connection.commit()
+        end_time = get_timestamp()
       insert_timestamps(config, src, command, start_time, end_time)
     except:
       udd.aux.unlock(config, src)
       raise
     udd.aux.unlock(config, src)
+
+# vim:set et tabstop=2:
