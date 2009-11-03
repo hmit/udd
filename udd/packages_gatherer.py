@@ -33,21 +33,21 @@ class packages_gatherer(gatherer):
       'Tag':0, 'Task':0, 'Python-Version':0, 'Provides':0, 'Conflicts':0,
       'SHA256':0, 'Original-Maintainer':0}
   ignorable = {'Filename':0, 'Npp-Filename':0, 'Npp-Name':0, 'Npp-Mimetype':0, 'Npp-Applications':0, 'Python-Runtime':0, 'Npp-File':0, 'Npp-Description':0, 'Url':0, 'Gstreamer-Elements':0, 'Gstreamer-Version':0, 'Gstreamer-Decoders':0, 'Gstreamer-Uri-Sinks':0, 'Gstreamer-Encoders':0, 'Gstreamer-Uri-Sources':0, 'url':0, 'Vdr-PatchLevel':0, 'Vdr-Patchlevel':0, 'originalmaintainer':0, 'Originalmaintainer':0, 'Build-Recommends':0, 'Multi-Arch':0, 'Maintainer-Homepage':0, 'Tads2-Version':0, 'Tads3-Version':0 }
-  ignorable_re = re.compile("^(Orig-|Original-|Origianl-|Orginal-|Debian-|X-Original-|Upstream-)")
+  ignorable_re = re.compile("^(Orig-|Original-|Origianl-|Orginal-|Orignal-|Orgiinal-|Debian-|X-Original-|Upstream-)")
 
-  warned_about = {}
-  # A mapping from <package-name><version> to 1 If <package-name><version> is
-  # included in this dictionary, this means, that we've already added this
-  # package with this version for architecture 'all' to the database. Needed
-  # because different architectures include packages for architecture 'all'
-  # with the same version, and we don't want these duplicate entries
-  imported_all_pkgs = {}
 
   def __init__(self, connection, config, source):
     gatherer.__init__(self, connection, config, source)
     # The ID for the distribution we want to include
     self._distr = None
     self.assert_my_config('directory', 'archs', 'release', 'components', 'distribution', 'packages-table', 'packages-schema')
+    self.warned_about = {}
+    # A mapping from <package-name><version> to 1 If <package-name><version> is
+    # included in this dictionary, this means, that we've already added this
+    # package with this version for architecture 'all' to the database. Needed
+    # because different architectures include packages for architecture 'all'
+    # with the same version, and we don't want these duplicate entries
+    self.imported_all_pkgs = {}
 
   def build_dict(self, control):
     """Build a dictionary from the control dictionary.
@@ -66,10 +66,10 @@ class packages_gatherer(gatherer):
     for k in control.keys():
       if k not in packages_gatherer.non_mandatory and k not in packages_gatherer.mandatory and k not in packages_gatherer.ignorable:
         if not packages_gatherer.ignorable_re.match(k):
-	  if k not in packages_gatherer.warned_about:
-	    packages_gatherer.warned_about[k] = 1
+	  if k not in self.warned_about:
+	    self.warned_about[k] = 1
 	  else:
-	    packages_gatherer.warned_about[k] += 1
+	    self.warned_about[k] += 1
     return d
 
   def import_packages(self, sequence, cur):
@@ -95,9 +95,9 @@ class packages_gatherer(gatherer):
       # imported
       if control['Architecture'] == 'all':
 	t = control['Package'] + control['Version']
-	if t in packages_gatherer.imported_all_pkgs:
+	if t in self.imported_all_pkgs:
 	  continue
-	packages_gatherer.imported_all_pkgs[t] = 1
+	self.imported_all_pkgs[t] = 1
 
       d = self.build_dict(control)
 
@@ -218,5 +218,5 @@ class packages_gatherer(gatherer):
     self.print_warnings()
 
   def print_warnings(self):
-    for key in packages_gatherer.warned_about:
-      print("[Packages] Unknown key %s appeared %d times" % (key, packages_gatherer.warned_about[key]))
+    for key in self.warned_about:
+      print("[Packages] Unknown key %s appeared %d times" % (key, self.warned_about[key]))
