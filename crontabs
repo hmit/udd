@@ -27,6 +27,8 @@ UAR=/org/udd.debian.org/udd/update-and-run.sh
 */5 * * * * /org/udd.debian.org/udd/scripts/monitor_locks
 0 * * * * /org/udd.debian.org/udd/scripts/check_timestamps
 0 * * * * crontab -l > /org/udd.debian.org/udd/web/crontabs.txt
+# test script for the removal gatherer
+0 1 2 * * python /org/udd.debian.org/udd/udd/removals_gatherer.py /org/udd.debian.org/mirrors/removals-full.txt > /dev/null
 
 MAILTO=tille@debian.org
 # screenshots.debian.net
