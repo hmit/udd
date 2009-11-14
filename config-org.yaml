@@ -250,6 +250,19 @@ debian-experimental:
   sources-schema: sources
   release: experimental
 
+ubuntu-lucid:
+  type: src-pkg
+  archs: [amd64, i386]
+  directory: /org/mirrors/ubuntu.com/ftp/dists/lucid/
+  components: [main, multiverse, universe, restricted]
+  distribution: ubuntu
+  release: lucid
+  packages-table: ubuntu_packages
+  sources-table: ubuntu_sources
+  uploaders-table: ubuntu_uploaders
+  packages-schema: packages
+  sources-schema: sources
+
 ubuntu-karmic:
   type: src-pkg
   archs: [amd64, i386]
