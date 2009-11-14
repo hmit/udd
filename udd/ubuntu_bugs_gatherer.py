@@ -35,9 +35,6 @@ class ubuntu_bugs_gatherer(gatherer):
     for b in bugs:
       if b == 310331:
         continue # this bug is buggy: two identical tasks
-#      if self.debug:
-#        if b != 310331:
-#          continue
       httpq.put(b)
 
     # start workers
@@ -97,7 +94,7 @@ class ubuntu_bugs_gatherer(gatherer):
   # "worker". Fetch a specific bug as text from launchpad.
   def bugfetcher(self, hq, dq):
     while True:
-      conn = httplib.HTTPSConnection('bugs.launchpad.net')
+      conn = httplib.HTTPSConnection('edge.launchpad.net')
       ok = True
       b = None
       while ok:
@@ -110,7 +107,7 @@ class ubuntu_bugs_gatherer(gatherer):
           _exit(1)
 
         try:
-          conn.request('GET', 'https://launchpad.net/bugs/' + str(b) + '/+text')
+          conn.request('GET', 'https://edge.launchpad.net/bugs/' + str(b) + '/+text')
           r = conn.getresponse()
           if r.status == 200:
             data = r.read()
