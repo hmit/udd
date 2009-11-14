@@ -22,6 +22,7 @@ general:
     dehs: module udd.dehs_gatherer
     ldap: module udd.ldap_gatherer
     wannabuild: module udd.wannabuild_gatherer
+    removals: module udd.removals_gatherer
   timestamp-dir: /org/udd.debian.org/timestamps
   lock-dir: /org/udd.debian.org/locks
   archs:
@@ -445,3 +446,9 @@ wannabuild:
     i386, ia64, kfreebsd-amd64, kfreebsd-i386, mips,
     mipsel, powerpc, s390, sparc]
 
+removals:
+  type: removals
+  update-command: wget -q http://ftp-master.debian.org/removals-full.txt -O - | scripts/fix-removal-timestamps.py > /org/udd.debian.org/mirrors/removals-full.txt
+  path: /org/udd.debian.org/mirrors/removals-full.txt
+  table: package_removal
+  schema: package_removal

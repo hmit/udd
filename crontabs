@@ -8,7 +8,7 @@ UAR=/org/udd.debian.org/udd/update-and-run.sh
 # Ubuntu Sources/Packages
 30 2 * * * $UAR ubuntu-lucid ubuntu-karmic ubuntu-hardy ubuntu-intrepid ubuntu-jaunty
 # Various simple things
-0 4 * * * $UAR dehs debian-popcon ubuntu-popcon lintian debtags carnivore ldap | /org/udd.debian.org/udd/scripts/filter-output.rb
+0 4,16 * * * $UAR dehs debian-popcon ubuntu-popcon lintian debtags carnivore ldap removals | /org/udd.debian.org/udd/scripts/filter-output.rb
 49 */6 * * * $UAR upload-history | /org/udd.debian.org/udd/scripts/filter-output.rb
 0 */12 * * * $UAR testing-migrations
 11 */4 * * * $UAR wannabuild | /org/udd.debian.org/udd/scripts/filter-output.rb

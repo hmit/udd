@@ -534,6 +534,29 @@ CREATE TABLE wannabuild (
 );
 GRANT SELECT ON wannabuild TO public;
 
+-- package_removal_batch
+CREATE TABLE package_removal_batch (
+  id int,
+  time timestamp,
+  ftpmaster text,
+  distribution text,
+  requestor text,
+  reasons text,
+  PRIMARY KEY (id)
+);
+GRANT SELECT ON package_removal_batch TO public;
+
+-- package_removal
+CREATE TABLE package_removal (
+  batch_id int,
+  name text,
+  version debversion,
+  arch_array text[],
+  PRIMARY KEY(batch_id, name, version),
+  FOREIGN KEY(batch_id) REFERENCES package_removal_batch(id)
+);
+GRANT SELECT ON package_removal TO public;
+
 -- timings of data operations
 CREATE TABLE timestamps (
   id serial,
