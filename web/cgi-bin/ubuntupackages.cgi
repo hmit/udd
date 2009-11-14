@@ -3,7 +3,7 @@
 
 require 'dbi'
 
-RELEASE='karmic'
+RELEASE='lucid'
 
 puts "Content-type: text/plain\n\n"
 
