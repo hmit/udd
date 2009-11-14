@@ -5,7 +5,9 @@ LINES = [
   "Can't parse line 124359: strings: 'unpacked/./usr/share/man/man3/Lire': No such file",
   'Duplicated key in language es:  gedit-plugins debian main squeeze 2.22.5-1 Conjunto de complementos de gedit 5edb9235bd149de240234eeb4065cff7',
   /illegal package name Package: /,
-  /Skipping upload: /
+  /Skipping upload: /,
+  /Can't parse line .* Use of uninitialized value in split at/,
+  /Can't parse line .* Use of uninitialized value.*in pattern match \(m\/\/\) at/,
 ]
 
 STDIN.each_line do |l|
