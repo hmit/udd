@@ -63,7 +63,7 @@ class ddtp_gatherer(gatherer):
     query = """PREPARE ddtp_check_before_insert (text, text, text, text, text, text) AS
                   SELECT COUNT(*) FROM %s
                     WHERE package = $1 AND distribution = $2 AND component = $3 AND
-                          release = $4::release AND language = $5 AND version = $6""" % (my_config['table'])
+                          release = $4 AND language = $5 AND version = $6""" % (my_config['table'])
     cur.execute(query)
 
 
@@ -79,7 +79,7 @@ class ddtp_gatherer(gatherer):
 #                   version
 #                  FROM packages
 #                  WHERE package = $1 AND distribution = $2 AND component = $3 AND
-#                  release = $4::release
+#                  release = $4
 #               ) AS tmp GROUP BY full_description"""
 #    cur.execute(query)
 
