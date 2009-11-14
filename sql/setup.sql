@@ -1,12 +1,11 @@
 -- Sources and Packages
-CREATE TYPE release AS ENUM ('hardy', 'intrepid', 'jaunty', 'karmic', 'etch', 'etch-security', 'etch-proposed-updates', 'lenny', 'lenny-security', 'lenny-proposed-updates', 'squeeze', 'squeeze-security', 'squeeze-proposed-updates', 'sid', 'experimental');
 CREATE TABLE sources
   (source text, version debversion, maintainer text,
     maintainer_name text, maintainer_email text, format text, files text,
     uploaders text, bin text, architecture text, standards_version text,
     homepage text, build_depends text, build_depends_indep text,
     build_conflicts text, build_conflicts_indep text, priority text, section
-    text, distribution text, release release, component text, vcs_type text,
+    text, distribution text, release text, component text, vcs_type text,
     vcs_url text, vcs_browser text,
     python_version text, checksums_sha1 text, checksums_sha256 text,
     original_maintainer text, dm_upload_allowed boolean,
@@ -17,7 +16,7 @@ GRANT SELECT ON sources TO PUBLIC;
 -- no primary key possible: duplicate rows are possible because duplicate entries
 -- in Uploaders: are allowed. yes.
 CREATE TABLE uploaders (source text, version debversion, distribution text,
-	release release, component text, uploader text, name text, email text);
+	release text, component text, uploader text, name text, email text);
    
 GRANT SELECT ON uploaders TO PUBLIC;
 
@@ -26,13 +25,13 @@ CREATE INDEX uploaders_distrelcompsrcver_idx on uploaders(distribution, release,
 CREATE INDEX sources_distrelcomp_idx on sources(distribution, release, component);
 
 CREATE TABLE packages_summary ( package text, version debversion, source text,
-source_version debversion, maintainer text, maintainer_name text, maintainer_email text, distribution text, release release,
+source_version debversion, maintainer text, maintainer_name text, maintainer_email text, distribution text, release text,
 component text,
 PRIMARY KEY (package, version, distribution, release, component));
 
 CREATE INDEX packages_summary_distrelcompsrcver_idx on packages_summary(distribution, release, component, source, source_version);
 
-CREATE TABLE packages_distrelcomparch (distribution text, release release,
+CREATE TABLE packages_distrelcomparch (distribution text, release text,
 component text, architecture text);
 
 CREATE TABLE packages
@@ -43,7 +42,7 @@ CREATE TABLE packages
     build_essential text, origin text, sha1 text, replaces text, section text,
     md5sum text, bugs text, priority text, tag text, task text, python_version text,
     provides text, conflicts text, sha256 text, original_maintainer text,
-    distribution text, release release, component text,
+    distribution text, release text, component text,
   PRIMARY KEY (package, version, architecture, distribution, release, component),
   FOREIGN KEY (package, version, distribution, release, component) REFERENCES packages_summary DEFERRABLE);
 
@@ -61,7 +60,7 @@ CREATE TABLE ubuntu_sources
     uploaders text, bin text, architecture text, standards_version text,
     homepage text, build_depends text, build_depends_indep text,
     build_conflicts text, build_conflicts_indep text, priority text, section
-    text, distribution text, release release, component text, vcs_type text,
+    text, distribution text, release text, component text, vcs_type text,
     vcs_url text, vcs_browser text,
     python_version text, checksums_sha1 text, checksums_sha256 text,
     original_maintainer text, dm_upload_allowed boolean,
@@ -72,20 +71,20 @@ CREATE INDEX ubuntu_sources_distrelcomp_idx on ubuntu_sources(distribution, rele
 -- no primary key possible: duplicate rows are possible because duplicate entries
 -- in Uploaders: are allowed. yes.
 CREATE TABLE ubuntu_uploaders (source text, version debversion, distribution text,
-	release release, component text, uploader text, name text, email text);
+	release text, component text, uploader text, name text, email text);
    
 GRANT SELECT ON ubuntu_uploaders TO PUBLIC;
 
 CREATE INDEX ubuntu_uploaders_distrelcompsrcver_idx on ubuntu_uploaders(distribution, release, component, source, version);
 
 CREATE TABLE ubuntu_packages_summary ( package text, version debversion, source text,
-source_version debversion, maintainer text, maintainer_name text, maintainer_email text, distribution text, release release,
+source_version debversion, maintainer text, maintainer_name text, maintainer_email text, distribution text, release text,
 component text,
 PRIMARY KEY (package, version, distribution, release, component));
 
 CREATE INDEX ubuntu_packages_summary_distrelcompsrcver_idx on ubuntu_packages_summary(distribution, release, component, source, source_version);
 
-CREATE TABLE ubuntu_packages_distrelcomparch (distribution text, release release,
+CREATE TABLE ubuntu_packages_distrelcomparch (distribution text, release text,
 component text, architecture text);
 
 CREATE TABLE ubuntu_packages
@@ -96,7 +95,7 @@ CREATE TABLE ubuntu_packages
     build_essential text, origin text, sha1 text, replaces text, section text,
     md5sum text, bugs text, priority text, tag text, task text, python_version text,
     provides text, conflicts text, sha256 text, original_maintainer text,
-    distribution text, release release, component text,
+    distribution text, release text, component text,
   PRIMARY KEY (package, version, architecture, distribution, release, component),
   FOREIGN KEY (package, version, distribution, release, component) REFERENCES ubuntu_packages_summary DEFERRABLE);
 
@@ -450,7 +449,7 @@ GRANT SELECT ON all_bugs TO PUBLIC;
 CREATE TABLE ddtp (
        package      text,
        distribution text,
-       release      release,
+       release      text,
        component    text,   -- == 'main' for the moment
        version      debversion,   -- different versions for a package might exist because some archs
                             -- might have problems with newer versions if a new version comes
