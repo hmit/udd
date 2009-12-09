@@ -23,6 +23,7 @@ general:
     ldap: module udd.ldap_gatherer
     wannabuild: module udd.wannabuild_gatherer
     removals: module udd.removals_gatherer
+    history-daily: module udd.history_daily_gatherer
   timestamp-dir: /org/udd.debian.org/timestamps
   lock-dir: /org/udd.debian.org/locks
   archs:
@@ -448,7 +449,10 @@ wannabuild:
 
 removals:
   type: removals
-  update-command: wget -q http://ftp-master.debian.org/removals-full.txt -O - | scripts/fix-removal-timestamps.py > /org/udd.debian.org/mirrors/removals-full.txt
+  update-command: wget -q http://ftp-master.debian.org/removals-full.txt -O - | /org/udd.debian.org/udd/scripts/fix-removal-timestamps.py > /org/udd.debian.org/mirrors/removals-full.txt
   path: /org/udd.debian.org/mirrors/removals-full.txt
   table: package_removal
   schema: package_removal
+
+history-daily:
+  type: history-daily

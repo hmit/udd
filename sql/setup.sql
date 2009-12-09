@@ -612,4 +612,15 @@ CREATE VIEW really_active_dds AS
     SELECT DISTINCT carnivore_login.id, carnivore_login.login FROM carnivore_login, carnivore_keys, ldap WHERE ((((carnivore_keys.id = carnivore_login.id) AND (carnivore_keys.key_type = 'keyring'::text)) AND (carnivore_login.login = ldap.login)) AND (ldap.activity_pgp > '2009-01-01 00:00:00+00'::timestamp with time zone));
 GRANT SELECT ON TABLE really_active_dds TO guestdd;
 
+-- HISTORICAL DATA
+CREATE SCHEMA history;
+CREATE TABLE history.sources_count (
+  ts timestamp,
+  total_sid_main int, total_sid_contrib int, total_sid_nonfree int,
+  vcstype_arch int, vcstype_bzr int, vcstype_cvs int, vcstype_darcs int, vcstype_git int, vcstype_hg  int, vcstype_mtn int, vcstype_svn int,
+format_3native int, format_3quilt int,
+  PRIMARY KEY (time)
+);
+GRANT SELECT ON history.sources_count TO public;
+
 
