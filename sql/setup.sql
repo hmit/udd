@@ -13,6 +13,29 @@ CREATE TABLE sources
 
 GRANT SELECT ON sources TO PUBLIC;
 
+CREATE VIEW sources_uniq AS
+select * from sources s1
+where not exists (select * from sources s2
+where s1.source = s2.source
+and s1.distribution = s2.distribution
+and s1.release = s2.release
+and s1.component = s2.component
+and s2.version > s1.version);
+
+GRANT SELECT ON sources_uniq TO PUBLIC;
+
+CREATE VIEW sources_redundant AS
+select * from sources s1
+where exists (select * from sources s2
+where s1.source = s2.source
+and s1.distribution = s2.distribution
+and s1.release = s2.release
+and s1.component = s2.component
+and s2.version > s1.version);
+
+GRANT SELECT ON sources_redundant TO PUBLIC;
+
+
 -- no primary key possible: duplicate rows are possible because duplicate entries
 -- in Uploaders: are allowed. yes.
 CREATE TABLE uploaders (source text, version debversion, distribution text,
@@ -597,7 +620,7 @@ first_seen, (current_date - first_seen) as first_seen_age,
 uh.date as upload_date, (current_date - uh.date::date) as upload_age,
 nmu, coalesce(nmus, 0) as nmus, coalesce(rc_bugs,0) as rc_bugs, coalesce(all_bugs,0) as all_bugs,
 coalesce(insts,0) as insts, coalesce(vote,0) as vote
-from sources s
+from sources_uniq s
 left join orphaned_packages op on s.source = op.source
 left join migrations tm on s.source = tm.source
 left join  upload_history uh on s.source = uh.source and s.version = uh.version
@@ -614,6 +637,7 @@ GRANT SELECT ON TABLE really_active_dds TO guestdd;
 
 -- HISTORICAL DATA
 CREATE SCHEMA history;
+GRANT USAGE ON SCHEMA history TO public;
 CREATE TABLE history.sources_count (
   ts timestamp,
   total_sid_main int, total_sid_contrib int, total_sid_nonfree int,

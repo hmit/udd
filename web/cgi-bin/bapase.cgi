@@ -182,7 +182,7 @@ select * from bapase where source in (
   select source from sources where distribution='debian' and release='squeeze' and maintainer_email in (
 select nmus.email from
 (select email, count(*) as tot from
-(select maintainer_email as email, source from sources
+(select maintainer_email as email, source from sources_uniq
 where release = 'sid'
 and distribution = 'debian'
 and component = 'main'
@@ -193,7 +193,7 @@ and distribution = 'debian'
 and component = 'main') as foo
 group by email) as tot,
 (select email, count(*) as nmus from
-(select sources.maintainer_email as email, sources.source from sources, upload_history uh
+(select sources.maintainer_email as email, sources.source from sources_uniq sources, upload_history uh
 where release = 'sid'
 and distribution = 'debian'
 and component = 'main'
@@ -213,7 +213,7 @@ and nmus.email = tot.email)
 union (select source from uploaders where distribution='debian' and release='squeeze' and email in (
 select nmus.email from
 (select email, count(*) as tot from
-(select maintainer_email as email, source from sources
+(select maintainer_email as email, source from sources_uniq sources
 where release = 'sid'
 and distribution = 'debian'
 and component = 'main'
@@ -224,7 +224,7 @@ and distribution = 'debian'
 and component = 'main') as foo
 group by email) as tot,
 (select email, count(*) as nmus from
-(select sources.maintainer_email as email, sources.source from sources, upload_history uh
+(select sources.maintainer_email as email, sources.source from sources_uniq sources, upload_history uh
 where release = 'sid'
 and distribution = 'debian'
 and component = 'main'
