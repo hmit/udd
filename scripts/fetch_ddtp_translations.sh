@@ -12,9 +12,13 @@ HTTPMIRROR="http://$MIRROR"
 # rm -rf "$TARGETPATH"
 for rel in $RELEASES; do
     TARGETDIR="$TARGETPATH"/${rel}
-    rm -rf "$TARGETDIR"
+    find "$TARGETPATH"/${rel} -name '*.md5' -exec mv '{}' '{}'.prev \;
+    rm -rf "$TARGETDIR"/*.gz
     [ -d $TARGETDIR ] || mkdir -p $TARGETDIR
+    # store a copy of md5 sums of previous files
     `dirname $0`/getlinks.pl "$HTTPMIRROR"/dists/${rel}/main/i18n/ "$TARGETPATH"/${rel} 'Translation-.*\.gz$'
+    # create md5 sums of translation files to enable deciding whether processing is needed or not
+    for zipfile in `find "$TARGETPATH"/${rel} -name '*.gz'` ; do md5sum $zipfile > "$TARGETPATH"/${rel}/`basename $zipfile .gz`.md5 ; done
     # getlinks.pl always returns 0 independently from success so we have to verify that the target dir is
     # not empty.
     NUMFILES=`ls "$TARGETPATH"/${rel} | wc -l`

@@ -17,6 +17,7 @@ import re
 from debian_bundle import deb822
 from os import listdir, access, F_OK
 from sys import stderr, exit
+from filecmp import cmp
 import gzip
 # import bz2
 from psycopg2 import IntegrityError, InternalError
@@ -53,7 +54,7 @@ class ddtp_gatherer(gatherer):
     my_config = self.my_config
 
     cur = self.cursor()
-    query = "DELETE FROM %s" % my_config['table']
+    query = "PREPARE ddtp_delete (text, text) AS DELETE FROM %s WHERE release = $1::release AND language = $2" % my_config['table']
     cur.execute(query)
     query = """PREPARE ddtp_insert AS INSERT INTO %s
                    (package, distribution, component, release, language, version, description, long_description, md5sum)
@@ -63,7 +64,7 @@ class ddtp_gatherer(gatherer):
     query = """PREPARE ddtp_check_before_insert (text, text, text, text, text, text) AS
                   SELECT COUNT(*) FROM %s
                     WHERE package = $1 AND distribution = $2 AND component = $3 AND
-                          release = $4 AND language = $5 AND version = $6""" % (my_config['table'])
+                          release = $4::release AND language = $5 AND version = $6""" % (my_config['table'])
     cur.execute(query)
 
 
@@ -79,7 +80,7 @@ class ddtp_gatherer(gatherer):
 #                   version
 #                  FROM packages
 #                  WHERE package = $1 AND distribution = $2 AND component = $3 AND
-#                  release = $4
+#                  release = $4::release
 #               ) AS tmp GROUP BY full_description"""
 #    cur.execute(query)
 
@@ -102,6 +103,21 @@ class ddtp_gatherer(gatherer):
         if not match:
           continue
         lang = match.groups()[0]
+        md5file=dir + 'Translation-' + lang + '.md5'
+        try:
+          if ( cmp(md5file, md5file + '.prev' ) ):
+            print md5file + 'has not changed.  No update needed.'
+            continue
+          else:
+            print md5file + 'changed.  Go on updating language ' + lang
+        except OSError:
+          print 'md5file for ' + lang + ' missing,  Go updating'
+
+        # Delete only records where we actually have Translation files.  This
+        # prevents dump deletion of all data in case of broken downloads
+        query = "EXECUTE ddtp_delete ('%s', '%s')" % (rel, lang)
+        cur.execute(query)
+
         descstring = 'Description-'+lang
         g = gzip.GzipFile(dir + filename)
         try:
