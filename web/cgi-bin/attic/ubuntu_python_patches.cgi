@@ -72,6 +72,7 @@ for row in data:
     else:
         pass
 
+print 'Content-Type: text/html\n\n'
 print '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">'
 print '<html>\n<head>\n<title>Python packages with Ubuntu modifications</title>'
 print '<meta http-equiv="Content-Type" content="text/html;charset=utf-8">\n</head>\n<body>'
