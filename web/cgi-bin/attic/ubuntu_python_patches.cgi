@@ -1,6 +1,6 @@
 #!/usr/bin/python                                 
 #
-# Copyright (C) 2009 Luca Falavigna <dktrkranz@debian.org>
+# Copyright (C) 2009-2010 Luca Falavigna <dktrkranz@debian.org>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@ from psycopg2 import connect
 lower = 0
 higher = 0
 tbl = str()
+rel = {'d':'sid', 'u':'lucid'}
 apt_pkg.InitSystem()
 conn = connect(database="udd", port=5441, host="localhost", user="guest")
 cur = conn.cursor()                    
@@ -31,9 +32,9 @@ query = """
 SELECT sources_uniq.source, sources_uniq.version, ubuntu_sources.version
 FROM sources_uniq, ubuntu_sources
 WHERE sources_uniq.distribution='debian'
-AND sources_uniq.release='sid'
+AND sources_uniq.release='%s'
 AND ubuntu_sources.distribution='ubuntu'
-AND ubuntu_sources.release='lucid'
+AND ubuntu_sources.release='%s'
 AND sources_uniq.source = ubuntu_sources.source
 AND sources_uniq.version != ubuntu_sources.version
 AND ubuntu_sources.version ~ 'ubuntu'
@@ -44,7 +45,7 @@ AND sources_uniq.source IN
     WHERE release = 'sid'
     AND depends ~ 'python[^-]+'
 )
-ORDER BY source;"""
+ORDER BY source;""" % (rel['d'], rel['u'])
 
 cur.execute(query)
 data = cur.fetchall()
@@ -77,8 +78,10 @@ print '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">'
 print '<html>\n<head>\n<title>Python packages with Ubuntu modifications</title>'
 print '<meta http-equiv="Content-Type" content="text/html;charset=utf-8">\n</head>\n<body>'
 print '<font size=5>Debian version higher than Ubuntu one: %d</font>\n<br>' % higher
-print '<font size=5 color="#FFCC66">Debian version lower than Ubuntu one: %s</font><br><br><br>' % lower
-print '<table border=2>\n<tr>\n<td><b><font size=5>Package</font></b></td>\n<td><b><font size=5>Debian Version</font></b></td>'
-print '<td><b><font size=5>Ubuntu Version</font></b></td>\n<td><b><font size=5>Patch</font></b></td>\n</tr>%s' % tbl
+print '<font size=5 color="#FFCC66">Debian version lower than Ubuntu one: %s</font>\n<br><br><br>' % lower
+print '<table border=2>\n<tr>\n<td align=center><b><font size=5>Package</font></b></td>'
+print '<td align="center"><b><font size=5>Debian Version (%s)</font></b></td>' % rel['d']
+print '<td align="center"><b><font size=5>Ubuntu Version (%s)</font></b></td>' % rel['u']
+print '<td align=center><b><font size=5>Patch</font></b></td>\n</tr>%s' % tbl
 print '</table>\n<p>\n<a href="http://validator.w3.org/check?uri=referer">'
 print '<img src="http://www.w3.org/Icons/valid-html401" alt="Valid HTML 4.01 Transitional" height="31" width="88">\n</a>\n</p>\n</body>\n</html>'
