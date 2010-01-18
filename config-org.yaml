@@ -66,7 +66,8 @@ debian-backports-etch:
   type: src-pkg
   archs: [alpha, amd64, arm, hppa, i386, ia64,  mips,
           mipsel, powerpc, s390, sparc]       
-  directory: /org/mirrors/backports.org/ftp/dists/etch-backports/
+  update-command: /org/udd.debian.org/udd/scripts/sync-dist.sh ftp.backports.org::backports.org/dists/etch-backports/ /org/udd.debian.org/mirrors/backports/etch
+  directory: /org/udd.debian.org/mirrors/backports/etch/
   components: [main, contrib, non-free]
   distribution: debian-backports
   packages-table: packages
@@ -90,11 +91,40 @@ debian-volatile-etch:
   sources-schema: sources
   release: etch
 
+debian-volatile-sloppy-etch:
+  type: src-pkg
+  archs: [alpha, amd64, arm, hppa, i386, ia64,  mips,
+          mipsel, powerpc, s390, sparc]       
+  directory: /org/mirrors/volatile.debian.org/archive/dists/etch/volatile-sloppy/
+  components: [main, contrib, non-free]
+  distribution: etch-volatile-sloppy
+  packages-table: packages
+  sources-table: sources
+  uploaders-table: uploaders
+  packages-schema: packages
+  sources-schema: sources
+  release: etch
+
+debian-volatile-proposed-etch:
+  type: src-pkg
+  archs: [alpha, amd64, arm, hppa, i386, ia64,  mips,
+          mipsel, powerpc, s390, sparc]       
+  directory: /org/mirrors/volatile.debian.org/archive/dists/etch-proposed-updates/volatile/
+  components: [main, contrib, non-free]
+  distribution: etch-volatile-proposed
+  packages-table: packages
+  sources-table: sources
+  uploaders-table: uploaders
+  packages-schema: packages
+  sources-schema: sources
+  release: etch
+
 debian-etch-security:
   type: src-pkg
   archs: [alpha, amd64, arm, hppa, i386, ia64,  mips,
           mipsel, powerpc, s390, sparc]       
-  directory: /org/mirrors/security.debian.org/ftp/dists/etch/updates/
+  update-command: /org/udd.debian.org/udd/scripts/sync-dist.sh security.debian.org::debian-security/dists/etch/ /org/udd.debian.org/mirrors/security/etch
+  directory: /org/udd.debian.org/mirrors/security/etch/updates/
   components: [main, contrib, non-free]
   distribution: debian
   packages-table: packages
@@ -124,7 +154,8 @@ debian-lenny-security:
   archs: [alpha, amd64, arm, armel, hppa,
           i386, ia64, mips,
           mipsel, powerpc, s390, sparc]       
-  directory: /org/mirrors/security.debian.org/ftp/dists/lenny/updates/
+  update-command: /org/udd.debian.org/udd/scripts/sync-dist.sh security.debian.org::debian-security/dists/lenny/ /org/udd.debian.org/mirrors/security/lenny
+  directory: /org/udd.debian.org/mirrors/security/lenny/updates/
   components: [main, contrib, non-free]
   distribution: debian
   packages-table: packages
@@ -153,7 +184,8 @@ debian-backports-lenny:
   type: src-pkg
   archs: [alpha, amd64, arm, armel, hppa, i386, ia64,  mips,
           mipsel, powerpc, s390, sparc]       
-  directory: /org/mirrors/backports.org/ftp/dists/lenny-backports/
+  update-command: /org/udd.debian.org/udd/scripts/sync-dist.sh ftp.backports.org::backports.org/dists/lenny-backports/ /org/udd.debian.org/mirrors/backports/lenny
+  directory: /org/udd.debian.org/mirrors/backports/lenny/
   components: [main, contrib, non-free]
   distribution: debian-backports
   packages-table: packages
@@ -170,6 +202,34 @@ debian-volatile-lenny:
   directory: /org/mirrors/volatile.debian.org/archive/dists/lenny/volatile/
   components: [main, contrib, non-free]
   distribution: lenny-volatile
+  packages-table: packages
+  sources-table: sources
+  uploaders-table: uploaders
+  packages-schema: packages
+  sources-schema: sources
+  release: lenny
+
+debian-volatile-sloppy-lenny:
+  type: src-pkg
+  archs: [alpha, amd64, arm, armel, hppa, i386, ia64,  mips,
+          mipsel, powerpc, s390, sparc]       
+  directory: /org/mirrors/volatile.debian.org/archive/dists/lenny/volatile-sloppy/
+  components: [main, contrib, non-free]
+  distribution: lenny-volatile-sloppy
+  packages-table: packages
+  sources-table: sources
+  uploaders-table: uploaders
+  packages-schema: packages
+  sources-schema: sources
+  release: lenny
+
+debian-volatile-proposed-lenny:
+  type: src-pkg
+  archs: [alpha, amd64, arm, armel, hppa, i386, ia64,  mips,
+          mipsel, powerpc, s390, sparc]       
+  directory: /org/mirrors/volatile.debian.org/archive/dists/lenny-proposed-updates/volatile/
+  components: [main, contrib, non-free]
+  distribution: lenny-volatile-proposed
   packages-table: packages
   sources-table: sources
   uploaders-table: uploaders
@@ -197,7 +257,8 @@ debian-squeeze-security:
   archs: [amd64, armel, hppa,
           i386, ia64, mips,
           mipsel, powerpc, s390, sparc, kfreebsd-amd64, kfreebsd-i386]       
-  directory: /org/mirrors/security.debian.org/ftp/dists/squeeze/updates/
+  update-command: /org/udd.debian.org/udd/scripts/sync-dist.sh security.debian.org::debian-security/dists/squeeze/ /org/udd.debian.org/mirrors/security/squeeze
+  directory: /org/udd.debian.org/mirrors/security/squeeze/updates/
   components: [main, contrib, non-free]
   distribution: debian
   packages-table: packages
@@ -254,7 +315,7 @@ debian-experimental:
 
 ubuntu-lucid:
   type: src-pkg
-  archs: [amd64, i386, arm]
+  archs: [amd64, i386]
   directory: /org/mirrors/ubuntu.com/ftp/dists/lucid/
   components: [main, multiverse, universe, restricted]
   distribution: ubuntu
@@ -314,6 +375,33 @@ ubuntu-hardy:
   packages-table: ubuntu_packages
   sources-table: ubuntu_sources
   uploaders-table: ubuntu_uploaders
+  packages-schema: packages
+  sources-schema: sources
+
+ubuntu-dapper:
+  type: src-pkg
+  archs: [amd64, i386]
+  directory: /org/mirrors/ubuntu.com/ftp/dists/dapper/
+  components: [main, multiverse, universe, restricted]
+  distribution: ubuntu
+  release: dapper
+  packages-table: ubuntu_packages
+  sources-table: ubuntu_sources
+  uploaders-table: ubuntu_uploaders
+  packages-schema: packages
+  sources-schema: sources
+
+sidux:
+  type: src-pkg
+  archs: [amd64, i386]
+  directory: /org/udd.debian.org/mirrors/sidux/sid
+  update-command: /org/udd.debian.org/udd/scripts/sync-dist.sh mira.sunsite.utk.edu::sidux/debian/dists/sid/ /org/udd.debian.org/mirrors/sidux/sid
+  components: [main, contrib, non-free, fix.main, fix.contrib, fix.non-free, firmware ]
+  distribution: sidux
+  release: sid
+  packages-table: derivatives_packages
+  sources-table: derivatives_sources
+  uploaders-table: derivatives_uploaders
   packages-schema: packages
   sources-schema: sources
 
