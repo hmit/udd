@@ -2,9 +2,10 @@
 
 require 'date'
 require 'thread'
+require 'dbi'
 Thread::abort_on_exception = true
 
-MIRRORPATH = '/org/mirrors/ftp.debian.org/ftp/dists/'
+$dbh = DBI::connect('DBI:Pg:dbname=udd;port=5441;host=localhost', 'guest')
 
 class PkgTestingStatus
   @@datezero = Date::parse('0000-01-01')
@@ -144,25 +145,12 @@ class PkgTestingStatus
   end
 end
 
-def readsources(file)
-  # read Sources
-  if file =~ /^http:\/\//
-    str = `wget -q -O - #{file} | gunzip`
-  elsif file =~ /\.gz$/
-    str = `zcat #{file}`
-  else
-    str = IO::read(file)
-  end
-  pkg = nil
-  vers = nil
+def readsources(dist, sect)
+  sth = $dbh.prepare("select source, max(version) from sources where distribution = 'debian' and component='#{dist}' and section='#{sect}' group by source")
+  sth.execute
   pkgsinfile = {}
-  str.each_line do |l|
-    if l =~ /^Package: /
-      pkg = l.split(' ')[1].chomp
-    elsif l =~ /^Version: /
-      vers = l.split(' ')[1].chomp
-      pkgsinfile[pkg] = vers
-    end
+  sth.fetch_all.each do |r|
+    pkgsinfile[r[0]] = r[1]
   end
   return pkgsinfile
 end
@@ -183,25 +171,19 @@ end
 
 pkgsrcs = {}
 ths = []
-mutex = Mutex::new
 ['testing', 'unstable'].each do |dist|
   ['non-free', 'contrib', 'main'].each do |sect|
-    ths << Thread::new(dist, sect) do |dist, sect|
-      srcs = readsources(MIRRORPATH + "/#{dist}/#{sect}/source/Sources.gz")
-      mutex.synchronize do
-	srcs.each_pair do |k, v|
-          pkgsrcs[k] = PkgSrc::new if not pkgsrcs.has_key?(k)
-          if dist == 'testing'
-	      pkgsrcs[k].testing = v
-          elsif dist == 'unstable'
-             pkgsrcs[k].unstable = v
-          end
-	end 
+    srcs = readsources(dist, sect)
+    srcs.each_pair do |k, v|
+      pkgsrcs[k] = PkgSrc::new if not pkgsrcs.has_key?(k)
+      if dist == 'testing'
+        pkgsrcs[k].testing = v
+      elsif dist == 'unstable'
+        pkgsrcs[k].unstable = v
       end
     end
   end
 end
-ths.each { |t| t.join }
 
 # combine data
 pkgsrcs.each_pair do |p, v|
