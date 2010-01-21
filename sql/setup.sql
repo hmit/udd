@@ -130,6 +130,59 @@ GRANT SELECT ON ubuntu_packages_distrelcomparch TO PUBLIC;
 CREATE INDEX ubuntu_packages_source_idx on ubuntu_packages(source);
 CREATE INDEX ubuntu_packages_distrelcomp_idx on ubuntu_packages(distribution, release, component);
 
+-- Other derivatives sources and packages
+CREATE TABLE derivatives_sources
+  (source text, version debversion, maintainer text,
+    maintainer_name text, maintainer_email text, format text, files text,
+    uploaders text, bin text, architecture text, standards_version text,
+    homepage text, build_depends text, build_depends_indep text,
+    build_conflicts text, build_conflicts_indep text, priority text, section
+    text, distribution text, release text, component text, vcs_type text,
+    vcs_url text, vcs_browser text,
+    python_version text, checksums_sha1 text, checksums_sha256 text,
+    original_maintainer text, dm_upload_allowed boolean,
+    PRIMARY KEY (source, version, distribution, release, component));
+
+CREATE INDEX derivatives_sources_distrelcomp_idx on derivatives_sources(distribution, release, component);
+
+-- no primary key possible: duplicate rows are possible because duplicate entries
+-- in Uploaders: are allowed. yes.
+CREATE TABLE derivatives_uploaders (source text, version debversion, distribution text,
+	release text, component text, uploader text, name text, email text);
+   
+GRANT SELECT ON derivatives_uploaders TO PUBLIC;
+
+CREATE INDEX derivatives_uploaders_distrelcompsrcver_idx on derivatives_uploaders(distribution, release, component, source, version);
+
+CREATE TABLE derivatives_packages_summary ( package text, version debversion, source text,
+source_version debversion, maintainer text, maintainer_name text, maintainer_email text, distribution text, release text,
+component text,
+PRIMARY KEY (package, version, distribution, release, component));
+
+CREATE INDEX derivatives_packages_summary_distrelcompsrcver_idx on derivatives_packages_summary(distribution, release, component, source, source_version);
+
+CREATE TABLE derivatives_packages_distrelcomparch (distribution text, release text,
+component text, architecture text);
+
+CREATE TABLE derivatives_packages
+  (package text, version debversion, architecture text, maintainer text, maintainer_name text, maintainer_email text, description
+    text, long_description text, source text, source_version debversion, essential text, depends text,
+    recommends text, suggests text, enhances text, pre_depends text, breaks text,
+    installed_size int, homepage text, size int,
+    build_essential text, origin text, sha1 text, replaces text, section text,
+    md5sum text, bugs text, priority text, tag text, task text, python_version text,
+    provides text, conflicts text, sha256 text, original_maintainer text,
+    distribution text, release text, component text,
+  PRIMARY KEY (package, version, architecture, distribution, release, component),
+  FOREIGN KEY (package, version, distribution, release, component) REFERENCES derivatives_packages_summary DEFERRABLE);
+
+GRANT SELECT ON derivatives_sources TO PUBLIC;
+GRANT SELECT ON derivatives_packages TO PUBLIC;
+GRANT SELECT ON derivatives_packages_summary TO PUBLIC;
+GRANT SELECT ON derivatives_packages_distrelcomparch TO PUBLIC;
+
+CREATE INDEX derivatives_packages_source_idx on derivatives_packages(source);
+CREATE INDEX derivatives_packages_distrelcomp_idx on derivatives_packages(distribution, release, component);
 
 -- Bugs (archived and unarchived)
 
@@ -284,6 +337,8 @@ CREATE TABLE popcon (
 CREATE TABLE popcon_src (
    source text, insts int, vote int, olde int, recent int, nofiles int,
    PRIMARY KEY (source));
+-- nicer name.
+CREATE VIEW sources_popcon as select * from popcon_src;
 
 CREATE TABLE popcon_src_average (
    source text, insts int, vote int, olde int, recent int, nofiles int,
@@ -292,6 +347,7 @@ CREATE TABLE popcon_src_average (
 GRANT SELECT ON popcon TO PUBLIC;
 GRANT SELECT ON popcon_src_average TO PUBLIC;
 GRANT SELECT ON popcon_src TO PUBLIC;
+GRANT SELECT ON sources_popcon TO PUBLIC;
 
 CREATE TABLE ubuntu_popcon (
    package text, insts int, vote int, olde int, recent int, nofiles int,
@@ -300,6 +356,7 @@ CREATE TABLE ubuntu_popcon (
 CREATE TABLE ubuntu_popcon_src (
    source text, insts int, vote int, olde int, recent int, nofiles int,
    PRIMARY KEY (source));
+CREATE VIEW ubuntu_sources_popcon AS SELECT * from ubuntu_popcon_src;
 
 CREATE TABLE ubuntu_popcon_src_average (
    source text, insts int, vote int, olde int, recent int, nofiles int,
@@ -308,6 +365,7 @@ CREATE TABLE ubuntu_popcon_src_average (
 GRANT SELECT ON ubuntu_popcon TO PUBLIC;
 GRANT SELECT ON ubuntu_popcon_src_average TO PUBLIC;
 GRANT SELECT ON ubuntu_popcon_src TO PUBLIC;
+GRANT SELECT ON ubuntu_sources_popcon TO PUBLIC;
 
 -- Lintian
 CREATE TYPE lintian_tagtype AS ENUM('experimental', 'overriden', 'pedantic', 'information', 'warning', 'error');

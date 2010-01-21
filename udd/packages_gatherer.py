@@ -93,11 +93,11 @@ class packages_gatherer(gatherer):
     for control in debian_bundle.deb822.Packages.iter_paragraphs(sequence):
       # Check whether packages with architectue 'all' have already been
       # imported
-      if control['Architecture'] == 'all':
-	t = control['Package'] + control['Version']
-	if t in self.imported_all_pkgs:
-	  continue
-	self.imported_all_pkgs[t] = 1
+      t = control['Package'] + '_' + control['Version'] + '_' + control['Architecture']
+      if t in self.imported_all_pkgs:
+        print "Already imported:" + t
+        continue
+      self.imported_all_pkgs[t] = 1
 
       d = self.build_dict(control)
 
@@ -126,9 +126,8 @@ class packages_gatherer(gatherer):
 	  d['Source'] = split[0]
 	  d['Source_Version'] = split[1].strip("()")
 
-      pkgs.append(d)
-
       d['maintainer_name'], d['maintainer_email'] = email.Utils.parseaddr(d['Maintainer'])
+      pkgs.append(d)
     try:
       cur.executemany(query, pkgs)
     except psycopg2.ProgrammingError:

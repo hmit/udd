@@ -19,8 +19,8 @@ def get_gatherer(connection, config, source):
 
 class sources_gatherer(gatherer):
   "This class imports the data from Sources.gz files into the database"
-  mandatory = {'Format': 0, 'Maintainer': 0, 'Package': 0, 'Version': 0, 'Files': 0}
-  non_mandatory = {'Uploaders': 0, 'Binary': 0, 'Architecture': 0,
+  mandatory = {'Maintainer': 0, 'Package': 0, 'Version': 0, 'Files': 0}
+  non_mandatory = {'Format':0, 'Uploaders': 0, 'Binary': 0, 'Architecture': 0,
       'Standards-Version': 0, 'Homepage': 0, 'Build-Depends': 0,
       'Build-Depends-Indep': 0, 'Build-Conflicts': 0, 'Build-Conflicts-Indep': 0,
       'Priority': 0, 'Section': 0, 'Python-Version': 0, 'Checksums-Sha1':0,
