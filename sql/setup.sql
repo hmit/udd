@@ -508,15 +508,18 @@ GRANT SELECT ON ubuntu_bugs_tasks TO PUBLIC;
 
 CREATE VIEW all_sources AS
 SELECT * FROM sources
-UNION ALL SELECT * FROM ubuntu_sources;
+UNION ALL SELECT * FROM ubuntu_sources
+UNION ALL SELECT * FROM derivatives_sources;
 
 CREATE VIEW all_packages AS
 SELECT * FROM packages
-UNION ALL SELECT * FROM ubuntu_packages;
+UNION ALL SELECT * FROM ubuntu_packages
+UNION ALL SELECT * FROM derivatives_packages;
 
 CREATE VIEW all_packages_distrelcomparch AS
 SELECT * FROM packages_distrelcomparch
-UNION ALL SELECT * FROM ubuntu_packages_distrelcomparch;
+UNION ALL SELECT * FROM ubuntu_packages_distrelcomparch
+UNION ALL SELECT * FROM derivatives_packages_distrelcomparch;
 
 CREATE VIEW all_bugs AS
 SELECT * FROM bugs
