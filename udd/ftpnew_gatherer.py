@@ -271,11 +271,20 @@ class ftpnew_gatherer(gatherer):
               print >>srco, "\nPackage: %s" % (value)
               binpkg.b['Distribution'] = srcpkg.s['Distribution']
             elif field == 'Maintainer':
-              # print "DEBUG %s: %s" % (field, value)
               if in_source:
                 srcpkg.s[field]   = value
                 srcpkg.s['maintainer_name'], srcpkg.s['maintainer_email'] = email.Utils.parseaddr(srcpkg.s['Maintainer'])
+                # if bin_pkg_changes == None:
                 binpkg_changes.b[field] = value
+
+                binpkg_changes.b['Distribution']     = srcpkg.s['Distribution']
+                binpkg_changes.b['Description']      = 'binary package information is missing in new queue'
+                binpkg_changes.b['Long_Description'] = '' # no long description available in *.changes file
+                binpkg_changes.b['Component']        = srcpkg.s['Component']
+                binpkg_changes.b['Architecture']     = srcpkg.s['Architecture']
+                binpkg_changes.b['Version']          = srcpkg.s['Version']
+                binpkg_changes.b['Maintainer']       = srcpkg.s['Maintainer']
+
               else:
                 binpkg.b[field]   = value
               print >>srco, "%s: %s" % (field, value)
@@ -289,6 +298,7 @@ class ftpnew_gatherer(gatherer):
             elif field == 'Architecture':
               if in_source:
                 srcpkg.s[field] = value
+                #*** if binpkg_changes != None:
                 binpkg_changes.b[field] = value
               else:
                 binpkg.b[field] = value
@@ -306,7 +316,8 @@ class ftpnew_gatherer(gatherer):
                   print >>stderr, "Incompatible version numbers between new.822(%s) and %s.html (%s)" % \
                       (srcpkg.s[field], src_info_base, value)
                 srcpkg.s[field]         = value
-                binpkg_changes.b[field] = value
+                if binpkg_changes != None:
+                  binpkg_changes.b[field] = value
               else:
                 binpkg.b[field]   = value
               print >>srco, "%s: %s" % (field, value)
@@ -369,12 +380,9 @@ class ftpnew_gatherer(gatherer):
                   print >>stderr, "Incompatible binaries between new.822(%s) and %s.html (%s)" % \
                       (srcpkg.s['Bin'], src_info_base, value)
                 srcpkg.s['Bin'] = value
-                print >>srco, "%s: %s" % (field, value)
+                # we need to initialise some fields in the binary package and the 'Maintainer' field is the last of them mentioned in the ftpnew formatted files
                 binpkg_changes = bin_pkg(value.split(' ')[0], srcpkg.s['Source'])
-                binpkg_changes.b['Distribution']     = srcpkg.s['Distribution']
-                binpkg_changes.b['Description']      = 'binary package information is missing in new queue'
-                binpkg_changes.b['Long_Description'] = '' # no long description available in *.changes file
-                binpkg_changes.b['Component']        = srcpkg.s['Component']
+                print >>srco, "%s: %s" % (field, value)
               else:
                 print >>stderr, "Binary should not mention Binary field in %s.html (%s)" % \
                     (src_info_base, value)
