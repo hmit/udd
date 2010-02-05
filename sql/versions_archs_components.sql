@@ -25,4 +25,5 @@ INSERT INTO releases VALUES ( 'squeeze-proposed-updates', NULL,         602 );
 INSERT INTO releases VALUES ( 'sid',                      NULL,      100000 );
 INSERT INTO releases VALUES ( 'experimental',             NULL,      100001 );
 
+GRANT SELECT ON releases TO PUBLIC ;
 
