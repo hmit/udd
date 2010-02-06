@@ -1,5 +1,5 @@
 #!/usr/bin/ruby -w
-# Used by Marco Rodriguez to track bugs in removed packages
+# Used by Marco Rodrigues to track bugs in removed packages
 require 'dbi'
 
 # see merkel:/org/bugs.debian.org/etc/pseudo-packages.description
