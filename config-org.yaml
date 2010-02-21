@@ -405,6 +405,34 @@ sidux:
   packages-schema: packages
   sources-schema: sources
 
+skolelinux-lenny:
+  type: src-pkg
+  archs: [amd64, i386, powerpc]
+  update-command: /org/udd.debian.org/udd/scripts/sync-dist.sh ftp.skolelinux.org::skolelinux-dist/dists/lenny/ /org/udd.debian.org/mirrors/skolelinux/lenny
+  directory: /org/udd.debian.org/mirrors/skolelinux/lenny
+  components: [local]
+  distribution: skolelinux
+  release: lenny
+  packages-table: derivatives_packages
+  sources-table: derivatives_sources
+  uploaders-table: derivatives_uploaders
+  packages-schema: packages
+  sources-schema: sources
+
+skolelinux-etch:
+  type: src-pkg
+  archs: [amd64, i386, powerpc]
+  update-command: /org/udd.debian.org/udd/scripts/sync-dist.sh ftp.skolelinux.org::skolelinux-dist/dists/etch/ /org/udd.debian.org/mirrors/skolelinux/etch
+  directory: /org/udd.debian.org/mirrors/skolelinux/etch
+  components: [local]
+  distribution: skolelinux
+  release: etch
+  packages-table: derivatives_packages
+  sources-table: derivatives_sources
+  uploaders-table: derivatives_uploaders
+  packages-schema: packages
+  sources-schema: sources
+
 debian-popcon:
   type: popcon
   path: /org/udd.debian.org/tmp/all-popcon-results.txt.gz
