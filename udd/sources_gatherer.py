@@ -31,7 +31,7 @@ class sources_gatherer(gatherer):
       'X-Vcs-Browser': 0, 'Vcs-Browser': 0, 'X-Vcs-Bzr': 0, 'X-Vcs-Darcs': 0, 'X-Vcs-Svn': 0, 'X-Vcs-Hg':0, 'X-Vcs-Git':0, 'Vcs-Browse':0,
       'Directory':0, 'Comment':0, 'Origin':0, 'Url':0, 'X-Collab-Maint':0, 'Autobuild':0, 'Vcs-Cvs:':0, 'Python-Standards-Version':0, 'url':0, 'originalmaintainer':0, 'Originalmaintainer':0, 'Build-Recommends':0, 'Maintainer-Homepage': 0}
       #Vcs-Cvs: is caused by a bug in python-debian, apparently.
-  ignorable_re = re.compile("^(Orig-|Original-|Origianl-|Orginal-|Orignal-|Orgiinal-|Debian-|X-Original-|Upstream-)")
+  ignorable_re = re.compile("^(Orig-|Original-|Origianl-|Orginal-|Orignal-|Orgiinal-|Orginial-|Debian-|X-Original-|Upstream-)")
   vcs = { 'Arch':0, 'Bzr':0, 'Cvs':0, 'Darcs':0, 'Git':0, 'Hg':0, 'Svn':0, 'Mtn':0}
 
   def __init__(self, connection, config, source):
@@ -140,6 +140,8 @@ class sources_gatherer(gatherer):
     cur = self.cursor()
 
     for comp in src_cfg['components']:
+      if re.search("debian-installer", comp):
+        continue # debian-installer components don't have source
       path = os.path.join(src_cfg['directory'], comp, 'source', 'Sources.gz')
       cur.execute("DELETE from %s WHERE Distribution = '%s' AND\
         release = '%s' AND component = '%s'"\
@@ -179,6 +181,7 @@ class sources_gatherer(gatherer):
         tmp.close()
       except IOError, (e, message):
         print "Could not read packages from %s: %s" % (path, message)
+        sys.exit(1)
       cur.execute("DEALLOCATE source_insert")
       cur.execute("DEALLOCATE uploader_insert")
 

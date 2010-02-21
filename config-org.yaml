@@ -39,7 +39,7 @@ debian-etch:
   archs: [alpha, amd64, arm, hppa, i386, ia64,  mips,
           mipsel, powerpc, s390, sparc]       
   directory: /org/mirrors/ftp.debian.org/ftp/dists/etch/
-  components: [main, contrib, non-free]
+  components: [main, contrib, non-free, main/debian-installer, non-free/debian-installer]
   distribution: debian
   packages-table: packages
   sources-table: sources
@@ -53,7 +53,7 @@ debian-etch-proposed-updates:
   archs: [alpha, amd64, arm, hppa, i386, ia64,  mips,
           mipsel, powerpc, s390, sparc]       
   directory: /org/mirrors/ftp.debian.org/ftp/dists/etch-proposed-updates/
-  components: [main, contrib, non-free]
+  components: [main, contrib, non-free, main/debian-installer]
   distribution: debian
   packages-table: packages
   sources-table: sources
@@ -68,7 +68,7 @@ debian-backports-etch:
           mipsel, powerpc, s390, sparc]       
   update-command: /org/udd.debian.org/udd/scripts/sync-dist.sh ftp.backports.org::backports.org/dists/etch-backports/ /org/udd.debian.org/mirrors/backports/etch
   directory: /org/udd.debian.org/mirrors/backports/etch/
-  components: [main, contrib, non-free]
+  components: [main, contrib, non-free, main/debian-installer]
   distribution: debian-backports
   packages-table: packages
   sources-table: sources
@@ -140,7 +140,7 @@ debian-lenny:
           i386, ia64, mips,
           mipsel, powerpc, s390, sparc]       
   directory: /org/mirrors/ftp.debian.org/ftp/dists/lenny/
-  components: [main, contrib, non-free]
+  components: [main, contrib, non-free, main/debian-installer, non-free/debian-installer]
   distribution: debian
   packages-table: packages
   sources-table: sources
@@ -186,7 +186,7 @@ debian-backports-lenny:
           mipsel, powerpc, s390, sparc]       
   update-command: /org/udd.debian.org/udd/scripts/sync-dist.sh ftp.backports.org::backports.org/dists/lenny-backports/ /org/udd.debian.org/mirrors/backports/lenny
   directory: /org/udd.debian.org/mirrors/backports/lenny/
-  components: [main, contrib, non-free]
+  components: [main, contrib, non-free, main/debian-installer]
   distribution: debian-backports
   packages-table: packages
   sources-table: sources
@@ -243,7 +243,7 @@ debian-squeeze:
           i386, ia64, mips,
           mipsel, powerpc, s390, sparc, kfreebsd-amd64, kfreebsd-i386]       
   directory: /org/mirrors/ftp.debian.org/ftp/dists/squeeze/
-  components: [main, contrib, non-free]
+  components: [main, contrib, non-free, main/debian-installer, non-free/debian-installer]
   distribution: debian
   packages-table: packages
   sources-table: sources
@@ -289,7 +289,7 @@ debian-sid:
           i386, ia64, mips,
           mipsel, powerpc, s390, sparc, kfreebsd-amd64, kfreebsd-i386]       
   directory: /org/mirrors/ftp.debian.org/ftp/dists/sid/
-  components: [main, contrib, non-free]
+  components: [main, contrib, non-free, main/debian-installer, non-free/debian-installer]
   distribution: debian
   packages-table: packages
   sources-table: sources
