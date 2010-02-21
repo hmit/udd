@@ -1,5 +1,6 @@
 #!/usr/bin/ruby -w
 
+require 'pp'
 require 'date'
 require 'thread'
 require 'dbi'
@@ -107,7 +108,7 @@ class PkgTestingStatus
   end
 
   def update(curdate, testing, unstable)
-#    STDERR.puts "#{curdate} #{testing} #{unstable}" if testing != unstable
+    # STDERR.puts "#{curdate} #{testing} #{unstable}" if testing != unstable
     if testing
       if curdate >= @intesting
         @intesting = curdate 
@@ -145,16 +146,6 @@ class PkgTestingStatus
   end
 end
 
-def readsources(dist, sect)
-  sth = $dbh.prepare("select source, max(version) from sources where distribution = 'debian' and component='#{dist}' and section='#{sect}' group by source")
-  sth.execute
-  pkgsinfile = {}
-  sth.fetch_all.each do |r|
-    pkgsinfile[r[0]] = r[1]
-  end
-  return pkgsinfile
-end
-
 Dir::chdir('/org/udd.debian.org/testing-status/')
 oldfile = Dir::glob('data.*').sort[-1]
 d = Date::today
@@ -163,27 +154,37 @@ newfile = "data.#{d}"
 $datezero = Date::parse('0000-01-01')
 
 
-pkgs = PkgTestingStatus::read(File::open(oldfile))
-
 class PkgSrc
   attr_accessor :testing, :unstable
 end
 
+def readsources(dist, sect)
+  sth = $dbh.prepare("select source, max(version) from sources where distribution = 'debian' and release='#{dist}' and component='#{sect}' group by source")
+  sth.execute
+  pkgsinfile = {}
+  sth.fetch_all.each do |r|
+    pkgsinfile[r[0]] = r[1]
+  end
+  return pkgsinfile
+end
+
 pkgsrcs = {}
 ths = []
-['testing', 'unstable'].each do |dist|
+['squeeze', 'sid'].each do |dist|
   ['non-free', 'contrib', 'main'].each do |sect|
     srcs = readsources(dist, sect)
     srcs.each_pair do |k, v|
       pkgsrcs[k] = PkgSrc::new if not pkgsrcs.has_key?(k)
-      if dist == 'testing'
+      if dist == 'squeeze'
         pkgsrcs[k].testing = v
-      elsif dist == 'unstable'
+      elsif dist == 'sid'
         pkgsrcs[k].unstable = v
       end
     end
   end
 end
+
+pkgs = PkgTestingStatus::read(File::open(oldfile))
 
 # combine data
 pkgsrcs.each_pair do |p, v|
@@ -191,7 +192,6 @@ pkgsrcs.each_pair do |p, v|
     pkgs[p] = PkgTestingStatus::new($datezero, '-', $datezero, '-', $datezero, '-', d)
   end
   pkgs[p].update(d, v.testing, v.unstable)
-
 end
 
 # output
