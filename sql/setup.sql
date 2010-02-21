@@ -216,6 +216,14 @@ CREATE TABLE bugs_fixed_in
 CREATE TABLE bugs_tags
   (id int REFERENCES bugs, tag text, PRIMARY KEY (id, tag));
 
+CREATE TABLE bugs_blocks
+  (id int REFERENCES bugs, blocked int,
+PRIMARY KEY(id, blocked));
+
+CREATE TABLE bugs_blockedby
+  (id int REFERENCES bugs, blocker int,
+PRIMARY KEY(id, blocker));
+
 CREATE TABLE archived_bugs
   (id int PRIMARY KEY, package text, source text, arrival timestamp, status text,
      severity bugs_severity, submitter text, submitter_name text,
@@ -243,6 +251,14 @@ CREATE TABLE archived_bugs_fixed_in
 
 CREATE TABLE archived_bugs_tags
   (id int REFERENCES archived_bugs, tag text, PRIMARY KEY (id, tag));
+
+CREATE TABLE archived_bugs_blocks
+  (id int REFERENCES bugs, blocked int,
+PRIMARY KEY(id, blocked));
+
+CREATE TABLE archived_bugs_blockedby
+  (id int REFERENCES bugs, blocker int,
+PRIMARY KEY(id, blocker));
 
 -- usertags are either for archived or unarchived bugs, so we can't add a
 -- foreign key here.
@@ -291,12 +307,16 @@ GRANT SELECT ON bugs_merged_with TO PUBLIC;
 GRANT SELECT ON bugs_found_in TO PUBLIC;
 GRANT SELECT ON bugs_fixed_in TO PUBLIC;
 GRANT SELECT ON bugs_tags TO PUBLIC;
+GRANT SELECT ON bugs_blocks TO PUBLIC;
+GRANT SELECT ON bugs_blockedby TO PUBLIC;
 GRANT SELECT ON archived_bugs TO PUBLIC;
 GRANT SELECT ON archived_bugs_packages TO PUBLIC;
 GRANT SELECT ON archived_bugs_merged_with TO PUBLIC;
 GRANT SELECT ON archived_bugs_found_in TO PUBLIC;
 GRANT SELECT ON archived_bugs_fixed_in TO PUBLIC;
 GRANT SELECT ON archived_bugs_tags TO PUBLIC;
+GRANT SELECT ON archived_bugs_blocks TO PUBLIC;
+GRANT SELECT ON archived_bugs_blockedby TO PUBLIC;
 GRANT SELECT ON bugs_rt_affects_stable TO PUBLIC;
 GRANT SELECT ON bugs_rt_affects_testing_and_unstable TO PUBLIC;
 GRANT SELECT ON bugs_rt_affects_unstable TO PUBLIC;

@@ -286,3 +286,26 @@ ALTER TABLE ubuntu_uploaders ALTER COLUMN release TYPE release USING release::re
 ALTER TABLE ddtp ALTER COLUMN release TYPE release USING release::release;
 ALTER TABLE packages_distrelcomparch ALTER COLUMN release TYPE release USING release::release;
 ALTER TABLE ubuntu_packages_distrelcomparch ALTER COLUMN release TYPE release USING release::release;
+
+CREATE TABLE bugs_blocks
+  (id int REFERENCES bugs, blocked int,
+PRIMARY KEY(id, blocked));
+
+CREATE TABLE bugs_blockedby
+  (id int REFERENCES bugs, blocker int,
+PRIMARY KEY(id, blocker));
+
+CREATE TABLE archived_bugs_blocks
+  (id int REFERENCES bugs, blocked int,
+PRIMARY KEY(id, blocked));
+
+CREATE TABLE archived_bugs_blockedby
+  (id int REFERENCES bugs, blocker int,
+PRIMARY KEY(id, blocker));
+
+
+GRANT SELECT ON bugs_blocks TO PUBLIC;
+GRANT SELECT ON bugs_blockedby TO PUBLIC;
+
+GRANT SELECT ON archived_bugs_blocks TO PUBLIC;
+GRANT SELECT ON archived_bugs_blockedby TO PUBLIC;

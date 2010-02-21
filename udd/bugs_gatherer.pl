@@ -167,7 +167,7 @@ sub run {
 	$t = time();
 
 	foreach my $prefix ($table, $archived_table) {
-		foreach my $postfix (qw{_packages _merged_with _found_in _fixed_in _tags}, '') {
+		foreach my $postfix (qw{_packages _merged_with _found_in _fixed_in _tags _blocks _blockedby}, '') {
 			my $sth = $dbh->prepare("DELETE FROM $prefix$postfix WHERE id = \$1");
 			map {
 				$sth->execute($_) or die $!;
@@ -186,6 +186,8 @@ sub run {
 	my $insert_bugs_fixed_handle = $dbh->prepare("INSERT INTO ${table}_fixed_in (id, version) VALUES (\$1, \$2)");
 	my $insert_bugs_merged_handle = $dbh->prepare("INSERT INTO ${table}_merged_with (id, merged_with) VALUES (\$1, \$2)");
 	my $insert_bugs_tags_handle = $dbh->prepare("INSERT INTO ${table}_tags (id, tag) VALUES (\$1, \$2)");
+	my $insert_bugs_blocks_handle = $dbh->prepare("INSERT INTO ${table}_blocks (id, blocked) VALUES (\$1, \$2)");
+	my $insert_bugs_blockedby_handle = $dbh->prepare("INSERT INTO ${table}_blockedby (id, blocker) VALUES (\$1, \$2)");
 	$insert_bugs_handle->bind_param(4, undef, SQL_INTEGER);
 	$insert_bugs_handle->bind_param(18, undef, SQL_INTEGER);
 
@@ -325,6 +327,12 @@ sub run {
 		}
 		foreach my $mergee (without_duplicates(split / /, $bug{mergedwith})) {
 			$insert_bugs_merged_handle->execute($bug_nr, $mergee) or die $!;
+		}
+		foreach my $blocked (without_duplicates(split / /, $bug{blocks})) {
+			$insert_bugs_blocks_handle->execute($bug_nr, $blocked) or die $!;
+		}
+		foreach my $blocker (without_duplicates(split / /, $bug{blockedby})) {
+			$insert_bugs_blockedby_handle->execute($bug_nr, $blocker) or die $!;
 		}
 		foreach my $tag (without_duplicates(@tags)) {
 			$insert_bugs_tags_handle->execute($bug_nr, $tag) or die $!;
