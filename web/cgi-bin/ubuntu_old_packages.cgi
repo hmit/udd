@@ -22,7 +22,7 @@ from ubuntu_sources src1
 join ubuntu_sources src2 using (source, version)
 left join ubuntu_popcon_src popcon using (source)
 where src1.component in ('universe', 'multiverse')
-and src1.release='lucid' and src2.release='hardy'
+and src1.release='#{RELEASE}' and src2.release='hardy'
 and src1.source not in
   (select source from sources where release = 'sid')
 and src1.source in
@@ -40,7 +40,7 @@ from ubuntu_sources src1
 join ubuntu_sources src2 using (source, version)
 left join ubuntu_popcon_src popcon using (source)
 where src1.component in ('universe', 'multiverse')
-and src1.release='lucid' and src2.release='hardy'
+and src1.release='#{RELEASE}' and src2.release='hardy'
 and src1.source not in
   (select source from sources where release = 'sid')
 and src1.source not in

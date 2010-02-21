@@ -35,7 +35,8 @@ DREL='squeeze'
 UREL='lucid'
 puts "Debian release: #{DREL}<br>"
 puts "Ubuntu release: #{UREL}<br>"
-puts "Bugs data refreshed once a day. Packages data refreshed twice a day.<br>
+puts "Bugs data refreshed once a day. Packages data refreshed twice a day.<br>"
+puts "<a href=\"http://svn.debian.org/wsvn/collab-qa/udd/web/cgi-bin/merges.cgi\">Source code</a>"
 
 dbh = DBI::connect('DBI:Pg:dbname=udd;port=5441;host=localhost', 'guest')
 

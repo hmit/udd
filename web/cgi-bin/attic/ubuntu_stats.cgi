@@ -2,86 +2,60 @@
 
 require 'dbi'
 require 'pp'
-RELEASE='jaunty'
+RELEASE='karmic'
 
 puts "Content-type: text/plain\n\n"
+
+def gcomp(rows, comp)
+  t = rows.select { |r| r[0] == comp }
+  if t == []
+    return 0
+  else
+    return t[0][1]
+  end
+end 
+def getnums(rows)
+  m = gcomp(rows, 'main') + gcomp(rows, 'restricted')
+  u = gcomp(rows, 'universe') + gcomp(rows, 'multiverse')
+  return [ m, u, m + u ]
+end
 
 dbh = DBI::connect('DBI:Pg:dbname=udd;port=5441;host=localhost', 'guest')
 sth = dbh.prepare("select count(*) from ubuntu_sources where distribution = 'ubuntu' and release = '#{RELEASE}'")
 sth.execute ; rows = sth.fetch_all
 allpkgs = rows[0][0]
+
 puts "Source packages in Ubuntu: #{allpkgs}"
-
-sth = dbh.prepare("select count(*) from sources where distribution = 'debian' and release = 'sid'")
+puts "Source packages per component:"
+sth = dbh.prepare("select component,count(*) from ubuntu_sources where distribution = 'ubuntu' and release = '#{RELEASE}' group by component")
 sth.execute ; rows = sth.fetch_all
-allpkgs = rows[0][0]
-puts "Source packages in Debian: #{allpkgs}"
-
-sth = dbh.prepare("select count(*) from sources where distribution = 'debian' and release = 'lenny'")
-sth.execute ; rows = sth.fetch_all
-allpkgs = rows[0][0]
-puts "Source packages in Debian lenny: #{allpkgs}"
-sth = dbh.prepare("select component, count(*) from ubuntu_sources where distribution = 'ubuntu' and release = '#{RELEASE}'
- group by component")
-sth.execute ; rows = sth.fetch_all
-pp rows
+pp getnums(rows)
 
 puts "Not Ubuntu specific:"
 sth = dbh.prepare("select component, count(*) from ubuntu_sources where distribution = 'ubuntu' and release = '#{RELEASE}'
-AND source !~ '^language-(support|pack)-.*'
-AND source !~ '^kde-l10n-.*'
-AND source !~ 'ubuntu'
-AND source !~ 'launchpad'
- group by component")
+AND source !~ '^language-(support|pack)-.*' AND source !~ '^kde-l10n-.*'
+AND source !~ 'ubuntu' AND source !~ 'launchpad'
+group by component")
 sth.execute ; rows = sth.fetch_all
-pp rows
+pp getnums(rows)
 
-puts "Not Ubuntu specific, not in debian:"
+puts "Not Ubuntu specific, not in debian (not in lenny or sid):"
 sth = dbh.prepare("select component, count(*) from ubuntu_sources where distribution = 'ubuntu' and release = '#{RELEASE}'
-AND source !~ '^language-(support|pack)-.*'
-AND source !~ '^kde-l10n-.*'
-AND source !~ 'ubuntu'
-AND source !~ 'launchpad'
+AND source !~ '^language-(support|pack)-.*' AND source !~ '^kde-l10n-.*'
+AND source !~ 'ubuntu' AND source !~ 'launchpad'
 AND source not in (select source from sources where distribution='debian' and release in ('sid', 'lenny'))
  group by component")
 sth.execute ; rows = sth.fetch_all
-pp rows
+pp getnums(rows)
 
-puts "Not Ubuntu specific, not in debian, version !~ /ubuntu/ (FAIL!):"
-sth = dbh.prepare("select component, count(*) from ubuntu_sources where distribution = 'ubuntu' and release = '#{RELEASE}'
-AND source !~ '^language-(support|pack)-.*' AND source !~ '^kde-l10n-.*' AND source !~ 'ubuntu' AND source !~ 'launchpad'
-AND source not in (select source from sources where distribution='debian' and release in ('sid', 'lenny'))
-AND version !~ 'ubuntu'
- group by component")
-sth.execute ; rows = sth.fetch_all
-pp rows
-
-puts "Also in Debian:"
-sth = dbh.prepare("select component, count(*) from ubuntu_sources where distribution = 'ubuntu' and release = '#{RELEASE}'
-AND source !~ '^language-(support|pack)-.*' AND source !~ '^kde-l10n-.*' AND source !~ 'ubuntu' AND source !~ 'launchpad'
-AND source in (select source from sources where distribution='debian' and release in ('sid', 'lenny'))
- group by component")
-sth.execute ; rows = sth.fetch_all
-pp rows
-
-puts "Also in Debian, not diverged (version !~ /ubuntu/):"
-sth = dbh.prepare("select component, count(*) from ubuntu_sources where distribution = 'ubuntu' and release = '#{RELEASE}'
-AND source !~ '^language-(support|pack)-.*' AND source !~ '^kde-l10n-.*' AND source !~ 'ubuntu' AND source !~ 'launchpad'
-AND source in (select source from sources where distribution='debian' and release in ('sid', 'lenny'))
-AND version !~ 'ubuntu'
- group by component")
-sth.execute ; rows = sth.fetch_all
-pp rows
-
-
-puts "Also in Debian, diverged (version ~ /ubuntu/):"
+puts "Also in debian, version ~ /ubuntu/:"
 sth = dbh.prepare("select component, count(*) from ubuntu_sources where distribution = 'ubuntu' and release = '#{RELEASE}'
 AND source !~ '^language-(support|pack)-.*' AND source !~ '^kde-l10n-.*' AND source !~ 'ubuntu' AND source !~ 'launchpad'
 AND source in (select source from sources where distribution='debian' and release in ('sid', 'lenny'))
 AND version ~ 'ubuntu'
  group by component")
 sth.execute ; rows = sth.fetch_all
-pp rows
+pp getnums(rows)
 
 puts "Also in Debian, diverged + new upstream (version ~ /-0ubuntu/):"
 sth = dbh.prepare("select component, count(*) from ubuntu_sources where distribution = 'ubuntu' and release = '#{RELEASE}'
@@ -90,7 +64,26 @@ AND source in (select source from sources where distribution='debian' and releas
 AND version ~ '-0ubuntu'
  group by component")
 sth.execute ; rows = sth.fetch_all
-pp rows
+pp getnums(rows)
+
+puts "Also in Debian, (version !~ /ubuntu/):"
+sth = dbh.prepare("select component, count(*) from ubuntu_sources where distribution = 'ubuntu' and release = '#{RELEASE}'
+AND source !~ '^language-(support|pack)-.*' AND source !~ '^kde-l10n-.*' AND source !~ 'ubuntu' AND source !~ 'launchpad'
+AND source in (select source from sources where distribution='debian' and release in ('sid', 'lenny'))
+AND version !~ 'ubuntu'
+ group by component")
+sth.execute ; rows = sth.fetch_all
+pp getnums(rows)
+
+puts "Also in Debian, (version !~ /ubuntu/):"
+sth = dbh.prepare("select component, count(*) from ubuntu_sources where distribution = 'ubuntu' and release = '#{RELEASE}'
+AND source !~ '^language-(support|pack)-.*' AND source !~ '^kde-l10n-.*' AND source !~ 'ubuntu' AND source !~ 'launchpad'
+AND source in (select source from sources where distribution='debian' and release in ('sid', 'lenny'))
+AND version !~ 'ubuntu'
+ group by component")
+sth.execute ; rows = sth.fetch_all
+pp getnums(rows)
+
 
 puts "diverged+new upstream (main):"
 sth = dbh.prepare("select source from ubuntu_sources where distribution = 'ubuntu' and release = '#{RELEASE}' and component = 'main'
@@ -148,8 +141,5 @@ rows.each do |r|
 end
 puts
 puts
-
-
-
 
 sth.finish

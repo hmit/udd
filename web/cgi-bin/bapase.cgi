@@ -2,6 +2,8 @@
 require 'dbi'
 require 'cgi'
 
+tstart = Time::now
+
 class Actions
   attr_reader :actions, :act_todo, :act_status, :act_comment
   def initialize
@@ -160,6 +162,7 @@ elsif type == 'testing'
 elsif type == 'nodd'
   orphaned = true
   query = <<EOF
+WITH active_emails AS (SELECT email FROM carnivore_emails, active_dds WHERE active_dds.id = carnivore_emails.id)
 select * from bapase where source in (
 SELECT source
 FROM sources
@@ -169,8 +172,8 @@ SELECT sources.source
 FROM sources
 LEFT OUTER JOIN uploaders ON (sources.source = uploaders.source AND sources.version = uploaders.version AND sources.distribution = uploaders.distribution AND sources.release = uploaders.release AND sources.component = uploaders.component)
 WHERE sources.distribution = 'debian' AND sources.release = 'sid'
-AND (maintainer_email in (SELECT email FROM carnivore_emails, active_dds WHERE active_dds.id = carnivore_emails.id)
-OR email in (SELECT email FROM carnivore_emails, active_dds WHERE active_dds.id = carnivore_emails.id)
+AND (maintainer_email in (select email from active_emails)
+OR email in (SELECT email FROM active_emails)
 OR maintainer_email ~ '.*@lists.(alioth.)?debian.org'
 OR email ~ '.*@lists.(alioth.)?debian.org'))
 ) order by upload_age desc
@@ -296,8 +299,10 @@ puts <<-EOF
 <th>Comments</th>
 </tr>
 EOF
+tqs = Time::now
 sth = dbh.prepare(query)
 sth.execute
+tqe = Time::now
 res = sth.fetch_all
 n = 0
 res.each do |r|
@@ -350,7 +355,8 @@ res.each do |r|
 end
 puts "</table>"
 
-puts " -- #{res.length} packages listed."
+tstop = Time::now
+puts " -- #{res.length} packages listed. Page generated in #{tstop - tstart} seconds. Query took #{tqe - tqs} seconds."
 puts "</body></html>"
 
 

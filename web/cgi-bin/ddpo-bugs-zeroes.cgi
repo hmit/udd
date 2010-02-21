@@ -79,9 +79,9 @@ pkgs.each do |pkg|
   puts "#{patch[pkg]}(#{patch_m[pkg]})"
 end
 
-sth = dbh.prepare("select source from sources where distribution='debian'")
+sth = dbh.prepare("select distinct source from sources where distribution='debian'")
 sth.execute
 sth.fetch_all.each do |r|
   next if srcs[r[0]]
-  puts "#{r[0]} 0 0 0 0 0"
+  puts "#{r[0]}:0(0) 0(0) 0(0) 0(0) 0(0)"
 end
