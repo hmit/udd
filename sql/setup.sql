@@ -253,11 +253,11 @@ CREATE TABLE archived_bugs_tags
   (id int REFERENCES archived_bugs, tag text, PRIMARY KEY (id, tag));
 
 CREATE TABLE archived_bugs_blocks
-  (id int REFERENCES bugs, blocked int,
+  (id int REFERENCES archived_bugs, blocked int,
 PRIMARY KEY(id, blocked));
 
 CREATE TABLE archived_bugs_blockedby
-  (id int REFERENCES bugs, blocker int,
+  (id int REFERENCES archived_bugs, blocker int,
 PRIMARY KEY(id, blocker));
 
 -- usertags are either for archived or unarchived bugs, so we can't add a
@@ -724,7 +724,7 @@ CREATE TABLE history.sources_count (
   total_sid_main int, total_sid_contrib int, total_sid_nonfree int,
   vcstype_arch int, vcstype_bzr int, vcstype_cvs int, vcstype_darcs int, vcstype_git int, vcstype_hg  int, vcstype_mtn int, vcstype_svn int,
 format_3native int, format_3quilt int,
-  PRIMARY KEY (time)
+  PRIMARY KEY (ts)
 );
 GRANT SELECT ON history.sources_count TO public;
 

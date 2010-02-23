@@ -296,11 +296,11 @@ CREATE TABLE bugs_blockedby
 PRIMARY KEY(id, blocker));
 
 CREATE TABLE archived_bugs_blocks
-  (id int REFERENCES bugs, blocked int,
+  (id int REFERENCES archived_bugs, blocked int,
 PRIMARY KEY(id, blocked));
 
 CREATE TABLE archived_bugs_blockedby
-  (id int REFERENCES bugs, blocker int,
+  (id int REFERENCES archived_bugs, blocker int,
 PRIMARY KEY(id, blocker));
 
 
