@@ -22,7 +22,7 @@ import gzip
 # import bz2
 from psycopg2 import IntegrityError, InternalError
 
-online=0
+debug=0
 
 def get_gatherer(connection, config, source):
   return ddtp_gatherer(connection, config, source)
@@ -31,7 +31,7 @@ class ddtp():
   def __init__(self, package, release, language):
     self.package          = package
     self.distribution     = 'debian' # No DDTP translations for debian-backports / debian-volatile
-    self.release          = release  # sid for the moment
+    self.release          = release
     self.component        = 'main'   # Only main translated for the moment
     self.language         = language
     self.description      = ''
@@ -67,22 +67,33 @@ class ddtp_gatherer(gatherer):
                           release = $4 AND language = $5 AND version = $6""" % (my_config['table'])
     cur.execute(query)
 
+    query = """PREPARE ddtp_get_duplicate (text, text, text, text, text, text) AS
+                  SELECT description, long_description, md5sum FROM %s
+                    WHERE package = $1 AND distribution = $2 AND component = $3 AND
+                          release = $4 AND language = $5 AND version = $6""" % (my_config['table'])
+    cur.execute(query)
 
-    # Query for english package description, its md5 sum and package version
-# Not used any more because the Translation files now contain version numbers
-# but keep the query as comment to store the knowledge how to calculate MD5 sums
-# for the descriptions for possible later use
-#    query = """PREPARE ddtp_packages_recieve_description_md5 AS 
-#               SELECT md5(full_description || E'\n' ) AS md5,
-#               full_description, MAX(version) AS version FROM (
-#                 SELECT DISTINCT
-#                   description || E'\n' || long_description AS full_description,
-#                   version
-#                  FROM packages
-#                  WHERE package = $1 AND distribution = $2 AND component = $3 AND
-#                  release = $4
-#               ) AS tmp GROUP BY full_description"""
-#    cur.execute(query)
+    # Query for english package description of the i386 architecture because this is the
+    # most popular arch.  In case a package description might differ in very seldom cases
+    # we put the translation of the i386 architecture into UDD
+    query = """PREPARE ddtp_packages_recieve_description_md5 (text, text, text, text, text) AS 
+               SELECT md5(full_description || E'\n' ) AS md5,
+               full_description FROM (
+                 SELECT DISTINCT
+                   description || E'\n' || long_description AS full_description
+                  FROM packages
+                  WHERE package = $1 AND distribution = $2 AND component = $3 AND
+                  release = $4 AND version = $5 AND architecture = 'i386'
+               ) AS tmp GROUP BY full_description"""
+    cur.execute(query)
+
+    # In some cases a just imported translation has to be removed again because
+    # of a further translation which matches MD5 sum of i386 architecture
+    query = """PREPARE ddtp_delete_duplicate(text, text, text, text, text, text) AS 
+               DELETE FROM %s
+                    WHERE package = $1 AND distribution = $2 AND component = $3 AND
+                          release = $4 AND language = $5 AND version = $6""" % (my_config['table'])
+    cur.execute(query)
 
     pkg = None
 
@@ -106,10 +117,12 @@ class ddtp_gatherer(gatherer):
         md5file=dir + 'Translation-' + lang + '.md5'
         try:
           if ( cmp(md5file, md5file + '.prev' ) ):
-            print md5file + 'has not changed.  No update needed.'
+            if debug:
+              print md5file + ' has not changed.  No update needed.'
             continue
           else:
-            print md5file + 'changed.  Go on updating language ' + lang
+            if debug:
+              print md5file + ' changed.  Go on updating language ' + lang
         except OSError:
           print 'md5file for ' + lang + ' missing,  Go updating'
 
@@ -135,10 +148,41 @@ class ddtp_gatherer(gatherer):
                      self.pkg.release, self.pkg.language, self.pkg.version)
             cur.execute(query)
             if cur.fetchone()[0] > 0:
-              print >>stderr, "Duplicated key in language %s: " % self.pkg.language, \
-                  self.pkg.package, self.pkg.distribution, self.pkg.component, self.pkg.release, \
-                  self.pkg.version, self.pkg.description, self.pkg.md5sum
-              continue
+              if debug > 0:
+                print >>stderr, "Just imported key in language %s: " % self.pkg.language, \
+                    self.pkg.package, self.pkg.distribution, self.pkg.component, self.pkg.release, \
+                    self.pkg.version, self.pkg.description, self.pkg.md5sum
+
+              query = " EXECUTE ddtp_packages_recieve_description_md5 ('%s', '%s', '%s', '%s', '%s')" % \
+                    (self.pkg.package, self.pkg.distribution, self.pkg.component, \
+                     self.pkg.release, self.pkg.version)
+              cur.execute(query)
+              if cur.rowcount <= 0:
+                print >>stderr, "Did not found descriptopn for i386 in", self.pkg.package, self.pkg.distribution, self.pkg.component, \
+                     self.pkg.release, self.pkg.version
+                # print >>stderr, query
+                continue
+
+              md5sum = cur.fetchone()[0]
+              if  md5sum.startswith(self.pkg.md5sum):
+                if debug > 0:
+                  print >>stderr, "Correkt translation is just in the Database."
+                continue
+
+              query = "EXECUTE ddtp_get_duplicate ('%s', '%s', '%s', '%s', '%s', '%s')" % \
+                    (self.pkg.package, self.pkg.distribution, self.pkg.component, \
+                     self.pkg.release, self.pkg.language, self.pkg.version)
+              cur.execute(query)
+              # print >>stderr, "Other translations:"
+              for r in cur.fetchall():
+                # print >>stderr, r[0], r[2]
+                if md5sum.startswith(r[2]):
+                  # print >>stderr, "This translation matches, delete existing translation", md5sum
+                  query = "EXECUTE ddtp_delete_duplicate ('%s', '%s', '%s', '%s', '%s', '%s')" % \
+                      (self.pkg.package, self.pkg.distribution, self.pkg.component, \
+                       self.pkg.release, self.pkg.language, self.pkg.version)
+                  cur.execute(query)
+
             query = "EXECUTE ddtp_insert (%s, '%s', '%s', '%s', '%s', '%s', %s, %s, %s)" % \
                         (quote(self.pkg.package), self.pkg.distribution, self.pkg.component, self.pkg.release, \
                          self.pkg.language, self.pkg.version, quote(self.pkg.description), \
