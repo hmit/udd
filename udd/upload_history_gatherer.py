@@ -67,7 +67,7 @@ class upload_history_gatherer(gatherer):
 
       for line in f:
         line_count += 1
-        line = line.strip()
+        line = line.lstrip()
         # Stupid multi-line maintainer fields *grml*
         if line == '':
           current['Changed-By_name'], current['Changed-By_email'] = email.Utils.parseaddr(current['Changed-By'])
