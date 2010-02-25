@@ -1,0 +1,25 @@
+general:
+  dbname: udd
+  dbport: 5441
+  types:
+    i18n-apps: module udd.i18n_apps_gatherer
+  timestamp-dir: /org/udd.debian.org/timestamps
+  lock-dir: /org/udd.debian.org/locks
+  archs:
+   [alpha, amd64, arm, armeb, armel, hppa, hurd-i386,
+    i386, i486, ia64, kfreebsd-amd64, kfreebsd-i386, mips,
+    mipsel, powerpc, ppc64, s390, sparc, all, any, lpia, m32r, s390x, sh3,
+    sh3eb, sh4, sh4eb, sh, knetbsd-i386, netbsd-alpha, sparc64,
+    netbsd-i386, hurd-powerpc, kfreebsd-powerpc, netbsd-powerpc, hurd-sparc,
+    kfreebsd-sparc, netbsd-sparc, darwin-i386, freebsd-i386, openbsd-i386, darwin-powerpc]
+
+i18n-apps:
+   type: i18n-apps
+   update-command: /org/udd.debian.org/udd/scripts/fetch_i18n-apps.sh
+   path: /org/udd.debian.org/mirrors/i18n-apps
+   mirror: http://i18n.debian.net/material/data
+   files: .*\.gz
+   releases: sid squeeze
+   table_apps: i18n_apps
+   table_debconf: po_debconf
+
