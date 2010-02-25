@@ -191,7 +191,9 @@ class ftpnew_gatherer(gatherer):
     ftpnew822file    = my_config['path']+'/new.822'
     ftpnew_data      = open(ftpnew822file)
 
-    has_warned_about_missing_section_key = 0
+    # seems there will be no change to set the section field ... getting bored about daily mail about this
+    # has_warned_about_missing_section_key = 0
+    has_warned_about_missing_section_key = 1
     try:
       for stanza in deb822.Sources.iter_paragraphs(ftpnew_data, shared_storage=False):
         try:
@@ -414,7 +416,9 @@ class ftpnew_gatherer(gatherer):
                 srcpkg.s['Vcs-Url']  = value
                 print >>srco, "%s: %s" % (field, value)
               else:
-                print >>stderr, "Unknown field in %s: %s" % (srcpkg.s['Source'], field)
+                # Don't warn about Original-Maintainer field
+                if not field.startswith('Original-Maintainer'):
+                  print >>stderr, "Unknown field in %s: %s" % (srcpkg.s['Source'], field)
                 print >>srco, "*%s: %s" % (field, value)
             continue
           if in_description:
