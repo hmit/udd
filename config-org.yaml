@@ -23,6 +23,7 @@ general:
     ldap: module udd.ldap_gatherer
     wannabuild: module udd.wannabuild_gatherer
     removals: module udd.removals_gatherer
+    pts: module udd.pts_gatherer
     history-daily: module udd.history_daily_gatherer
   timestamp-dir: /org/udd.debian.org/timestamps
   lock-dir: /org/udd.debian.org/locks
@@ -569,6 +570,11 @@ removals:
   path: /org/udd.debian.org/mirrors/removals-full.txt
   table: package_removal
   schema: package_removal
+
+pts:
+  type: pts
+  update-command: ssh -i /org/udd.debian.org/.ssh/id_ptsdata qa@master.debian.org /org/packages.qa.debian.org/bin/export-data-to-udd > /org/udd.debian.org/tmp/pts.txt
+  path: /org/udd.debian.org/tmp/pts.txt
 
 history-daily:
   type: history-daily

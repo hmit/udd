@@ -716,6 +716,21 @@ CREATE VIEW really_active_dds AS
     SELECT DISTINCT carnivore_login.id, carnivore_login.login FROM carnivore_login, carnivore_keys, ldap WHERE ((((carnivore_keys.id = carnivore_login.id) AND (carnivore_keys.key_type = 'keyring'::text)) AND (carnivore_login.login = ldap.login)) AND (ldap.activity_pgp > '2009-01-01 00:00:00+00'::timestamp with time zone));
 GRANT SELECT ON TABLE really_active_dds TO guestdd;
 
+-- PTS
+CREATE TABLE pts (
+  source text,
+  email text,
+  PRIMARY KEY(source, email)
+);
+GRANT SELECT ON pts TO guestdd;
+
+CREATE TABLE pts_public (
+  source text,
+  email text,
+  PRIMARY KEY(source, email)
+);
+GRANT SELECT ON pts_public TO public;
+
 -- HISTORICAL DATA
 CREATE SCHEMA history;
 GRANT USAGE ON SCHEMA history TO public;

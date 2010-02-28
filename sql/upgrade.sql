@@ -309,3 +309,21 @@ GRANT SELECT ON bugs_blockedby TO PUBLIC;
 
 GRANT SELECT ON archived_bugs_blocks TO PUBLIC;
 GRANT SELECT ON archived_bugs_blockedby TO PUBLIC;
+
+-- 2010-02-28
+-- PTS
+CREATE TABLE pts (
+  source text,
+  email text,
+  PRIMARY KEY(source, email)
+);
+GRANT SELECT ON pts TO guestdd;
+
+CREATE TABLE pts_public (
+  source text,
+  email text,
+  PRIMARY KEY(source, email)
+);
+GRANT SELECT ON pts_public TO public;
+
+
