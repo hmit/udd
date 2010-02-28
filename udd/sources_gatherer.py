@@ -11,6 +11,7 @@ import tempfile
 from aux import ConfigException
 from aux import null_or_quote, quote
 from gatherer import gatherer
+from time import time
 import email.Utils
 import re
 
@@ -32,7 +33,7 @@ class sources_gatherer(gatherer):
       'Directory':0, 'Comment':0, 'Origin':0, 'Url':0, 'X-Collab-Maint':0, 'Autobuild':0, 'Vcs-Cvs:':0, 'Python-Standards-Version':0, 'url':0, 'originalmaintainer':0, 'Originalmaintainer':0, 'Build-Recommends':0, 'Maintainer-Homepage': 0}
       #Vcs-Cvs: is caused by a bug in python-debian, apparently.
   ignorable_re = re.compile("^(Orig-|Original-|Origianl-|Orginal-|Orignal-|Orgiinal-|Orginial-|Debian-|X-Original-|Upstream-)")
-  vcs = { 'Arch':0, 'Bzr':0, 'Cvs':0, 'Darcs':0, 'Git':0, 'Hg':0, 'Svn':0, 'Mtn':0}
+  vcs = [ 'Svn', 'Git', 'Arch', 'Bzr', 'Cvs', 'Darcs', 'Hg', 'Mtn']
 
   def __init__(self, connection, config, source):
     gatherer.__init__(self, connection, config, source)
@@ -79,13 +80,12 @@ class sources_gatherer(gatherer):
         d['Dm-Upload-Allowed'] = (d['Dm-Upload-Allowed'].lower() == 'yes')
 
     
-    for k in control.keys():
-      if k not in sources_gatherer.mandatory and k not in sources_gatherer.non_mandatory and k not in sources_gatherer.ignorable:
-        if not sources_gatherer.ignorable_re.match(k):
-          if k not in self.warned_about:
-            self.warned_about[k] = 1
-          else:
-            self.warned_about[k] += 1
+    for k in control.iterkeys():
+      if k not in sources_gatherer.mandatory and k not in sources_gatherer.non_mandatory and k not in sources_gatherer.ignorable and (not sources_gatherer.ignorable_re.match(k)):
+        if k not in self.warned_about:
+          self.warned_about[k] = 1
+        else:
+          self.warned_about[k] += 1
     return d
 
   def import_sources(self, file):

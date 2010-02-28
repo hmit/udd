@@ -11,6 +11,7 @@ import tempfile
 from aux import ConfigException
 import psycopg2
 from gatherer import gatherer
+from time import time
 import email.Utils
 import re
 
@@ -35,6 +36,15 @@ class packages_gatherer(gatherer):
   ignorable = {'Filename':0, 'Npp-Filename':0, 'Npp-Name':0, 'Npp-Mimetype':0, 'Npp-Applications':0, 'Python-Runtime':0, 'Npp-File':0, 'Npp-Description':0, 'Url':0, 'Gstreamer-Elements':0, 'Gstreamer-Version':0, 'Gstreamer-Decoders':0, 'Gstreamer-Uri-Sinks':0, 'Gstreamer-Encoders':0, 'Gstreamer-Uri-Sources':0, 'url':0, 'Vdr-PatchLevel':0, 'Vdr-Patchlevel':0, 'originalmaintainer':0, 'Originalmaintainer':0, 'Build-Recommends':0, 'Multi-Arch':0, 'Maintainer-Homepage':0, 'Tads2-Version':0, 'Tads3-Version':0, 'Xul-Appid': 0, 'Subarchitecture':0, 'Package-Type':0, 'Kernel-Version': 0, 'Installer-Menu-Item':0, 'Supported':0, 'subarchitecture':0, 'package-type':0 }
   ignorable_re = re.compile("^(Orig-|Original-|Origianl-|Orginal-|Orignal-|Orgiinal-|Orginial-|Debian-|X-Original-|Upstream-)")
 
+  pkgquery = """EXECUTE package_insert
+      (%(Package)s, %(Version)s, %(Architecture)s, %(Maintainer)s, %(maintainer_name)s, %(maintainer_email)s,
+      %(Description)s, %(Long_Description)s, %(Source)s, %(Source_Version)s, %(Essential)s,
+      %(Depends)s, %(Recommends)s, %(Suggests)s, %(Enhances)s,
+      %(Pre-Depends)s, %(Breaks)s, %(Installed-Size)s, %(Homepage)s, %(Size)s,
+      %(Build-Essential)s, %(Origin)s, %(SHA1)s,
+      %(Replaces)s, %(Section)s, %(MD5sum)s, %(Bugs)s, %(Priority)s,
+      %(Tag)s, %(Task)s, %(Python-Version)s, %(Provides)s,
+      %(Conflicts)s, %(SHA256)s, %(Original-Maintainer)s)"""
 
   def __init__(self, connection, config, source):
     gatherer.__init__(self, connection, config, source)
@@ -59,17 +69,16 @@ class packages_gatherer(gatherer):
 	raise "Mandatory field %s not specified" % k
       d[k] = control[k]
     for k in packages_gatherer.non_mandatory:
-      if k not in control:
-	d[k] = None
-      else:
+      if k in control:
 	d[k] = control[k]
-    for k in control.keys():
-      if k not in packages_gatherer.non_mandatory and k not in packages_gatherer.mandatory and k not in packages_gatherer.ignorable:
-        if not packages_gatherer.ignorable_re.match(k):
-	  if k not in self.warned_about:
-	    self.warned_about[k] = 1
-	  else:
-	    self.warned_about[k] += 1
+      else:
+	d[k] = None
+    for k in control.iterkeys():
+      if k not in packages_gatherer.non_mandatory and k not in packages_gatherer.mandatory and k not in packages_gatherer.ignorable and not (packages_gatherer.ignorable_re.match(k)):
+        if k not in self.warned_about:
+          self.warned_about[k] = 1
+	else:
+	  self.warned_about[k] += 1
     return d
 
   def import_packages(self, sequence, cur):
@@ -80,15 +89,7 @@ class packages_gatherer(gatherer):
     it is called.The Format of the sequence is expected to be that of a
     debian packages file."""
     pkgs = []
-    query = """EXECUTE package_insert
-      (%(Package)s, %(Version)s, %(Architecture)s, %(Maintainer)s, %(maintainer_name)s, %(maintainer_email)s,
-      %(Description)s, %(Long_Description)s, %(Source)s, %(Source_Version)s, %(Essential)s,
-      %(Depends)s, %(Recommends)s, %(Suggests)s, %(Enhances)s,
-      %(Pre-Depends)s, %(Breaks)s, %(Installed-Size)s, %(Homepage)s, %(Size)s,
-      %(Build-Essential)s, %(Origin)s, %(SHA1)s,
-      %(Replaces)s, %(Section)s, %(MD5sum)s, %(Bugs)s, %(Priority)s,
-      %(Tag)s, %(Task)s, %(Python-Version)s, %(Provides)s,
-      %(Conflicts)s, %(SHA256)s, %(Original-Maintainer)s)"""
+
     # The fields that are to be read. Other fields are ignored
     for control in debian_bundle.deb822.Packages.iter_paragraphs(sequence):
       # Check whether packages with architectue 'all' have already been
@@ -100,7 +101,7 @@ class packages_gatherer(gatherer):
 
       d = self.build_dict(control)
 
-      # We just use the first line of the description
+      # We split the description
       if 'Description' in d:
 	if len(d['Description'].split("\n",1)) > 1:
 	  d['Long_Description'] = d['Description'].split("\n",1)[1]
@@ -128,9 +129,9 @@ class packages_gatherer(gatherer):
       d['maintainer_name'], d['maintainer_email'] = email.Utils.parseaddr(d['Maintainer'])
       pkgs.append(d)
     try:
-      cur.executemany(query, pkgs)
+      cur.executemany(self.pkgquery, pkgs)
     except psycopg2.ProgrammingError:
-      print query
+      print "Error while inserting packages"
       raise
 
   def setup(self):
