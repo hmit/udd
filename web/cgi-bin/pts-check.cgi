@@ -30,28 +30,12 @@ puts "Packages you are uploader for but are not subscribed to:<br/><ul>"
 (upload - pts).sort.each { |s| puts "<li><a href=\"http://packages.qa.debian.org/#{s}\">#{s}</a></li>" }
 puts "</ul>"
 end
-if (pts - (maint+upload)).length > 0
-puts "Packages you don't maintain or upload, and are subscribed to (that could be perfectly fine of course):<br/><ul>"
-(pts - (maint+upload)).sort.each { |s| puts "<li><a href=\"http://packages.qa.debian.org/#{s}\">#{s}</a></li>" }
-end
-puts "</ul>"
-
-if allpkgs
-puts "Packages you maintain and are subscribed to:<br/><ul>"
-(maint & pts).sort.each { |s| puts "<li><a href=\"http://packages.qa.debian.org/#{s}\">#{s}</a></li>" }
-puts "</ul>"
-puts "Packages you are uploader for and are subscribed to:<br/><ul>"
-(upload & pts).sort.each { |s| puts "<li><a href=\"http://packages.qa.debian.org/#{s}\">#{s}</a></li>" }
-puts "</ul>"
-end
-
 else
 puts <<-EOF
 
 <form method="get" ACTION="pts-check.cgi">
 Email to check: <input type="text" name="email" value="email" size="30"/>
 <input type="submit"/><br/>
-<input type="checkbox" name="allpkgs" value="1"/> Include information about packages you maintain or upload, and are subscribed to.
 </form>
 EOF
 end
