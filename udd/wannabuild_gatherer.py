@@ -40,27 +40,6 @@ class wannabuild_gatherer(gatherer):
         wbcur.execute("SELECT package, distribution, version, state, installed_version, previous_state, state_change, binary_nmu_version, notes FROM \"%s_public\".packages" % arch)
         for row in wbcur.fetchall():
             row = list(row)
-            if row[6] != None:
-                t = None
-                try:
-                    t = time.strptime(row[6], "%Y %b %d %H:%M:%S")
-                except ValueError:
-                    # we couldn't parse the date in english. But since Debian is
-                    # the universal operating system, let's try a few other
-                    # popular languages in Debian ;)
-                    for lang in [ 'de_DE.UTF-8', 'fr_FR.UTF-8', 'fi_FI.UTF-8']:
-                        try:
-                            locale.setlocale(locale.LC_TIME, lang)
-                            t = time.strptime(row[6], "%Y %b %d %H:%M:%S")
-                            locale.resetlocale()
-                            continue
-                        except ValueError:
-                            locale.resetlocale()
-                if t == None:
-                    print "Parsing failed in all lang: %s %s - %s"%(row[0], row[1], row[6])
-                    row[6] = None
-                else:
-                    row[6] = time.strftime("%a, %d %b %Y %H:%M:%S +0000", t)
             entries.append([arch] + row)
         cur.executemany("EXECUTE wb_insert (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", entries)
         entries = []
