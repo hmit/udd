@@ -35,8 +35,6 @@ class pts_gatherer(gatherer):
         sub = sub.strip()
         c.execute("EXECUTE pts_insert(%s, %s)", (package, sub))
 
-    c.execute("DELETE FROM pts_public")
-    c.execute("INSERT INTO pts_public SELECT source, md5(lower(email)) FROM pts")
     c.execute("DEALLOCATE pts_insert")
     c.execute("ANALYZE pts")
     c.execute("ANALYZE pts_public")

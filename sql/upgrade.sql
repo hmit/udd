@@ -319,11 +319,3 @@ CREATE TABLE pts (
 );
 GRANT SELECT ON pts TO guestdd;
 
-CREATE TABLE pts_public (
-  source text,
-  email text,
-  PRIMARY KEY(source, email)
-);
-GRANT SELECT ON pts_public TO public;
-
-
