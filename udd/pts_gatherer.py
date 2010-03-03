@@ -37,5 +37,4 @@ class pts_gatherer(gatherer):
 
     c.execute("DEALLOCATE pts_insert")
     c.execute("ANALYZE pts")
-    c.execute("ANALYZE pts_public")
 
