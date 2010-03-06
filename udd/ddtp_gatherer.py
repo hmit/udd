@@ -158,7 +158,7 @@ class ddtp_gatherer(gatherer):
                      self.pkg.release, self.pkg.version)
               cur.execute(query)
               if cur.rowcount <= 0:
-                print >>stderr, "Did not found descriptopn for i386 in", self.pkg.package, self.pkg.distribution, self.pkg.component, \
+                print >>stderr, "Did not found description for i386 in", self.pkg.package, self.pkg.distribution, self.pkg.component, \
                      self.pkg.release, self.pkg.version
                 # print >>stderr, query
                 continue
