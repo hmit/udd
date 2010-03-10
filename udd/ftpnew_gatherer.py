@@ -343,7 +343,7 @@ class ftpnew_gatherer(gatherer):
                     else:
                       print >>stderr, "Bug #%i of package %s and source %s is not against pseudopackage 'wnpp' and hast title '%s'" % bug_info
                 if not ftpnew_gatherer.closes_is_itp_re.match(wnpp_title):
-                  print >>stderr, "Closed bug %i seems to be not ITPed (queue = %s; title = %s)" % (ival, srcpkg.s['Queue'], wnpp_title)
+                  print >>stderr, "Bug %i closed by source package %s seems to be not ITPed" % (ival, srcpkg.s['Source'])
                 else:
                   if found_itp:
                     if DEBUG != 0:
