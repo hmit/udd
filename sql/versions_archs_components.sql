@@ -22,9 +22,9 @@ CREATE OR REPLACE FUNCTION versions_archs_component (text) RETURNS SETOF RECORD 
 	         || package || ''' GROUP BY component, version ORDER BY version) AS cv GROUP BY component;';
 
 	FOR r IN EXECUTE query LOOP
-	    query1      = /* -- DROP TABLE IF EXISTS tmpReleaseVersionArch ; */
-                 'CREATE TEMPORARY TABLE tmpReleaseVersionArch AS
-	         SELECT release || CASE WHEN char_length(substring(distribution from ''-.*'')) > 0
+	    query1 = 'SELECT release, version, array_to_string(array_sort(array_accum(arch)),'',''), CAST(''' 
+                 || r.component || ''' AS text) AS component FROM 
+                 (SELECT release || CASE WHEN char_length(substring(distribution from ''-.*'')) > 0
                                         THEN substring(distribution from ''-.*'')
                                         ELSE '''' END AS release,
                             -- make *-volatile a "pseudo-release"
@@ -32,16 +32,11 @@ CREATE OR REPLACE FUNCTION versions_archs_component (text) RETURNS SETOF RECORD 
                         architecture AS arch, component
                     FROM packages
 	           WHERE package = ''' || package || ''' AND component = ''' || r.component || '''
-		   GROUP BY architecture, version, release, distribution, component
-	         ;' ;
-	    EXECUTE query1;
-	    query1 = 'SELECT release, version, array_to_string(array_sort(array_accum(arch)),'',''), CAST(''' 
-                 || r.component || ''' AS text) AS component FROM tmpReleaseVersionArch
+		   GROUP BY architecture, version, release, distribution, component) tmpReleaseVersionArch
                  GROUP BY release, version ORDER BY version;' ;
 	    FOR q IN EXECUTE query1 LOOP
 	        RETURN NEXT q;
 	    END LOOP;
-	    DROP TABLE tmpReleaseVersionArch ;
         END LOOP;
     END; $$ LANGUAGE 'plpgsql';
 
