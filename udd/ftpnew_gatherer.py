@@ -15,7 +15,7 @@ from gatherer import gatherer
 import email.Utils
 import re
 from time import ctime
-from psycopg2 import IntegrityError
+from psycopg2 import IntegrityError, ProgrammingError
 
 def get_gatherer(connection, config, source):
   return ftpnew_gatherer(connection, config, source)
@@ -75,7 +75,9 @@ class src_pkg():
   def __str__(self):
     str  = "Source %(Source)s: %(Version)s, (%(Architecture)s), %(Last_modified)s, %(Queue)s, %(Distribution)s" % \
         (self.s)
-    str += "   %(maintainer_name)s <%(maintainer_email)s>, %(Closes)i" % (self.s)
+    if self.s.has_key('maintainer_name') and self.s.has_key('maintainer_email') and \
+          self.s.has_key('Closes'):
+       str += "   %(maintainer_name)s <%(maintainer_email)s>, %(Closes)i" % (self.s)
     return str
 
 class bin_pkg():
@@ -211,6 +213,8 @@ class ftpnew_gatherer(gatherer):
         srcpkg.s['Last_modified'] = ctime(int(stanza['last-modified'])) # We want a real time object instead of an epoch
         srcpkg.s['Distribution']  = stanza['distribution']
         srcpkg.s['Changed-By']    = stanza['changed-by']
+        # remove comma between binaries which are inserted in *.dsc information
+        srcpkg.s['Bin']           = re.sub(", +", " ", stanza['binary'])
         try:
           srcpkg.s['Section']       = stanza['section']
           if stanza['section'].startswith('non-free'):
@@ -267,6 +271,12 @@ class ftpnew_gatherer(gatherer):
                 break
               if in_source:
                 in_source = 0
+                # we need to initialise some fields in the binary package
+                binpkg_changes = bin_pkg(value.split(' ')[0], srcpkg.s['Source'])
+                for key in ['Architecture', 'Component', 'Distribution', 'Version', 'Maintainer']:
+                  binpkg_changes.b[key]     = srcpkg.s[key]
+                binpkg_changes.b['Description']      = 'binary package information is missing in new queue'
+                binpkg_changes.b['Long_Description'] = '' # no long description available in *.changes file
               if binpkg:
                 binpkgs.append(binpkg)
               binpkg = bin_pkg(value, srcpkg.s['Source'])
@@ -276,17 +286,6 @@ class ftpnew_gatherer(gatherer):
               if in_source:
                 srcpkg.s[field]   = value
                 srcpkg.s['maintainer_name'], srcpkg.s['maintainer_email'] = email.Utils.parseaddr(srcpkg.s['Maintainer'])
-                # if bin_pkg_changes == None:
-                binpkg_changes.b[field] = value
-
-                binpkg_changes.b['Distribution']     = srcpkg.s['Distribution']
-                binpkg_changes.b['Description']      = 'binary package information is missing in new queue'
-                binpkg_changes.b['Long_Description'] = '' # no long description available in *.changes file
-                binpkg_changes.b['Component']        = srcpkg.s['Component']
-                binpkg_changes.b['Architecture']     = srcpkg.s['Architecture']
-                binpkg_changes.b['Version']          = srcpkg.s['Version']
-                binpkg_changes.b['Maintainer']       = srcpkg.s['Maintainer']
-
               else:
                 binpkg.b[field]   = value
               print >>srco, "%s: %s" % (field, value)
@@ -300,8 +299,6 @@ class ftpnew_gatherer(gatherer):
             elif field == 'Architecture':
               if in_source:
                 srcpkg.s[field] = value
-                #*** if binpkg_changes != None:
-                binpkg_changes.b[field] = value
               else:
                 binpkg.b[field] = value
               print >>srco, "%s: %s" % (field, value)
@@ -318,8 +315,6 @@ class ftpnew_gatherer(gatherer):
                   print >>stderr, "Incompatible version numbers between new.822(%s) and %s.html (%s)" % \
                       (srcpkg.s[field], src_info_base, value)
                 srcpkg.s[field]         = value
-                if binpkg_changes != None:
-                  binpkg_changes.b[field] = value
               else:
                 binpkg.b[field]   = value
               print >>srco, "%s: %s" % (field, value)
@@ -372,18 +367,19 @@ class ftpnew_gatherer(gatherer):
                     (src_info_base, value)
             elif field == 'Binary':
               if in_source:
-                # Binaries are mentioned in different syntax in *.changes and *.dsc
-                value = re.sub(", +", " ", value)
+                # Remove ',' in *.dsc information (not needed in *.changes)
+                value = re.sub(", +", " ", value)   # !!!!
               if self.check_existing_binaries(value.split(' '), srcpkg.s['Queue']):
                 srcpkg.s['Queue'] = 'ignore'
                 break
               if in_source:
-                if srcpkg.s['Bin'] != () and value != srcpkg.s['Bin']:
+                # if srcpkg.s['Bin'] != () and value != srcpkg.s['Bin']:
+                # Sometimes the order of multi binary packages is different - it is sufficient
+                # to assume that the package names are the same if the strings are equally long
+                if srcpkg.s['Bin'] != () and len(value) != len(srcpkg.s['Bin']):
                   print >>stderr, "Incompatible binaries between new.822(%s) and %s.html (%s)" % \
                       (srcpkg.s['Bin'], src_info_base, value)
                 srcpkg.s['Bin'] = value
-                # we need to initialise some fields in the binary package and the 'Maintainer' field is the last of them mentioned in the ftpnew formatted files
-                binpkg_changes = bin_pkg(value.split(' ')[0], srcpkg.s['Source'])
                 print >>srco, "%s: %s" % (field, value)
               else:
                 print >>stderr, "Binary should not mention Binary field in %s.html (%s)" % \
@@ -459,7 +455,10 @@ class ftpnew_gatherer(gatherer):
                     %(Vcs-Type)s, %(Vcs-Url)s, %(Vcs-Browser)s,
                     %(Section)s, %(Distribution)s, %(Component)s, %(Closes)s, %(License)s,
                     %(Last_modified)s, %(Queue)s)"""
-          cur.execute(query, srcpkg.s)
+          try:
+            cur.execute(query, srcpkg.s)
+          except ProgrammingError, err:
+            print "ProgrammingError", err, "\n", query, "\n", srcpkg.s
           for binpkg in binpkgs:
             # print binpkg
             if not binpkg:

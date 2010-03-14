@@ -19,7 +19,8 @@ from psycopg2 import IntegrityError, InternalError
 
 debug=0
 
-check_char_re = re.compile('&#[0-9][0-9][0-9];')
+check_char_re               = re.compile('&#[0-9][0-9][0-9];')
+parse_translation_status_re = re.compile('^(\d+)t(\d+)f(\d+)u$')
 
 def replace_special_char(string):
   if not check_char_re.search(string):
@@ -43,18 +44,16 @@ class pkg_info():
     self.release          = release
     self.version          = ''
     self.maintainer       = ''
-    self.po_info          = {}
-    self.debconfpo_info   = {}
 
   def __str__(self):
     return "Package %s: %s, %s\n%s" % \
-        (self.package, self.maintainer, self.version, self.po_info)
+        (self.package, self.maintainer, self.version)
 
 class po_info():
   def __init__(self, poline):
     po = poline.strip().split('!')
     # ignore .pot and .templates files
-    if po[0].endswith('.pot') or po[0].endswith('.templates'):
+    if not po[0].endswith('.po'):
       # or po[1].startswith('_') :
       self.infofields = 0
       return
@@ -68,7 +67,15 @@ class po_info():
       print >>stderr, "Invalid language '%s'. Po filename is %s." % (self.language, self.po_file)
       self.infofields = 0
       return
-    self.ID               = po[2]       # Need to ask Nicolas for the meaning of this
+    match = parse_translation_status_re.match(po[2])
+    if not match:
+      self.translated   = 'NULL'
+      self.fuzzy        = 'NULL'
+      self.untranslated = 'NULL'
+    else:
+      self.translated   = match.groups()[0]
+      self.fuzzy        = match.groups()[1]
+      self.untranslated = match.groups()[2]
     self.pkg_version_lang = po[3]       # Meaning is unclear
 
     # sometimes language translation team is missing
@@ -97,15 +104,70 @@ class i18n_apps_gatherer(gatherer):
 
     cur = self.cursor()
     # create prepared statements here!
-    query = """PREPARE i18n_apps_insert
-                   (text, text, text, text, text, text, text, text, text, text)
+    query = """PREPARE %s_insert
+                   (text, text, text, text, text, text, text, text, text, int, int, int)
                 AS INSERT INTO %s
                    (package, version, release, maintainer, po_file, language,
-                    id, pkg_version_lang, last_translator, language_team)
-                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)""" % (my_config['table_apps'])
-    cur.execute(query)
+                    pkg_version_lang, last_translator, language_team,
+                    translated, fuzzy, untranslated)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)"""
+    cur.execute(query % (my_config['table_apps'], my_config['table_apps']))
+    cur.execute(query % (my_config['table_debconf'], my_config['table_debconf']))
 
     pkg = None
+
+  def parse_po_infoline(self, po_type, data):
+    cur = self.cursor()
+
+    if po_type == 'PO':
+      target_table = self.my_config['table_apps']
+    elif po_type == 'PODEBCONF':
+      target_table = self.my_config['table_debconf']
+    else:
+      print >>stderr, "Wrong PO type %s ignored." % po_type
+      return
+
+    po_info_dict = {}
+    for poline in data[po_type].split("\n"):
+      # ignore first empty line
+      if len(poline) <= 1:
+        continue
+      poinfo = po_info(poline)
+      if poinfo.infofields == 0:
+        continue
+      # Sometimes there is more than one po file in a package.  We inject the file
+      # which contains better info about translator
+      # Attention: For the current application it is completely sufficient that we
+      #            keep the information *that* a package contains translation for
+      #            a certain package in UDD.  Other applications might need more
+      #            complete information.
+      if po_info_dict.has_key(poinfo.language):
+        po_info_dict[poinfo.language] = max(po_info_dict[poinfo.language], poinfo)
+      else:
+        po_info_dict[poinfo.language] = poinfo
+
+    for lang in po_info_dict.keys():
+      poinfo = po_info_dict[lang]
+      query = "EXECUTE %s_insert (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)" % \
+                (target_table, \
+                 quote(self.pkg.package), quote(self.pkg.version), quote(self.pkg.release), \
+                 quote(self.pkg.maintainer), quote(poinfo.po_file), quote(poinfo.language), \
+                 quote(poinfo.pkg_version_lang), \
+                 quote(poinfo.last_translator), quote(poinfo.language_team), \
+                 poinfo.translated, poinfo.fuzzy, poinfo.untranslated)
+      try:
+        cur.execute(query)
+      except IntegrityError, err:
+        print str(err).strip()
+        print len(po), po, poline, self.pkg
+      except InternalError, err:
+        print "InternalError:", err
+        print len(po), po, poline, self.pkg, po_type
+        print query
+        exit(-1)
+      except UnicodeEncodeError, err:
+        print err
+        print query
 
   def run(self):
     my_config = self.my_config
@@ -141,46 +203,12 @@ class i18n_apps_gatherer(gatherer):
             continue
           self.pkg.version     = stanza['Version']
           self.pkg.maintainer  = stanza['Maintainer']
+
           if stanza.has_key('PO'):
-            for poline in stanza['PO'].split("\n"):
-              # ignore first empty line
-              if len(poline) <= 1:
-                continue
-              poinfo = po_info(poline)
-              if poinfo.infofields == 0:
-                continue
-              # Sometimes there is more than one po file in a package.  We inject the file
-              # which contains better info about translator
-              # Attention: For the current application it is completely sufficient that we
-              #            keep the information *that* a package contains translation for
-              #            a certain package in UDD.  Other applications might need more
-              #            complete information.
-              if self.pkg.po_info.has_key(poinfo.language):
-                self.pkg.po_info[poinfo.language] = max(self.pkg.po_info[poinfo.language], poinfo)
-              else:
-                self.pkg.po_info[poinfo.language] = poinfo
+            self.parse_po_infoline('PO', stanza)
+          if stanza.has_key('PODEBCONF'):
+            self.parse_po_infoline('PODEBCONF', stanza)
 
-            for lang in self.pkg.po_info.keys():
-              poinfo = self.pkg.po_info[lang]
-              query = "EXECUTE i18n_apps_insert (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)" % \
-                        (quote(self.pkg.package), quote(self.pkg.version), quote(self.pkg.release), \
-                         quote(self.pkg.maintainer), quote(poinfo.po_file), quote(poinfo.language), \
-                         quote(poinfo.ID), quote(poinfo.pkg_version_lang), \
-                         quote(poinfo.last_translator), quote(poinfo.language_team))
-
-              try:
-                cur.execute(query)
-              except IntegrityError, err:
-                print str(err).strip()
-                print len(po), po, poline, self.pkg
-              except InternalError, err:
-                print "InternalError:", err
-                print len(po), po, poline, self.pkg
-                print query
-                exit(-1)
-              except UnicodeEncodeError, err:
-                print err
-                print query
       except IOError, err:
         print >>stderr, "Error reading %s (%s)" % (file, err)
 
