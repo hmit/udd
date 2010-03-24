@@ -9,7 +9,7 @@ PSEUDO_PKGS = ['base', 'cdrom', 'spam', 'press', 'kernel', 'project',
 'wnpp', 'cdimage.debian.org', 'tech-ctte', 'mirrors', 'security.debian.org',
 'installation-reports', 'upgrade-reports', 'release-notes', 'wiki.debian.org',
 'security-tracker', 'release.debian.org', 'debian-policy', 'debian-i18n',
-'buildd.emdebian.org', 'buildd.debian.org' ]
+'buildd.emdebian.org', 'buildd.debian.org', 'snapshot.debian.org' ]
 
 EXCLUDED = [
   /^(linux|kernel)-(image|source)-/, # we don't care about those bugs for now
