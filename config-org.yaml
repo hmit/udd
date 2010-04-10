@@ -19,6 +19,7 @@ general:
     ddtp: module udd.ddtp_gatherer
     ftpnew: module udd.ftpnew_gatherer
     screenshots: module udd.screenshot_gatherer
+    bibref: module udd.bibref_gatherer
     dehs: module udd.dehs_gatherer
     ldap: module udd.ldap_gatherer
     wannabuild: module udd.wannabuild_gatherer
@@ -556,6 +557,14 @@ screenshots:
   cache: /org/udd.debian.org/mirrors/cache
   table:  screenshots
   screenshots_json: /org/udd.debian.org/mirrors/screenshots/screenshots.json
+
+bibref:
+  type: bibref
+  update-command: /org/udd.debian.org/udd/scripts/fetch_bibref.sh
+  path: /org/udd.debian.org/mirrors/bibref
+  cache: /org/udd.debian.org/mirrors/cache
+  table: bibref
+  bibref_yaml: /org/udd.debian.org/mirrors/bibref/bibref.yaml
 
 wannabuild:
   type: wannabuild
