@@ -4,9 +4,15 @@ require 'dbi'
 require 'pp'
 require 'uri'
 require 'net/http'
+require 'cgi'
 
 URELEASE='lucid'
 
+$cgi = CGI::new
+
+if $cgi.has_key?('csv')
+  puts "Content-type: text/plain\n\n"
+else
 puts "Content-type: text/html\n\n"
 
 puts <<-EOF
@@ -32,6 +38,7 @@ puts <<-EOF
 
 Contact: <a href="mailto: lucas@ubuntu.com">Lucas Nussbaum</a><br>
 EOF
+end
 
 STDOUT.flush
 
@@ -59,13 +66,35 @@ res64.each do |l|
 end
 fails.delete_if { |k, v| (v['32'].nil? or v['32'][0] == 'OK') and (v['64'].nil? or v['64'][0] == 'OK') }
 
+outdatedres = []
+
+if not $cgi.has_key?('csv')
+
 puts "#{fails.length} packages failed to build.<br><br>"
 
-outdatedres = []
 puts "<table>"
 puts "<tr><th>Package</th><th>Section</th><th>Newer in Debian</th><th>i386</th><th>amd64</th><th>Reason</th></tr>"
+end
 
 def showrow(r, fa)
+  if $cgi.has_key?('csv')
+  print "#{r['source']},#{fa['version']},#{r['component']},"
+  if r['dversion'].nil?
+    print "Not in Debian"
+  elsif r['vercmp']
+    print "Yes"
+  else
+    print "No"
+  end
+  ['32','64'].each do |a|
+    if fa[a].nil?
+      print ",N/A"
+    else
+      print ",http://people.ubuntuwire.org/~lucas/ubuntu-nbs/#{a}/#{r['source']}_#{fa['version']}_llucid#{a}.buildlog,#{fa[a][0]}"
+    end
+  end
+  puts
+  else
   puts "<tr><td>#{r['source']} #{fa['version']} 
   <a href=\"http://packages.qa.debian.org/#{r['source']}\">PTS</a>
   <a href=\"http://bugs.debian.org/src:#{r['source']}\">BTS</a>
@@ -95,6 +124,7 @@ def showrow(r, fa)
     puts "<td>i386: #{fa['32'][1]}<br>amd64: #{fa['64'][1]}</td>"
   end
   puts "</tr>"
+  end
 end
 
 rows_u.each do |r|
@@ -106,17 +136,21 @@ rows_u.each do |r|
   end
   showrow(r, fa)
 end
+if not $cgi.has_key?('csv')
 puts "</table>"
-# FIXME outdatedres
 
 puts "<h2>Outdated results</h2>"
 puts "Those test builds were done with a version of the package that was superseded by a newer version in lucid.<br><br>"
 puts "<table>"
 puts "<tr><th>Package</th><th>Section</th><th>Newer in Debian</th><th>i386</th><th>amd64</th><th>Reason</th></tr>"
+end
+
 outdatedres.each do |r|
   fa = fails[r['source']]
   showrow(r, fa)
 end
+if not $cgi.has_key?('csv')
 puts "</table>"
 puts "</body>"
 puts "</html>"
+end
