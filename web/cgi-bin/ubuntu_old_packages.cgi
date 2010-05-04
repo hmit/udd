@@ -3,7 +3,7 @@
 
 require 'dbi'
 
-RELEASE='lucid'
+RELEASE='maverick'
 
 puts "Content-type: text/html\n\n"
 
