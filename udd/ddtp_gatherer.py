@@ -131,10 +131,13 @@ class ddtp_gatherer(gatherer):
         query = "EXECUTE ddtp_delete ('%s', '%s')" % (rel, lang)
         cur.execute(query)
 
+        i18n_error_flag=0
         descstring = 'Description-'+lang
         g = gzip.GzipFile(dir + filename)
         try:
           for stanza in deb822.Sources.iter_paragraphs(g, shared_storage=False):
+            if i18n_error_flag == 1:
+              continue
             self.pkg             = ddtp(stanza['package'], rel, lang)
             self.pkg.md5sum      = stanza['Description-md5']
             self.pkg.version     = stanza['Version']
@@ -146,7 +149,12 @@ class ddtp_gatherer(gatherer):
             query = "EXECUTE ddtp_check_before_insert ('%s', '%s', '%s', '%s', '%s', '%s')" % \
                     (self.pkg.package, self.pkg.distribution, self.pkg.component, \
                      self.pkg.release, self.pkg.language, self.pkg.version)
-            cur.execute(query)
+            try:
+              cur.execute(query)
+            except InternalError, err:
+              print >>stderr, "Encoding problem reading %s%s (%s)" % ( dir, filename, err)
+              i18n_error_flag=1
+              continue
             if cur.fetchone()[0] > 0:
               if debug > 0:
                 print >>stderr, "Just imported key in language %s: " % self.pkg.language, \
@@ -195,6 +203,8 @@ class ddtp_gatherer(gatherer):
                     (self.pkg.package, self.pkg.version, self.pkg.description, self.pkg.md5sum)
         except IOError, err:
           print >>stderr, "Error reading %s (%s)" % (dir+filename, err)
+        # commit every successfully language to make sure we get any languages in an willnot be blocked by a single failing import
+        self.connection.commit()
 
     cur.execute("DEALLOCATE ddtp_insert")
     cur.execute("ANALYZE %s" % my_config['table'])
