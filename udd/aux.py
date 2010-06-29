@@ -10,7 +10,9 @@ import fcntl
 debug = 0
 
 def quote(s):
-  "Quote a string for SQL"
+  "Quote a string for SQL and encode it to UTF-8 if it is a unicode string"
+  if isinstance(s, unicode):
+    s = s.encode('utf-8')
   return "'" + s.replace("\\", "\\\\").replace("'", "\\'") + "'"
 
 def null_or_quote(dict, key):
