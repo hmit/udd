@@ -28,6 +28,11 @@ from logging.config import fileConfig
 fileConfig("logging.ini")
 
 debug=0
+def to_unicode(value, encoding='utf-8'):
+    if isinstance(value, str):
+	return value.decode(encoding)
+    else:
+        return unicode(value)
 
 def get_gatherer(connection, config, source):
   return ddtp_gatherer(connection, config, source)
@@ -212,7 +217,7 @@ class ddtp_gatherer(gatherer):
               cur.execute(query)
             except IntegrityError, err:
               self.log.exception("Duplicated key in language %s: (%s)", self.pkg.language,
-                                 ", ".join([item.encode('utf-8') for item in (self.pkg.package, self.pkg.version, self.pkg.description, self.pkg.md5sum)]))
+                                 ", ".join([to_unicode(item) for item in (self.pkg.package, self.pkg.version, self.pkg.description, self.pkg.md5sum)]))
               self.connection.rollback()
               continue
         except IOError, err:
