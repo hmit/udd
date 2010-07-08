@@ -21,6 +21,11 @@ def get_gatherer(connection, config, source):
   return ftpnew_gatherer(connection, config, source)
 
 DEBUG=0
+def to_unicode(value, encoding='utf-8'):
+    if isinstance(value, str):
+	return value.decode(encoding)
+    else:
+        return unicode(value)
 
 # When parsing src html pages we have to get rid of certain html strings
 def de_html(string):
@@ -212,7 +217,7 @@ class ftpnew_gatherer(gatherer):
         srcpkg.s['Queue']         = stanza['queue']
         srcpkg.s['Last_modified'] = ctime(int(stanza['last-modified'])) # We want a real time object instead of an epoch
         srcpkg.s['Distribution']  = stanza['distribution']
-        srcpkg.s['Changed-By']    = stanza['changed-by']
+        srcpkg.s['Changed-By']    = to_unicode(stanza['changed-by'])
         # remove comma between binaries which are inserted in *.dsc information
         srcpkg.s['Bin']           = re.sub(", +", " ", stanza['binary'])
         try:
@@ -284,8 +289,8 @@ class ftpnew_gatherer(gatherer):
               binpkg.b['Distribution'] = srcpkg.s['Distribution']
             elif field == 'Maintainer':
               if in_source:
-                srcpkg.s[field]   = value
-                srcpkg.s['maintainer_name'], srcpkg.s['maintainer_email'] = email.Utils.parseaddr(srcpkg.s['Maintainer'])
+                srcpkg.s[field]   = to_unicode(value)
+                srcpkg.s['maintainer_name'], srcpkg.s['maintainer_email'] = email.Utils.parseaddr(srcpkg.s[field])
               else:
                 binpkg.b[field]   = value
               print >>srco, "%s: %s" % (field, value)
@@ -445,7 +450,8 @@ class ftpnew_gatherer(gatherer):
           if srcpkg.s['Queue'] != 'ignore':
             # fall back to some basic information
             binpkgs.append(binpkg_changes)
-            print >>stderr, "Package %s is missing information for binary packages" % (binpkg_changes.b['Package'])
+            if binpkg_changes:
+              print >>stderr, "Package %s is missing information for binary packages" % (binpkg_changes.b['Package'])
         if srcpkg.s['Queue'] != 'ignore':
           # print srcpkg
           srcpkg.check_dict()
@@ -459,6 +465,8 @@ class ftpnew_gatherer(gatherer):
             cur.execute(query, srcpkg.s)
           except ProgrammingError, err:
             print "ProgrammingError", err, "\n", query, "\n", srcpkg.s
+          except UnicodeEncodeError, err:
+            print "UnicodeEncodeError probably in 'Maintainer' or 'Changed-By' field, but should be prevented by to_unicode()\n", err, "\n", srcpkg.s
           for binpkg in binpkgs:
             # print binpkg
             if not binpkg:
