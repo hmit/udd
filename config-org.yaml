@@ -500,3 +500,14 @@ pts:
 
 history-daily:
   type: history-daily
+
+i18n-apps:
+   type: i18n-apps
+   update-command: /org/udd.debian.org/udd/scripts/fetch_i18n-apps.sh
+   path: /org/udd.debian.org/mirrors/i18n-apps
+   mirror: http://i18n.debian.net/material/data
+   files: .*\.gz
+   releases: sid squeeze
+   table_apps: i18n_apps
+   table_debconf: po_debconf
+
