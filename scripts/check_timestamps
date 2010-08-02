@@ -1,5 +1,7 @@
 echo "select source, max(end_time) from timestamps
 where command = 'run' and source not in (
+'debian-etch', 'debian-backports-etch', 'debian-volatile-etch', 'debian-volatile-sloppy-etch', 'debian-volatile-proposed-etch', 'debian-etch-proposed-updates', 'debian-etch-security', 'ddtp'
+) and source not in (
 select source from timestamps where command = 'run' and end_time > (current_timestamp - interval '36 hours')) group by source;" | psql -q -t udd | grep -v "^$"
 ls -l --time-style=full-iso /org/bugs.debian.org/www/project/trace/ |sort -n -k 6 | grep -v $(date --iso) | grep -v $(date --iso -d '1 day ago') | grep -v "^total"
 
