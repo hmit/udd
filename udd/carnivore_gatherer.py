@@ -24,6 +24,7 @@ class carnivore_gatherer(gatherer):
     "Key in ldap":     {"name": "ldap_key", "content-type": "multiple entries"},
     "Key in emeritus": {"name": "emeritus_key", "content-type": "multiple entries"},
     "Key in removed":  {"name": "removed_key", "content-type": "multiple entries"},
+    "Key in dm":       {"name": "dm_key", "content-type": "multiple entries"},
   }
 
   def __init__(self, connection, config, source):
@@ -76,7 +77,7 @@ class carnivore_gatherer(gatherer):
             qs.append("EXECUTE carnivore_name_insert (%d, %s)" % (record_number, quote(name)))
           if "login" in record:
             qs.append("EXECUTE carnivore_login_insert (%d, %s)" % (record_number, quote(record["login"])))
-          for key_type in ['keyring', 'ldap', 'emeritus', 'removed']:
+          for key_type in ['keyring', 'ldap', 'emeritus', 'removed', 'dm']:
             if ("%s_key" % key_type) in record:
               for key in record["%s_key" % key_type]:
                 qs.append("EXECUTE carnivore_keys_insert (%d, %s, '%s')" % (record_number, quote(key), key_type))
