@@ -26,6 +26,7 @@ general:
     removals: module udd.removals_gatherer
     pts: module udd.pts_gatherer
     history-daily: module udd.history_daily_gatherer
+    i18n-apps: module udd.i18n_apps_gatherer
   timestamp-dir: /org/udd.debian.org/timestamps
   lock-dir: /org/udd.debian.org/locks
   archs:
