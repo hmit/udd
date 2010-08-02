@@ -22,15 +22,16 @@ upload = dbh.select_all("select source from uploaders where distribution='debian
 pts = dbh.select_all("select source from pts where #{dbh.quote(cgi['email'])}=email").map { |e| e[0] }
 puts "<h1>PTS subscriptions check for #{cgi['email']}</h1>"
 if (maint - pts).length > 0
-puts "Packages you maintain but are not subscribed to:<br/><ul>"
-(maint - pts).sort.each { |s| puts "<li><a href=\"http://packages.qa.debian.org/#{s}\">#{s}</a></li>" }
-puts "</ul>"
+puts "Packages you maintain but are not subscribed to:<br/><pre>"
+(maint - pts).sort.each { |s| puts "subscribe #{s} #{cgi['email']}" }
+puts "</pre>"
 end
 if (upload - pts).length > 0
-puts "Packages you are uploader for but are not subscribed to:<br/><ul>"
-(upload - pts).sort.each { |s| puts "<li><a href=\"http://packages.qa.debian.org/#{s}\">#{s}</a></li>" }
-puts "</ul>"
+puts "Packages you are uploader for but are not subscribed to:<br/><pre>"
+(upload - pts).sort.each { |s| puts "subscribe #{s} #{cgi['email']}" }
+puts "</pre>"
 end
+puts 'To be sent in the body of a mail to pts@qa.debian.org. See <a href="http://www.debian.org/doc/developers-reference/resources.html#pts-commands">Developers Reference</a> for more info.<br/>If you are a DD, you can also connect to master and feed those commands to /org/packages.qa.debian.org/bin/pts'
 else
 puts <<-EOF
 

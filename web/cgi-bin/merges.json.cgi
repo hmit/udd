@@ -10,7 +10,7 @@ URELEASE='maverick'
 
 puts "Content-type: application/json\n\n"
 
-DREL='squeeze'
+DREL='sid'
 UREL='maverick'
 
 dbh = DBI::connect('DBI:Pg:dbname=udd;port=5441;host=localhost', 'guest')
@@ -41,7 +41,7 @@ sth2 = dbh.prepare("select distinct package, b.bug, title, status
 from ubuntu_bugs b, ubuntu_bugs_tasks bt
 where b.bug = bt.bug
 and title ~ '^((P|p)lease )?((M|m)erge|(S|s)ync) .* from Debian'
-and status != 'Fix Released'
+and status not in ('Invalid', 'Fix Released', 'Won''t Fix', 'Opinion')
 and distro != 'Debian'")
 sth2.execute ; rowsb = sth2.fetch_all
 

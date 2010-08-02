@@ -31,7 +31,7 @@ puts <<-EOF
 <h1>Outstanding merges</h1>
 EOF
 
-DREL='squeeze'
+DREL='sid'
 UREL='maverick'
 puts "Debian release: #{DREL}<br>"
 puts "Ubuntu release: #{UREL}<br>"
@@ -65,7 +65,7 @@ sth2 = dbh.prepare("select distinct package, b.bug, title, status
 from ubuntu_bugs b, ubuntu_bugs_tasks bt
 where b.bug = bt.bug
 and title ~ '^((P|p)lease )?((M|m)erge|(S|s)ync) .* from Debian'
-and status != 'Fix Released'
+and status not in ('Invalid', 'Fix Released', 'Won''t Fix', 'Opinion')
 and distro != 'Debian'")
 sth2.execute ; rowsb = sth2.fetch_all
 

@@ -27,8 +27,8 @@ class ldap_gatherer(gatherer):
 
     cur.execute("""PREPARE ldap_insert 
       AS INSERT INTO ldap
-      (uid, login, cn, sn, expire, location, country, activity_from, activity_from_info, activity_pgp, activity_pgp_info, gecos, birthdate, gender)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)""")
+      (uid, login, cn, sn, expire, location, country, activity_from, activity_from_info, activity_pgp, activity_pgp_info, gecos, birthdate, gender, fingerprint)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)""")
 
     entries = []
     con = ldap.initialize('ldap://db.debian.org')
@@ -53,11 +53,12 @@ class ldap_gatherer(gatherer):
       gender = int(f['gender'][0]) if 'gender' in f else None
       loc = f['l'][0] if 'l' in f else None
       country = f['c'][0] if 'c' in f else None
+      fp = f['keyFingerPrint'][0] if 'keyFingerPrint' in f else None
       expired = ('shadowExpire' in f)
 
-      entries.append((int(f['uidNumber'][0]), f['uid'][0], f['cn'][0], f['sn'][0], expired, loc, country, af_date, af_info, ag_date, ag_info, gecos, birthdate, gender))
+      entries.append((int(f['uidNumber'][0]), f['uid'][0], f['cn'][0], f['sn'][0], expired, loc, country, af_date, af_info, ag_date, ag_info, gecos, birthdate, gender, fp))
 
-    cur.executemany("EXECUTE ldap_insert (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", entries)
+    cur.executemany("EXECUTE ldap_insert (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", entries)
     cur.execute("DEALLOCATE ldap_insert")
     cur.execute("ANALYZE ldap")
 

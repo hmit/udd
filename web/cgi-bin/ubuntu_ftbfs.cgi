@@ -42,8 +42,8 @@ end
 
 STDOUT.flush
 
-res32 = Net::HTTP.get(URI::parse('http://people.ubuntuwire.com/~lucas/ubuntu-nbs/res.maverick.32')).split(/\n/)
-res64 = Net::HTTP.get(URI::parse('http://people.ubuntuwire.com/~lucas/ubuntu-nbs/res.maverick.64')).split(/\n/)
+res32 = Net::HTTP.get(URI::parse('http://people.ubuntuwire.com/~lucas/ubuntu-nbs/res.ubuntu.32')).split(/\n/)
+res64 = Net::HTTP.get(URI::parse('http://people.ubuntuwire.com/~lucas/ubuntu-nbs/res.ubuntu.64')).split(/\n/)
 
 dbh = DBI::connect('DBI:Pg:dbname=udd;port=5441;host=localhost', 'guest')
 
@@ -90,7 +90,7 @@ def showrow(r, fa)
     if fa[a].nil?
       print ",N/A"
     else
-      print ",http://people.ubuntuwire.org/~lucas/ubuntu-nbs/#{a}/#{r['source']}_#{fa['version']}_lmaverick#{a}.buildlog,#{fa[a][0]}"
+      print ",http://people.ubuntuwire.org/~lucas/ubuntu-nbs/#{a}/#{r['source']}_#{fa['version']}_lubuntu#{a}.buildlog,#{fa[a][0]}"
     end
   end
   puts
@@ -111,7 +111,7 @@ def showrow(r, fa)
     if fa[a].nil?
       puts "<td>N/A</td>"
     else
-      puts "<td><a href=\"http://people.ubuntuwire.org/~lucas/ubuntu-nbs/#{a}/#{r['source']}_#{fa['version']}_lmaverick#{a}.buildlog\">#{fa[a][0]}</a></td>"
+      puts "<td><a href=\"http://people.ubuntuwire.org/~lucas/ubuntu-nbs/#{a}/#{r['source']}_#{fa['version']}_lubuntu#{a}.buildlog\">#{fa[a][0]}</a></td>"
     end
   end
   if fa['32'].nil? or fa['32'][0] == 'OK' # only amd64 failed
@@ -140,7 +140,7 @@ if not $cgi.has_key?('csv')
 puts "</table>"
 
 puts "<h2>Outdated results</h2>"
-puts "Those test builds were done with a version of the package that was superseded by a newer version in maverick.<br><br>"
+puts "Those test builds were done with a version of the package that was superseded by a newer version in ubuntu.<br><br>"
 puts "<table>"
 puts "<tr><th>Package</th><th>Section</th><th>Newer in Debian</th><th>i386</th><th>amd64</th><th>Reason</th></tr>"
 end

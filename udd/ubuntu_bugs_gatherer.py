@@ -159,7 +159,7 @@ class ubuntu_bugs_gatherer(gatherer):
     # ignore attachments for now
     s = set(bm.keys()) - set(['bug', 'title', 'reporter', 'attachments',
       'subscribers', 'tags', 'duplicate-of', 'duplicates', 'date-reported',
-      'date-updated', 'security'])
+      'date-updated', 'security', 'patches'])
     if len(s) > 0:
       print s
     name, login = self.splitpar(bm['reporter'])
@@ -175,8 +175,12 @@ class ubuntu_bugs_gatherer(gatherer):
       security = 'f'
     treported = time.strftime("%a, %d %b %Y %H:%M:%S +0000", reported)
     tupdated = time.strftime("%a, %d %b %Y %H:%M:%S +0000", updated)
-    c.execute('insert into ubuntu_bugs values (%s, %s, %s, %s, %s, %s, %s, %s)',
-        (bugno, bm['title'], login, name, dup, treported, tupdated, security))
+    if len(bm['patches']) > 0:
+      patches = 't'
+    else:
+      patches = 'f'
+    c.execute('insert into ubuntu_bugs values (%s, %s, %s, %s, %s, %s, %s, %s, %s)',
+        (bugno, bm['title'], login, name, dup, treported, tupdated, security, patches))
     # subscribers
     for sub in bm['subscribers'].split('\n'):
       name, login = self.splitpar(sub)

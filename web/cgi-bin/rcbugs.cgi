@@ -64,3 +64,21 @@ rows.each do |r|
 end
 puts "</table>"
 sth.finish
+
+sth = dbh.prepare("select id, bugs.package, bugs.source, insts, title from bugs, popcon_src where bugs.source = popcon_src.source and id in (select id from bugs_rt_affects_testing) and id not in (select id from bugs_rt_affects_unstable) and severity >= 'serious' order by package")
+sth.execute ; rows = sth.fetch_all
+
+puts "<h2>RC bugs affecting only testing (not unstable, and not pending)</h2>"
+puts "<table>"
+puts "<tr><th>bug</th><th>package</th><th>source</th><th>popcon</th><th>title</th></tr>"
+rows.each do |r|
+   puts "<tr><td><a href=\"http://bugs.debian.org/#{r['id']}\">#{r['id']}</a></td>"
+   puts "<td>#{r['package']}</td>"
+   puts "<td><a href=\"http://packages.qa.debian.org/#{r['source']}\">#{r['source']}</a></td>"
+   puts "<td>#{r['insts']}</td>"
+   puts "<td>#{r['title']}</td>"
+end
+puts "</table>"
+sth.finish
+
+

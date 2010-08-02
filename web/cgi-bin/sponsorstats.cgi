@@ -13,7 +13,10 @@ and s.version = u.version
 and u.changed_by_email = ce1.email
 and u.signed_by_email = ce2.email
 and ce1.id != ce2.id
-and ce2.id = cl.id")
+and ce2.id = cl.id
+and u.changed_by_email not in (
+select email from carnivore_emails, carnivore_login where carnivore_login.id = carnivore_emails.id)
+")
 sth.execute
 names = {}
 uploaders = {}
@@ -34,6 +37,7 @@ end
 puts "<html><body>"
 puts "<h1>Sponsoring stats, powered by UDD!</h2>"
 puts "<p>Uploads in <b>bold</b> were NMUs.</p>"
+puts "<p>That excludes uploads done for people who are now DD, even if the upload was done while they were not DD.</p>"
 puts '<a href="http://svn.debian.org/wsvn/collab-qa/udd/web/cgi-bin/sponsorstats.cgi?op=file&rev=0&sc=0">source code</a><br/>'
 
 puts "<ul>"

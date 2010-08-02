@@ -472,6 +472,7 @@ duplicate_of int,
 date_reported text,
 date_updated text,
 security boolean,
+patches boolean,
 PRIMARY KEY (bug));
 
 CREATE TABLE ubuntu_bugs_duplicates (
@@ -618,6 +619,7 @@ CREATE TABLE ldap (
   gecos text,
   birthdate date,
   gender numeric,
+  fingerprint text,
   PRIMARY KEY (uid)
 );
 GRANT SELECT ON ldap TO guestdd;
