@@ -435,17 +435,17 @@ GRANT SELECT ON migrations TO PUBLIC;
 
 CREATE TABLE upload_history
  (source text, version debversion, date timestamp with time zone,
- changed_by text, changed_by_name text, changed_by_email text, maintainer text, maintainer_name text, maintainer_email text, nmu boolean, signed_by text, signed_by_name text, signed_by_email text, key_id text,
+ changed_by text, changed_by_name text, changed_by_email text, maintainer text, maintainer_name text, maintainer_email text, nmu boolean, signed_by text, signed_by_name text, signed_by_email text, key_id text, file text,
  fingerprint text,
  PRIMARY KEY (source, version));
 
 CREATE TABLE upload_history_architecture
- (source text, version debversion, architecture text,
+ (source text, version debversion, architecture text, file text,
  PRIMARY KEY (source, version, architecture),
 FOREIGN KEY (source, version) REFERENCES upload_history DEFERRABLE);
   
 CREATE TABLE upload_history_closes
- (source text, version debversion, bug int,
+ (source text, version debversion, bug int, file text,
  PRIMARY KEY (source, version, bug),
 FOREIGN KEY (source, version) REFERENCES upload_history DEFERRABLE);
 

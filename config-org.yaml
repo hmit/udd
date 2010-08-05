@@ -375,7 +375,7 @@ testing-migrations:
 upload-history:
   type: upload-history
   path: /org/udd.debian.org/tmp/upload-history
-  update-command: if [ ! -e /org/udd.debian.org/tmp/upload-history/ ]; then mkdir /org/udd.debian.org/tmp/upload-history/; fi; rm -rf /org/udd.debian.org/tmp/upload-history/*; wget -q -r --no-parent -nd -A debian-devel-* -P /org/udd.debian.org/tmp/upload-history http://qa.debian.org/~filippo/ddc/
+  update-command: if [ ! -e /org/udd.debian.org/tmp/upload-history/ ]; then mkdir /org/udd.debian.org/tmp/upload-history/; fi; lftp -c 'mirror -e -P http://master.debian.org/~lucas/ddc-parser/ /org/udd.debian.org/tmp/upload-history'
   schema: upload_history
   table: upload_history
 
