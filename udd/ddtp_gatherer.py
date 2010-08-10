@@ -23,9 +23,7 @@ import gzip
 from psycopg2 import IntegrityError, InternalError
 
 import logging
-from logging.config import fileConfig
-
-fileConfig("logging.ini")
+import logging.handlers
 
 debug=0
 def to_unicode(value, encoding='utf-8'):
@@ -63,6 +61,11 @@ class ddtp_gatherer(gatherer):
     self.assert_my_config('path', 'files', 'table', 'releases')
     my_config = self.my_config
     self.log = logging.getLogger(self.__class__.__name__)
+    self.log.setLevel(logging.INFO)
+    handler = logging.handlers.RotatingFileHandler(filename=self.__class__.__name__+'.log',mode='w')
+    formatter = logging.Formatter("%(asctime)s - %(levelname)s - (%(lineno)d): %(message)s")
+    handler.setFormatter(formatter)
+    self.log.addHandler(handler)
 
     cur = self.cursor()
     query = "PREPARE ddtp_delete (text, text) AS DELETE FROM %s WHERE release = $1 AND language = $2" % my_config['table']
