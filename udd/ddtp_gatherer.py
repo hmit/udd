@@ -101,8 +101,8 @@ class ddtp_gatherer(gatherer):
                    description || E'\n' || long_description AS full_description
                   FROM packages
                   WHERE package = $1 AND distribution = $2 AND component = $3 AND
-                  release = $4 AND version = $5 AND architecture = 'i386'
-               ) AS tmp GROUP BY full_description"""
+                  release = $4 AND version = $5 AND architecture in ('all', 'i386', 'amd64')
+               ) AS tmp GROUP BY full_description LIMIT 1"""
     self.log.debug("execute query %s", query)
     cur.execute(query)
 
@@ -185,7 +185,7 @@ class ddtp_gatherer(gatherer):
               self.log.debug("execute query %s", query)
               cur.execute(query)
               if cur.rowcount <= 0:
-                self.log.warning("Did not find description for i386 in %s",
+                self.log.warning("Did not find description for most frequent architectures in %s",
                                  ", ".join([self.pkg.package, self.pkg.distribution, self.pkg.component,
                                             self.pkg.release, self.pkg.version]))
                 continue
