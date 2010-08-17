@@ -6,13 +6,14 @@ This script imports bibliographic references from upstream-metadata.debian.net.
 
 from gatherer import gatherer
 from sys import stderr, exit
+from yaml import safe_load_all
 
 online=0
 
 def get_gatherer(connection, config, source):
   return bibref_gatherer(connection, config, source)
 
-class screenshot_gatherer(gatherer):
+class bibref_gatherer(gatherer):
   """
   Bibliographic references from upstream-metadata.debian.net.
   """
@@ -46,12 +47,11 @@ class screenshot_gatherer(gatherer):
 
     for res in safe_load_all(result):
       package, key, value = res
-      query = """EXECUTE bibref_insert
-                        (%(package)s, %(key)s, %(value)s)"""
+      query = "EXECUTE bibref_insert (%s, %s, %s)"
       try:
-        cur.execute(query, res)
+        cur.execute(query, (package, key, value))
       except UnicodeEncodeError, err:
-        print >>stderr, "Unable to inject data for package %s. %s" % (res['name'], err)
+        print >>stderr, "Unable to inject data for package %s. %s" % (package, err)
         print >>stderr,  "-->", res
     cur.execute("DEALLOCATE bibref_insert")
     cur.execute("ANALYZE %s" % my_config['table'])
@@ -60,4 +60,3 @@ if __name__ == '__main__':
   main()
 
 # vim:set et tabstop=2:
-
