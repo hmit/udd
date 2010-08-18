@@ -47,11 +47,12 @@ class bibref_gatherer(gatherer):
 
     for res in safe_load_all(result):
       package, key, value = res
+      value = unicode(value)
       query = "EXECUTE bibref_insert (%s, %s, %s)"
       try:
-        cur.execute(query, (package, key, value))
+        cur.execute(query, (package, key, value.encode('utf-8')))
       except UnicodeEncodeError, err:
-        print >>stderr, "Unable to inject data for package %s. %s" % (package, err)
+        print >>stderr, "Unable to inject data for package %s, key %s, value %s. %s" % (package, key, value, err)
         print >>stderr,  "-->", res
     cur.execute("DEALLOCATE bibref_insert")
     cur.execute("ANALYZE %s" % my_config['table'])
