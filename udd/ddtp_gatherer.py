@@ -61,7 +61,10 @@ class ddtp_gatherer(gatherer):
     self.assert_my_config('path', 'files', 'table', 'releases')
     my_config = self.my_config
     self.log = logging.getLogger(self.__class__.__name__)
-    self.log.setLevel(logging.INFO)
+    if debug==1:
+	self.log.setLevel(logging.DEBUG)
+    else:
+	self.log.setLevel(logging.INFO)
     handler = logging.handlers.RotatingFileHandler(filename=self.__class__.__name__+'.log',mode='w')
     formatter = logging.Formatter("%(asctime)s - %(levelname)s - (%(lineno)d): %(message)s")
     handler.setFormatter(formatter)
@@ -69,26 +72,26 @@ class ddtp_gatherer(gatherer):
 
     cur = self.cursor()
     query = "PREPARE ddtp_delete (text, text) AS DELETE FROM %s WHERE release = $1 AND language = $2" % my_config['table']
-    self.log.debug("execute query %s", query)
+    # self.log.debug("execute query %s", query)
     cur.execute(query)
     query = """PREPARE ddtp_insert AS INSERT INTO %s
                    (package, distribution, component, release, language, version, description, long_description, md5sum)
                     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)""" % (my_config['table'])
-    self.log.debug("execute query %s", query)
+    # self.log.debug("execute query %s", query)
     cur.execute(query)
 
     query = """PREPARE ddtp_check_before_insert (text, text, text, text, text, text) AS
                   SELECT COUNT(*) FROM %s
                     WHERE package = $1 AND distribution = $2 AND component = $3 AND
                           release = $4 AND language = $5 AND version = $6""" % (my_config['table'])
-    self.log.debug("execute query %s", query)
+    # self.log.debug("execute query %s", query)
     cur.execute(query)
 
     query = """PREPARE ddtp_get_duplicate (text, text, text, text, text, text) AS
                   SELECT description, long_description, md5sum FROM %s
                     WHERE package = $1 AND distribution = $2 AND component = $3 AND
                           release = $4 AND language = $5 AND version = $6""" % (my_config['table'])
-    self.log.debug("execute query %s", query)
+    # self.log.debug("execute query %s", query)
     cur.execute(query)
 
     # Query for english package description of the i386 architecture because this is the
@@ -103,7 +106,7 @@ class ddtp_gatherer(gatherer):
                   WHERE package = $1 AND distribution = $2 AND component = $3 AND
                   release = $4 AND version = $5 AND architecture in ('all', 'i386', 'amd64')
                ) AS tmp GROUP BY full_description LIMIT 1"""
-    self.log.debug("execute query %s", query)
+    # self.log.debug("execute query %s", query)
     cur.execute(query)
 
     # In some cases a just imported translation has to be removed again because
@@ -112,7 +115,7 @@ class ddtp_gatherer(gatherer):
                DELETE FROM %s
                     WHERE package = $1 AND distribution = $2 AND component = $3 AND
                           release = $4 AND language = $5 AND version = $6""" % (my_config['table'])
-    self.log.debug("execute query %s", query)
+    # self.log.debug("execute query %s", query)
     cur.execute(query)
 
     pkg = None
@@ -137,17 +140,18 @@ class ddtp_gatherer(gatherer):
         md5file=dir + 'Translation-' + lang + '.md5'
         try:
           if ( cmp(md5file, md5file + '.prev' ) ):
-            self.log.debug("%s has not changed.  No update needed.", md5file)
+            # self.log.debug("%s has not changed.  No update needed.", md5file)
             continue
           else:
-            self.log.debug("%s changed.  Go on updating language %s", md5file, lang)
+            # self.log.debug("%s changed.  Go on updating language %s", md5file, lang)
+            pass
         except OSError:
           self.log.info('md5file for %s missing,  Go updating', lang)
 
         # Delete only records where we actually have Translation files.  This
         # prevents dump deletion of all data in case of broken downloads
         query = "EXECUTE ddtp_delete (%s, %s)" % (quote(rel), quote(lang))
-        self.log.debug("execute query %s", query)
+        # self.log.debug("execute query %s", query)
         cur.execute(query)
 
         i18n_error_flag=0
@@ -162,13 +166,18 @@ class ddtp_gatherer(gatherer):
             self.pkg.version     = stanza['Version']
             desc                 = stanza[descstring]
             lines                = desc.splitlines()
-            self.pkg.description = lines[0]
+            try:
+              self.pkg.description = lines[0]
+            except IndexError, err:
+              self.log.exception("Did not found first line in description: file=%s%s, pkg=%s, version=%s" % (dir, filename, self.pkg.package, self.pkg.version))
+              i18n_error_flag=1
+              continue
             for line in lines[1:]:
               self.pkg.long_description += line + "\n"
             query = "EXECUTE ddtp_check_before_insert (%s, %s, %s, %s, %s, %s)" % \
                     tuple([quote(item) for item in (self.pkg.package, self.pkg.distribution, self.pkg.component, 
                      self.pkg.release, self.pkg.language, self.pkg.version)])
-            self.log.debug("execute query %s", query)
+            # self.log.debug("execute query %s", query)
             try:
               cur.execute(query)
             except InternalError, err:
@@ -198,14 +207,14 @@ class ddtp_gatherer(gatherer):
               query = "EXECUTE ddtp_get_duplicate (%s, %s, %s, %s, %s, %s)" % \
                     tuple([quote(item) for item in (self.pkg.package, self.pkg.distribution, self.pkg.component, \
                      self.pkg.release, self.pkg.language, self.pkg.version)])
-              self.log.debug("execute query %s", query)
+              # self.log.debug("execute query %s", query)
               cur.execute(query)
               for r in cur.fetchall():
                 if md5sum.startswith(r[2]):
                   query = "EXECUTE ddtp_delete_duplicate (%s, %s, %s, %s, %s, %s)" % \
                       tuple([quote(item) for item in (self.pkg.package, self.pkg.distribution, self.pkg.component, \
                        self.pkg.release, self.pkg.language, self.pkg.version)])
-                  self.log.debug("execute query %s", query)
+                  # self.log.debug("execute query %s", query)
                   cur.execute(query)
 
             query = "EXECUTE ddtp_insert (%s, %s, %s, %s, %s, %s, %s, %s, %s)" % \
@@ -216,7 +225,7 @@ class ddtp_gatherer(gatherer):
                          self.pkg.long_description, \
                          self.pkg.md5sum)])
             try:
-              self.log.debug("execute query %s", query)
+              # self.log.debug("execute query %s", query)
               cur.execute(query)
             except IntegrityError, err:
               self.log.exception("Duplicated key in language %s: (%s)", self.pkg.language,
