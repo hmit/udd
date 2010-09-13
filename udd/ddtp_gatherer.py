@@ -164,7 +164,12 @@ class ddtp_gatherer(gatherer):
             self.pkg             = ddtp(stanza['package'], rel, lang)
             self.pkg.md5sum      = stanza['Description-md5']
             self.pkg.version     = stanza['Version']
-            desc                 = stanza[descstring]
+            try:
+              desc               = stanza[descstring]
+            except KeyError, err:
+              self.log.error("file=%s%s, pkg=%s, version=%s (%s)" % (dir, filename, self.pkg.package, self.pkg.version, err))
+              i18n_error_flag=1
+              continue
             lines                = desc.splitlines()
             try:
               self.pkg.description = lines[0]
