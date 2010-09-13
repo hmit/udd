@@ -9,7 +9,7 @@ puts "Content-type: text/html\n\n"
 RELEASE_RESTRICT = [
   ['squeeze', 'squeeze', 'id in (select id from bugs_rt_affects_testing)'],
   ['sid', 'sid', 'id in (select id from bugs_rt_affects_unstable)'],
-  ['squeeze_and_sid', 'squeeze and sid', 'id in (select id from bugs_rt_affects_testing_and_unstable)'],
+  ['squeeze_and_sid', 'squeeze and sid', 'id in (select id from bugs_rt_affects_testing) and id in (select id from bugs_rt_affects_unstable)'],
   ['squeeze_or_sid', 'squeeze or sid', 'id in (select id from bugs_rt_affects_testing union select id from bugs_rt_affects_unstable)'],
   ['squeeze_not_sid', 'squeeze, not sid', 'id in (select id from bugs_rt_affects_testing) and id not in (select id from bugs_rt_affects_unstable)'],
   ['sid_not_squeeze', 'sid, not squeeze', 'id in (select id from bugs_rt_affects_unstable) and id not in (select id from bugs_rt_affects_testing)']
@@ -123,7 +123,7 @@ RELEASE_RESTRICT.each do |r|
   puts "<input type='radio' name='release' value='#{r[0]}' #{checked}/>#{r[1]}&nbsp;&nbsp;"
 end
 puts <<-EOF
-</p>
+(also uses release tags and xxx-ignore information)</p>
 <table class="invisible"><tr><td>
 <table class="buglist">
 <tr><th colspan='4'>FILTERS</th></tr>
@@ -199,15 +199,16 @@ rows = sth.fetch_all
 puts "<p><b>#{rows.length} bugs found.</b></p>"
 puts <<-EOF
 <table class="buglist">
-<tr><th>bug#</th><th>source pkg</th><th>binary pkg</th><th>title</th><th>last&nbsp;modified</th></tr>
+<tr><th>bug#</th><th>package</th><th>title</th><th>last&nbsp;modified</th></tr>
 EOF
 rows.each do |r|
   puts "<tr><td style='text-align: center;'><a href=\"http://bugs.debian.org/#{r['id']}\">##{r['id']}</a></td>"
   puts "<td style='text-align: center;'>"
-  puts r['source'].split(/,\s*/).map { |pkg| "<a href=\"http://packages.qa.debian.org/#{pkg}\">#{pkg}</a>" }.join(', ')
+  srcs = r['source'].split(/,\s*/)
+  bins = r['package'].split(/,\s*/)
+  puts (0...bins.length).map { |i| "<a href=\"http://packages.qa.debian.org/#{srcs[i]}\">#{bins[i]}</a>" }.join(', ')
   puts "</td>"
   puts <<-EOF
-  <td style='text-align: center;'>#{r['package']}</td>
   <td>#{r['title']}</td>
   <td style='text-align: center;'>#{r['last_modified'].to_date}</td>
   </tr>
