@@ -50,9 +50,9 @@ class upload_history_gatherer(gatherer):
     added = {}
     files = glob(path + '/debian-devel-changes.*')
     files.sort()
-#    for name in files:
     for name in files[-2:]:
-      bname = os.path.basename(name)
+#    for name in files:
+      bname = os.path.basename(name).replace(".gz","").replace(".out","")
 #      print bname
       cursor.execute("DELETE FROM " + self.my_config['table'] + "_architecture where file='%s'" % (bname))
       cursor.execute("DELETE FROM " + self.my_config['table'] + "_closes where file='%s'" % (bname))
@@ -79,7 +79,11 @@ class upload_history_gatherer(gatherer):
         if line == '':
           current['Changed-By_name'], current['Changed-By_email'] = email.Utils.parseaddr(current['Changed-By'])
           current['Maintainer_name'], current['Maintainer_email'] = email.Utils.parseaddr(current['Maintainer'])
-          current['Signed-By_name'], current['Signed-By_email'] = email.Utils.parseaddr(current['Signed-By'])
+          if current['Signed-By'].find('@') != -1:
+            current['Signed-By_name'], current['Signed-By_email'] = email.Utils.parseaddr(current['Signed-By'])
+          else:
+            current['Signed-By_name'] = current['Signed-By']
+            current['Signed-By_email'] = ''
           current['Message-Date'] = current['Message-Date'].partition('(')[0].replace('+4200','+0000').replace('+4300','+0000').replace('+4100','+0000').replace('+4400','+0000').replace('+4000','+0000')
           if (current['Source'], current['Version']) in added or \
             (current['Source'], current['Version']) == ('libapache-authznetldap-perl', '0.07-4') or \
