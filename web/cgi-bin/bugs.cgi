@@ -12,7 +12,8 @@ RELEASE_RESTRICT = [
   ['squeeze_and_sid', 'squeeze and sid', 'id in (select id from bugs_rt_affects_testing) and id in (select id from bugs_rt_affects_unstable)'],
   ['squeeze_or_sid', 'squeeze or sid', 'id in (select id from bugs_rt_affects_testing union select id from bugs_rt_affects_unstable)'],
   ['squeeze_not_sid', 'squeeze, not sid', 'id in (select id from bugs_rt_affects_testing) and id not in (select id from bugs_rt_affects_unstable)'],
-  ['sid_not_squeeze', 'sid, not squeeze', 'id in (select id from bugs_rt_affects_unstable) and id not in (select id from bugs_rt_affects_testing)']
+  ['sid_not_squeeze', 'sid, not squeeze', 'id in (select id from bugs_rt_affects_unstable) and id not in (select id from bugs_rt_affects_testing)'],
+  ['lenny', 'lenny', 'id in (select id from bugs_rt_affects_stable)'],
 ]
 
 FILTERS = [
@@ -23,6 +24,8 @@ FILTERS = [
  ['notsqueeze', 'packages not in squeeze', 'id not in (select id from bugs_packages, sources where bugs_packages.source = sources.source and release=\'squeeze\')'],
  ['merged', 'merged bugs', 'id in (select id from bugs_merged_with where id > merged_with)'],
  ['done', 'marked as done', 'status = \'done\''],
+ ['outdatedsqueeze', 'outdated binaries in squeeze', "source in (select distinct p1.source from packages_summary p1, packages_summary p2 where p1.source = p2.source and p1.release='squeeze' and p2.release='squeeze' and p1.source_version != p2.source_version)"],
+ ['outdatedsid', 'outdated binaries in sid', "source in (select distinct p1.source from packages_summary p1, packages_summary p2 where p1.source = p2.source and p1.release='sid' and p2.release='sid' and p1.source_version != p2.source_version)"],
 ]
 
 TYPES = [
@@ -61,17 +64,17 @@ end
 # filters
 filters = {}
 FILTERS.map { |r| r[0] }.each do |e|
-  if ['notconsidered', 'only', 'ign'].include?(cgi.params[e][0])
+  if ['', 'only', 'ign'].include?(cgi.params[e][0])
     filters[e] = cgi.params[e][0]
   else
-    filters[e] = (e == 'merged' ? 'ign' : 'notconsidered')
+    filters[e] = (e == 'merged' ? 'ign' : '')
   end
 end
 # filter: newer than X days
-if ['notconsidered', 'only', 'ign'].include?(cgi.params['fnewer'][0])
+if ['', 'only', 'ign'].include?(cgi.params['fnewer'][0])
   fnewer = cgi.params['fnewer'][0]
 else
-  fnewer = 'notconsidered'
+  fnewer = ''
 end
 if cgi.params['fnewerval'][0] =~ /^[0-9]+$/
   fnewerval = cgi.params['fnewerval'][0].to_i
@@ -96,6 +99,11 @@ puts <<-EOF
 <html>
 <head>
 <style type="text/css">
+
+  body {
+    font-family : "DejaVu Sans", "Bitstream Vera Sans", sans-serif;"
+  }
+
   table.buglist td, table.buglist th {
     border: 1px solid gray;
     padding-left: 3px;
@@ -108,11 +116,25 @@ puts <<-EOF
     border-collapse: collapse;
   }
 
+div#body {
+  border-top: 2px solid #d70751;
+}
+
+div.footer {
+    padding: 0.3em 0;
+    background-color: #fff;
+    text-align: center;
+    border-top: 2px solid #d70751;
+    margin: 0 0 0 0;
+    border-bottom: 0;
+    font-size: 85%;
+}
 </style>
-<title>RC Bugs List @ UDD</title>
+<title>Debian Bugs Search @ UDD</title>
 </head>
 <body>
-<h1>Release Critical Bugs List</h1>
+<h1 style="margin-bottom : 5px"><img src="http://qa.debian.org/debian.png" alt="Debian logo" width="188" height="52" style="vertical-align : -13px; ">Bugs Search <span style="color :#c70036">@</span> UDD</h1>
+<div id="body">
 
 <form action="bugs.cgi" method="get">
 <p><b>Bugs affecting:</b>
@@ -123,7 +145,7 @@ RELEASE_RESTRICT.each do |r|
   puts "<input type='radio' name='release' value='#{r[0]}' #{checked}/>#{r[1]}&nbsp;&nbsp;"
 end
 puts <<-EOF
-(also uses release tags and xxx-ignore information)</p>
+<br/>(also uses release tags and xxx-ignore information)</p>
 <table class="invisible"><tr><td>
 <table class="buglist">
 <tr><th colspan='4'>FILTERS</th></tr>
@@ -132,7 +154,7 @@ EOF
 FILTERS.each do |r|
   puts <<-EOF
   <tr>
-  <td style='text-align: center;'><input type='radio' name='#{r[0]}' value='' #{filters[r[0]]=='notconsidered'?'CHECKED=\'1\'':''}/></td>
+  <td style='text-align: center;'><input type='radio' name='#{r[0]}' value='' #{filters[r[0]]==''?'CHECKED=\'1\'':''}/></td>
   <td style='text-align: center;'><input type='radio' name='#{r[0]}' value='only' #{filters[r[0]]=='only'?'CHECKED=\'1\'':''}/></td>
   <td style='text-align: center;'><input type='radio' name='#{r[0]}' value='ign' #{filters[r[0]]=='ign'?'CHECKED=\'1\'':''}'/></td>
   <td>#{r[1]}</td>
@@ -142,7 +164,7 @@ end
 # newer than
 puts <<-EOF
   <tr>
-  <td style='text-align: center;'><input type='radio' name='fnewer' value='' #{fnewer=='notconsidered'?'CHECKED=\'1\'':''}/></td>
+  <td style='text-align: center;'><input type='radio' name='fnewer' value='' #{fnewer==''?'CHECKED=\'1\'':''}/></td>
   <td style='text-align: center;'><input type='radio' name='fnewer' value='only' #{fnewer=='only'?'CHECKED=\'1\'':''}/></td>
   <td style='text-align: center;'><input type='radio' name='fnewer' value='ign' #{fnewer=='ign'?'CHECKED=\'1\'':''}'/></td>
   <td>newer than <input type='text' size='3' name='fnewerval' value='#{fnewerval}'/> days</td>
@@ -166,7 +188,7 @@ puts "<b> -- </b>"
   puts "<input type='radio' name='sorto' value='#{r[0]}' #{checked}/>#{r[1]}&nbsp;&nbsp;"
 end
 puts <<-EOF
-</p><input type='submit' value='Update'/>
+</p><input type='submit' value='Search'/>
 </form>
 EOF
 if cgi.params != {}
@@ -188,9 +210,13 @@ if fnewer == 'only'
 elsif fnewer == 'ign'
   q += "and (current_timestamp - interval '#{fnewerval} days' > arrival) \n"
 end
-q += "AND ("
-q += TYPES.select { |t| types[t[0]] }.map { |t| t[2] }.join("\n OR ")
-q += ")\n "
+q2 = TYPES.select { |t| types[t[0]] }.map { |t| t[2] }.join("\n OR ")
+if q2 != ""
+  q += "AND (#{q2})\n"
+else
+  puts "<p><b>Must select at least one bug type!</b></p>"
+  q += "AND FALSE\n"
+end
 q += "order by #{sortby} #{sorto}"
 sth = dbh.prepare(q)
 sth.execute
@@ -209,7 +235,7 @@ rows.each do |r|
   puts (0...bins.length).map { |i| "<a href=\"http://packages.qa.debian.org/#{srcs[i]}\">#{bins[i]}</a>" }.join(', ')
   puts "</td>"
   puts <<-EOF
-  <td>#{r['title']}</td>
+  <td>#{CGI::escapeHTML(r['title'])}</td>
   <td style='text-align: center;'>#{r['last_modified'].to_date}</td>
   </tr>
   EOF
@@ -285,12 +311,15 @@ sth.finish
 puts "</table>"
 sth2 = dbh.prepare("select max(start_time) from timestamps where source = 'bugs' and command = 'run'")
 sth2.execute ; r2 = sth2.fetch_all
-puts "<p><b>Generated in #{Time::now - tstart} seconds. Last data update: #{r2[0][0]}</b></p>"
+puts "<p><b>Generated in #{Time::now - tstart} seconds. Last data update: #{r2[0][0]}"
+puts " (%.1f hours ago)</b></p>" % ((Time::now - r2[0][0].to_time) / 3600)
 puts "<pre>#{q}</pre>"
 end # if cgi.params != {}
 puts <<-EOF
-<hr/>
-<small>Suggestions / comments / patches to lucas at debian dot org. <a href="http://svn.debian.org/wsvn/collab-qa/udd/web/cgi-bin/bugs.cgi">source code</a>.</small>
+</div>
+<div class="footer">
+<small>Suggestions / comments / patches to lucas@debian.org. <a href="http://svn.debian.org/wsvn/collab-qa/udd/web/cgi-bin/bugs.cgi">source code</a>.</small>
+</div>
 </body>
 </html>
 EOF
