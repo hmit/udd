@@ -1,0 +1,1 @@
+../sponsorstats.cgi
