@@ -40,7 +40,8 @@ SORTS = [
   ['id', 'bug#'],
   ['source', 'source package'],
   ['package', 'binary package'],
-  ['last_modified', 'last modified']
+  ['last_modified', 'last modified'],
+  ['popcon', 'popularity contest'],
 ]
 
 cgi = CGI::new
@@ -196,7 +197,11 @@ if cgi.params != {}
 # Generate and execute query
 tstart = Time::now
 dbh = DBI::connect('DBI:Pg:dbname=udd;port=5441;host=localhost', 'guest')
-q = "select id, bugs.package, bugs.source, title, last_modified from bugs \n"
+if sortby != 'popcon'
+  q = "select id, bugs.package, bugs.source, title, last_modified from bugs \n"
+else
+  q = "select id, bugs.package, bugs.source, title, last_modified, coalesce(popcon_src.insts, 0) as popcon\nfrom bugs left join popcon_src on (bugs.source = popcon_src.source) \n"
+end
 q += "where #{RELEASE_RESTRICT.select { |r| r[0] == release }[0][2]} \n"
 FILTERS.each do |f|
   if filters[f[0]] == 'only'
@@ -223,10 +228,13 @@ sth.execute
 rows = sth.fetch_all
 
 puts "<p><b>#{rows.length} bugs found.</b></p>"
-puts <<-EOF
-<table class="buglist">
-<tr><th>bug#</th><th>package</th><th>title</th><th>last&nbsp;modified</th></tr>
-EOF
+puts '<table class="buglist">'
+if sortby != 'popcon'
+  puts '<tr><th>bug#</th><th>package</th><th>title</th><th>last&nbsp;modified</th></tr>'
+else
+  puts '<tr><th>bug#</th><th>package</th><th>title</th><th>popcon</th><th>last&nbsp;modified</th></tr>'
+end
+
 rows.each do |r|
   puts "<tr><td style='text-align: center;'><a href=\"http://bugs.debian.org/#{r['id']}\">##{r['id']}</a></td>"
   puts "<td style='text-align: center;'>"
@@ -234,11 +242,11 @@ rows.each do |r|
   bins = r['package'].split(/,\s*/)
   puts (0...bins.length).map { |i| "<a href=\"http://packages.qa.debian.org/#{srcs[i]}\">#{bins[i]}</a>" }.join(', ')
   puts "</td>"
-  puts <<-EOF
-  <td>#{CGI::escapeHTML(r['title'])}</td>
-  <td style='text-align: center;'>#{r['last_modified'].to_date}</td>
-  </tr>
-  EOF
+  puts "<td>#{CGI::escapeHTML(r['title'])}</td>"
+  if sortby == 'popcon'
+    puts "<td>#{r['popcon']}</td>"
+  end
+  puts "<td style='text-align: center;'>#{r['last_modified'].to_date}</td></tr>"
 end
 =begin
 release goals:
