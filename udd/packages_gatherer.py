@@ -33,7 +33,7 @@ class packages_gatherer(gatherer):
       'SHA1':0, 'Replaces':0, 'Section':0, 'MD5sum':0, 'Bugs':0, 'Priority':0,
       'Tag':0, 'Task':0, 'Python-Version':0, 'Provides':0, 'Conflicts':0,
       'SHA256':0, 'Original-Maintainer':0}
-  ignorable = {'Filename':0, 'Npp-Filename':0, 'Npp-Name':0, 'Npp-Mimetype':0, 'Npp-Applications':0, 'Python-Runtime':0, 'Npp-File':0, 'Npp-Description':0, 'Url':0, 'Gstreamer-Elements':0, 'Gstreamer-Version':0, 'Gstreamer-Decoders':0, 'Gstreamer-Uri-Sinks':0, 'Gstreamer-Encoders':0, 'Gstreamer-Uri-Sources':0, 'url':0, 'Vdr-PatchLevel':0, 'Vdr-Patchlevel':0, 'originalmaintainer':0, 'Originalmaintainer':0, 'Build-Recommends':0, 'Multi-Arch':0, 'Maintainer-Homepage':0, 'Tads2-Version':0, 'Tads3-Version':0, 'Xul-Appid': 0, 'Subarchitecture':0, 'Package-Type':0, 'Kernel-Version': 0, 'Installer-Menu-Item':0, 'Supported':0, 'subarchitecture':0, 'package-type':0 }
+  ignorable = {'Filename':0, 'Npp-Filename':0, 'Npp-Name':0, 'Npp-Mimetype':0, 'Npp-Applications':0, 'Python-Runtime':0, 'Npp-File':0, 'Npp-Description':0, 'Url':0, 'Gstreamer-Elements':0, 'Gstreamer-Version':0, 'Gstreamer-Decoders':0, 'Gstreamer-Uri-Sinks':0, 'Gstreamer-Encoders':0, 'Gstreamer-Uri-Sources':0, 'url':0, 'Vdr-PatchLevel':0, 'Vdr-Patchlevel':0, 'originalmaintainer':0, 'Originalmaintainer':0, 'Build-Recommends':0, 'Multi-Arch':0, 'Maintainer-Homepage':0, 'Tads2-Version':0, 'Tads3-Version':0, 'Xul-Appid': 0, 'Subarchitecture':0, 'Package-Type':0, 'Kernel-Version': 0, 'Installer-Menu-Item':0, 'Supported':0, 'subarchitecture':0, 'package-type':0, 'Python3-Version':0 }
   ignorable_re = re.compile("^(Orig-|Original-|Origianl-|Orginal-|Orignal-|Orgiinal-|Orginial-|Debian-|X-Original-|Upstream-)")
 
   pkgquery = """EXECUTE package_insert
