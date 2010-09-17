@@ -49,7 +49,11 @@ class dehs_gatherer(gatherer):
     for line in file(my_config['path']):
       line_number += 1
 
-      src, uu, eu, uv, ev, upv, epv, u_utd, e_utd, uf, ef, udate, edate = line.rstrip().split('|')
+      try:
+        src, uu, eu, uv, ev, upv, epv, u_utd, e_utd, uf, ef, udate, edate = line.rstrip().split('|')
+      except ValueError:
+         print "Error reading "+line
+         continue
       if udate == "":
         udate = None
       if edate == "":
