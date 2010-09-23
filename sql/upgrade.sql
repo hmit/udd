@@ -319,3 +319,9 @@ CREATE TABLE pts (
 );
 GRANT SELECT ON pts TO guestdd;
 
+-- 2010-09-20
+-- upload_history rewrite
+ALTER TABLE upload_history ADD distribution text;
+ALTER TABLE upload_history ADD file text;
+ALTER TABLE upload_history_architecture ADD file text;
+ALTER TABLE upload_history_closes ADD file text;

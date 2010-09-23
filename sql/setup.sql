@@ -430,7 +430,7 @@ GRANT SELECT ON migrations TO PUBLIC;
 
 CREATE TABLE upload_history
  (source text, version debversion, date timestamp with time zone,
- changed_by text, changed_by_name text, changed_by_email text, maintainer text, maintainer_name text, maintainer_email text, nmu boolean, signed_by text, signed_by_name text, signed_by_email text, key_id text, file text,
+ changed_by text, changed_by_name text, changed_by_email text, maintainer text, maintainer_name text, maintainer_email text, nmu boolean, signed_by text, signed_by_name text, signed_by_email text, key_id text, distribution text, file text,
  fingerprint text,
  PRIMARY KEY (source, version));
 
