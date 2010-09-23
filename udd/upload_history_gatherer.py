@@ -28,6 +28,10 @@ class upload_history_gatherer(gatherer):
 
   def run(self):
     path = self.my_config['path']
+    if 'only-recent' in self.my_config:
+      onlyrecent = self.my_config['only-recent']
+    else:
+      onlyrecent = True
 
     cursor = self.cursor()
 
@@ -50,7 +54,9 @@ class upload_history_gatherer(gatherer):
     added = {}
     files = glob(path + '/debian-devel-changes.*')
     files.sort()
-    for name in files[-2:]:
+    if onlyrecent:
+      files = files[-2:]
+    for name in files:
 #    for name in files:
       bname = os.path.basename(name).replace(".gz","").replace(".out","")
 #      print bname
