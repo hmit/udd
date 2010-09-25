@@ -112,13 +112,15 @@ class hints_gatherer(gatherer):
             h['source'] = src
             if hint[0].versionmap.has_key(src):
                 h['version'] = hint[0].versionmap[src]
+                if h['version'] == '':
+                    h['version'] = None
             else:
                 h['version'] = None
             if hint[0].archmap.has_key(src):
                 h['arch'] = ' '.join(hint[0].archmap[src])
             else:
                 h['arch'] = None
-            hs.append(h)
+            hs.append(h.copy())
     cursor.executemany(query, hs)
     cursor.execute("DEALLOCATE h_insert")
     cursor.execute("ANALYZE hints")
