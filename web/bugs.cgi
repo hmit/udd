@@ -43,12 +43,14 @@ SORTS = [
   ['source', 'source package'],
   ['package', 'binary package'],
   ['last_modified', 'last modified'],
+  ['severity', 'severity'],
   ['popcon', 'popularity contest'],
 ]
 
 COLUMNS = [
   ['cpopcon', 'popularity contest'],
   ['chints', 'release team hints'],
+  ['cseverity', 'severity'],
 ]
 
 cgi = CGI::new
@@ -79,9 +81,8 @@ else
   sorto = 'asc'
 end
 # hack to enable popcon column if sortby = popcon
-if sortby == 'popcon'
-  cols['cpopcon'] = true
-end
+cols['cpopcon'] = true if sortby == 'popcon'
+cols['cseverity'] = true if sortby == 'severity'
 # filters
 filters = {}
 FILTERS.map { |r| r[0] }.each do |e|
@@ -223,9 +224,9 @@ if cgi.params != {}
 tstart = Time::now
 dbh = DBI::connect('DBI:Pg:dbname=udd;port=5441;host=localhost', 'guest')
 if cols['cpopcon']
-  q = "select id, bugs.package, bugs.source, title, last_modified, coalesce(popcon_src.insts, 0) as popcon\nfrom bugs left join popcon_src on (bugs.source = popcon_src.source) \n"
+  q = "select id, bugs.package, bugs.source, severity, title, last_modified, coalesce(popcon_src.insts, 0) as popcon\nfrom bugs left join popcon_src on (bugs.source = popcon_src.source) \n"
 else
-  q = "select id, bugs.package, bugs.source, title, last_modified from bugs \n"
+  q = "select id, bugs.package, bugs.source, severity, title, last_modified from bugs \n"
 end
 q += "where #{RELEASE_RESTRICT.select { |r| r[0] == release }[0][2]} \n"
 FILTERS.each do |f|
@@ -266,9 +267,8 @@ end
 puts "<p><b>#{rows.length} bugs found.</b></p>"
 puts '<table class="buglist">'
 puts '<tr><th>bug#</th><th>package</th><th>title</th>'
-if cols['cpopcon']
-  puts '<th>popcon</th>'
-end
+puts '<th>popcon</th>' if cols['cpopcon']
+puts '<th>severity</th>' if cols['cseverity']
 if cols['chints']
   puts '<th>hints</th>'
 end
@@ -293,12 +293,9 @@ rows.each do |r|
   puts (0...bins.length).map { |i| "<a href=\"http://packages.qa.debian.org/#{srcs[i]}\">#{bins[i]}</a>" }.join(', ')
   puts "</td>"
   puts "<td>#{CGI::escapeHTML(r['title'])}</td>"
-  if cols['cpopcon']
-    puts "<td>#{r['popcon']}</td>"
-  end
-  if cols['chints']
-    puts "<td>#{genhints(r['source'], hints[r['source']])}</td>"
-  end
+  puts "<td>#{r['popcon']}</td>" if cols['cpopcon']
+  puts "<td>#{r['severity']}</td>" if cols['cseverity']
+  puts "<td>#{genhints(r['source'], hints[r['source']])}</td>" if cols['chints']
   puts "<td style='text-align: center;'>#{r['last_modified'].to_date}</td></tr>"
 end
 
