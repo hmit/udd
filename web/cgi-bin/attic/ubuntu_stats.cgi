@@ -2,7 +2,7 @@
 
 require 'dbi'
 require 'pp'
-RELEASE='karmic'
+RELEASE='maverick'
 
 puts "Content-type: text/plain\n\n"
 
@@ -26,7 +26,7 @@ sth.execute ; rows = sth.fetch_all
 allpkgs = rows[0][0]
 
 puts "Source packages in Ubuntu: #{allpkgs}"
-puts "Source packages per component:"
+puts "Source packages per component: [main+restricted, universe+multiverse, total]"
 sth = dbh.prepare("select component,count(*) from ubuntu_sources where distribution = 'ubuntu' and release = '#{RELEASE}' group by component")
 sth.execute ; rows = sth.fetch_all
 pp getnums(rows)
@@ -62,15 +62,6 @@ sth = dbh.prepare("select component, count(*) from ubuntu_sources where distribu
 AND source !~ '^language-(support|pack)-.*' AND source !~ '^kde-l10n-.*' AND source !~ 'ubuntu' AND source !~ 'launchpad'
 AND source in (select source from sources where distribution='debian' and release in ('sid', 'lenny'))
 AND version ~ '-0ubuntu'
- group by component")
-sth.execute ; rows = sth.fetch_all
-pp getnums(rows)
-
-puts "Also in Debian, (version !~ /ubuntu/):"
-sth = dbh.prepare("select component, count(*) from ubuntu_sources where distribution = 'ubuntu' and release = '#{RELEASE}'
-AND source !~ '^language-(support|pack)-.*' AND source !~ '^kde-l10n-.*' AND source !~ 'ubuntu' AND source !~ 'launchpad'
-AND source in (select source from sources where distribution='debian' and release in ('sid', 'lenny'))
-AND version !~ 'ubuntu'
  group by component")
 sth.execute ; rows = sth.fetch_all
 pp getnums(rows)
