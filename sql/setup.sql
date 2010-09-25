@@ -750,5 +750,3 @@ CREATE VIEW relevant_hints AS
   OR (type IN ('unblock', 'age-days', 'hint', 'easy') AND (source, version) IN (select source, version from sources where release='sid'))
   OR (type IN ('remove') AND (source, version) IN (select source, version from sources where release='squeeze')) ;
 GRANT SELECT ON relevant_hints TO public;
-
-SELECT * from hints where (source, version, type) not in (select source, version, type from relevant_hints);

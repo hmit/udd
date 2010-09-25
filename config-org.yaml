@@ -88,8 +88,7 @@ debian-backports-lenny:
   type: src-pkg
   archs: [alpha, amd64, arm, armel, hppa, i386, ia64,  mips,
           mipsel, powerpc, s390, sparc]       
-  update-command: /org/udd.debian.org/udd/scripts/sync-dist.sh backports.debian.org::debian-backports/dists/lenny-backports/ /org/udd.debian.org/mirrors/backports/lenny
-  directory: /org/udd.debian.org/mirrors/backports/lenny/
+  directory: /org/mirrors/debian-backports/dists/lenny-backports/
   components: [main, contrib, non-free, main/debian-installer]
   distribution: debian-backports
   packages-table: packages
