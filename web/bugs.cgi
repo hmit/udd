@@ -46,12 +46,26 @@ SORTS = [
   ['popcon', 'popularity contest'],
 ]
 
+COLUMNS = [
+  ['cpopcon', 'popularity contest'],
+  ['chints', 'release team hints'],
+]
+
 cgi = CGI::new
 # releases
 if RELEASE_RESTRICT.map { |r| r[0] }.include?(cgi.params['release'][0])
   release = cgi.params['release'][0]
 else
   release = 'squeeze'
+end
+# columns
+cols = {}
+COLUMNS.map { |r| r[0] }.each do |r|
+  if cgi.params[r][0]
+    cols[r] = true
+  else
+    cols[r] = false
+  end
 end
 # sorts
 if SORTS.map { |r| r[0] }.include?(cgi.params['sortby'][0])
@@ -63,6 +77,10 @@ if ['asc', 'desc'].include?(cgi.params['sorto'][0])
   sorto = cgi.params['sorto'][0]
 else
   sorto = 'asc'
+end
+# hack to enable popcon column if sortby = popcon
+if sortby == 'popcon'
+  cols['cpopcon'] = true
 end
 # filters
 filters = {}
@@ -190,8 +208,13 @@ puts "<b> -- </b>"
   checked = (sorto == r[0] ? 'CHECKED=\'1\'':'')
   puts "<input type='radio' name='sorto' value='#{r[0]}' #{checked}/>#{r[1]}&nbsp;&nbsp;"
 end
+puts "<br/>\n<b>Additional columns:</b> "
+COLUMNS.each do |r|
+  checked = cols[r[0]] ? 'checked':''
+  puts "<input type='checkbox' name='#{r[0]}' value='1' #{checked}/>#{r[1]}&nbsp;&nbsp;"
+end
 puts <<-EOF
-</p><input type='submit' value='Search'/>
+<br/>\n<input type='submit' value='Search'/></p>
 </form>
 EOF
 if cgi.params != {}
@@ -199,10 +222,10 @@ if cgi.params != {}
 # Generate and execute query
 tstart = Time::now
 dbh = DBI::connect('DBI:Pg:dbname=udd;port=5441;host=localhost', 'guest')
-if sortby != 'popcon'
-  q = "select id, bugs.package, bugs.source, title, last_modified from bugs \n"
-else
+if cols['cpopcon']
   q = "select id, bugs.package, bugs.source, title, last_modified, coalesce(popcon_src.insts, 0) as popcon\nfrom bugs left join popcon_src on (bugs.source = popcon_src.source) \n"
+else
+  q = "select id, bugs.package, bugs.source, title, last_modified from bugs \n"
 end
 q += "where #{RELEASE_RESTRICT.select { |r| r[0] == release }[0][2]} \n"
 FILTERS.each do |f|
@@ -229,12 +252,37 @@ sth = dbh.prepare(q)
 sth.execute
 rows = sth.fetch_all
 
+if cols['chints']
+  sthh = dbh.prepare("select distinct source, type, argument, version, file, comment from relevant_hints order by type")
+  sthh.execute
+  rowsh = sthh.fetch_all
+  hints = {}
+  rowsh.each do |r|
+    hints[r['source']] ||= []
+    hints[r['source']] << r
+  end
+end
+
 puts "<p><b>#{rows.length} bugs found.</b></p>"
 puts '<table class="buglist">'
-if sortby != 'popcon'
-  puts '<tr><th>bug#</th><th>package</th><th>title</th><th>last&nbsp;modified</th></tr>'
-else
-  puts '<tr><th>bug#</th><th>package</th><th>title</th><th>popcon</th><th>last&nbsp;modified</th></tr>'
+puts '<tr><th>bug#</th><th>package</th><th>title</th>'
+if cols['cpopcon']
+  puts '<th>popcon</th>'
+end
+if cols['chints']
+  puts '<th>hints</th>'
+end
+puts '<th>last&nbsp;modified</th></tr>'
+
+def genhints(source, hints)
+  return '' if hints.nil?
+  s = ''
+  hints.each do |h|
+    v = h['version'] ? h['version'] + ' ' : ''
+    t = h['type'] == 'age-days' ? "age/#{h['argument']}" : h['type']
+    s += "<a href=\"http://release.debian.org/britney/hints/#{h['file']}\" title=\"#{v}#{h['file']} #{h['comment']}\">#{t}</a> "
+  end
+  s
 end
 
 rows.each do |r|
@@ -245,79 +293,15 @@ rows.each do |r|
   puts (0...bins.length).map { |i| "<a href=\"http://packages.qa.debian.org/#{srcs[i]}\">#{bins[i]}</a>" }.join(', ')
   puts "</td>"
   puts "<td>#{CGI::escapeHTML(r['title'])}</td>"
-  if sortby == 'popcon'
+  if cols['cpopcon']
     puts "<td>#{r['popcon']}</td>"
+  end
+  if cols['chints']
+    puts "<td>#{genhints(r['source'], hints[r['source']])}</td>"
   end
   puts "<td style='text-align: center;'>#{r['last_modified'].to_date}</td></tr>"
 end
-=begin
-release goals:
-all
-include / only
 
-columns:
-id
-source
-package
-title
-
-time
-data last refreshed
-EOF
-=end
-
-=begin
-sth = dbh.prepare("select id, bugs.package, bugs.source, insts, title from bugs, popcon_src where bugs.source = popcon_src.source and id in (select id from bugs_rt_affects_testing_and_unstable) and id in (select id from bugs_tags where tag='patch') and id not in (select id from bugs_tags where tag='pending') and severity >= 'serious' order by id")
-sth.execute ; rows = sth.fetch_all
-
-puts "<h2>RC bugs tagged patch (and not pending)</h2>"
-puts "<table>"
-puts "<tr><th>bug</th><th>package</th><th>source</th><th>popcon</th><th>title</th></tr>"
-rows.each do |r|
-   puts "<tr><td><a href=\"http://bugs.debian.org/#{r['id']}\">#{r['id']}</a></td>"
-   puts "<td>#{r['package']}</td>"
-   puts "<td><a href=\"http://packages.qa.debian.org/#{r['source']}\">#{r['source']}</a></td>"
-   puts "<td>#{r['insts']}</td>"
-   puts "<td>#{r['title']}</td>"
-end
-puts "</table>"
-sth.finish
-
-puts "<h2>RC bugs on packages with a newer version in Ubuntu (possible patches), not tagged patch nor pending</h2>"
-puts "<table>"
-puts "<tr><th>bug</th><th>package</th><th>source</th><th>versions (D/U)</th><th>popcon</th><th>title</th></tr>"
-
-sth = dbh.prepare("WITH ubudeb AS (select distinct on (d.source, u.source) d.source as dsource, u.source as usource, d.version as dversion, u.version as uversion from sources_uniq d, ubuntu_sources u where d.release = 'sid' and d.distribution = 'debian' and u.release = '#{URELEASE}' and u.distribution = 'ubuntu' and u.source = d.source and u.version > d.version order by d.source asc, u.source asc, d.version desc)
-select id, bugs.package, bugs.source, title, dversion, uversion, insts from bugs, ubudeb, popcon_src where popcon_src.source = bugs.source and id in (select id from bugs_rt_affects_testing_and_unstable) and id not in (select id from bugs_tags where tag='patch') and id not in (select id from bugs_tags where tag='pending') and severity >= 'serious' and ubudeb.dsource = bugs.source order by id")
-sth.execute ; rows = sth.fetch_all
-rows.each do |r|
-   puts "<tr><td><a href=\"http://bugs.debian.org/#{r['id']}\">#{r['id']}</a></td>"
-   puts "<td>#{r['package']}</td>"
-   puts "<td><a href=\"http://packages.qa.debian.org/#{r['source']}\">#{r['source']}</a> <a href=\"https://launchpad.net/ubuntu/#{URELEASE}/+source/#{r['source']}/+changelog\">UbCh</a></td>"
-   puts "<td>#{r['dversion']} / #{r['uversion']}</td>"
-   puts "<td>#{r['insts']}</td>"
-   puts "<td>#{r['title']}</td>"
-end
-puts "</table>"
-sth.finish
-
-sth = dbh.prepare("select id, bugs.package, bugs.source, insts, title from bugs, popcon_src where bugs.source = popcon_src.source and id in (select id from bugs_rt_affects_testing) and id not in (select id from bugs_rt_affects_unstable) and severity >= 'serious' order by package")
-sth.execute ; rows = sth.fetch_all
-
-puts "<h2>RC bugs affecting only testing (not unstable, and not pending)</h2>"
-puts "<table>"
-puts "<tr><th>bug</th><th>package</th><th>source</th><th>popcon</th><th>title</th></tr>"
-rows.each do |r|
-   puts "<tr><td><a href=\"http://bugs.debian.org/#{r['id']}\">#{r['id']}</a></td>"
-   puts "<td>#{r['package']}</td>"
-   puts "<td><a href=\"http://packages.qa.debian.org/#{r['source']}\">#{r['source']}</a></td>"
-   puts "<td>#{r['insts']}</td>"
-   puts "<td>#{r['title']}</td>"
-end
-puts "</table>"
-sth.finish
-
-=end
 puts "</table>"
 sth2 = dbh.prepare("select max(start_time) from timestamps where source = 'bugs' and command = 'run'")
 sth2.execute ; r2 = sth2.fetch_all
