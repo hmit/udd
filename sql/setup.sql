@@ -736,4 +736,8 @@ format_3native int, format_3quilt int,
 );
 GRANT SELECT ON history.sources_count TO public;
 
-
+CREATE TABLE hints
+ (source text, version debversion, architecture text,
+    type text, file text, comment text);
+CREATE INDEX hints_idx on hints(source, version);
+GRANT SELECT ON hints TO public;

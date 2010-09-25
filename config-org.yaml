@@ -27,6 +27,7 @@ general:
     pts: module udd.pts_gatherer
     history-daily: module udd.history_daily_gatherer
     i18n-apps: module udd.i18n_apps_gatherer
+    hints: module udd.hints_gatherer
   timestamp-dir: /org/udd.debian.org/timestamps
   lock-dir: /org/udd.debian.org/locks
   archs:
@@ -378,6 +379,11 @@ upload-history:
   update-command: if [ ! -e /org/udd.debian.org/tmp/upload-history/ ]; then mkdir /org/udd.debian.org/tmp/upload-history/; fi; lftp -c 'mirror -e -P http://master.debian.org/~lucas/ddc-parser/ /org/udd.debian.org/tmp/upload-history'
   schema: upload_history
   table: upload_history
+
+hints:
+  type: hints
+  path: /org/udd.debian.org/tmp/hints
+  update-command: /org/udd.debian.org/udd/scripts/update-hints
 
 bugs:
   type: bugs
