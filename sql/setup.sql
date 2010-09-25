@@ -738,13 +738,13 @@ GRANT SELECT ON history.sources_count TO public;
 
 CREATE TABLE hints
  (source text, version debversion, architecture text,
-    type text, file text, comment text);
+    type text, argument text, file text, comment text);
 CREATE INDEX hints_idx on hints(source, version);
 GRANT SELECT ON hints TO public;
 
 DROP VIEW relevant_hints;
 CREATE VIEW relevant_hints AS 
-  SELECT source, version, architecture, type, file, comment FROM hints
+  SELECT source, version, architecture, type, argument, file, comment FROM hints
   WHERE version is NULL
   OR type = 'approve'
   OR (type IN ('unblock', 'age-days', 'hint', 'easy') AND (source, version) IN (select source, version from sources where release='sid'))
