@@ -25,9 +25,9 @@ FILTERS = [
  ['merged', 'merged bugs', 'id in (select id from bugs_merged_with where id > merged_with)'],
  ['done', 'marked as done', 'status = \'done\''],
  ['outdatedsqueeze', 'outdated binaries in squeeze', "source in (select distinct p1.source from packages_summary p1, packages_summary p2 where p1.source = p2.source and p1.release='squeeze' and p2.release='squeeze' and p1.source_version != p2.source_version)"],
- ['outdatedsid', 'outdated binaries in sid', "source in (select distinct p1.source from packages_summary p1, packages_summary p2 where p1.source = p2.source and p1.release='sid' and p2.release='sid' and p1.source_version != p2.source_version)"],
- ['needmig', 'different versions in squeeze and sid', "source in (select s1.source from sources s1, sources s2 where s1.source = s2.source and s1.release = 'squeeze' and s2.release='sid' and s1.version != s2.version)"],
- ['newerubuntu', 'newer in Ubuntu than in sid', "source in (select s1.source from sources_uniq s1, ubuntu_sources s2 where s1.source = s2.source and s1.release = 'sid' and s2.release='maverick' and s1.version < s2.version)"],
+ ['outdatedsid', 'outdated binaries in sid', "bugs.source in (select distinct p1.source from packages_summary p1, packages_summary p2 where p1.source = p2.source and p1.release='sid' and p2.release='sid' and p1.source_version != p2.source_version)"],
+ ['needmig', 'different versions in squeeze and sid', "bugs.source in (select s1.source from sources s1, sources s2 where s1.source = s2.source and s1.release = 'squeeze' and s2.release='sid' and s1.version != s2.version)"],
+ ['newerubuntu', 'newer in Ubuntu than in sid', "bugs.source in (select s1.source from sources_uniq s1, ubuntu_sources s2 where s1.source = s2.source and s1.release = 'sid' and s2.release='maverick' and s1.version < s2.version)"],
 ]
 
 TYPES = [
