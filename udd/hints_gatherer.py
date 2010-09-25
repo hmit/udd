@@ -28,6 +28,10 @@ class Hint(object):
         self.pkgs = []
         self.versionmap = {} # original versions on the hint
         self.archmap = {}
+        self.arg = None
+        if self.type == 'age-days':
+            self.arg = args[0]
+            args = args[1:]
 
         for pkg in args:
             if '/' in pkg:
@@ -99,14 +103,15 @@ class hints_gatherer(gatherer):
     hints = self.parse_hints(path)
 
     cursor = self.cursor()
-    cursor.execute("PREPARE h_insert AS INSERT INTO hints (source, version, architecture, type, file, comment) VALUES ($1, $2 , $3, $4, $5, $6)")
+    cursor.execute("PREPARE h_insert AS INSERT INTO hints (source, version, architecture, type, argument, file, comment) VALUES ($1, $2 , $3, $4, $5, $6, $7)")
     cursor.execute("DELETE FROM hints")
-    query = "EXECUTE h_insert(%(source)s, %(version)s, %(arch)s, %(type)s, %(file)s, %(comment)s)"
+    query = "EXECUTE h_insert(%(source)s, %(version)s, %(arch)s, %(type)s, %(argument)s, %(file)s, %(comment)s)"
     hs = []
     for hint in hints:
         h = {}
         h['file'] = hint[1]
         h['comment'] = hint[2]
+        h['argument'] = hint[0].arg
         h['type'] = hint[0].type
         for src in hint[0].pkgs:
             h['source'] = src
