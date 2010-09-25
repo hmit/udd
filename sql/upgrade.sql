@@ -325,3 +325,7 @@ ALTER TABLE upload_history ADD distribution text;
 ALTER TABLE upload_history ADD file text;
 ALTER TABLE upload_history_architecture ADD file text;
 ALTER TABLE upload_history_closes ADD file text;
+
+-- 2010-09-25
+CREATE INDEX sources_release_idx ON sources(release);
+CREATE INDEX bugs_tags_tag_idx ON bugs_tags(tag);

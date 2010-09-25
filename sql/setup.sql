@@ -201,6 +201,8 @@ CREATE TABLE bugs_packages
   (id int REFERENCES bugs, package text, source text,
 	PRIMARY KEY (id, package));
 
+CREATE INDEX sources_release_idx ON sources(release);
+
 CREATE TABLE bugs_merged_with
   (id int REFERENCES bugs, merged_with int,
 PRIMARY KEY(id, merged_with));
@@ -215,6 +217,7 @@ CREATE TABLE bugs_fixed_in
 
 CREATE TABLE bugs_tags
   (id int REFERENCES bugs, tag text, PRIMARY KEY (id, tag));
+CREATE INDEX bugs_tags_tag_idx ON bugs_tags(tag);
 
 CREATE TABLE bugs_blocks
   (id int REFERENCES bugs, blocked int,
