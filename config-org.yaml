@@ -87,7 +87,7 @@ debian-backports-lenny:
   type: src-pkg
   archs: [alpha, amd64, arm, armel, hppa, i386, ia64,  mips,
           mipsel, powerpc, s390, sparc]       
-  update-command: /org/udd.debian.org/udd/scripts/sync-dist.sh ftp.backports.org::backports.org/dists/lenny-backports/ /org/udd.debian.org/mirrors/backports/lenny
+  update-command: /org/udd.debian.org/udd/scripts/sync-dist.sh backports.debian.org::debian-backports/dists/lenny-backports/ /org/udd.debian.org/mirrors/backports/lenny
   directory: /org/udd.debian.org/mirrors/backports/lenny/
   components: [main, contrib, non-free, main/debian-installer]
   distribution: debian-backports
@@ -307,13 +307,13 @@ ubuntu-dapper:
   packages-schema: packages
   sources-schema: sources
 
-sidux:
+aptosid:
   type: src-pkg
   archs: [amd64, i386]
-  directory: /org/udd.debian.org/mirrors/sidux/sid
-  update-command: /org/udd.debian.org/udd/scripts/sync-dist.sh mira.sunsite.utk.edu::sidux/debian/dists/sid/ /org/udd.debian.org/mirrors/sidux/sid
-  components: [main, contrib, non-free, fix.main, fix.contrib, fix.non-free, firmware ]
-  distribution: sidux
+  directory: /org/udd.debian.org/mirrors/aptosid/sid
+  update-command: /org/udd.debian.org/udd/scripts/sync-dist.sh debian.tu-bs.de::aptosid/debian/dists/sid/ /org/udd.debian.org/mirrors/aptosid/sid
+  components: [main, fix.main ]
+  distribution: aptosid
   release: sid
   packages-table: derivatives_packages
   sources-table: derivatives_sources
