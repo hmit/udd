@@ -741,3 +741,14 @@ CREATE TABLE hints
     type text, file text, comment text);
 CREATE INDEX hints_idx on hints(source, version);
 GRANT SELECT ON hints TO public;
+
+DROP VIEW relevant_hints;
+CREATE VIEW relevant_hints AS 
+  SELECT source, version, architecture, type, file, comment FROM hints
+  WHERE version is NULL
+  OR type = 'approve'
+  OR (type IN ('unblock', 'age-days', 'hint', 'easy') AND (source, version) IN (select source, version from sources where release='sid'))
+  OR (type IN ('remove') AND (source, version) IN (select source, version from sources where release='squeeze')) ;
+GRANT SELECT ON relevant_hints TO public;
+
+SELECT * from hints where (source, version, type) not in (select source, version, type from relevant_hints);
