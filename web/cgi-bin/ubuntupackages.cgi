@@ -3,7 +3,7 @@
 
 require 'dbi'
 
-RELEASE='maverick'
+RELEASE='natty'
 
 puts "Content-type: text/plain\n\n"
 

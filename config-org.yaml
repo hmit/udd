@@ -216,6 +216,20 @@ debian-experimental:
   sources-schema: sources
   release: experimental
 
+ubuntu-natty:
+  type: src-pkg
+  archs: [amd64, i386]
+  directory: /org/mirrors/ubuntu.com/ftp/dists/natty/
+  components: [main, multiverse, universe, restricted]
+  distribution: ubuntu
+  release: natty
+  packages-table: ubuntu_packages
+  sources-table: ubuntu_sources
+  uploaders-table: ubuntu_uploaders
+  packages-schema: packages
+  sources-schema: sources
+
+
 ubuntu-maverick:
   type: src-pkg
   archs: [amd64, i386]

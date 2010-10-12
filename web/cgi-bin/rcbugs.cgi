@@ -3,7 +3,7 @@
 require 'dbi'
 require 'pp'
 
-URELEASE='maverick'
+URELEASE='natty'
 
 puts "Content-type: text/html\n\n"
 

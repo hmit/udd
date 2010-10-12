@@ -6,7 +6,7 @@ require 'uri'
 require 'net/http'
 require 'cgi'
 
-URELEASE='maverick'
+URELEASE='natty'
 
 $cgi = CGI::new
 

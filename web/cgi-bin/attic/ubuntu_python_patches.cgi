@@ -23,7 +23,7 @@ from psycopg2 import connect
 lower = 0
 higher = 0
 tbl = str()
-rel = {'d':'sid', 'u':'maverick'}
+rel = {'d':'sid', 'u':'natty'}
 apt_pkg.InitSystem()
 conn = connect(database="udd", port=5441, host="localhost", user="guest")
 cur = conn.cursor()                    

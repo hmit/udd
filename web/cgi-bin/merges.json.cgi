@@ -6,12 +6,12 @@ require 'uri'
 require 'net/http'
 require 'json/pure'
 
-URELEASE='maverick'
+URELEASE='natty'
 
 puts "Content-type: application/json\n\n"
 
 DREL='sid'
-UREL='maverick'
+UREL='natty'
 
 dbh = DBI::connect('DBI:Pg:dbname=udd;port=5441;host=localhost', 'guest')
 
