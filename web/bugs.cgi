@@ -14,6 +14,7 @@ RELEASE_RESTRICT = [
   ['squeeze_not_sid', 'squeeze, not sid', 'id in (select id from bugs_rt_affects_testing) and id not in (select id from bugs_rt_affects_unstable)'],
   ['sid_not_squeeze', 'sid, not squeeze', 'id in (select id from bugs_rt_affects_unstable) and id not in (select id from bugs_rt_affects_testing)'],
   ['lenny', 'lenny', 'id in (select id from bugs_rt_affects_stable)'],
+  ['any', 'any', 'id in (select id from bugs where status!=\'done\')'],
 ]
 
 FILTERS = [
@@ -24,7 +25,7 @@ FILTERS = [
  ['notsqueeze', 'packages not in squeeze', 'id not in (select id from bugs_packages, sources where bugs_packages.source = sources.source and release=\'squeeze\')'],
  ['merged', 'merged bugs', 'id in (select id from bugs_merged_with where id > merged_with)'],
  ['done', 'marked as done', 'status = \'done\''],
- ['outdatedsqueeze', 'outdated binaries in squeeze', "source in (select distinct p1.source from packages_summary p1, packages_summary p2 where p1.source = p2.source and p1.release='squeeze' and p2.release='squeeze' and p1.source_version != p2.source_version)"],
+ ['outdatedsqueeze', 'outdated binaries in squeeze', "bugs.source in (select distinct p1.source from packages_summary p1, packages_summary p2 where p1.source = p2.source and p1.release='squeeze' and p2.release='squeeze' and p1.source_version != p2.source_version)"],
  ['outdatedsid', 'outdated binaries in sid', "bugs.source in (select distinct p1.source from packages_summary p1, packages_summary p2 where p1.source = p2.source and p1.release='sid' and p2.release='sid' and p1.source_version != p2.source_version)"],
  ['needmig', 'different versions in squeeze and sid', "bugs.source in (select s1.source from sources s1, sources s2 where s1.source = s2.source and s1.release = 'squeeze' and s2.release='sid' and s1.version != s2.version)"],
  ['newerubuntu', 'newer in Ubuntu than in sid', "bugs.source in (select s1.source from sources_uniq s1, ubuntu_sources s2 where s1.source = s2.source and s1.release = 'sid' and s2.release='maverick' and s1.version < s2.version)"],
@@ -36,6 +37,7 @@ TYPES = [
   ['lfs', 'release goal: Large File Support', 'id in (select id from bugs_tags where tag=\'lfs\')', false ],
   ['boot', 'release goal: boot performance (init.d dependencies)', 'id in (select id from bugs_usertags where email = \'initscripts-ng-devel@lists.alioth.debian.org\')', false],
   ['oldgnome', 'release goal: remove obsolete GNOME libraries', 'id in (select id from bugs_usertags where email = \'pkg-gnome-maintainers@lists.alioth.debian.org\' and tag=\'oldlibs\')', false],
+  ['ruby', 'Ruby bugs', "bugs.source in (select source from sources where maintainer ~ 'ruby' or uploaders ~ 'ruby')\nOR bugs.package in (select source from packages where (package ~ 'ruby' or depends ~ 'ruby') and source != 'subversion')\nOR title ~ 'ruby'"],
 ]
 
 SORTS = [
@@ -249,9 +251,15 @@ else
   q += "AND FALSE\n"
 end
 q += "order by #{sortby} #{sorto}"
-sth = dbh.prepare(q)
-sth.execute
-rows = sth.fetch_all
+begin
+  sth = dbh.prepare(q)
+  sth.execute
+  rows = sth.fetch_all
+rescue DBI::ProgrammingError => e
+  puts "<p>The query generated an error, please report it to lucas@debian.org: #{e.message}</p>"
+  puts "<pre>#{q}</pre>"
+  exit(0)
+end
 
 if cols['chints']
   sthh = dbh.prepare("select distinct source, type, argument, version, file, comment from relevant_hints order by type")
@@ -309,7 +317,7 @@ end # if cgi.params != {}
 puts <<-EOF
 </div>
 <div class="footer">
-<small>Suggestions / comments / patches to lucas@debian.org. <a href="http://svn.debian.org/wsvn/collab-qa/udd/web/cgi-bin/bugs.cgi">source code</a>.</small>
+<small>Suggestions / comments / patches to lucas@debian.org. <a href="http://svn.debian.org/wsvn/collab-qa/udd/web/bugs.cgi">source code</a>.</small>
 </div>
 </body>
 </html>
