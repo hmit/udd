@@ -55,6 +55,10 @@ class screenshot_gatherer(gatherer):
         res['maintainer'] = res['maintainer'].encode('utf-8')
       except AttributeError, err:
         print >>stderr, "Missing maintainer for screenshot of package %s" % res['name']
+      try:
+        res['description'] = res['description'].encode('utf-8')
+      except AttributeError, err:
+        print >>stderr, "Missing description for screenshot of package %s" % res['name']
       query = """EXECUTE screenshots_insert
                         (%(name)s, %(version)s, %(homepage)s, %(maintainer)s, %(maintainer_email)s,
                          %(description)s, %(section)s, %(url)s, %(large_image_url)s, %(small_image_url)s)"""
