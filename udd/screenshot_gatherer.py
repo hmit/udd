@@ -45,8 +45,10 @@ class screenshot_gatherer(gatherer):
 
     screenshot_file = my_config['screenshots_json']
     fp = open(screenshot_file, 'r')
-    # result = json.read(fp.read())
-    result = json.load(fp)
+    try:
+      result = json.load(fp)
+    except AttributeError:
+      result = json.read(fp.read())
     fp.close()
 
     for res in result['screenshots']:
