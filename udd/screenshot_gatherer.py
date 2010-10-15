@@ -7,6 +7,7 @@ This script imports screenshot URLs from screenshots.debian.net
 from aux import quote
 from gatherer import gatherer
 import json
+# import simplejson as json
 from sys import stderr, exit
 
 from psycopg2 import IntegrityError, InternalError
@@ -44,7 +45,8 @@ class screenshot_gatherer(gatherer):
 
     screenshot_file = my_config['screenshots_json']
     fp = open(screenshot_file, 'r')
-    result = json.read(fp.read())
+    # result = json.read(fp.read())
+    result = json.load(fp)
     fp.close()
 
     for res in result['screenshots']:
