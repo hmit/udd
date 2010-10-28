@@ -341,7 +341,6 @@ res.each do |r|
   puts "<td><a href=\"http://bugs.debian.org/src:#{pkg}\">#{r['rc_bugs']}&nbsp;/&nbsp;#{r['all_bugs']}</a></td>"
   puts "<td>#{r['upload_age']}</td>"
   puts "<td>#{r['nmus']}</td>"
-  puts "<td></td>"
   if $actions[pkg]
     comment = $actions[pkg].act_comment.gsub(/#\d+/) do |bug|
       bugn = bug.gsub(/^#/, '')
