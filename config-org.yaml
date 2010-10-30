@@ -98,6 +98,20 @@ debian-backports-lenny:
   sources-schema: sources
   release: lenny
 
+debian-backports-lenny-sloppy:
+  type: src-pkg
+  archs: [alpha, amd64, arm, armel, hppa, i386, ia64,  mips,
+          mipsel, powerpc, s390, sparc]       
+  directory: /org/mirrors/debian-backports/dists/lenny-backports-sloppy/
+  components: [main, contrib, non-free ]
+  distribution: debian-backports-sloppy
+  packages-table: packages
+  sources-table: sources
+  uploaders-table: uploaders
+  packages-schema: packages
+  sources-schema: sources
+  release: lenny
+
 debian-volatile-lenny:
   type: src-pkg
   archs: [alpha, amd64, arm, armel, hppa, i386, ia64,  mips,
@@ -531,3 +545,46 @@ i18n-apps:
    table_apps: i18n_apps
    table_debconf: po_debconf
 
+debian-ports-sid:
+  type: src-pkg
+  archs: [armhf, avr32, hurd-i386, m68k, powerpcspe, sh4, sparc64 ]
+  directory: /org/udd.debian.org/mirrors/debian-ports/unstable/
+  components: [main]
+  distribution: debian-ports
+  packages-table: derivatives_packages
+  sources-table: derivatives_sources
+  uploaders-table: derivatives_uploaders
+  packages-schema: packages
+  sources-schema: sources
+  release: sid
+  update-command: /org/udd.debian.org/udd/scripts/sync-dist.sh rsync.debian-ports.org::debian/dists/unstable/ /org/udd.debian.org/mirrors/debian-ports/unstable
+  no-sources: true
+
+debian-ports-unreleased:
+  type: src-pkg
+  archs: [armhf, avr32, hurd-i386, m68k, powerpcspe, sh4, sparc64 ]
+  directory: /org/udd.debian.org/mirrors/debian-ports/unreleased/
+  components: [main]
+  distribution: debian-ports
+  packages-table: derivatives_packages
+  sources-table: derivatives_sources
+  uploaders-table: derivatives_uploaders
+  packages-schema: packages
+  sources-schema: sources
+  release: unreleased
+  update-command: /org/udd.debian.org/udd/scripts/sync-dist.sh rsync.debian-ports.org::debian/dists/unreleased/ /org/udd.debian.org/mirrors/debian-ports/unreleased
+
+debian-ports-experimental:
+  type: src-pkg
+  archs: [armhf, avr32, hurd-i386, m68k, powerpcspe, sh4, sparc64 ]
+  directory: /org/udd.debian.org/mirrors/debian-ports/experimental/
+  components: [main]
+  distribution: debian-ports
+  packages-table: derivatives_packages
+  sources-table: derivatives_sources
+  uploaders-table: derivatives_uploaders
+  packages-schema: packages
+  sources-schema: sources
+  release: experimental
+  update-command: /org/udd.debian.org/udd/scripts/sync-dist.sh rsync.debian-ports.org::debian/dists/experimental/ /org/udd.debian.org/mirrors/debian-ports/experimental
+  no-sources: true
