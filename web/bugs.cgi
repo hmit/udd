@@ -57,6 +57,7 @@ COLUMNS = [
   ['cpopcon', 'popularity contest'],
   ['chints', 'release team hints'],
   ['cseverity', 'severity'],
+  ['ctags', 'tags'],
 ]
 
 cgi = CGI::new
@@ -159,6 +160,7 @@ div.footer {
 }
 </style>
 <title>Debian Bugs Search @ UDD</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 </head>
 <body>
 <h1 style="margin-bottom : 5px"><img src="http://qa.debian.org/debian.png" alt="Debian logo" width="188" height="52" style="vertical-align : -13px; ">Bugs Search <span style="color :#c70036">@</span> UDD</h1>
@@ -215,7 +217,7 @@ puts "<b> -- </b>"
   checked = (sorto == r[0] ? 'CHECKED=\'1\'':'')
   puts "<input type='radio' name='sorto' value='#{r[0]}' #{checked}/>#{r[1]}&nbsp;&nbsp;"
 end
-puts "<br/>\n<b>Additional columns:</b> "
+puts "<br/>\n<b>Additional information:</b> "
 COLUMNS.each do |r|
   checked = cols[r[0]] ? 'checked':''
   puts "<input type='checkbox' name='#{r[0]}' value='1' #{checked}/>#{r[1]}&nbsp;&nbsp;"
@@ -276,6 +278,18 @@ if cols['chints']
   end
 end
 
+if cols['ctags']
+  ids = rows.map { |r| r['id'] }.join(',')
+  stht = dbh.prepare("select id, tag from bugs_tags where id in (#{ids})")
+  stht.execute
+  rowst = stht.fetch_all
+  tags = {}
+  rowst.each do |r|
+    tags[r['id']] ||= []
+    tags[r['id']] << r['tag']
+  end
+end
+
 puts "<p><b>#{rows.length} bugs found.</b></p>"
 puts '<table class="buglist">'
 puts '<tr><th>bug#</th><th>package</th><th>title</th>'
@@ -297,8 +311,52 @@ def genhints(source, hints)
   s
 end
 
+# copied from /org/bugs.debian.org/etc/config
+$TagsSingleLetter = {
+  'patch' => '+',
+  'wontfix' => '☹',
+  'moreinfo' => 'M',
+  'unreproducible' => 'R',
+  'security' => 'S',
+  'pending' => 'P',
+  'fixed'   => 'F',
+  'help'    => 'H',
+  'fixed-upstream' => 'U',
+  'upstream' => 'u',
+# Added tags
+  'confirmed' => 'C',
+  'etch-ignore' => 'etc-i',
+  'lenny-ignore' => 'len-i',
+  'sarge-ignore' => 'sar-i',
+  'squeeze-ignore' => 'squ-i',
+  'woody' => 'wod',
+  'sarge' => 'sar',
+  'etch' => 'etc',
+  'lenny' => 'len',
+  'squeeze' => 'squ',
+  'sid' => 'sid',
+  'experimental' => 'exp',
+  'l10n' => 'l10n',
+  'd-i' => 'd-i',
+  'ipv6' => 'ipv6',
+  'lfs' => 'lfs',
+  'fixed-in-experimental' => 'fie',
+}
+
+def gentags(tags)
+  return '' if tags.nil?
+  tags.sort!
+  texttags = tags.map do |tag|
+    puts "unknowntag: #{tag}" if $TagsSingleLetter[tag].nil?
+    "<abbr title='#{tag}'>#{$TagsSingleLetter[tag]}</abbr>"
+  end
+  return '&nbsp;[' + texttags.join('|') + ']'
+end
+
 rows.each do |r|
-  puts "<tr><td style='text-align: center;'><a href=\"http://bugs.debian.org/#{r['id']}\">##{r['id']}</a></td>"
+  print "<tr><td style='text-align: left;'><a href=\"http://bugs.debian.org/#{r['id']}\">##{r['id']}</a>"
+  puts "#{gentags(tags[r['id']])}" if cols['ctags']
+  puts "</td>"
   puts "<td style='text-align: center;'>"
   srcs = r['source'].split(/,\s*/)
   bins = r['package'].split(/,\s*/)
