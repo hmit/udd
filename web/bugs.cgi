@@ -21,6 +21,7 @@ FILTERS = [
  ['patch', 'tagged patch', 'id in (select id from bugs_tags where tag=\'patch\')'],
  ['pending', 'tagged pending', 'id in (select id from bugs_tags where tag=\'pending\')'],
  ['security', 'tagged security', 'id in (select id from bugs_tags where tag=\'security\')'],
+ ['claimed', 'claimed bugs', "id in (select id from bugs_usertags where email='bugsquash@qa.debian.org')"],
  ['notmain', 'packages not in main', 'id not in (select id from bugs_packages, sources where bugs_packages.source = sources.source and component=\'main\')'],
  ['notsqueeze', 'packages not in squeeze', 'id not in (select id from bugs_packages, sources where bugs_packages.source = sources.source and release=\'squeeze\')'],
  ['base', 'packages in base system', 'bugs.source in (select source from sources where priority=\'required\' or priority=\'important\')'],
@@ -58,6 +59,7 @@ COLUMNS = [
   ['chints', 'release team hints'],
   ['cseverity', 'severity'],
   ['ctags', 'tags'],
+  ['cclaimed', 'claimed by'],
 ]
 
 cgi = CGI::new
@@ -290,14 +292,25 @@ if cols['ctags']
   end
 end
 
+if cols['cclaimed']
+  ids = rows.map { |r| r['id'] }.join(',')
+  stht = dbh.prepare("select id, tag from bugs_usertags where email='bugsquash@qa.debian.org' and id in (#{ids})")
+  stht.execute
+  rowst = stht.fetch_all
+  claimedbugs = {}
+  rowst.each do |r|
+    claimedbugs[r['id']] ||= []
+    claimedbugs[r['id']] << r['tag']
+  end
+end
+
 puts "<p><b>#{rows.length} bugs found.</b></p>"
 puts '<table class="buglist">'
 puts '<tr><th>bug#</th><th>package</th><th>title</th>'
 puts '<th>popcon</th>' if cols['cpopcon']
 puts '<th>severity</th>' if cols['cseverity']
-if cols['chints']
-  puts '<th>hints</th>'
-end
+puts '<th>hints</th>' if cols['chints']
+puts '<th>claimed by</th>' if cols['cclaimed']
 puts '<th>last&nbsp;modified</th></tr>'
 
 def genhints(source, hints)
@@ -366,6 +379,7 @@ rows.each do |r|
   puts "<td>#{r['popcon']}</td>" if cols['cpopcon']
   puts "<td>#{r['severity']}</td>" if cols['cseverity']
   puts "<td>#{genhints(r['source'], hints[r['source']])}</td>" if cols['chints']
+  puts "<td>#{claimedbugs[r['id']]}</td>" if cols['cclaimed']
   puts "<td style='text-align: center;'>#{r['last_modified'].to_date}</td></tr>"
 end
 
