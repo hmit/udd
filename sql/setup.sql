@@ -750,3 +750,28 @@ CREATE VIEW relevant_hints AS
   OR (type IN ('unblock', 'age-days', 'hint', 'easy') AND (source, version) IN (select source, version from sources where release='sid'))
   OR (type IN ('remove') AND (source, version) IN (select source, version from sources where release='squeeze')) ;
 GRANT SELECT ON relevant_hints TO public;
+
+CREATE TABLE deferred
+ (source text, version debversion, distribution text, urgency text, date timestamp with time zone, delayed_until timestamp, delay_remaining interval,
+ changed_by text, changed_by_name text, changed_by_email text, maintainer text, maintainer_name text, maintainer_email text, changes text,
+ PRIMARY KEY (source, version));
+
+CREATE TABLE deferred_architecture
+ (source text, version debversion, architecture text,
+ PRIMARY KEY (source, version, architecture),
+FOREIGN KEY (source, version) REFERENCES deferred DEFERRABLE);
+
+CREATE TABLE deferred_binary
+ (source text, version debversion, package text,
+ PRIMARY KEY (source, version, package),
+FOREIGN KEY (source, version) REFERENCES deferred DEFERRABLE);
+   
+CREATE TABLE deferred_closes
+ (source text, version debversion, bug int,
+ PRIMARY KEY (source, version, bug),
+FOREIGN KEY (source, version) REFERENCES deferred DEFERRABLE);
+
+GRANT SELECT ON deferred TO public;
+GRANT SELECT ON deferred_architecture TO public;
+GRANT SELECT ON deferred_binary TO public;
+GRANT SELECT ON deferred_closes TO public;

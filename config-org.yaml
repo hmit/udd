@@ -28,6 +28,7 @@ general:
     history-daily: module udd.history_daily_gatherer
     i18n-apps: module udd.i18n_apps_gatherer
     hints: module udd.hints_gatherer
+    deferred: module udd.deferred_gatherer
   timestamp-dir: /org/udd.debian.org/timestamps
   lock-dir: /org/udd.debian.org/locks
   archs:
@@ -588,3 +589,7 @@ debian-ports-experimental:
   release: experimental
   update-command: /org/udd.debian.org/udd/scripts/sync-dist.sh rsync.debian-ports.org::debian/dists/experimental/ /org/udd.debian.org/mirrors/debian-ports/experimental
   no-sources: true
+
+deferred:
+  type: deferred
+  url: http://ftp-master.debian.org/deferred/status
