@@ -49,8 +49,8 @@ class deferred_gatherer(gatherer):
     q_defarch = "EXECUTE da_insert(%(Source)s, %(Version)s, %(Architecture)s)"
     cur.execute("PREPARE da_binary AS INSERT INTO deferred_binary (source, version, package) VALUES ($1, $2, $3)")
     q_defbin = "EXECUTE da_binary(%(Source)s, %(Version)s, %(Package)s)"
-    cur.execute("PREPARE da_closes AS INSERT INTO deferred_closes (source, version, bug) VALUES ($1, $2, $3)")
-    q_defcloses = "EXECUTE da_closes(%(Source)s, %(Version)s, %(Bug)s)"
+    cur.execute("PREPARE da_closes AS INSERT INTO deferred_closes (source, version, id) VALUES ($1, $2, $3)")
+    q_defcloses = "EXECUTE da_closes(%(Source)s, %(Version)s, %(Id)s)"
 
     cur.execute("DELETE FROM deferred_closes")
     cur.execute("DELETE FROM deferred_binary")
@@ -75,7 +75,7 @@ class deferred_gatherer(gatherer):
         db_list.append(current_binary)
       for bug in set(current['Closes'].split()):
         current_c = {'Source': current['Source'], 'Version': current['Version']} 
-        current_c['Bug'] = bug
+        current_c['Id'] = bug
         dc_list.append(current_c)
 
     cur.executemany(q_deferred, d_list)

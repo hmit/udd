@@ -767,8 +767,8 @@ CREATE TABLE deferred_binary
 FOREIGN KEY (source, version) REFERENCES deferred DEFERRABLE);
    
 CREATE TABLE deferred_closes
- (source text, version debversion, bug int,
- PRIMARY KEY (source, version, bug),
+ (source text, version debversion, id int,
+ PRIMARY KEY (source, version, id),
 FOREIGN KEY (source, version) REFERENCES deferred DEFERRABLE);
 
 GRANT SELECT ON deferred TO public;
