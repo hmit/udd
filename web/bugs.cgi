@@ -314,7 +314,7 @@ if cols['cdeferred']
   deferredbugs = {}
   rowsd.each do |r|
     d = r['du'].to_i
-    deferredbugs[r['bug']] = "#{r['version']} (#{d}&nbsp;day#{d==1?'':'s'})"
+    deferredbugs[r['id']] = "#{r['version']} (#{d}&nbsp;day#{d==1?'':'s'})"
   end
 end
 
