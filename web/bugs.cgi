@@ -22,6 +22,7 @@ FILTERS = [
  ['pending', 'tagged pending', 'id in (select id from bugs_tags where tag=\'pending\')'],
  ['security', 'tagged security', 'id in (select id from bugs_tags where tag=\'security\')'],
  ['claimed', 'claimed bugs', "id in (select id from bugs_usertags where email='bugsquash@qa.debian.org')"],
+ ['deferred', 'fixed in deferred/delayed', "id in (select bug from deferred_closes)"],
  ['notmain', 'packages not in main', 'id not in (select id from bugs_packages, sources where bugs_packages.source = sources.source and component=\'main\')'],
  ['notsqueeze', 'packages not in squeeze', 'id not in (select id from bugs_packages, sources where bugs_packages.source = sources.source and release=\'squeeze\')'],
  ['base', 'packages in base system', 'bugs.source in (select source from sources where priority=\'required\' or priority=\'important\')'],
@@ -60,6 +61,7 @@ COLUMNS = [
   ['cseverity', 'severity'],
   ['ctags', 'tags'],
   ['cclaimed', 'claimed by'],
+  ['cdeferred', 'deferred/delayed'],
 ]
 
 cgi = CGI::new
@@ -304,6 +306,18 @@ if cols['cclaimed']
   end
 end
 
+if cols['cdeferred']
+  ids = rows.map { |r| r['id'] }.join(',')
+  sthd = dbh.prepare("select bug, deferred.source, deferred.version, extract (day from delayed_until) as du from deferred, deferred_closes where deferred.source = deferred_closes.source and deferred.version = deferred_closes.version and deferred_closes.bug in (#{ids})")
+  sthd.execute
+  rowsd = sthd.fetch_all
+  deferredbugs = {}
+  rowsd.each do |r|
+    d = r['du'].to_i
+    deferredbugs[r['bug']] = "#{r['version']} (#{d}&nbsp;day#{d==1?'':'s'})"
+  end
+end
+
 puts "<p><b>#{rows.length} bugs found.</b></p>"
 puts '<table class="buglist">'
 puts '<tr><th>bug#</th><th>package</th><th>title</th>'
@@ -311,6 +325,7 @@ puts '<th>popcon</th>' if cols['cpopcon']
 puts '<th>severity</th>' if cols['cseverity']
 puts '<th>hints</th>' if cols['chints']
 puts '<th>claimed by</th>' if cols['cclaimed']
+puts '<th>deferred</th>' if cols['cdeferred']
 puts '<th>last&nbsp;modified</th></tr>'
 
 def genhints(source, hints)
@@ -380,6 +395,7 @@ rows.each do |r|
   puts "<td>#{r['severity']}</td>" if cols['cseverity']
   puts "<td>#{genhints(r['source'], hints[r['source']])}</td>" if cols['chints']
   puts "<td>#{claimedbugs[r['id']]}</td>" if cols['cclaimed']
+  puts "<td>#{deferredbugs[r['id']]}</td>" if cols['cdeferred']
   puts "<td style='text-align: center;'>#{r['last_modified'].to_date}</td></tr>"
 end
 
