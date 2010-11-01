@@ -2,7 +2,7 @@
 
 require 'dbi'
 
-puts "Content-type: text/html\n\n"
+puts "Content-type: text/html; charset=utf-8\n\n"
 
 dbh = DBI::connect('DBI:Pg:dbname=udd;port=5441;host=localhost', 'guest')
 sth = dbh.prepare("select s.source, s.version, u.changed_by, nmu, signed_by, cl.login
