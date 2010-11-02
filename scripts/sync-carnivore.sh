@@ -2,9 +2,6 @@
 
 set -e
 umask 002
-SRC=he@merkel.debian.org:/org/qa.debian.org/carnivore
-TARGET=/org/udd.debian.org/mirrors/qa.debian.org/
-
-mkdir $TARGET &>/dev/null || true
-
-rsync --quiet -e  "ssh -i /org/udd.debian.org/.ssh/id_carnivore_sync" -avz $SRC $TARGET
+pw=$(</org/udd.debian.org/udd-qa.debian.org-password)
+TARGET=/org/udd.debian.org/mirrors/qa.debian.org-carnivore-report
+echo http://udd:${pw}@qa.debian.org/carnivore-report | wget -q -O $TARGET -i -

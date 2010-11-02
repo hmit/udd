@@ -446,7 +446,7 @@ orphaned-packages:
 carnivore:
   type: carnivore
   update-command: /org/udd.debian.org/udd/scripts/sync-carnivore.sh
-  path: /org/udd.debian.org/mirrors/qa.debian.org/carnivore/report
+  path: /org/udd.debian.org/mirrors/qa.debian.org-carnivore-report
   emails-table: carnivore_emails
   names-table: carnivore_names
   keys-table: carnivore_keys
