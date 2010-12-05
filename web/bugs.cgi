@@ -301,7 +301,7 @@ end
 
 if cols['cclaimed']
   ids = rows.map { |r| r['id'] }.join(',')
-  stht = dbh.prepare("select id, tag from bugs_usertags where email='bugsquash@qa.debian.org' and id in (#{ids})")
+  stht = dbh.prepare("select distinct id, tag from bugs_usertags where email='bugsquash@qa.debian.org' and id in (#{ids})")
   stht.execute
   rowst = stht.fetch_all
   claimedbugs = {}
@@ -313,7 +313,7 @@ end
 
 if cols['cdeferred']
   ids = rows.map { |r| r['id'] }.join(',')
-  sthd = dbh.prepare("select id, deferred.source, deferred.version, extract (day from delayed_until) as du from deferred, deferred_closes where deferred.source = deferred_closes.source and deferred.version = deferred_closes.version and deferred_closes.id in (#{ids})")
+  sthd = dbh.prepare("select id, deferred.source, deferred.version, extract (day from delay_remaining) as du from deferred, deferred_closes where deferred.source = deferred_closes.source and deferred.version = deferred_closes.version and deferred_closes.id in (#{ids})")
   sthd.execute
   rowsd = sthd.fetch_all
   deferredbugs = {}
