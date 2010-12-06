@@ -184,7 +184,7 @@ RELEASE_RESTRICT.each do |r|
   puts "<input type='radio' name='release' value='#{r[0]}' #{checked}/>#{r[1]}&nbsp;&nbsp;"
 end
 puts <<-EOF
-<br/>(also uses release tags and xxx-ignore information)</p>
+<br/>(This already uses release tags ('sid', 'squeeze') and xxx-ignore ('squeeze-ignore') to include/exclude bugs)</p>
 <table class="invisible"><tr><td>
 <table class="buglist">
 <tr><th colspan='4'>FILTERS</th></tr>
