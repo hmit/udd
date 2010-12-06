@@ -73,10 +73,11 @@ class deferred_gatherer(gatherer):
         current_binary = {'Source': current['Source'], 'Version': current['Version']} 
         current_binary['Package'] = binary
         db_list.append(current_binary)
-      for bug in set(current['Closes'].split()):
-        current_c = {'Source': current['Source'], 'Version': current['Version']} 
-        current_c['Id'] = bug
-        dc_list.append(current_c)
+      if current.has_key('Closes'):
+        for bug in set(current['Closes'].split()):
+          current_c = {'Source': current['Source'], 'Version': current['Version']} 
+          current_c['Id'] = bug
+          dc_list.append(current_c)
 
     cur.executemany(q_deferred, d_list)
     cur.executemany(q_defarch, da_list)
