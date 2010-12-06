@@ -152,7 +152,10 @@ end
 
 if type == 'o'
   orphaned = true
-  query = "select * from bapase where type is not null order by orphaned_age desc"
+  query = "select * from bapase where type is not null and type in ('O', 'ITA') order by orphaned_age desc"
+elsif type == 'rfa'
+  orphaned = true
+  query = "select * from bapase where type is not null and type in ('RFA') order by orphaned_age desc"
 elsif type == 'nmu'
   orphaned = true
   query = "select * from bapase where nmu and nmus > 1 order by nmus desc"
@@ -251,6 +254,7 @@ else
   <h1>Bapase</h1>
   <ul>
   <li><a href="bapase.cgi?t=o">Orphaned packages</a></li>
+  <li><a href="bapase.cgi?t=rfa">RFAed packages</a></li>
   <li><a href="bapase.cgi?t=nmu">Packages maintained with NMUs</a></li>
   <li><a href="bapase.cgi?t=testing">Packages not in testing</a></li>
   <li><a href="bapase.cgi?t=nodd">Packages not maintained by DDs</a></li>
