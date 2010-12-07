@@ -67,6 +67,7 @@ COLUMNS = [
   ['ctags', 'tags'],
   ['cclaimed', 'claimed by'],
   ['cdeferred', 'deferred/delayed'],
+  ['caffected', 'affected releases'],
 ]
 
 cgi = CGI::new
@@ -243,9 +244,9 @@ if cgi.params != {}
 tstart = Time::now
 dbh = DBI::connect('DBI:Pg:dbname=udd;port=5441;host=localhost', 'guest')
 if cols['cpopcon']
-  q = "select id, bugs.package, bugs.source, severity, title, last_modified, coalesce(popcon_src.insts, 0) as popcon\nfrom bugs left join popcon_src on (bugs.source = popcon_src.source) \n"
+  q = "select id, bugs.package, bugs.source, severity, title, last_modified, affects_stable, affects_testing, affects_unstable, affects_experimental, coalesce(popcon_src.insts, 0) as popcon\nfrom bugs left join popcon_src on (bugs.source = popcon_src.source) \n"
 else
-  q = "select id, bugs.package, bugs.source, severity, title, last_modified from bugs \n"
+  q = "select id, bugs.package, bugs.source, severity, title, last_modified, affects_stable, affects_testing, affects_unstable, affects_experimental from bugs \n"
 end
 q += "where #{RELEASE_RESTRICT.select { |r| r[0] == release }[0][2]} \n"
 FILTERS.each do |f|
@@ -388,9 +389,20 @@ def gentags(tags)
   return '&nbsp;[' + texttags.join('|') + ']'
 end
 
+def genaffected(r)
+  s = ""
+  s += "<abbr title='affects stable'>S</abbr>" if r['affects_stable']
+  s += "<abbr title='affects testing'>T</abbr>" if r['affects_testing']
+  s += "<abbr title='affects unstable'>U</abbr>" if r['affects_unstable']
+  s += "<abbr title='affects unstable'>E</abbr>" if r['affects_experimental']
+  return "" if s == ""
+  return "&nbsp;("+s+")"
+end
+
 rows.each do |r|
   print "<tr><td style='text-align: left;'><a href=\"http://bugs.debian.org/#{r['id']}\">##{r['id']}</a>"
   puts "#{gentags(tags[r['id']])}" if cols['ctags']
+  puts "#{genaffected(r)}" if cols['caffected']
   puts "</td>"
   puts "<td style='text-align: center;'>"
   srcs = r['source'].split(/,\s*/)
