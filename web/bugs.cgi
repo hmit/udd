@@ -149,6 +149,7 @@ puts <<-EOF
   }
   table.buglist tr:hover  {
     background-color: #ccc;
+    color: #000;
   }
   table {
     border-collapse: collapse;
@@ -161,6 +162,7 @@ div#body {
 div.footer {
     padding: 0.3em 0;
     background-color: #fff;
+    color: #000;
     text-align: center;
     border-top: 2px solid #d70751;
     margin: 0 0 0 0;
