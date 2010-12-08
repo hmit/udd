@@ -1,0 +1,97 @@
+#!/bin/bash
+
+# trick.
+check_commandline() {
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            sync:stage1)
+                SYNCSTAGE1="true"
+                SYNCALL="false"
+                ;;
+            sync:stage2)
+                SYNCSTAGE2="true"
+                SYNCALL="false"
+                ;;
+            sync:callback)
+                SYNCCALLBACK="true"
+                ;;
+            sync:archive:*)
+                ARCHIVE=${1##sync:archive:}
+                # We do not like / or . in the remotely supplied archive name.
+                ARCHIVE=${ARCHIVE//\/}
+                ARCHIVE=${ARCHIVE//.}
+                ;;
+            sync:all)
+                SYNCALL="true"
+                ;;
+            sync:mhop)
+                SYNCMHOP="true"
+                ;;
+            *)
+                echo "Unknown option ${1} ignored"
+                ;;
+        esac
+        shift  # Check next set of parameters.
+    done
+}
+
+# As what are we called?
+NAME="`basename $0`"
+# The original command line arguments need to be saved!
+if [ $# -gt 0 ]; then
+    ORIGINAL_COMMAND=$*
+else
+    ORIGINAL_COMMAND=""
+fi
+
+SSH_ORIGINAL_COMMAND=${SSH_ORIGINAL_COMMAND:-""}
+# Now, check if we got told about stuff via ssh
+if [ -n "${SSH_ORIGINAL_COMMAND}" ]; then
+    # We deliberately add "nothing" and ignore it right again, to avoid
+    # people from outside putting some set options in the first place,
+    # making us parse them...
+    set "nothing" "${SSH_ORIGINAL_COMMAND}"
+    shift
+    # Yes, unqouted $* here. Or the function will only see it as one
+    # parameter, which doesnt help the case in it.
+    check_commandline $*
+fi
+
+# Now, we can locally override all the above variables by just putting
+# them into the .ssh/authorized_keys file forced command.
+if [ -n "${ORIGINAL_COMMAND}" ]; then
+    set ${ORIGINAL_COMMAND}
+    check_commandline $*
+fi
+
+update-archive() {
+UAR=/org/udd.debian.org/udd/update-and-run.sh
+date
+echo "Called with $ARCHIVE"
+case "$ARCHIVE" in
+   debian)
+     $UAR debian-squeeze debian-sid debian-experimental debian-lenny debian-lenny-proposed-updates  debian-squeeze-proposed-updates
+      ;;
+   ubuntu)
+      $UAR ubuntu-natty ubuntu-maverick ubuntu-lucid ubuntu-hardy
+      ;;
+   security)
+      $UAR debian-lenny-security debian-squeeze-security
+      ;;
+   volatile)
+      $UAR debian-volatile-lenny debian-volatile-sloppy-lenny debian-volatile-proposed-lenny
+      ;;
+   backports)
+      $UAR debian-backports-lenny debian-backports-lenny-sloppy
+      ;;
+   debian-ports)
+      $UAR debian-ports-sid debian-ports-experimental debian-ports-unreleased
+      ;;
+   *)
+      echo "Unknown archive: $ARCHIVE"
+      ;;
+esac
+date
+}
+
+update-archive $ARCHIVE | mail -e -s "[UDD] $ARCHIVE sync" lucas@debian.org
