@@ -31,6 +31,7 @@ FILTERS = [
  ['notsqueeze', 'packages not in squeeze', 'id not in (select id from bugs_packages, sources where bugs_packages.source = sources.source and release=\'squeeze\')'],
  ['base', 'packages in base system', 'bugs.source in (select source from sources where priority=\'required\' or priority=\'important\')'],
  ['standard', 'packages in standard installation', 'bugs.source in (select source from sources where priority=\'standard\')'],
+ ['orphaned', 'orphaned packages', 'bugs.source in (select source from orphaned_packages where type in (\'ITA\', \'O\'))'],
  ['merged', 'merged bugs', 'id in (select id from bugs_merged_with where id > merged_with)'],
  ['done', 'marked as done', 'status = \'done\''],
  ['outdatedsqueeze', 'outdated binaries in squeeze', "bugs.source in (select distinct p1.source from packages_summary p1, packages_summary p2 where p1.source = p2.source and p1.release='squeeze' and p2.release='squeeze' and p1.source_version != p2.source_version)"],
