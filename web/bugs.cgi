@@ -174,12 +174,26 @@ div.footer {
 </style>
 <title>Debian Bugs Search @ UDD</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<script type="text/javascript">
+function removeBlankFields(form) {
+	var inputs = form.getElementsByTagName("input");
+	var removeList = new Array();
+	for (var i=0; i<inputs.length; i++) {
+		if (inputs[i].value == "") {
+			removeList.push(inputs[i]);
+		}
+	}
+	for (x in removeList) {
+		removeList[x].parentNode.removeChild(removeList[x]);
+	}
+}
+</script>
 </head>
 <body>
 <h1 style="margin-bottom : 5px"><img src="http://qa.debian.org/debian.png" alt="Debian logo" width="188" height="52" style="vertical-align : -13px; ">Bugs Search <span style="color :#c70036">@</span> UDD</h1>
 <div id="body">
 
-<form action="bugs.cgi" method="get">
+<form action="bugs.cgi" method="get" onsubmit="removeBlankFields(this);">
 <p><b>Bugs affecting:</b>
 EOF
 
