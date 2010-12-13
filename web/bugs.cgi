@@ -284,6 +284,13 @@ else
   q += "AND FALSE\n"
 end
 q += "order by #{sortby} #{sorto}"
+
+load = IO::read('/proc/loadavg').split[0].to_f
+if load > 7
+  puts "<p><b>Current system load (#{load}) is too high. Please retry later!</b></p>"
+  exit(0)
+end
+
 begin
   sth = dbh.prepare(q)
   sth.execute
