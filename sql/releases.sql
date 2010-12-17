@@ -1,6 +1,6 @@
 /****************************************************************************************
  * This table enables sorting of releases according to their release date.  To define   *
- * a reasonable order also for releases which are not or nevel will be released an      *
+ * a reasonable order also for releases which are not or never will be released an      *
  * additional column sort is defined.                                                   *
  * The relevant discussion can be found here:                                           *
  *   http://lists.debian.org/debian-qa/2010/02/msg00001.html                            *
