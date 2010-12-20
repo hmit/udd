@@ -21,35 +21,35 @@ from psycopg2 import connect
 from re import split, sub
 from urllib import urlopen
 
+groups = {}
+group_list = ('pkg-gnome', 'pkg-gstreamer', 'pkg-telepathy', 'pkg-utopia')
 conn = connect(database='udd', port=5441, host='localhost', user='guest')
 cur = conn.cursor()
 
-query_sid = """SELECT DISTINCT s.source
-               FROM sources_uniq s
-               INNER JOIN upload_history u
-               ON u.source = s.source
-               AND u.version = s.version
-               WHERE architecture != 'all'
-               AND release ='sid'
-               AND (s.maintainer_email = 'pkg-gnome-maintainers@lists.alioth.debian.org'
-               OR uploaders LIKE '%pkg-gnome-maintainers@lists.alioth.debian.org%')
-               ORDER BY s.source"""
-query_exp = """SELECT DISTINCT s.source
-               FROM sources_uniq s
-               INNER JOIN upload_history u
-               ON u.source = s.source
-               AND u.version = s.version
-               WHERE architecture != 'all'
-               AND release ='experimental'
-               AND (s.maintainer_email = 'pkg-gnome-maintainers@lists.alioth.debian.org'
-               OR uploaders LIKE '%pkg-gnome-maintainers@lists.alioth.debian.org%')
-               ORDER BY s.source"""
+groups['pkg-gnome'] = ('pkg-gnome-maintainers@lists.alioth.debian.org',
+                       {'sid':None, 'experimental':None})
+groups['pkg-gstreamer'] = ('pkg-gstreamer-maintainers@lists.alioth.debian.org',
+                           {'sid':None, 'experimental':None})
+groups['pkg-telepathy'] = ('pkg-telepathy-maintainers@lists.alioth.debian.org',
+                           {'sid':None, 'experimental':None})
+groups['pkg-utopia'] = ('pkg-utopia-maintainers@lists.alioth.debian.org',
+                        {'sid':None, 'experimental':None})
 
-suites = {}
-cur.execute(query_sid)
-suites['unstable'] = cur.fetchall()
-cur.execute(query_exp)
-suites['experimental'] = cur.fetchall()
+for group in group_list:
+    for suite in groups[group][1].keys():
+       query = """SELECT DISTINCT s.source
+                  FROM sources_uniq s
+                  INNER JOIN upload_history u
+                  ON u.source = s.source
+                  AND u.version = s.version
+                  WHERE architecture != 'all'
+                  AND release = '%(suite)s'
+                  AND (s.maintainer_email = '%(mail)s'
+                  OR uploaders LIKE '%%%(mail)s%%')
+                  ORDER BY s.source""" \
+                  % {'mail': groups[group][0], 'suite': suite}
+       cur.execute(query)
+       groups[group][1][suite] = cur.fetchall()
 cur.close()
 conn.close()
 
@@ -57,7 +57,7 @@ print """Content-Type: text/html\n\n
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<title>pkg-gnome buildd status</title>
+<title>Debian GNOME Team buildd status</title>
 <meta http-equiv="content-type" content="text/html; charset=utf-8" />
 <link rel="StyleSheet" type="text/css" href="https://buildd.debian.org/pkg.css" />
 <link rel="StyleSheet" type="text/css" href="https://buildd.debian.org/status/status.css" />
@@ -94,23 +94,31 @@ function toggleBuildd(suite) {
 <table id="header" width="100%">
 <tr>
 <td><img src="http://pkg-gnome.alioth.debian.org/images/gnome-debian-small-trans.png" alt="Debian Logo" /></td>
-<td><h1 class="header">Debian GNOME Packaging - Buildd results</h1></td>
+<td><h1 class="header">Debian GNOME Packaging - Buildd status</h1></td>
 </tr>
-</table>"""
+</table>
+<hr>"""
 
-for s in 'unstable', 'experimental':
-    print '<h3 class="%(s)s" onclick="toggleBuildd(\'%(s)s\')">Click to show buildd results for packages in %(s)s</h3>' % {'s': s}
-    print '<h3 class="%(s)s" style="display: none" onclick="toggleBuildd(\'%(s)s\')"> Click to hide buildd results for packages in %(s)s</h3>' % {'s': s}
-    print '<div class="%s" style="display: none">' % s
-    url = 'https://buildd.debian.org/status/package.php?p='
-    for d in suites[s]:
-        url += "%s+" % d[0].replace('+', '%2B')
-    url += '&suite=%s&compact=compact' % s
-    data = urlopen(url).read()
-    data = split('<div id="jsmode"></div>', data)[1]
-    data = split('</div><div id="footer">', data)[0]
-    data = sub(r'<a href="([ap])', r'<a href="https://buildd.debian.org/status/\1', data)
-    print data
-    print '</div>'
+for group in group_list:
+    for suite in sorted(groups[group][1].keys(), reverse=True):
+        print '<h3 class="%(group)s%(suite)s" onclick="toggleBuildd(\'%(group)s%(suite)s\')"> \
+               Click to show buildd status for %(group)s packages in %(suite)s</h3>' \
+               % {'group':group, 'suite': suite}
+        print '<h3 class="%(group)s%(suite)s" style="display: none" onclick="toggleBuildd(\'%(group)s%(suite)s\')"> \
+               Click to hide buildd status for %(group)s packages in %(suite)s</h3>' \
+               % {'group':group, 'suite': suite}
+        print '<div class="%(group)s%(suite)s" style="display: none">' \
+               % {'group':group, 'suite': suite}
+        url = 'https://buildd.debian.org/status/package.php?p='
+        for row in groups[group][1][suite]:
+            url += "%s+" % row[0].replace('+', '%2B')
+        url += '&suite=%s&compact=compact' % suite
+        data = urlopen(url).read()
+        data = split('<div id="jsmode"></div>', data)[1]
+        data = split('</div><div id="footer">', data)[0]
+        data = sub(r'<a href="([ap])', r'<a href="https://buildd.debian.org/status/\1', data)
+        print data
+        print '</div>'
+    print '<hr>'
 
 print '</body></html>'
