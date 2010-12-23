@@ -8,37 +8,31 @@
  * See below for an usage example.                                                 *
  ***********************************************************************************/
 
-CREATE OR REPLACE FUNCTION versions_archs_component (text) RETURNS SETOF RECORD AS $$
-    Declare
- 	r           RECORD;
-    BEGIN
-        FOR r IN
-            SELECT release || CASE WHEN char_length(substring(distribution from '-.*')) > 0
+CREATE OR REPLACE FUNCTION versions_archs_component_sql (text) RETURNS SETOF RECORD AS $$
+       SELECT p.release, version, archs, component FROM
+          ( SELECT release || CASE WHEN char_length(substring(distribution from '-.*')) > 0
                                         THEN substring(distribution from '-.*')
                                         ELSE '' END AS release,
                             -- make *-volatile a "pseudo-release"
                         regexp_replace(version, '^[0-9]:', '') AS version,
-                        array_to_string(array_sort(array_accum(architecture)),','),
+                        array_to_string(array_sort(array_accum(architecture)),',') AS archs,
                         component
                     FROM packages
 	           WHERE package = $1
 		   GROUP BY version, release, distribution, component
-		   ORDER BY version
-	      LOOP
-	  RETURN NEXT r;
-        END LOOP;
-    END; $$ LANGUAGE 'plpgsql';
+          ) p
+	  JOIN releases ON releases.release = p.release
+	  ORDER BY releases.sort, version;
+ $$ LANGUAGE 'SQL';
 
 /***********************************************************************************
  * Example of usage: Package seaview which has versions is in different components *
 
-   SELECT r as release, version, archs, component
-     FROM versions_archs_component('seaview') AS (r text, version text, archs text, component text)
+   SELECT * FROM versions_archs_component_sql('seaview') AS (release text, version text, archs text, component text);
           -- you have to specify the column names because plain RECORD type is returned
-     JOIN releases ON releases.release = r
-          -- JOIN with release table to enable reasonable sorting
-    WHERE r NOT LIKE '%-%'
+    WHERE release NOT LIKE '%-%'
           -- ignore releases like *-security etc.
-    ORDER BY releases.sort;
+
+   SELECT * FROM versions_archs_component_sql('libc6') AS (release text, version text, archs text, component text);
 
  ***********************************************************************************/
