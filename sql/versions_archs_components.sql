@@ -10,33 +10,22 @@
 
 CREATE OR REPLACE FUNCTION versions_archs_component (text) RETURNS SETOF RECORD AS $$
     Declare
-        package     ALIAS FOR $1 ;
-
  	r           RECORD;
-	q           RECORD;
-	query       text;
-        query1      text;
     BEGIN
-	-- make sure we have the components in reasonable order
-        query = 'SELECT component FROM (SELECT component, version FROM packages WHERE package = '''
-	         || package || ''' GROUP BY component, version ORDER BY version) AS cv GROUP BY component;';
-
-	FOR r IN EXECUTE query LOOP
-	    query1 = 'SELECT release, version, array_to_string(array_sort(array_accum(arch)),'',''), CAST(''' 
-                 || r.component || ''' AS text) AS component FROM 
-                 (SELECT release || CASE WHEN char_length(substring(distribution from ''-.*'')) > 0
-                                        THEN substring(distribution from ''-.*'')
-                                        ELSE '''' END AS release,
+        FOR r IN
+            SELECT release || CASE WHEN char_length(substring(distribution from '-.*')) > 0
+                                        THEN substring(distribution from '-.*')
+                                        ELSE '' END AS release,
                             -- make *-volatile a "pseudo-release"
-                        regexp_replace(version, ''^[0-9]:'', '''') AS version,
-                        architecture AS arch, component
+                        regexp_replace(version, '^[0-9]:', '') AS version,
+                        array_to_string(array_sort(array_accum(architecture)),','),
+                        component
                     FROM packages
-	           WHERE package = ''' || package || ''' AND component = ''' || r.component || '''
-		   GROUP BY architecture, version, release, distribution, component) tmpReleaseVersionArch
-                 GROUP BY release, version ORDER BY version;' ;
-	    FOR q IN EXECUTE query1 LOOP
-	        RETURN NEXT q;
-	    END LOOP;
+	           WHERE package = $1
+		   GROUP BY version, release, distribution, component
+		   ORDER BY version
+	      LOOP
+	  RETURN NEXT r;
         END LOOP;
     END; $$ LANGUAGE 'plpgsql';
 
@@ -53,4 +42,3 @@ CREATE OR REPLACE FUNCTION versions_archs_component (text) RETURNS SETOF RECORD 
     ORDER BY releases.sort;
 
  ***********************************************************************************/
-
