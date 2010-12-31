@@ -11,6 +11,8 @@ CREATE OR REPLACE FUNCTION blends_query_packages (text[]) RETURNS SETOF RECORD A
          src.vcs_type, src.vcs_url, src.vcs_browser,
          p.enhances,
          rva.releases, versions, rva.architectures,
+	 unstable_upstream, unstable_parsed_version, unstable_status, experimental_parsed_version, experimental_status,
+	 pop.vote, pop.recent,
          p.description  AS description_en, p.long_description  AS long_description_en,
          cs.description AS description_cs, cs.long_description AS long_description_cs,
          da.description AS description_da, da.long_description AS long_description_da,
@@ -95,6 +97,13 @@ CREATE OR REPLACE FUNCTION blends_query_packages (text[]) RETURNS SETOF RECORD A
 	    ) tmp GROUP BY package
          ) rva
          ON p.package = rva.package
+    LEFT OUTER JOIN (
+      SELECT DISTINCT
+        source, unstable_upstream, unstable_parsed_version, unstable_status, experimental_parsed_version, experimental_status
+        FROM dehs
+        WHERE unstable_status = 'outdated'
+    ) d ON p.source = d.source 
+    LEFT OUTER JOIN popcon pop ON p.package = pop.package
     WHERE p.package = ANY ($1)
     ORDER BY p.package
  $$ LANGUAGE 'SQL';
