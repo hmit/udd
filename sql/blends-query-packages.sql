@@ -13,6 +13,8 @@ CREATE OR REPLACE FUNCTION blends_query_packages (text[]) RETURNS SETOF RECORD A
          rva.releases, versions, rva.architectures,
 	 unstable_upstream, unstable_parsed_version, unstable_status, experimental_parsed_version, experimental_status,
 	 pop.vote, pop.recent,
+         tags.debtags,
+         screenshot_urls, large_image_urls, small_image_urls,
          p.description  AS description_en, p.long_description  AS long_description_en,
          cs.description AS description_cs, cs.long_description AS long_description_cs,
          da.description AS description_da, da.long_description AS long_description_da,
@@ -104,6 +106,23 @@ CREATE OR REPLACE FUNCTION blends_query_packages (text[]) RETURNS SETOF RECORD A
         WHERE unstable_status = 'outdated'
     ) d ON p.source = d.source 
     LEFT OUTER JOIN popcon pop ON p.package = pop.package
+    LEFT OUTER JOIN (
+       SELECT package, array_agg(tag) AS debtags
+         FROM debtags 
+        WHERE tag NOT LIKE 'implemented-in::%'
+	  AND tag NOT LIKE 'protocol::%'
+          AND tag NOT LIKE '%::TODO'
+          AND tag NOT LIKE '%not-yet-tagged%'
+          GROUP BY package
+    ) tags ON tags.package = p.package
+    LEFT OUTER JOIN (
+       SELECT package, 
+              array_agg(screenshot_url)  AS screenshot_urls,
+              array_agg(large_image_url) AS large_image_urls,
+              array_agg(small_image_url) AS small_image_urls 
+         FROM screenshots 
+         GROUP BY package
+    ) sshots ON sshots.package = p.package
     WHERE p.package = ANY ($1)
     ORDER BY p.package
  $$ LANGUAGE 'SQL';
