@@ -55,7 +55,7 @@ CREATE OR REPLACE FUNCTION blends_query_packages (text[]) RETURNS SETOF RECORD A
     LEFT OUTER JOIN ddtp uk ON uk.language = 'uk' AND uk.package = p.package AND uk.distribution = p.distribution AND uk.release = p.release AND uk.component = p.component
     LEFT OUTER JOIN ddtp zh_CN ON zh_CN.language = 'zh_CN' AND zh_CN.package = p.package AND zh_CN.distribution = p.distribution AND zh_CN.release = p.release AND zh_CN.component = p.component
     LEFT OUTER JOIN ddtp zh_TW ON zh_TW.language = 'zh_TW' AND zh_TW.package = p.package AND zh_TW.distribution = p.distribution AND zh_TW.release = p.release AND zh_TW.component = p.component
-    -- extract one single package with highes, version and release and any architecture
+    -- extract one single package with highest version and release and any architecture
     JOIN (
        SELECT pkg.package, pkg.version, pkg.architecture, (SELECT release FROM releases WHERE sort = MAX(r.sort)) AS release
          FROM packages pkg
@@ -125,4 +125,68 @@ CREATE OR REPLACE FUNCTION blends_query_packages (text[]) RETURNS SETOF RECORD A
     ) sshots ON sshots.package = p.package
     WHERE p.package = ANY ($1)
     ORDER BY p.package
+ $$ LANGUAGE 'SQL';
+
+-- Select unique DDTP translation for highest package version for a given language
+-- ATTENTION: The execution of this query is quite slow and should be optimized
+CREATE OR REPLACE FUNCTION ddtp_unique(text)  RETURNS SETOF RECORD AS $$
+  SELECT DISTINCT d.package, d.description, d.long_description FROM ddtp d
+    JOIN (
+      SELECT dr.package, dr.version, (SELECT release FROM releases WHERE sort = MAX(r.sort)) AS release FROM ddtp dr
+        JOIN (
+          SELECT package, MAX(version) AS version FROM ddtp WHERE language = $1 GROUP BY package
+        ) duv ON duv.package = dr.package AND duv.version = dr.version
+        JOIN releases r ON dr.release = r.release
+        WHERE language = $1
+        GROUP BY dr.package, dr.version
+    -- sometimes there are different translations of the same package version in different releases
+    -- because translators moved on working inbetween releases but we need to select only one of these
+    -- (the last one)
+    ) duvr ON duvr.package = d.package AND duvr.version = d.version AND duvr.release = d.release
+    WHERE language = $1
+ $$ LANGUAGE 'SQL';
+
+CREATE OR REPLACE FUNCTION blends_metapackage_translations (text[]) RETURNS SETOF RECORD AS $$
+  SELECT
+         p.package,
+         cs.description_cs, cs.long_description_cs,
+         da.description_da, da.long_description_da,
+         de.description_de, de.long_description_de,
+         es.description_es, es.long_description_es,
+         fi.description_fi, fi.long_description_fi,
+         fr.description_fr, fr.long_description_fr,
+         hu.description_hu, hu.long_description_hu,
+         it.description_it, it.long_description_it,
+         ja.description_ja, ja.long_description_ja,
+         ko.description_ko, ko.long_description_ko,
+         nl.description_nl, nl.long_description_nl,
+         pl.description_pl, pl.long_description_pl,
+         pt_BR.description_pt_BR, pt_BR.long_description_pt_BR,
+         ru.description_ru, ru.long_description_ru,
+         sk.description_sk, sk.long_description_sk,
+         sv.description_sv, sv.long_description_sv,
+         uk.description_uk, uk.long_description_uk,
+         zh_CN.description_zh_CN, zh_CN.long_description_zh_CN,
+         zh_TW.description_zh_TW, zh_TW.long_description_zh_TW
+    FROM packages p
+    LEFT OUTER JOIN (SELECT * FROM ddtp_unique('cs') AS (package text, description_cs text, long_description_cs text)) cs ON cs.package = p.package
+    LEFT OUTER JOIN (SELECT * FROM ddtp_unique('da') AS (package text, description_da text, long_description_da text)) da ON da.package = p.package
+    LEFT OUTER JOIN (SELECT * FROM ddtp_unique('de') AS (package text, description_de text, long_description_de text)) de ON de.package = p.package
+    LEFT OUTER JOIN (SELECT * FROM ddtp_unique('es') AS (package text, description_es text, long_description_es text)) es ON es.package = p.package
+    LEFT OUTER JOIN (SELECT * FROM ddtp_unique('fi') AS (package text, description_fi text, long_description_fi text)) fi ON fi.package = p.package
+    LEFT OUTER JOIN (SELECT * FROM ddtp_unique('fr') AS (package text, description_fr text, long_description_fr text)) fr ON fr.package = p.package
+    LEFT OUTER JOIN (SELECT * FROM ddtp_unique('hu') AS (package text, description_hu text, long_description_hu text)) hu ON hu.package = p.package
+    LEFT OUTER JOIN (SELECT * FROM ddtp_unique('it') AS (package text, description_it text, long_description_it text)) it ON it.package = p.package
+    LEFT OUTER JOIN (SELECT * FROM ddtp_unique('ja') AS (package text, description_ja text, long_description_ja text)) ja ON ja.package = p.package
+    LEFT OUTER JOIN (SELECT * FROM ddtp_unique('ko') AS (package text, description_ko text, long_description_ko text)) ko ON ko.package = p.package
+    LEFT OUTER JOIN (SELECT * FROM ddtp_unique('nl') AS (package text, description_nl text, long_description_nl text)) nl ON nl.package = p.package
+    LEFT OUTER JOIN (SELECT * FROM ddtp_unique('pl') AS (package text, description_pl text, long_description_pl text)) pl ON pl.package = p.package
+    LEFT OUTER JOIN (SELECT * FROM ddtp_unique('pt_BR') AS (package text, description_pt_BR text, long_description_pt_BR text)) pt_BR ON pt_BR.package = p.package
+    LEFT OUTER JOIN (SELECT * FROM ddtp_unique('ru') AS (package text, description_ru text, long_description_ru text)) ru ON ru.package = p.package
+    LEFT OUTER JOIN (SELECT * FROM ddtp_unique('sk') AS (package text, description_sk text, long_description_sk text)) sk ON sk.package = p.package
+    LEFT OUTER JOIN (SELECT * FROM ddtp_unique('sv') AS (package text, description_sv text, long_description_sv text)) sv ON sv.package = p.package
+    LEFT OUTER JOIN (SELECT * FROM ddtp_unique('uk') AS (package text, description_uk text, long_description_uk text)) uk ON uk.package = p.package
+    LEFT OUTER JOIN (SELECT * FROM ddtp_unique('zh_CN') AS (package text, description_zh_CN text, long_description_zh_CN text)) zh_CN ON zh_CN.package = p.package
+    LEFT OUTER JOIN (SELECT * FROM ddtp_unique('zh_TW') AS (package text, description_zh_TW text, long_description_zh_TW text)) zh_TW ON zh_TW.package = p.package
+    WHERE p.package = ANY ($1)
  $$ LANGUAGE 'SQL';
