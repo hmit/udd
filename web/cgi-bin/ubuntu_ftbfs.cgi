@@ -36,7 +36,7 @@ puts <<-EOF
 <body>
 <h1>Ubuntu packages that FTBFS</h1>
 
-Contact: <a href="mailto: lucas@ubuntu.com">Lucas Nussbaum</a><br>
+Contact: <a href="mailto:lucas@ubuntu.com">Lucas Nussbaum</a><br>
 EOF
 end
 
