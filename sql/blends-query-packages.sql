@@ -9,6 +9,7 @@ CREATE OR REPLACE FUNCTION blends_query_packages (text[]) RETURNS SETOF RECORD A
          p.source, p.section, task, p.homepage,
          src.maintainer_name, src.maintainer_email,
          src.vcs_type, src.vcs_url, src.vcs_browser,
+	 src.changed_by,
          p.enhances,
          rva.releases, versions, rva.architectures,
 	 unstable_upstream, unstable_parsed_version, unstable_status, experimental_parsed_version, experimental_status,
@@ -74,8 +75,13 @@ CREATE OR REPLACE FUNCTION blends_query_packages (text[]) RETURNS SETOF RECORD A
             WHERE pkg.package = ANY ($1)
          GROUP BY pkg.package, pkg.architecture, pkg.version
        ) pvar ON pvar.package = p.package AND pvar.version = p.version AND pvar.architecture = p.architecture AND pvar.release = p.release
-    -- extract source
-    JOIN sources src ON src.source = p.source
+    -- extract source and join with upload_history to find out latest uploader if different from Maintainer
+    JOIN (
+	SELECT s.source, s.version, s.maintainer, s.release, s.maintainer_name, s.maintainer_email, s.vcs_type, s.vcs_url, s.vcs_browser,
+               CASE WHEN uh.changed_by != s.maintainer THEN uh.changed_by ELSE NULL END AS changed_by
+          FROM sources s
+          LEFT OUTER JOIN upload_history uh ON s.source = uh.source AND s.version = uh.version
+    ) src ON src.source = p.source
                     -- AND src.version = p.version -- this excludes packages whith binary only uploads
                     AND src.release = p.release
     -- join with sets of avialable versions in different releases
