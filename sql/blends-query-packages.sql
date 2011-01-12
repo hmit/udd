@@ -3,7 +3,7 @@
  ************************************************************************************/
 
 CREATE OR REPLACE FUNCTION blends_query_packages (text[]) RETURNS SETOF RECORD AS $$
-  SELECT
+  SELECT DISTINCT
          p.package, p.distribution, p.release, p.component, p.version,
          p.architecture, p.maintainer,
          p.source, p.section, task, p.homepage,
@@ -98,6 +98,7 @@ CREATE OR REPLACE FUNCTION blends_query_packages (text[]) RETURNS SETOF RECORD A
 		   GROUP BY package, version, release, distribution, component
               ) p
 	      JOIN releases ON releases.release = p.release
+              ORDER BY releases.sort, version
 	    ) tmp GROUP BY package
          ) rva
          ON p.package = rva.package
