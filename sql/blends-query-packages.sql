@@ -5,7 +5,7 @@
 CREATE OR REPLACE FUNCTION blends_query_packages (text[]) RETURNS SETOF RECORD AS $$
   SELECT DISTINCT
          p.package, p.distribution, p.release, p.component, p.version,
-         p.architecture, p.maintainer,
+         p.maintainer,
          p.source, p.section, task, p.homepage,
          src.maintainer_name, src.maintainer_email,
          src.vcs_type, src.vcs_url, src.vcs_browser,
