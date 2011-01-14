@@ -2,7 +2,9 @@
  * Obtain all needed information of a package mentioned in a Blends task            *
  ************************************************************************************/
 
-CREATE OR REPLACE FUNCTION blends_query_packages (text[]) RETURNS SETOF RECORD AS $$
+-- drop the function which did not query for enhances
+DROP FUNCTION IF EXISTS blends_query_packages(text[]);
+CREATE OR REPLACE FUNCTION blends_query_packages(text[],text[]) RETURNS SETOF RECORD AS $$
   SELECT DISTINCT
          p.package, p.distribution, p.release, p.component, p.version,
          p.maintainer,
@@ -10,7 +12,7 @@ CREATE OR REPLACE FUNCTION blends_query_packages (text[]) RETURNS SETOF RECORD A
          src.maintainer_name, src.maintainer_email,
          src.vcs_type, src.vcs_url, src.vcs_browser,
 	 src.changed_by,
-         p.enhances,
+         enh.enhanced,
          rva.releases, versions, rva.architectures,
 	 unstable_upstream, unstable_parsed_version, unstable_status, experimental_parsed_version, experimental_status,
 	 pop.vote, pop.recent,
@@ -132,6 +134,13 @@ CREATE OR REPLACE FUNCTION blends_query_packages (text[]) RETURNS SETOF RECORD A
          FROM screenshots 
          GROUP BY package
     ) sshots ON sshots.package = p.package
+    -- check whether a package is enhanced by some other package
+    LEFT OUTER JOIN (
+      SELECT DISTINCT regexp_replace(package_version, E'\\s*\\(.*\\)', '') AS package, array_agg(enhanced_by) AS enhanced FROM (
+        SELECT DISTINCT package AS enhanced_by, regexp_split_to_table(enhances, E',\\s*') AS package_version FROM packages
+         WHERE enhances LIKE ANY( $2 )
+      ) AS tmpenh GROUP BY package
+    ) enh ON enh.package = p.package
     WHERE p.package = ANY ($1)
     ORDER BY p.package
  $$ LANGUAGE 'SQL';
