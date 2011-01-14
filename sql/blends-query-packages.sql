@@ -101,7 +101,6 @@ CREATE OR REPLACE FUNCTION blends_query_packages(text[],text[]) RETURNS SETOF RE
           FROM sources s
           LEFT OUTER JOIN upload_history uh ON s.source = uh.source AND s.version = uh.version
     ) src ON src.source = p.source
-                    -- AND src.version = p.version -- this excludes packages whith binary only uploads
                     AND src.release = p.release
     -- join with sets of avialable versions in different releases
     JOIN (
@@ -109,20 +108,23 @@ CREATE OR REPLACE FUNCTION blends_query_packages(text[],text[]) RETURNS SETOF RE
              array_agg(CASE WHEN component = 'main' THEN version ELSE version || ' (' || component || ')' END) AS versions,
              array_agg(archs) AS architectures
           FROM (
-     	    SELECT package, p.release as release, version, archs, component FROM
-              ( SELECT package,
-                   release || CASE WHEN char_length(substring(distribution from '-.*')) > 0
+     	    SELECT package, ptmp.release as release, strip_binary_upload(version) AS version, archs, component FROM
+              ( SELECT package, release, version, array_to_string(array_sort(array_accum(architecture)),',') AS archs, component
+                  FROM (
+                    SELECT package,
+                           release || CASE WHEN char_length(substring(distribution from '-.*')) > 0
                                         THEN substring(distribution from '-.*')
                                         ELSE '' END AS release,
                             -- make *-volatile a "pseudo-release"
-                        regexp_replace(version, '^[0-9]:', '') AS version,
-                        array_to_string(array_sort(array_accum(architecture)),',') AS archs,
-                        component
-                    FROM packages
-	           WHERE package = ANY ($1)
-		   GROUP BY package, version, release, distribution, component
-              ) p
-	      JOIN releases ON releases.release = p.release
+                            strip_binary_upload(regexp_replace(version, '^[0-9]:', '')) AS version,
+                            architecture,
+                            component
+                      FROM packages
+	             WHERE package = ANY ($1)
+                   ) AS prvac
+		   GROUP BY package, version, release, component
+              ) ptmp
+	      JOIN releases ON releases.release = ptmp.release
               ORDER BY releases.sort, version
 	    ) tmp GROUP BY package
          ) rva
