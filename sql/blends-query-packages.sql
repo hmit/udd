@@ -111,8 +111,8 @@ CREATE OR REPLACE FUNCTION blends_query_packages(text[],text[]) RETURNS SETOF RE
           LEFT OUTER JOIN upload_history uh ON s.source = uh.source AND s.version = uh.version
     ) src ON src.source = p.source AND src.source = ps.source
            AND src.release = p.release
-           AND ps.version = p.version
-           AND ps.maintainer_email = src.maintainer_email -- we really mean the same upload
+           AND ( ( ps.version = p.version AND ps.version != ps.source_version ) OR
+                 ( ps.version = p.version AND src.version = p.version) )
     -- join with sets of avialable versions in different releases
     JOIN (
       SELECT package, array_agg(release) AS releases,
