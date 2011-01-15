@@ -91,7 +91,7 @@ CREATE OR REPLACE FUNCTION blends_query_packages(text[],text[]) RETURNS SETOF RE
                   GROUP BY package
                 ) mv ON pv1.version = mv.version AND pv1.package = mv.package
                 GROUP BY pv1.package, pv1.version
-          ) sv1 ON pkg.version = sv1.version AND pkg.architecture = sv1.architecture
+          ) sv1 ON pkg.version = sv1.version AND pkg.architecture = sv1.architecture AND sv1.package = pkg.package
          JOIN releases r ON r.release = pkg.release
          GROUP BY pkg.package, pkg.architecture, pkg.version
        ) pvar ON pvar.package = p.package AND pvar.version = p.version AND pvar.architecture = p.architecture AND pvar.release = p.release
