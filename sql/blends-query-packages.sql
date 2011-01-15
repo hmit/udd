@@ -4,7 +4,7 @@
 
 -- strip '+bX' for binary only uploads which is not interesting in the Blends scope
 CREATE OR REPLACE FUNCTION strip_binary_upload(text) RETURNS debversion AS $$
-       SELECT CAST(regexp_replace($1, E'\\+b[0-9]+$', '') AS debversion) ;
+       SELECT CAST(regexp_replace(regexp_replace($1, E'\\+b[0-9]+$', ''), E'^[0-9]+:', '') AS debversion) ;
 $$  LANGUAGE 'SQL';
 
 -- drop the function which did not query for enhances
@@ -44,7 +44,8 @@ CREATE OR REPLACE FUNCTION blends_query_packages(text[],text[]) RETURNS SETOF RE
          zh_CN.description AS description_zh_CN, zh_CN.long_description AS long_description_zh_CN,
          zh_TW.description AS description_zh_TW, zh_TW.long_description AS long_description_zh_TW
     FROM (
-      SELECT package, distribution, release, component, strip_binary_upload(version) AS version,
+      SELECT DISTINCT 
+             package, distribution, release, component, strip_binary_upload(version) AS version,
              maintainer, source, section, task, homepage, description, long_description,
 	     architecture
         FROM packages
@@ -94,14 +95,24 @@ CREATE OR REPLACE FUNCTION blends_query_packages(text[],text[]) RETURNS SETOF RE
          JOIN releases r ON r.release = pkg.release
          GROUP BY pkg.package, pkg.architecture, pkg.version
        ) pvar ON pvar.package = p.package AND pvar.version = p.version AND pvar.architecture = p.architecture AND pvar.release = p.release
+    -- obtain source_version of given package which is needed in cases where this is different form binary package version
+    JOIN (
+       SELECT DISTINCT package, source, strip_binary_upload(version) AS version,
+                       strip_binary_upload(source_version) AS source_version, release,
+                       maintainer_email
+         FROM packages_summary WHERE package = ANY ($1)
+    ) ps ON ps.package = p.package AND ps.release = p.release
     -- extract source and join with upload_history to find out latest uploader if different from Maintainer
     JOIN (
-	SELECT s.source, s.version, s.maintainer, s.release, s.maintainer_name, s.maintainer_email, s.vcs_type, s.vcs_url, s.vcs_browser,
+	SELECT DISTINCT s.source, strip_binary_upload(s.version) AS version,
+               s.maintainer, s.release, s.maintainer_name, s.maintainer_email, s.vcs_type, s.vcs_url, s.vcs_browser,
                CASE WHEN uh.changed_by != s.maintainer THEN uh.changed_by ELSE NULL END AS changed_by
           FROM sources s
           LEFT OUTER JOIN upload_history uh ON s.source = uh.source AND s.version = uh.version
-    ) src ON src.source = p.source
-                    AND src.release = p.release
+    ) src ON src.source = p.source AND src.source = ps.source
+           AND src.release = p.release
+           AND ps.version = p.version
+           AND ps.maintainer_email = src.maintainer_email -- we really mean the same upload
     -- join with sets of avialable versions in different releases
     JOIN (
       SELECT package, array_agg(release) AS releases,
