@@ -22,7 +22,7 @@ CREATE OR REPLACE FUNCTION blends_query_packages(text[],text[]) RETURNS SETOF RE
 	 unstable_upstream, unstable_parsed_version, unstable_status, experimental_parsed_version, experimental_status,
 	 pop.vote, pop.recent,
          tags.debtags,
-         screenshot_urls, large_image_urls, small_image_urls,
+         screenshot_versions, large_image_urls, small_image_urls,
          p.description  AS description_en, p.long_description  AS long_description_en,
          cs.description AS description_cs, cs.long_description AS long_description_cs,
          da.description AS description_da, da.long_description AS long_description_da,
@@ -46,8 +46,7 @@ CREATE OR REPLACE FUNCTION blends_query_packages(text[],text[]) RETURNS SETOF RE
     FROM (
       SELECT DISTINCT 
              package, distribution, release, component, strip_binary_upload(version) AS version,
-             maintainer, source, section, task, homepage, description, long_description,
-	     architecture
+             maintainer, source, section, task, homepage, description, long_description
         FROM packages
        WHERE package = ANY ($1)
     ) p
@@ -72,29 +71,36 @@ CREATE OR REPLACE FUNCTION blends_query_packages(text[],text[]) RETURNS SETOF RE
     LEFT OUTER JOIN ddtp uk ON uk.language = 'uk' AND uk.package = p.package AND uk.distribution = p.distribution AND uk.release = p.release AND uk.component = p.component AND strip_binary_upload(uk.version) = p.version
     LEFT OUTER JOIN ddtp zh_CN ON zh_CN.language = 'zh_CN' AND zh_CN.package = p.package AND zh_CN.distribution = p.distribution AND zh_CN.release = p.release AND zh_CN.component = p.component AND strip_binary_upload(zh_CN.version) = p.version
     LEFT OUTER JOIN ddtp zh_TW ON zh_TW.language = 'zh_TW' AND zh_TW.package = p.package AND zh_TW.distribution = p.distribution AND zh_TW.release = p.release AND zh_TW.component = p.component AND strip_binary_upload(zh_TW.version) = p.version
-    -- extract one single package with highest version and release and any architecture
+    -- extract one single package with highest version and release
     JOIN (
-       SELECT pkg.package, pkg.version, pkg.architecture, (SELECT release FROM releases WHERE sort = MAX(r.sort)) AS release
-         FROM (
-          SELECT package, strip_binary_upload(version) AS version, architecture, release
-            FROM packages WHERE package = ANY ($1)
-         ) pkg
-         JOIN (
-          SELECT pv1.package, MIN(architecture) AS architecture, pv1.version
-            FROM (
-	    	SELECT package, strip_binary_upload(version) AS version, architecture
-                  FROM packages WHERE package = ANY ($1)
-            ) pv1
-            JOIN (
-                SELECT package, MAX(strip_binary_upload(version)) AS version
-                  FROM packages WHERE package = ANY ($1)
-                  GROUP BY package
-                ) mv ON pv1.version = mv.version AND pv1.package = mv.package
-                GROUP BY pv1.package, pv1.version
-          ) sv1 ON pkg.version = sv1.version AND pkg.architecture = sv1.architecture AND sv1.package = pkg.package
-         JOIN releases r ON r.release = pkg.release
-         GROUP BY pkg.package, pkg.architecture, pkg.version
-       ) pvar ON pvar.package = p.package AND pvar.version = p.version AND pvar.architecture = p.architecture AND pvar.release = p.release
+      -- select packages which have versions outside experimental
+      SELECT px.package, strip_binary_upload(px.version) AS version, (SELECT release FROM releases WHERE sort = MAX(rx.sort)) AS release
+        FROM (
+           -- select highest version which is not in experimental
+           SELECT package, MAX(version) AS version FROM packages
+            WHERE package = ANY ($1)
+              AND release != 'experimental'
+            GROUP BY package
+        ) px
+        JOIN (
+           -- select the release in which this version is available
+           SELECT DISTINCT package, version, release FROM packages
+            WHERE package = ANY ($1)
+        ) py ON px.package = py.package AND px.version = py.version
+        JOIN releases rx ON py.release = rx.release
+        GROUP BY px.package, px.version
+      UNION
+      -- find out which packages only exist in experimental and nowhere else
+      SELECT DISTINCT package, strip_binary_upload(version) AS version, release
+        FROM packages
+       WHERE package = ANY ($1)
+          -- ignore packages which have other releases than experimental
+         AND package NOT IN (
+             SELECT DISTINCT package FROM packages 
+              WHERE package = ANY ($1)
+                AND release != 'experimental'
+             )
+       ) pvar ON pvar.package = p.package AND pvar.version = p.version AND pvar.release = p.release
     -- obtain source_version of given package which is needed in cases where this is different form binary package version
     JOIN (
        SELECT DISTINCT package, source, strip_binary_upload(version) AS version,
@@ -136,7 +142,7 @@ CREATE OR REPLACE FUNCTION blends_query_packages(text[],text[]) RETURNS SETOF RE
 		   GROUP BY package, version, release, component
               ) ptmp
 	      JOIN releases ON releases.release = ptmp.release
-              ORDER BY releases.sort, version
+              ORDER BY version, releases.sort
 	    ) tmp GROUP BY package
          ) rva
          ON p.package = rva.package
@@ -158,7 +164,7 @@ CREATE OR REPLACE FUNCTION blends_query_packages(text[],text[]) RETURNS SETOF RE
     ) tags ON tags.package = p.package
     LEFT OUTER JOIN (
        SELECT package, 
-              array_agg(screenshot_url)  AS screenshot_urls,
+              array_agg(version)  AS screenshot_versions,
               array_agg(large_image_url) AS large_image_urls,
               array_agg(small_image_url) AS small_image_urls 
          FROM screenshots 
