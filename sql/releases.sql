@@ -23,7 +23,7 @@ INSERT INTO releases VALUES ( 'squeeze',                  NULL,         600 );
 INSERT INTO releases VALUES ( 'squeeze-security',         NULL,         601 );
 INSERT INTO releases VALUES ( 'squeeze-proposed-updates', NULL,         602 );
 INSERT INTO releases VALUES ( 'sid',                      NULL,      100000 );
-INSERT INTO releases VALUES ( 'experimental',             NULL,      100001 );
+INSERT INTO releases VALUES ( 'experimental',             NULL,           0 ); /* this pseudo releases does not fit any order and it is not higher than unstable */
 
 GRANT SELECT ON releases TO PUBLIC ;
 
