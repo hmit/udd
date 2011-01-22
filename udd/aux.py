@@ -5,6 +5,8 @@ import sys
 import psycopg2
 from os import path
 import fcntl
+import re
+from email.Utils import parseaddr
 
 # If debug is something that evaluates to True, then print_debug actually prints something
 debug = 0
@@ -89,3 +91,13 @@ def print_debug(*args):
   if debug:
     sys.stdout.write(*args)
     sys.stdout.write("\n")
+
+def parse_email(str):
+  """Use email.Utils to parse name and email.  Afterwards check whether it was successful and try harder to get a reasonable address"""
+  name, email = parseaddr(str)
+  # if no '@' is detected in email but string contains a '@' anyway try harder to get a reasonable Mail address
+  if email.find('@') == -1 and str.find('@') != -1:
+    email = re.sub('^[^<]+[<\(]([.\w]+@[.\w]+)[>\)].*',                  '\\1', str)
+    name  = re.sub('^[^\w]*([^<]+[.\w\)\]]) *[<\(][.\w]+@[.\w]+[>\)].*', '\\1', str)
+    print_debug("parse_email: %s ---> %s <%s>" % (str, name, email))
+  return name, email

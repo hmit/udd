@@ -7,7 +7,6 @@ from glob import glob
 import gzip
 import psycopg2
 import sys
-import email.Utils
 import os.path
 
 def get_gatherer(config, connection, source):
@@ -83,10 +82,10 @@ class upload_history_gatherer(gatherer):
         line = line.lstrip()
         # Stupid multi-line maintainer fields *grml*
         if line == '':
-          current['Changed-By_name'], current['Changed-By_email'] = email.Utils.parseaddr(current['Changed-By'])
-          current['Maintainer_name'], current['Maintainer_email'] = email.Utils.parseaddr(current['Maintainer'])
+          current['Changed-By_name'], current['Changed-By_email'] = aux.parse_email(current['Changed-By'])
+          current['Maintainer_name'], current['Maintainer_email'] = aux.parse_email(current['Maintainer'])
           if current['Signed-By'].find('@') != -1:
-            current['Signed-By_name'], current['Signed-By_email'] = email.Utils.parseaddr(current['Signed-By'])
+            current['Signed-By_name'], current['Signed-By_email'] = aux.parse_email(current['Signed-By'])
           else:
             current['Signed-By_name'] = current['Signed-By']
             current['Signed-By_email'] = ''
