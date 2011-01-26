@@ -38,6 +38,9 @@ FILTERS = [
  ['outdatedsid', 'outdated binaries in sid', "bugs.source in (select distinct p1.source from packages_summary p1, packages_summary p2 where p1.source = p2.source and p1.release='sid' and p2.release='sid' and p1.source_version != p2.source_version)"],
  ['needmig', 'different versions in squeeze and sid', "bugs.source in (select s1.source from sources s1, sources s2 where s1.source = s2.source and s1.release = 'squeeze' and s2.release='sid' and s1.version != s2.version)"],
  ['newerubuntu', 'newer in Ubuntu than in sid', "bugs.source in (select s1.source from sources_uniq s1, ubuntu_sources s2 where s1.source = s2.source and s1.release = 'sid' and s2.release='natty' and s1.version < s2.version)"],
+ ['rtsqueeze-will-remove', 'RT tag for squeeze: will-remove', "id in (select id from bugs_usertags where email='release.debian.org@packages.debian.org' and tag='squeeze-will-remove')"],
+ ['rtsqueeze-can-defer', 'RT tag for squeeze: can-defer', "id in (select id from bugs_usertags where email='release.debian.org@packages.debian.org' and tag='squeeze-can-defer')"],
+ ['rtsqueeze-is-blocker', 'RT tag for squeeze: is-blocker', "id in (select id from bugs_usertags where email='release.debian.org@packages.debian.org' and tag='squeeze-is-blocker')"],
 ]
 
 TYPES = [
@@ -62,13 +65,14 @@ SORTS = [
 ]
 
 COLUMNS = [
-  ['cpopcon', 'popularity contest'],
-  ['chints', 'release team hints'],
+  ['cpopcon', 'popularity&nbsp;contest'],
+  ['chints', 'release&nbsp;team&nbsp;hints'],
   ['cseverity', 'severity'],
   ['ctags', 'tags'],
-  ['cclaimed', 'claimed by'],
+  ['cclaimed', 'claimed&nbsp;by'],
   ['cdeferred', 'deferred/delayed'],
-  ['caffected', 'affected releases'],
+  ['caffected', 'affected&nbsp;releases'],
+  ['crttags', 'release&nbsp;team&nbsp;tags&nbsp;for&nbsp;squeeze'],
 ]
 
 cgi = CGI::new
@@ -258,6 +262,7 @@ if cgi.params != {}
 # Generate and execute query
 tstart = Time::now
 dbh = DBI::connect('DBI:Pg:dbname=udd;port=5441;host=localhost', 'guest')
+dbh.execute("SET statement_timeout TO 90000")
 if cols['cpopcon']
   q = "select id, bugs.package, bugs.source, severity, title, last_modified, affects_stable, affects_testing, affects_unstable, affects_experimental, coalesce(popcon_src.insts, 0) as popcon\nfrom bugs left join popcon_src on (bugs.source = popcon_src.source) \n"
 else
@@ -285,9 +290,10 @@ else
 end
 q += "order by #{sortby} #{sorto}"
 
-load = IO::read('/proc/loadavg').split[0].to_f
-if load > 7
+load = IO::read('/proc/loadavg').split[1].to_f
+if load > 20
   puts "<p><b>Current system load (#{load}) is too high. Please retry later!</b></p>"
+  puts "<pre>#{q}</pre>"
   exit(0)
 end
 
@@ -336,6 +342,19 @@ if cols['cclaimed']
   end
 end
 
+if cols['crttags']
+  ids = rows.map { |r| r['id'] }.join(',')
+  stht = dbh.prepare("select distinct id, tag from bugs_usertags where email='release.debian.org@packages.debian.org' and id in (#{ids})")
+  stht.execute
+  rowst = stht.fetch_all
+  rttags = {}
+  rowst.each do |r|
+    rttags[r['id']] ||= []
+    rttags[r['id']] << r['tag']
+  end
+end
+
+
 if cols['cdeferred']
   ids = rows.map { |r| r['id'] }.join(',')
   sthd = dbh.prepare("select id, deferred.source, deferred.version, extract (day from delay_remaining) as du from deferred, deferred_closes where deferred.source = deferred_closes.source and deferred.version = deferred_closes.version and deferred_closes.id in (#{ids})")
@@ -356,6 +375,7 @@ puts '<th>severity</th>' if cols['cseverity']
 puts '<th>hints</th>' if cols['chints']
 puts '<th>claimed by</th>' if cols['cclaimed']
 puts '<th>deferred</th>' if cols['cdeferred']
+puts '<th>RT tag</th>' if cols['crttags']
 puts '<th>last&nbsp;modified</th></tr>'
 
 def genhints(source, hints)
@@ -437,6 +457,7 @@ rows.each do |r|
   puts "<td>#{genhints(r['source'], hints[r['source']])}</td>" if cols['chints']
   puts "<td>#{claimedbugs[r['id']]}</td>" if cols['cclaimed']
   puts "<td>#{deferredbugs[r['id']]}</td>" if cols['cdeferred']
+  puts "<td>#{rttags[r['id']]}</td>" if cols['crttags']
   puts "<td style='text-align: center;'>#{r['last_modified'].to_date}</td></tr>"
 end
 
