@@ -94,7 +94,7 @@ class ubuntu_bugs_gatherer(gatherer):
   # "worker". Fetch a specific bug as text from launchpad.
   def bugfetcher(self, hq, dq):
     while True:
-      conn = httplib.HTTPSConnection('edge.launchpad.net')
+      conn = httplib.HTTPSConnection('launchpad.net')
       ok = True
       b = None
       while ok:
@@ -107,7 +107,7 @@ class ubuntu_bugs_gatherer(gatherer):
           _exit(1)
 
         try:
-          conn.request('GET', 'https://edge.launchpad.net/bugs/' + str(b) + '/+text')
+          conn.request('GET', 'https://launchpad.net/bugs/' + str(b) + '/+text')
           r = conn.getresponse()
           if r.status == 200:
             data = r.read()
