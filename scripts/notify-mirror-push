@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# lock
+exec 8>/tmp/lock.udd-mirror-notif
+flock -w 14400 8 || (echo 'Lock acquisition failed.' ; exit 1)
+
 # trick.
 check_commandline() {
     while [ $# -gt 0 ]; do
@@ -66,8 +70,6 @@ fi
 
 update-archive() {
 UAR=/org/udd.debian.org/udd/update-and-run.sh
-date
-echo "Called with $ARCHIVE"
 case "$ARCHIVE" in
    debian)
      $UAR debian-squeeze debian-sid debian-experimental debian-lenny debian-lenny-proposed-updates  debian-squeeze-proposed-updates
@@ -91,7 +93,6 @@ case "$ARCHIVE" in
       echo "Unknown archive: $ARCHIVE"
       ;;
 esac
-date
 }
 
 update-archive $ARCHIVE | mail -e -s "[UDD] $ARCHIVE sync" lucas@debian.org
