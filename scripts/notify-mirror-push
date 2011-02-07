@@ -78,13 +78,15 @@ case "$ARCHIVE" in
       $UAR ubuntu-natty ubuntu-maverick ubuntu-lucid ubuntu-hardy
       ;;
    security)
-      $UAR debian-lenny-security debian-squeeze-security debian-wheezy-security
+      $UAR debian-lenny-security debian-squeeze-security
+# debian-wheezy-security
       ;;
    volatile)
-      $UAR debian-volatile-lenny debian-volatile-sloppy-lenny debian-volatile-proposed-lenny debian-volatile-squeeze debian-volatile-sloppy-squeeze debian-volatile-proposed-squeeze
+      $UAR debian-volatile-lenny debian-volatile-sloppy-lenny debian-volatile-proposed-lenny
+#  debian-volatile-squeeze debian-volatile-sloppy-squeeze debian-volatile-proposed-squeeze
       ;;
    backports)
-      $UAR debian-backports-lenny debian-backports-lenny-sloppy debian-backports-squeeze debian-backports-squeeze-sloppy
+      $UAR debian-backports-lenny debian-backports-lenny-sloppy debian-backports-squeeze
       ;;
    debian-ports)
       $UAR debian-ports-sid debian-ports-experimental debian-ports-unreleased

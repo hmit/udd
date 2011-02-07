@@ -186,9 +186,7 @@ debian-squeeze-security:
 
 debian-squeeze-proposed-updates:
   type: src-pkg
-  archs: [amd64, armel,
-          i386, ia64, mips,
-          mipsel, powerpc, s390, sparc, kfreebsd-amd64, kfreebsd-i386]       
+  archs: [amd64, armel, i386, ia64, mips, mipsel, powerpc, s390, sparc, kfreebsd-amd64, kfreebsd-i386]       
   directory: /org/mirrors/ftp.debian.org/ftp/dists/squeeze-proposed-updates/
   components: [main, contrib, non-free]
   distribution: debian
@@ -201,8 +199,7 @@ debian-squeeze-proposed-updates:
 
 debian-backports-squeeze:
   type: src-pkg
-  archs: [alpha, amd64, arm, armel, hppa, i386, ia64,  mips,
-          mipsel, powerpc, s390, sparc]       
+  archs: [amd64, armel, i386, ia64, mips, mipsel, powerpc, s390, sparc, kfreebsd-amd64, kfreebsd-i386]       
   directory: /org/mirrors/debian-backports/dists/squeeze-backports/
   components: [main, contrib, non-free, main/debian-installer]
   distribution: debian-backports
@@ -213,24 +210,22 @@ debian-backports-squeeze:
   sources-schema: sources
   release: squeeze
 
-debian-backports-squeeze-sloppy:
-  type: src-pkg
-  archs: [alpha, amd64, arm, armel, hppa, i386, ia64,  mips,
-          mipsel, powerpc, s390, sparc]       
-  directory: /org/mirrors/debian-backports/dists/squeeze-backports-sloppy/
-  components: [main, contrib, non-free ]
-  distribution: debian-backports-sloppy
-  packages-table: packages
-  sources-table: sources
-  uploaders-table: uploaders
-  packages-schema: packages
-  sources-schema: sources
-  release: squeeze
+#debian-backports-squeeze-sloppy:
+#  type: src-pkg
+#  archs: [amd64, armel, i386, ia64, mips, mipsel, powerpc, s390, sparc, kfreebsd-amd64, kfreebsd-i386]       
+#  directory: /org/mirrors/debian-backports/dists/squeeze-backports-sloppy/
+#  components: [main, contrib, non-free ]
+#  distribution: debian-backports-sloppy
+#  packages-table: packages
+#  sources-table: sources
+#  uploaders-table: uploaders
+#  packages-schema: packages
+#  sources-schema: sources
+#  release: squeeze
 
 debian-volatile-squeeze:
   type: src-pkg
-  archs: [alpha, amd64, arm, armel, hppa, i386, ia64,  mips,
-          mipsel, powerpc, s390, sparc]       
+  archs: [amd64, armel, i386, ia64, mips, mipsel, powerpc, s390, sparc, kfreebsd-amd64, kfreebsd-i386]       
   directory: /org/mirrors/volatile.debian.org/archive/dists/squeeze/volatile/
   components: [main, contrib, non-free]
   distribution: squeeze-volatile
@@ -243,8 +238,7 @@ debian-volatile-squeeze:
 
 debian-volatile-sloppy-squeeze:
   type: src-pkg
-  archs: [alpha, amd64, arm, armel, hppa, i386, ia64,  mips,
-          mipsel, powerpc, s390, sparc]       
+  archs: [amd64, armel, i386, ia64, mips, mipsel, powerpc, s390, sparc, kfreebsd-amd64, kfreebsd-i386]       
   directory: /org/mirrors/volatile.debian.org/archive/dists/squeeze/volatile-sloppy/
   components: [main, contrib, non-free]
   distribution: squeeze-volatile-sloppy
@@ -257,8 +251,7 @@ debian-volatile-sloppy-squeeze:
 
 debian-volatile-proposed-squeeze:
   type: src-pkg
-  archs: [alpha, amd64, arm, armel, hppa, i386, ia64,  mips,
-          mipsel, powerpc, s390, sparc]       
+  archs: [amd64, armel, i386, ia64, mips, mipsel, powerpc, s390, sparc, kfreebsd-amd64, kfreebsd-i386]       
   directory: /org/mirrors/volatile.debian.org/archive/dists/squeeze-proposed-updates/volatile/
   components: [main, contrib, non-free]
   distribution: squeeze-volatile-proposed
@@ -271,9 +264,7 @@ debian-volatile-proposed-squeeze:
 
 debian-wheezy:
   type: src-pkg
-  archs: [amd64, armel,
-          i386, ia64, mips,
-          mipsel, powerpc, s390, sparc, kfreebsd-amd64, kfreebsd-i386]       
+  archs: [amd64, armel, i386, ia64, mips, mipsel, powerpc, s390, sparc, kfreebsd-amd64, kfreebsd-i386]       
   directory: /org/mirrors/ftp.debian.org/ftp/dists/wheezy/
   components: [main, contrib, non-free, main/debian-installer, non-free/debian-installer]
   distribution: debian
@@ -286,9 +277,7 @@ debian-wheezy:
 
 debian-wheezy-security:
   type: src-pkg
-  archs: [amd64, armel, hppa,
-          i386, ia64, mips,
-          mipsel, powerpc, s390, sparc, kfreebsd-amd64, kfreebsd-i386]       
+  archs: [amd64, armel, i386, ia64, mips, mipsel, powerpc, s390, sparc, kfreebsd-amd64, kfreebsd-i386]       
   directory: /org/mirrors/debian-security/dists/wheezy/updates/
   components: [main, contrib, non-free]
   distribution: debian
@@ -301,9 +290,7 @@ debian-wheezy-security:
 
 debian-wheezy-proposed-updates:
   type: src-pkg
-  archs: [amd64, armel,
-          i386, ia64, mips,
-          mipsel, powerpc, s390, sparc, kfreebsd-amd64, kfreebsd-i386]       
+  archs: [amd64, armel, i386, ia64, mips, mipsel, powerpc, s390, sparc, kfreebsd-amd64, kfreebsd-i386]       
   directory: /org/mirrors/ftp.debian.org/ftp/dists/wheezy-proposed-updates/
   components: [main, contrib, non-free]
   distribution: debian
