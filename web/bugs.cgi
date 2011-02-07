@@ -7,13 +7,13 @@ require 'cgi'
 puts "Content-type: text/html\n\n"
 
 RELEASE_RESTRICT = [
-  ['squeeze', 'squeeze', 'id in (select id from bugs_rt_affects_testing)'],
+  ['wheezy', 'wheezy', 'id in (select id from bugs_rt_affects_testing)'],
   ['sid', 'sid', 'id in (select id from bugs_rt_affects_unstable)'],
-  ['squeeze_and_sid', 'squeeze and sid', 'id in (select id from bugs_rt_affects_testing) and id in (select id from bugs_rt_affects_unstable)'],
-  ['squeeze_or_sid', 'squeeze or sid', 'id in (select id from bugs_rt_affects_testing union select id from bugs_rt_affects_unstable)'],
-  ['squeeze_not_sid', 'squeeze, not sid', 'id in (select id from bugs_rt_affects_testing) and id not in (select id from bugs_rt_affects_unstable)'],
-  ['sid_not_squeeze', 'sid, not squeeze', 'id in (select id from bugs_rt_affects_unstable) and id not in (select id from bugs_rt_affects_testing)'],
-  ['lenny', 'lenny', 'id in (select id from bugs_rt_affects_stable)'],
+  ['wheezy_and_sid', 'wheezy and sid', 'id in (select id from bugs_rt_affects_testing) and id in (select id from bugs_rt_affects_unstable)'],
+  ['wheezy_or_sid', 'wheezy or sid', 'id in (select id from bugs_rt_affects_testing union select id from bugs_rt_affects_unstable)'],
+  ['wheezy_not_sid', 'wheezy, not sid', 'id in (select id from bugs_rt_affects_testing) and id not in (select id from bugs_rt_affects_unstable)'],
+  ['sid_not_wheezy', 'sid, not wheezy', 'id in (select id from bugs_rt_affects_unstable) and id not in (select id from bugs_rt_affects_testing)'],
+  ['squeeze', 'squeeze', 'id in (select id from bugs_rt_affects_stable)'],
   ['any', 'any', 'id in (select id from bugs where status!=\'done\')'],
 ]
 
@@ -28,19 +28,19 @@ FILTERS = [
  ['claimed', 'claimed bugs', "id in (select id from bugs_usertags where email='bugsquash@qa.debian.org')"],
  ['deferred', 'fixed in deferred/delayed', "id in (select id from deferred_closes)"],
  ['notmain', 'packages not in main', 'id not in (select id from bugs_packages, sources where bugs_packages.source = sources.source and component=\'main\')'],
- ['notsqueeze', 'packages not in squeeze', 'id not in (select id from bugs_packages, sources where bugs_packages.source = sources.source and release=\'squeeze\')'],
+ ['notwheezy', 'packages not in wheezy', 'id not in (select id from bugs_packages, sources where bugs_packages.source = sources.source and release=\'wheezy\')'],
  ['base', 'packages in base system', 'bugs.source in (select source from sources where priority=\'required\' or priority=\'important\')'],
  ['standard', 'packages in standard installation', 'bugs.source in (select source from sources where priority=\'standard\')'],
  ['orphaned', 'orphaned packages', 'bugs.source in (select source from orphaned_packages where type in (\'ITA\', \'O\'))'],
  ['merged', 'merged bugs', 'id in (select id from bugs_merged_with where id > merged_with)'],
  ['done', 'marked as done', 'status = \'done\''],
- ['outdatedsqueeze', 'outdated binaries in squeeze', "bugs.source in (select distinct p1.source from packages_summary p1, packages_summary p2 where p1.source = p2.source and p1.release='squeeze' and p2.release='squeeze' and p1.source_version != p2.source_version)"],
+ ['outdatedwheezy', 'outdated binaries in wheezy', "bugs.source in (select distinct p1.source from packages_summary p1, packages_summary p2 where p1.source = p2.source and p1.release='wheezy' and p2.release='wheezy' and p1.source_version != p2.source_version)"],
  ['outdatedsid', 'outdated binaries in sid', "bugs.source in (select distinct p1.source from packages_summary p1, packages_summary p2 where p1.source = p2.source and p1.release='sid' and p2.release='sid' and p1.source_version != p2.source_version)"],
- ['needmig', 'different versions in squeeze and sid', "bugs.source in (select s1.source from sources s1, sources s2 where s1.source = s2.source and s1.release = 'squeeze' and s2.release='sid' and s1.version != s2.version)"],
+ ['needmig', 'different versions in wheezy and sid', "bugs.source in (select s1.source from sources s1, sources s2 where s1.source = s2.source and s1.release = 'wheezy' and s2.release='sid' and s1.version != s2.version)"],
  ['newerubuntu', 'newer in Ubuntu than in sid', "bugs.source in (select s1.source from sources_uniq s1, ubuntu_sources s2 where s1.source = s2.source and s1.release = 'sid' and s2.release='natty' and s1.version < s2.version)"],
- ['rtsqueeze-will-remove', 'RT tag for squeeze: will-remove', "id in (select id from bugs_usertags where email='release.debian.org@packages.debian.org' and tag='squeeze-will-remove')"],
- ['rtsqueeze-can-defer', 'RT tag for squeeze: can-defer', "id in (select id from bugs_usertags where email='release.debian.org@packages.debian.org' and tag='squeeze-can-defer')"],
- ['rtsqueeze-is-blocker', 'RT tag for squeeze: is-blocker', "id in (select id from bugs_usertags where email='release.debian.org@packages.debian.org' and tag='squeeze-is-blocker')"],
+ ['rtwheezy-will-remove', 'RT tag for wheezy: will-remove', "id in (select id from bugs_usertags where email='release.debian.org@packages.debian.org' and tag='wheezy-will-remove')"],
+ ['rtwheezy-can-defer', 'RT tag for wheezy: can-defer', "id in (select id from bugs_usertags where email='release.debian.org@packages.debian.org' and tag='wheezy-can-defer')"],
+ ['rtwheezy-is-blocker', 'RT tag for wheezy: is-blocker', "id in (select id from bugs_usertags where email='release.debian.org@packages.debian.org' and tag='wheezy-is-blocker')"],
 ]
 
 TYPES = [
@@ -72,7 +72,7 @@ COLUMNS = [
   ['cclaimed', 'claimed&nbsp;by'],
   ['cdeferred', 'deferred/delayed'],
   ['caffected', 'affected&nbsp;releases'],
-  ['crttags', 'release&nbsp;team&nbsp;tags&nbsp;for&nbsp;squeeze'],
+  ['crttags', 'release&nbsp;team&nbsp;tags&nbsp;for&nbsp;wheezy'],
 ]
 
 cgi = CGI::new
@@ -80,7 +80,7 @@ cgi = CGI::new
 if RELEASE_RESTRICT.map { |r| r[0] }.include?(cgi.params['release'][0])
   release = cgi.params['release'][0]
 else
-  release = 'squeeze'
+  release = 'wheezy'
 end
 # columns
 cols = {}
@@ -206,7 +206,7 @@ RELEASE_RESTRICT.each do |r|
   puts "<input type='radio' name='release' value='#{r[0]}' #{checked}/>#{r[1]}&nbsp;&nbsp;"
 end
 puts <<-EOF
-<br/>(This already uses release tags ('sid', 'squeeze') and xxx-ignore ('squeeze-ignore') to include/exclude bugs)</p>
+<br/>(This already uses release tags ('sid', 'wheezy') and xxx-ignore ('wheezy-ignore') to include/exclude bugs)</p>
 <table class="invisible"><tr><td>
 <table class="buglist">
 <tr><th colspan='4'>FILTERS</th></tr>
@@ -407,11 +407,13 @@ $TagsSingleLetter = {
   'lenny-ignore' => 'len-i',
   'sarge-ignore' => 'sar-i',
   'squeeze-ignore' => 'squ-i',
+  'wheezy-ignore' => 'whe-i',
   'woody' => 'wod',
   'sarge' => 'sar',
   'etch' => 'etc',
   'lenny' => 'len',
   'squeeze' => 'squ',
+  'wheezy' => 'whe',
   'sid' => 'sid',
   'experimental' => 'exp',
   'l10n' => 'l10n',

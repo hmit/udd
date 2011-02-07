@@ -170,12 +170,12 @@ end
 
 pkgsrcs = {}
 ths = []
-['squeeze', 'sid'].each do |dist|
+['wheezy', 'sid'].each do |dist|
   ['non-free', 'contrib', 'main'].each do |sect|
     srcs = readsources(dist, sect)
     srcs.each_pair do |k, v|
       pkgsrcs[k] = PkgSrc::new if not pkgsrcs.has_key?(k)
-      if dist == 'squeeze'
+      if dist == 'wheezy'
         pkgsrcs[k].testing = v
       elsif dist == 'sid'
         pkgsrcs[k].unstable = v

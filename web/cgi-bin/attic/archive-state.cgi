@@ -102,7 +102,7 @@ AND us.source !~ '^language-(support|pack)-.*'
 AND us.source !~ '^kde-l10n-.*'
 AND us.source !~ 'ubuntu'
 AND us.source !~ 'launchpad'
-AND us.source not in (select source from sources where distribution='debian' and release in ('sid', 'squeeze', 'lenny'))")
+AND us.source not in (select source from sources where distribution='debian' and release in ('sid', 'wheezy', 'squeeze'))")
 sth.execute
 nb_u = sth.fetch_all[0][0]
 puts "#{nb_u} packages (#{nb_u*100/nb_tot}%)<br/>"
@@ -114,7 +114,7 @@ AND us.source !~ '^language-(support|pack)-.*'
 AND us.source !~ '^kde-l10n-.*'
 AND us.source !~ 'ubuntu'
 AND us.source !~ 'launchpad'
-AND us.source not in (select source from sources where distribution='debian' and release in ('sid', 'squeeze', 'lenny'))
+AND us.source not in (select source from sources where distribution='debian' and release in ('sid', 'wheezy', 'squeeze'))
 ORDER BY INSTS DESC")
 sth.execute
 puts "Top 20 packages, sorted by popcon installations"

@@ -22,6 +22,9 @@ INSERT INTO releases VALUES ( 'lenny-proposed-updates',   '2009-02-14', 502 ); /
 INSERT INTO releases VALUES ( 'squeeze',                  NULL,         600 );
 INSERT INTO releases VALUES ( 'squeeze-security',         NULL,         601 );
 INSERT INTO releases VALUES ( 'squeeze-proposed-updates', NULL,         602 );
+INSERT INTO releases VALUES ( 'wheezy',                  NULL,         700 );
+INSERT INTO releases VALUES ( 'wheezy-security',         NULL,         701 );
+INSERT INTO releases VALUES ( 'wheezy-proposed-updates', NULL,         702 );
 INSERT INTO releases VALUES ( 'sid',                      NULL,      100000 );
 INSERT INTO releases VALUES ( 'experimental',             NULL,           0 ); /* this pseudo releases does not fit any order and it is not higher than unstable */
 

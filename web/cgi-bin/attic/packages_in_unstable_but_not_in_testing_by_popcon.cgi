@@ -11,7 +11,7 @@ my $sth = $dbh->prepare(<<EOF
 SELECT DISTINCT pkgs.package, insts
 FROM packages_summary pkgs, popcon
 WHERE pkgs.release = 'sid' AND pkgs.package NOT IN
-(SELECT package FROM packages_summary WHERE release = 'squeeze')
+(SELECT package FROM packages_summary WHERE release = 'wheezy')
 AND popcon.package = pkgs.package ORDER BY insts DESC;
 EOF
 	);

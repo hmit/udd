@@ -161,7 +161,7 @@ elsif type == 'nmu'
   query = "select * from bapase where nmu and nmus > 1 order by nmus desc"
 elsif type == 'testing'
   orphaned = true
-  query = "select * from bapase where source not in (select source from sources where distribution='debian' and release='squeeze') order by testing_age desc, first_seen asc"
+  query = "select * from bapase where source not in (select source from sources where distribution='debian' and release='wheezy') order by testing_age desc, first_seen asc"
 elsif type == 'nodd'
   orphaned = true
   query = <<EOF
@@ -185,7 +185,7 @@ elsif type == 'maintnmu'
   orphaned = true
   query = <<EOF
 select * from bapase where source in (
-  select source from sources where distribution='debian' and release='squeeze' and maintainer_email in (
+  select source from sources where distribution='debian' and release='wheezy' and maintainer_email in (
 select nmus.email from
 (select email, count(*) as tot from
 (select maintainer_email as email, source from sources_uniq
@@ -216,7 +216,7 @@ and uh.nmu
 group by email) as nmus
 where nmus * 100 / tot >= 100
 and nmus.email = tot.email)
-union (select source from uploaders where distribution='debian' and release='squeeze' and email in (
+union (select source from uploaders where distribution='debian' and release='wheezy' and email in (
 select nmus.email from
 (select email, count(*) as tot from
 (select maintainer_email as email, source from sources_uniq sources

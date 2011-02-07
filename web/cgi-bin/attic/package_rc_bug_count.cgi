@@ -17,13 +17,13 @@ WHERE
     AND(
             NOT EXISTS (SELECT tag FROM bugs_tags t WHERE b.id=t.id AND t.tag IN ('sid', 'sarge', 'etch', 'lenny', 'experimental'))
         OR
-                EXISTS (SELECT tag FROM bugs_tags t WHERE b.id=t.id AND t.tag = 'squeeze')
+                EXISTS (SELECT tag FROM bugs_tags t WHERE b.id=t.id AND t.tag = 'wheezy')
     )
-    AND NOT EXISTS (SELECT tag FROM bugs_tags t WHERE b.id=t.id AND t.tag = 'squeeze-ignore')
+    AND NOT EXISTS (SELECT tag FROM bugs_tags t WHERE b.id=t.id AND t.tag = 'wheezy-ignore')
     AND(
-            EXISTS (SELECT package FROM packages p WHERE p.package = b.package AND p.distribution = 'debian' AND p.release = 'squeeze')
+            EXISTS (SELECT package FROM packages p WHERE p.package = b.package AND p.distribution = 'debian' AND p.release = 'wheezy')
         OR
-            EXISTS (SELECT source FROM sources s WHERE s.source = b.package AND s.distribution = 'debian' AND s.release = 'squeeze')
+            EXISTS (SELECT source FROM sources s WHERE s.source = b.package AND s.distribution = 'debian' AND s.release = 'wheezy')
     )
 GROUP BY b.package
 EOF

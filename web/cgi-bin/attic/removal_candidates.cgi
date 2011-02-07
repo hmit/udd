@@ -9,7 +9,7 @@ use CGI;
 my $s = <<EOF
 select sources.source, id, insts, arrival, last_modified, title
 from sources, bugs, popcon_src
-where sources.distribution = 'debian' and sources.release = 'squeeze'
+where sources.distribution = 'debian' and sources.release = 'wheezy'
 and bugs.source = sources.source
 and id in (select id from bugs_rt_affects_testing_and_unstable)
 and bugs.severity >= 'serious'

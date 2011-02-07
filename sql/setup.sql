@@ -271,32 +271,32 @@ CREATE TABLE bugs_usertags
 CREATE VIEW bugs_rt_affects_stable AS
 SELECT id, package, source FROM bugs
 WHERE affects_stable
-AND (id NOT IN (SELECT id FROM bugs_tags WHERE tag IN ('sid', 'sarge', 'etch', 'squeeze', 'experimental'))
-OR id IN (SELECT id FROM bugs_tags WHERE tag = 'lenny'))
-AND id NOT IN (select id FROM bugs_tags WHERE tag = 'lenny-ignore')
-AND id in (select id from sources, bugs_packages where sources.source = bugs_packages.source and release='lenny');
-
-CREATE VIEW bugs_rt_affects_testing AS
-SELECT id, package, source FROM bugs
-WHERE affects_testing 
-AND (id NOT IN (SELECT id FROM bugs_tags WHERE tag IN ('sid', 'sarge', 'etch', 'lenny', 'experimental'))
+AND (id NOT IN (SELECT id FROM bugs_tags WHERE tag IN ('sid', 'sarge', 'etch', 'lenny', 'wheezy', 'experimental'))
 OR id IN (SELECT id FROM bugs_tags WHERE tag = 'squeeze'))
 AND id NOT IN (select id FROM bugs_tags WHERE tag = 'squeeze-ignore')
 AND id in (select id from sources, bugs_packages where sources.source = bugs_packages.source and release='squeeze');
 
+CREATE VIEW bugs_rt_affects_testing AS
+SELECT id, package, source FROM bugs
+WHERE affects_testing 
+AND (id NOT IN (SELECT id FROM bugs_tags WHERE tag IN ('sid', 'sarge', 'etch', 'lenny', 'squeeze', 'experimental'))
+OR id IN (SELECT id FROM bugs_tags WHERE tag = 'wheezy'))
+AND id NOT IN (select id FROM bugs_tags WHERE tag = 'wheezy-ignore')
+AND id in (select id from sources, bugs_packages where sources.source = bugs_packages.source and release='wheezy');
+
 CREATE VIEW bugs_rt_affects_unstable AS
 SELECT id, package, source FROM bugs
 WHERE affects_unstable 
-AND (id NOT IN (SELECT id FROM bugs_tags WHERE tag IN ('lenny', 'sarge', 'etch', 'squeeze', 'experimental'))
+AND (id NOT IN (SELECT id FROM bugs_tags WHERE tag IN ('lenny', 'sarge', 'etch', 'squeeze', 'wheezy', 'experimental'))
 OR id IN (SELECT id FROM bugs_tags WHERE tag = 'sid'))
 AND id in (select id from sources, bugs_packages where sources.source = bugs_packages.source and release='sid');
 
 CREATE VIEW bugs_rt_affects_testing_and_unstable AS
 SELECT id, package, source FROM bugs
 WHERE affects_unstable AND affects_testing
-AND (id NOT IN (SELECT id FROM bugs_tags WHERE tag IN ('sarge', 'etch', 'lenny', 'experimental'))
-OR (id IN (SELECT id FROM bugs_tags WHERE tag = 'sid') AND id IN (SELECT id FROM bugs_tags WHERE tag = 'squeeze')))
-AND id in (select id from sources, bugs_packages where sources.source = bugs_packages.source and release='squeeze')
+AND (id NOT IN (SELECT id FROM bugs_tags WHERE tag IN ('sarge', 'etch', 'lenny', 'squeeze', 'experimental'))
+OR (id IN (SELECT id FROM bugs_tags WHERE tag = 'sid') AND id IN (SELECT id FROM bugs_tags WHERE tag = 'wheezy')))
+AND id in (select id from sources, bugs_packages where sources.source = bugs_packages.source and release='wheezy')
 AND id in (select id from sources, bugs_packages where sources.source = bugs_packages.source and release='sid');
 
 GRANT SELECT ON bugs TO PUBLIC;

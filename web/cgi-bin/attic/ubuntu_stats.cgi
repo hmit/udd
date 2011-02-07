@@ -99,10 +99,10 @@ rows.each do |r|
 end
 puts
 
-puts "diverged+new upstream, newer than in squeeze (main):"
+puts "diverged+new upstream, newer than in wheezy (main):"
 sth = dbh.prepare("select u.source, u.version, d.version from ubuntu_sources u, sources d
 where u.distribution = 'ubuntu' and u.release = '#{RELEASE}' and u.component = 'main'
-and d.distribution = 'debian' and d.release = 'squeeze'
+and d.distribution = 'debian' and d.release = 'wheezy'
 AND u.source !~ '^language-(support|pack)-.*' AND u.source !~ '^kde-l10n-.*' AND u.source !~ 'ubuntu' AND u.source !~ 'launchpad'
 AND u.source in (select source from sources where distribution='debian' and release in ('sid', 'lenny'))
 AND u.version ~ '-0ubuntu'
@@ -116,10 +116,10 @@ end
 puts
 puts
 
-puts "diverged+new upstream, newer than in squeeze (universe):"
+puts "diverged+new upstream, newer than in wheezy (universe):"
 sth = dbh.prepare("select u.source, u.version, d.version from ubuntu_sources u, sources d
 where u.distribution = 'ubuntu' and u.release = '#{RELEASE}' and u.component = 'universe'
-and d.distribution = 'debian' and d.release = 'squeeze'
+and d.distribution = 'debian' and d.release = 'wheezy'
 AND u.source !~ '^language-(support|pack)-.*' AND u.source !~ '^kde-l10n-.*' AND u.source !~ 'ubuntu' AND u.source !~ 'launchpad'
 AND u.source in (select source from sources where distribution='debian' and release in ('sid', 'lenny'))
 AND u.version ~ '-0ubuntu'
