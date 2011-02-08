@@ -180,7 +180,7 @@ sub run {
 	my $location = $src_config{archived} ? 'archive' : 'db_h';
 	$table = $src_config{archived} ? $archived_table : $table;
 	# Read all bugs
-	my $insert_bugs_handle = $dbh->prepare("INSERT INTO $table (id, package, source, arrival, status, severity, submitter, submitter_name, submitter_email, owner, owner_name, owner_email, done, done_name, done_email, title, forwarded, last_modified, affects_stable, affects_testing, affects_unstable, affects_experimental) VALUES (\$1, \$2, \$3, \$4::abstime, \$5, \$6, \$7, \$8, \$9, \$10, \$11, \$12, \$13, \$14, \$15, \$16, \$17, \$18::abstime, \$19, \$20, \$21, \$22)");
+	my $insert_bugs_handle = $dbh->prepare("INSERT INTO $table (id, package, source, arrival, status, severity, submitter, submitter_name, submitter_email, owner, owner_name, owner_email, done, done_name, done_email, title, forwarded, last_modified, affects_oldstable, affects_stable, affects_testing, affects_unstable, affects_experimental) VALUES (\$1, \$2, \$3, \$4::abstime, \$5, \$6, \$7, \$8, \$9, \$10, \$11, \$12, \$13, \$14, \$15, \$16, \$17, \$18::abstime, \$19, \$20, \$21, \$22, \$23)");
 	my $insert_bugs_packages_handle = $dbh->prepare("INSERT INTO ${table}_packages (id, package, source) VALUES (\$1, \$2, \$3)");
 	my $insert_bugs_found_handle = $dbh->prepare("INSERT INTO ${table}_found_in (id, version) VALUES (\$1, \$2)");
 	my $insert_bugs_fixed_handle = $dbh->prepare("INSERT INTO ${table}_fixed_in (id, version) VALUES (\$1, \$2)");
@@ -253,10 +253,14 @@ sub run {
 		}
 
 		#Calculate bug presence in distributions
-		my ($present_in_stable, $present_in_testing, $present_in_unstable, $present_in_experimental);
+		my (present_in_oldstable, $present_in_stable, $present_in_testing, $present_in_unstable, $present_in_experimental);
 		if($src_config{archived}) {
-			$present_in_stable = $present_in_testing = $present_in_unstable = $present_in_experimental = 'FALSE';
+			$present_in_oldstable = $present_in_stable = $present_in_testing = $present_in_unstable = $present_in_experimental = 'FALSE';
 		} else {
+			$present_in_oldstable =
+				bug_presence(bug => $bug_nr, status => \%bug,
+							 dist => 'oldstable',
+							 arch => \@archs);
 			$present_in_stable =
 				bug_presence(bug => $bug_nr, status => \%bug,
 							 dist => 'stable',
@@ -274,10 +278,15 @@ sub run {
 							 dist => 'experimental',
 							 arch => \@archs);
 
-			if(!defined($present_in_stable) or !defined($present_in_unstable) or !defined($present_in_testing) or !defined($present_in_experimental)) {
+			if(!defined($present_in_oldstable) or !defined($present_in_stable) or !defined($present_in_unstable) or !defined($present_in_testing) or !defined($present_in_experimental)) {
 				print "NUMBER: $bug_nr\n";
 			}
 		
+			if(defined($present_in_oldstable) and ($present_in_oldstable eq 'absent' or $present_in_oldstable eq 'fixed')) {
+				$present_in_oldstable = 'FALSE';
+			} else {
+				$present_in_oldstable = 'TRUE';
+			}
 			if(defined($present_in_stable) and ($present_in_stable eq 'absent' or $present_in_stable eq 'fixed')) {
 				$present_in_stable = 'FALSE';
 			} else {
@@ -305,7 +314,7 @@ sub run {
 			$bug{severity}, $bug{originator}, $submitter_name, $submitter_email, $bug{owner},
 		       	$owner_name, $owner_email, $bug{done}, $done_name, $done_email, $bug{subject},
 		       	$bug{forwarded}, $bug{log_modified},
-			$present_in_stable, $present_in_testing, $present_in_unstable, $present_in_experimental) or die $!;
+			$present_in_oldstable, $present_in_stable, $present_in_testing, $present_in_unstable, $present_in_experimental) or die $!;
 
 		my $src;
 		foreach my $pkg (keys %{{ map { $_ => 1 } split(/\s*[, ]\s*/, $bug{package})}}) {

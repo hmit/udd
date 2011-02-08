@@ -193,7 +193,8 @@ CREATE TABLE bugs
      severity bugs_severity, submitter text, submitter_name text,
      submitter_email text, owner text, owner_name text, owner_email text,
      done text, done_name text, done_email text, title text,
-     last_modified timestamp, forwarded text, affects_stable boolean,
+     last_modified timestamp, forwarded text, affects_oldstable boolean,
+     affects_stable boolean,
     affects_testing boolean, affects_unstable boolean,
     affects_experimental boolean);
 
@@ -232,7 +233,8 @@ CREATE TABLE archived_bugs
      severity bugs_severity, submitter text, submitter_name text,
      submitter_email text, owner text, owner_name text, owner_email text,
      done text, done_name text, done_email text, title text,
-     last_modified timestamp, forwarded text, affects_stable boolean,
+     last_modified timestamp, forwarded text, affects_oldstable boolean,
+     affects_stable boolean,
     affects_testing boolean, affects_unstable boolean,
     affects_experimental boolean);
 
@@ -267,6 +269,14 @@ PRIMARY KEY(id, blocker));
 -- foreign key here.
 CREATE TABLE bugs_usertags
   (email text, tag text, id int);
+
+CREATE VIEW bugs_rt_affects_oldstable AS
+SELECT id, package, source FROM bugs
+WHERE affects_oldstable
+AND (id NOT IN (SELECT id FROM bugs_tags WHERE tag IN ('sid', 'sarge', 'etch', 'squeeze', 'wheezy', 'experimental'))
+OR id IN (SELECT id FROM bugs_tags WHERE tag = 'lenny'))
+AND id NOT IN (select id FROM bugs_tags WHERE tag = 'lenny-ignore')
+AND id in (select id from sources, bugs_packages where sources.source = bugs_packages.source and release='lenny');
 
 CREATE VIEW bugs_rt_affects_stable AS
 SELECT id, package, source FROM bugs
@@ -315,6 +325,7 @@ GRANT SELECT ON archived_bugs_fixed_in TO PUBLIC;
 GRANT SELECT ON archived_bugs_tags TO PUBLIC;
 GRANT SELECT ON archived_bugs_blocks TO PUBLIC;
 GRANT SELECT ON archived_bugs_blockedby TO PUBLIC;
+GRANT SELECT ON bugs_rt_affects_oldstable TO PUBLIC;
 GRANT SELECT ON bugs_rt_affects_stable TO PUBLIC;
 GRANT SELECT ON bugs_rt_affects_testing_and_unstable TO PUBLIC;
 GRANT SELECT ON bugs_rt_affects_unstable TO PUBLIC;

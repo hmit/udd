@@ -14,6 +14,7 @@ RELEASE_RESTRICT = [
   ['wheezy_not_sid', 'wheezy, not sid', 'id in (select id from bugs_rt_affects_testing) and id not in (select id from bugs_rt_affects_unstable)'],
   ['sid_not_wheezy', 'sid, not wheezy', 'id in (select id from bugs_rt_affects_unstable) and id not in (select id from bugs_rt_affects_testing)'],
   ['squeeze', 'squeeze', 'id in (select id from bugs_rt_affects_stable)'],
+  ['lenny', 'lenny', 'id in (select id from bugs_rt_affects_oldstable)'],
   ['any', 'any', 'id in (select id from bugs where status!=\'done\')'],
 ]
 
