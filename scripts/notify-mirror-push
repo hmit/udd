@@ -72,18 +72,16 @@ update-archive() {
 UAR=/org/udd.debian.org/udd/update-and-run.sh
 case "$ARCHIVE" in
    debian)
-     $UAR debian-wheezy debian-squeeze debian-sid debian-experimental debian-lenny debian-lenny-proposed-updates  debian-squeeze-proposed-updates debian-wheezy-proposed-updates
+     $UAR debian-wheezy debian-squeeze debian-sid debian-experimental debian-lenny debian-lenny-proposed-updates  debian-squeeze-proposed-updates debian-wheezy-proposed-updates debian-squeeze-updates
       ;;
    ubuntu)
       $UAR ubuntu-natty ubuntu-maverick ubuntu-lucid ubuntu-hardy
       ;;
    security)
-      $UAR debian-lenny-security debian-squeeze-security
-# debian-wheezy-security
+      $UAR debian-lenny-security debian-squeeze-security debian-wheezy-security
       ;;
    volatile)
       $UAR debian-volatile-lenny debian-volatile-sloppy-lenny debian-volatile-proposed-lenny
-#  debian-volatile-squeeze debian-volatile-sloppy-squeeze debian-volatile-proposed-squeeze
       ;;
    backports)
       $UAR debian-backports-lenny debian-backports-lenny-sloppy debian-backports-squeeze

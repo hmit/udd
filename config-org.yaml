@@ -197,6 +197,19 @@ debian-squeeze-proposed-updates:
   sources-schema: sources
   release: squeeze-proposed-updates
 
+debian-squeeze-updates:
+  type: src-pkg
+  archs: [amd64, armel, i386, ia64, mips, mipsel, powerpc, s390, sparc, kfreebsd-amd64, kfreebsd-i386]       
+  directory: /org/mirrors/ftp.debian.org/ftp/dists/squeeze-updates/
+  components: [main, contrib, non-free]
+  distribution: debian
+  packages-table: packages
+  sources-table: sources
+  uploaders-table: uploaders
+  packages-schema: packages
+  sources-schema: sources
+  release: squeeze-updates
+
 debian-backports-squeeze:
   type: src-pkg
   archs: [amd64, armel, i386, ia64, mips, mipsel, powerpc, s390, sparc, kfreebsd-amd64, kfreebsd-i386]       
@@ -222,45 +235,6 @@ debian-backports-squeeze:
 #  packages-schema: packages
 #  sources-schema: sources
 #  release: squeeze
-
-debian-volatile-squeeze:
-  type: src-pkg
-  archs: [amd64, armel, i386, ia64, mips, mipsel, powerpc, s390, sparc, kfreebsd-amd64, kfreebsd-i386]       
-  directory: /org/mirrors/volatile.debian.org/archive/dists/squeeze/volatile/
-  components: [main, contrib, non-free]
-  distribution: squeeze-volatile
-  packages-table: packages
-  sources-table: sources
-  uploaders-table: uploaders
-  packages-schema: packages
-  sources-schema: sources
-  release: squeeze
-
-debian-volatile-sloppy-squeeze:
-  type: src-pkg
-  archs: [amd64, armel, i386, ia64, mips, mipsel, powerpc, s390, sparc, kfreebsd-amd64, kfreebsd-i386]       
-  directory: /org/mirrors/volatile.debian.org/archive/dists/squeeze/volatile-sloppy/
-  components: [main, contrib, non-free]
-  distribution: squeeze-volatile-sloppy
-  packages-table: packages
-  sources-table: sources
-  uploaders-table: uploaders
-  packages-schema: packages
-  sources-schema: sources
-  release: squeeze
-
-debian-volatile-proposed-squeeze:
-  type: src-pkg
-  archs: [amd64, armel, i386, ia64, mips, mipsel, powerpc, s390, sparc, kfreebsd-amd64, kfreebsd-i386]       
-  directory: /org/mirrors/volatile.debian.org/archive/dists/squeeze-proposed-updates/volatile/
-  components: [main, contrib, non-free]
-  distribution: squeeze-volatile-proposed
-  packages-table: packages
-  sources-table: sources
-  uploaders-table: uploaders
-  packages-schema: packages
-  sources-schema: sources
-  release: squeeze
 
 debian-wheezy:
   type: src-pkg
