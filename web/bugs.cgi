@@ -159,6 +159,12 @@ puts <<-EOF
     background-color: #ccc;
     color: #000;
   }
+  table.buglist tr:hover :link {
+    color: #00f;
+  }
+  table.buglist tr:hover :visited {
+    color: #707;
+  }
   table {
     border-collapse: collapse;
   }
@@ -177,6 +183,12 @@ div.footer {
     border-bottom: 0;
     font-size: 85%;
 }
+  div.footer :link {
+    color: #00f;
+  }
+  div.footer :visited {
+    color: #707;
+  }
 </style>
 <title>Debian Bugs Search @ UDD</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
