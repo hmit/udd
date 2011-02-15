@@ -253,7 +253,7 @@ sub run {
 		}
 
 		#Calculate bug presence in distributions
-		my (present_in_oldstable, $present_in_stable, $present_in_testing, $present_in_unstable, $present_in_experimental);
+		my ($present_in_oldstable, $present_in_stable, $present_in_testing, $present_in_unstable, $present_in_experimental);
 		if($src_config{archived}) {
 			$present_in_oldstable = $present_in_stable = $present_in_testing = $present_in_unstable = $present_in_experimental = 'FALSE';
 		} else {
