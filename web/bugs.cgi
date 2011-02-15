@@ -217,7 +217,7 @@ EOF
 
 RELEASE_RESTRICT.each do |r|
   checked = (release == r[0] ? 'CHECKED=\'1\'':'')
-  puts "<input type='radio' name='release' value='#{r[0]}' #{checked}/>#{r[1]}&nbsp;&nbsp;"
+  puts "<label><input type='radio' name='release' value='#{r[0]}' #{checked}/>#{r[1]}</label>&nbsp;&nbsp;"
 end
 puts <<-EOF
 <br/>(This already uses release tags ('sid', 'wheezy') and xxx-ignore ('wheezy-ignore') to include/exclude bugs)</p>
@@ -249,23 +249,23 @@ puts "</table></td><td style='padding-left: 20px'><table class='buglist'>"
 puts "<tr><th colspan='2'>Bug types</th></tr>"
 TYPES.each do |t|
   checked = types[t[0]]?" checked='1'":""
-  puts "<tr><td><input type='checkbox' name='#{t[0]}' value='1'#{checked}/></td><td>#{t[1]}</td></tr>"
+  puts "<tr><td><input type='checkbox' id='#{t[0]}' name='#{t[0]}' value='1'#{checked}/></td><td><label for='#{t[0]}'>#{t[1]}</label></td></tr>"
 end
 puts "</table></td></tr></table>"
 puts "<p><b>Sort by:</b> "
 SORTS.each do |r|
   checked = (sortby == r[0] ? 'CHECKED=\'1\'':'')
-  puts "<input type='radio' name='sortby' value='#{r[0]}' #{checked}/>#{r[1]}&nbsp;&nbsp;"
+  puts "<label><input type='radio' name='sortby' value='#{r[0]}' #{checked}/>#{r[1]}</label>&nbsp;&nbsp;"
 end
 puts "<b> -- </b>"
 [['asc', 'increasing'],[ 'desc', 'decreasing']].each do |r|
   checked = (sorto == r[0] ? 'CHECKED=\'1\'':'')
-  puts "<input type='radio' name='sorto' value='#{r[0]}' #{checked}/>#{r[1]}&nbsp;&nbsp;"
+  puts "<label><input type='radio' name='sorto' value='#{r[0]}' #{checked}/>#{r[1]}</label>&nbsp;&nbsp;"
 end
 puts "<br/>\n<b>Additional information:</b> "
 COLUMNS.each do |r|
   checked = cols[r[0]] ? 'checked':''
-  puts "<input type='checkbox' name='#{r[0]}' value='1' #{checked}/>#{r[1]}&nbsp;&nbsp;"
+  puts "<label><input type='checkbox' name='#{r[0]}' value='1' #{checked}/>#{r[1]}</label>&nbsp;&nbsp;"
 end
 puts <<-EOF
 <br/>\n<input type='submit' value='Search'/></p>
