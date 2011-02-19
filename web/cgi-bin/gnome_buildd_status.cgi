@@ -22,12 +22,14 @@ from re import split, sub
 from urllib import urlopen
 
 groups = {}
-group_list = ('pkg-gnome', 'pkg-gstreamer', 'pkg-telepathy', 'pkg-utopia')
+group_list = ('pkg-gnome', 'pkg-evolution', 'pkg-gstreamer', 'pkg-telepathy', 'pkg-utopia')
 conn = connect(database='udd', port=5441, host='localhost', user='guest')
 cur = conn.cursor()
 
 groups['pkg-gnome'] = ('pkg-gnome-maintainers@lists.alioth.debian.org',
                        {'sid':None, 'experimental':None})
+groups['pkg-evolution'] = ('pkg-evolution-maintainers@lists.alioth.debian.org',
+                           {'sid':None, 'experimental':None})
 groups['pkg-gstreamer'] = ('pkg-gstreamer-maintainers@lists.alioth.debian.org',
                            {'sid':None, 'experimental':None})
 groups['pkg-telepathy'] = ('pkg-telepathy-maintainers@lists.alioth.debian.org',
@@ -114,10 +116,14 @@ for group in group_list:
             url += "%s+" % row[0].replace('+', '%2B')
         url += '&suite=%s&compact=compact' % suite
         data = urlopen(url).read()
-        data = split('<div id="jsmode"></div>', data)[1]
-        data = split('</div><div id="footer">', data)[0]
-        data = sub(r'<a href="([ap])', r'<a href="https://buildd.debian.org/status/\1', data)
-        print data
+        try:
+            data = split('<div id="jsmode"></div>', data)[1]
+            data = split('</div><div id="footer">', data)[0]
+        except IndexError:
+            print 'No packages'
+        else:
+            data = sub(r'<a href="([ap])', r'<a href="https://buildd.debian.org/status/\1', data)
+            print data
         print '</div>'
     print '<hr>'
 
