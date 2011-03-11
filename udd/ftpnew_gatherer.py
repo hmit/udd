@@ -422,7 +422,7 @@ class ftpnew_gatherer(gatherer):
                 print >>srco, "%s: %s" % (field, value)
               else:
                 # Don't warn about Original-Maintainer field
-                if not field.startswith('Original-Maintainer'):
+                if not field in ('Original-Maintainer', 'Multi-Arch', 'Python3-Version'):
                   print >>stderr, "Unknown field in %s: %s" % (srcpkg.s['Source'], field)
                 print >>srco, "*%s: %s" % (field, value)
             continue
