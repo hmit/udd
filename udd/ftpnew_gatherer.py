@@ -6,7 +6,10 @@ See http://ftp-master.debian.org/new.822 and
     http://ftp-master.debian.org/new.html
 """
 
-from debian_bundle import deb822
+try:
+    from debian import deb822
+except:
+    from debian_bundle import deb822
 from os import access, mkdir, unlink, W_OK
 from sys import stderr
 import aux
@@ -343,7 +346,8 @@ class ftpnew_gatherer(gatherer):
                     else:
                       print >>stderr, "Bug #%i of package %s and source %s is not against pseudopackage 'wnpp' and hast title '%s'" % bug_info
                 if not ftpnew_gatherer.closes_is_itp_re.match(wnpp_title):
-                  print >>stderr, "Bug %i closed by source package %s seems to be not ITPed" % (ival, srcpkg.s['Source'])
+                  # print >>stderr, "Bug %i closed by source package %s seems to be not ITPed" % (ival, srcpkg.s['Source'])
+                  pass # avoid useless warnings
                 else:
                   if found_itp:
                     if DEBUG != 0:
@@ -362,7 +366,7 @@ class ftpnew_gatherer(gatherer):
               print >>srco, "%s: %s\n" % (field, value)
             elif field == 'Distribution':
               if in_source:
-                if srcpkg.has_several_versions == 0 and value != srcpkg.s['Distribution']:
+                if srcpkg.has_several_versions == 0 and value.strip() != srcpkg.s['Distribution']:
                   print >>stderr, "Incompatible distributions between new.822(%s) and %s.html (%s)" % \
                       (srcpkg.s['Distribution'], src_info_base, value)
                 srcpkg.s[field] = value
