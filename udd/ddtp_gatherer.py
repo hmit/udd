@@ -14,7 +14,10 @@ because you have the MD5sum of the descriptions
 from aux import quote
 from gatherer import gatherer
 import re
-from debian_bundle import deb822
+try:
+    from debian import deb822
+except:
+    from debian_bundle import deb822
 from os import listdir, access, F_OK
 from sys import stderr, exit
 from filecmp import cmp
