@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# date >> /tmp/log.notif
+# echo $* >> /tmp/log.notif
+# env >> /tmp/log.notif
+
 # lock
 exec 8>/tmp/lock.udd-mirror-notif
 flock -w 14400 8 || (echo 'Lock acquisition failed.' ; exit 1)
@@ -71,7 +75,7 @@ fi
 update-archive() {
 UAR=/org/udd.debian.org/udd/update-and-run.sh
 case "$ARCHIVE" in
-   debian)
+   "")
      $UAR debian-wheezy debian-squeeze debian-sid debian-experimental debian-lenny debian-lenny-proposed-updates  debian-squeeze-proposed-updates debian-wheezy-proposed-updates debian-squeeze-updates
       ;;
    ubuntu)
