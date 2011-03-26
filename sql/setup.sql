@@ -711,7 +711,8 @@ sync, (current_date - sync) as sync_age, sync_version,
 first_seen, (current_date - first_seen) as first_seen_age,
 uh.date as upload_date, (current_date - uh.date::date) as upload_age,
 nmu, coalesce(nmus, 0) as nmus, coalesce(rc_bugs,0) as rc_bugs, coalesce(all_bugs,0) as all_bugs,
-coalesce(insts,0) as insts, coalesce(vote,0) as vote
+coalesce(insts,0) as insts, coalesce(vote,0) as vote, s.maintainer, bugs.last_modified, 
+(current_date - bugs.last_modified::date) as last_modified_age
 from sources_uniq s
 left join orphaned_packages op on s.source = op.source
 left join migrations tm on s.source = tm.source
@@ -719,6 +720,7 @@ left join  upload_history uh on s.source = uh.source and s.version = uh.version
 left join  upload_history_nmus uhn on s.source = uhn.source
 left join bugs_count b on s.source = b.source
 left join popcon_src ps on s.source = ps.source
+left join bugs on op.bug = bugs.id
 where s.distribution='debian' and s.release='sid';
 GRANT SELECT ON bapase TO PUBLIC;
 
