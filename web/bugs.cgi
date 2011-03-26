@@ -474,7 +474,9 @@ rows.each do |r|
   puts "<td>#{claimedbugs[r['id']]}</td>" if cols['cclaimed']
   puts "<td>#{deferredbugs[r['id']]}</td>" if cols['cdeferred']
   puts "<td>#{rttags[r['id']]}</td>" if cols['crttags']
-  puts "<td style='text-align: center;'>#{r['last_modified'].to_date}</td></tr>"
+  d = r['last_modified']
+  d = Date::new(d.year, d.month, d.day)
+  puts "<td style='text-align: center;'>#{d}</td></tr>"
 end
 
 puts "</table>"
