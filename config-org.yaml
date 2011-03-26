@@ -478,7 +478,7 @@ testing-migrations:
 upload-history:
   type: upload-history
   path: /org/udd.debian.org/tmp/upload-history
-  update-command: if [ ! -e /org/udd.debian.org/tmp/upload-history/ ]; then mkdir /org/udd.debian.org/tmp/upload-history/; fi; lftp -c 'mirror -e -P http://master.debian.org/~lucas/ddc-parser/ /org/udd.debian.org/tmp/upload-history'
+  update-command: if [ ! -e /org/udd.debian.org/tmp/upload-history/ ]; then mkdir /org/udd.debian.org/tmp/upload-history/; fi; cd  /org/udd.debian.org/tmp/upload-history ; lftp -c 'open http://master.debian.org/ ; mirror -e -P http://master.debian.org/~lucas/ddc-parser/'
   schema: upload_history
   table: upload_history
 
