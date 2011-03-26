@@ -153,6 +153,9 @@ end
 if type == 'o'
   orphaned = true
   query = "select * from bapase where type is not null and type in ('O', 'ITA') order by orphaned_age desc"
+elsif type == 'o2'
+  orphaned = true
+  query = "select * from bapase where type is not null and type in ('O', 'ITA') and orphaned_age >= 600 and orphaned_age < 730 and insts < 300 and last_modified_age > 60 order by last_modified_age desc"
 elsif type == 'rfa'
   orphaned = true
   query = "select * from bapase where type is not null and type in ('RFA') order by orphaned_age desc"
@@ -326,7 +329,7 @@ res.each do |r|
   end
   if orphaned
     if r['type']
-      puts "<td><a href=\"http://bugs.debian.org/#{r['bug']}\">#{r['type']}</a>&nbsp;(#{r['orphaned_age']})</td>"
+      puts "<td><a href=\"http://bugs.debian.org/#{r['bug']}\">#{r['type']}</a>&nbsp;(#{r['orphaned_age']},&nbsp;#{r['last_modified_age']})</td>"
     else
       puts "<td></td>"
     end
