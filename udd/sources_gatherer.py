@@ -2,7 +2,7 @@
 # Last-Modified: <Sun Aug 17 12:07:25 2008>
 # This file is a part of the Ultimate Debian Database project
 
-import debian_bundle.deb822
+import debian.deb822
 import gzip
 import os
 import sys
@@ -108,7 +108,7 @@ class sources_gatherer(gatherer):
     query_uploaders = """EXECUTE uploader_insert (%(Package)s, %(Version)s,
       %(Uploader)s, %(Name)s, %(Email)s)"""
     uploaders = []
-    for control in debian_bundle.deb822.Packages.iter_paragraphs(file):
+    for control in debian.deb822.Packages.iter_paragraphs(file):
       d = self.build_dict(control)
       d['maintainer_name'], d['maintainer_email'] = email.Utils.parseaddr(d['Maintainer'])
       pkgs.append(d)
@@ -170,7 +170,7 @@ class sources_gatherer(gatherer):
 
 #        aux.print_debug("Reading file " + path)
         # Copy content from gzipped file to temporary file, so that apt_pkg is
-        # used by debian_bundle
+        # used by debian
         tmp = tempfile.NamedTemporaryFile()
         file = gzip.open(path)
         tmp.write(file.read())

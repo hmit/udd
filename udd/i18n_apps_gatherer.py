@@ -9,7 +9,7 @@ inside Debian packages.
 from aux import quote
 from gatherer import gatherer
 import re
-from debian_bundle import deb822
+from debian import deb822
 from os import stat
 from sys import stderr, exit
 from filecmp import cmp

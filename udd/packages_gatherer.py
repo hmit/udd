@@ -2,7 +2,7 @@
 # Last-Modified: <Sun Aug 17 12:24:40 2008>
 # This file is a part of the Ultimate Debian Database project
 
-import debian_bundle.deb822
+import debian.deb822
 import gzip
 import os
 import sys
@@ -91,7 +91,7 @@ class packages_gatherer(gatherer):
     pkgs = []
 
     # The fields that are to be read. Other fields are ignored
-    for control in debian_bundle.deb822.Packages.iter_paragraphs(sequence):
+    for control in debian.deb822.Packages.iter_paragraphs(sequence):
       # Check whether packages with architectue 'all' have already been
       # imported
       t = control['Package'] + '_' + control['Version'] + '_' + control['Architecture']
@@ -185,7 +185,7 @@ class packages_gatherer(gatherer):
 	    """ %  (table, self._distr, src_cfg['release'], comp))
 #	  aux.print_debug("Reading file " + path)
 	  # Copy content from gzipped file to temporary file, so that apt_pkg is
-	  # used by debian_bundle
+	  # used by debian
 	  tmp = tempfile.NamedTemporaryFile()
 	  file = gzip.open(path)
 	  tmp.write(file.read())
