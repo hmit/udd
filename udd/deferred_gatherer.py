@@ -5,7 +5,7 @@ This script imports the deferred queue status from
 http://ftp-master.debian.org/deferred/status
 """
 
-from debian_bundle import deb822
+from debian import deb822
 from os import access, mkdir, unlink, W_OK
 from sys import stderr
 import aux
