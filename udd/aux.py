@@ -38,7 +38,9 @@ def open_connection(config):
     p = " port=" + str(config['general']['dbport'])
   else:
     p = ""
-  return psycopg2.connect("dbname=" + config['general']['dbname'] + p)
+  c = psycopg2.connect("dbname=" + config['general']['dbname'] + p)
+  c.set_client_encoding("UTF8")
+  return c
 
 __locks = {}
 def lock(config, source):
