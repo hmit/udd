@@ -187,7 +187,7 @@ if name:
             print '<h3>Buildd status for %s packages in %s</h3>' % (role, suite)
             url = 'https://buildd.debian.org/status/package.php?p='
             for row in packages[suite][role]:
-                url += "%s+" % row[0].replace('+', '%2B')
+                url += "%s%%2C" % row[0].replace('+', '%2B')
             url += '&suite=%s&compact=compact' % suite
             data = urlopen(url).read()
             data = split('<div id="jsmode"></div>', data)[1]

@@ -113,7 +113,7 @@ for group in group_list:
                % {'group':group, 'suite': suite}
         url = 'https://buildd.debian.org/status/package.php?p='
         for row in groups[group][1][suite]:
-            url += "%s+" % row[0].replace('+', '%2B')
+            url += "%s%%2C" % row[0].replace('+', '%2B')
         url += '&suite=%s&compact=compact' % suite
         data = urlopen(url).read()
         try:
