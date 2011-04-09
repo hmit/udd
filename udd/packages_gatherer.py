@@ -31,7 +31,7 @@ class packages_gatherer(gatherer):
       'Suggests': 0, 'Enhances': 0, 'Pre-Depends': 0, 'Breaks':0, 'Installed-Size': 0,
       'Homepage': 0, 'Size': 0, 'Build-Essential':0, 'Origin':0,
       'SHA1':0, 'Replaces':0, 'Section':0, 'MD5sum':0, 'Bugs':0, 'Priority':0,
-      'Tag':0, 'Task':0, 'Python-Version':0, 'Provides':0, 'Conflicts':0,
+      'Tag':0, 'Task':0, 'Python-Version':0, 'Ruby-Versions':0, 'Provides':0, 'Conflicts':0,
       'SHA256':0, 'Original-Maintainer':0}
   ignorable = {'Modaliases':0, 'Filename':0, 'Npp-Filename':0, 'Npp-Name':0, 'Npp-Mimetype':0, 'Npp-Applications':0, 'Python-Runtime':0, 'Npp-File':0, 'Npp-Description':0, 'Url':0, 'Gstreamer-Elements':0, 'Gstreamer-Version':0, 'Gstreamer-Decoders':0, 'Gstreamer-Uri-Sinks':0, 'Gstreamer-Encoders':0, 'Gstreamer-Uri-Sources':0, 'url':0, 'Vdr-PatchLevel':0, 'Vdr-Patchlevel':0, 'originalmaintainer':0, 'Originalmaintainer':0, 'Build-Recommends':0, 'Multi-Arch':0, 'Maintainer-Homepage':0, 'Tads2-Version':0, 'Tads3-Version':0, 'Xul-Appid': 0, 'Subarchitecture':0, 'Package-Type':0, 'Kernel-Version': 0, 'Installer-Menu-Item':0, 'Supported':0, 'subarchitecture':0, 'package-type':0, 'Python3-Version':0 }
   ignorable_re = re.compile("^(Orig-|Original-|Origianl-|Orginal-|Orignal-|Orgiinal-|Orginial-|Debian-|X-Original-|Upstream-)")
@@ -43,7 +43,7 @@ class packages_gatherer(gatherer):
       %(Pre-Depends)s, %(Breaks)s, %(Installed-Size)s, %(Homepage)s, %(Size)s,
       %(Build-Essential)s, %(Origin)s, %(SHA1)s,
       %(Replaces)s, %(Section)s, %(MD5sum)s, %(Bugs)s, %(Priority)s,
-      %(Tag)s, %(Task)s, %(Python-Version)s, %(Provides)s,
+      %(Tag)s, %(Task)s, %(Python-Version)s, %(Ruby-Versions)s, %(Provides)s,
       %(Conflicts)s, %(SHA256)s, %(Original-Maintainer)s)"""
 
   def __init__(self, connection, config, source):
@@ -175,13 +175,13 @@ class packages_gatherer(gatherer):
 	    Source_Version, Essential, Depends, Recommends, Suggests, Enhances,
 	    Pre_Depends, Breaks, Installed_Size, Homepage, Size,
 	    build_essential, origin, sha1, replaces, section,
-            md5sum, bugs, priority, tag, task, python_version,
+            md5sum, bugs, priority, tag, task, python_version, ruby_versions,
             provides, conflicts, sha256, original_maintainer,
 	    Distribution, Release, Component)
 	  VALUES
 	    ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15,
 	      $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28,
-	      $29, $30, $31, $32, $33, $34, $35, '%s', '%s', '%s')
+	      $29, $30, $31, $32, $33, $34, $35, $36, '%s', '%s', '%s')
 	    """ %  (table, self._distr, src_cfg['release'], comp))
 #	  aux.print_debug("Reading file " + path)
 	  # Copy content from gzipped file to temporary file, so that apt_pkg is

@@ -333,3 +333,11 @@ CREATE INDEX bugs_tags_tag_idx ON bugs_tags(tag);
 -- 2011-02-08
 ALTER TABLE bugs add affects_oldstable boolean;
 ALTER TABLE archived_bugs add affects_oldstable boolean;
+
+-- 2011-04-09
+ALTER TABLE sources add ruby_versions text;
+ALTER TABLE packages add ruby_versions text;
+ALTER TABLE ubuntu_sources add ruby_versions text;
+ALTER TABLE ubuntu_packages add ruby_versions text;
+ALTER TABLE derivatives_sources add ruby_versions text;
+ALTER TABLE derivatives_packages add ruby_versions text;
