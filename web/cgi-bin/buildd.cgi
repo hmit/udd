@@ -139,8 +139,8 @@ print """Content-Type: text/html\n\n
 <head>
 <title>Maintainer's buildd status</title>
 <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-<link rel="StyleSheet" type="text/css" href="https://buildd.debian.org/pkg.css" />
-<link rel="StyleSheet" type="text/css" href="https://buildd.debian.org/status/status.css" />
+<link rel="StyleSheet" type="text/css" href="https://buildd.debian.org/status/media/pkg.css" />
+<link rel="StyleSheet" type="text/css" href="https://buildd.debian.org/status/media/status.css" >
 <style type="text/css">
 #header {
     height:90px;
