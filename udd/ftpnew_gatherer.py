@@ -148,20 +148,20 @@ class ftpnew_gatherer(gatherer):
     self.assert_my_config('path', 'table_sources', 'table_packages', 'ftpmasterURL', 'releases_ignore')
 
 
-  def check_existing_binaries(self, values, queue):
+  def check_existing_binaries(self, values, source, queue):
     # Sometimes the source package name has changed, but the binary package name is known in UDD
     # we are not interested in these packages
 
     cur = self.cursor()
     for value in values:
       # query = "SELECT count(*) FROM packages WHERE package = '%s'" % (value)
-      query = "EXECUTE ftpnew_check_existing_package ('%s')" % (value)
+      query = "EXECUTE ftpnew_check_existing_package ('%s', '%s')" % (value, source)
       cur.execute(query)
       in_udd = cur.fetchone()[0]
       if in_udd:
         if DEBUG != 0:
-    	  print >>stderr, "Binary package %s is %i times in UDD - no interest in just known binaries (queue = %s)" \
-      	             % (value, int(in_udd), queue)
+    	  print >>stderr, "Binary package %s is shipped in source %s %i times in UDD - no interest in just known binaries (queue = %s)" \
+      	             % (value, source, int(in_udd), queue)
     	return 1
     return 0
 
@@ -174,7 +174,7 @@ class ftpnew_gatherer(gatherer):
 
     # if we check whether a package just exists in UDD we ignore oldstable which is currently etch but other
     # dists might have to be ignored as well
-    cur.execute("PREPARE ftpnew_check_existing_package AS SELECT COUNT(*) FROM packages WHERE package = $1 AND release NOT IN (%s)" \
+    cur.execute("PREPARE ftpnew_check_existing_package AS SELECT COUNT(*) FROM packages WHERE package = $1 AND source = $2 AND release NOT IN (%s)" \
                   % self.my_config["releases_ignore"])
     # For some reason the code tries to add binary packages twice - just verify whether the package is
     # just included to make sure we do not trigger conflicting primary keys
@@ -274,7 +274,7 @@ class ftpnew_gatherer(gatherer):
             value = de_html(match.groups()[1])
             if field == 'Package':
               # Here begins a new binary package
-              if self.check_existing_binaries((value,), srcpkg.s['Queue']):
+              if self.check_existing_binaries((value,), srcpkg.s['Source'], srcpkg.s['Queue']):
                 srcpkg.s['Queue'] = 'ignore'
                 break
               if in_source:
@@ -378,7 +378,7 @@ class ftpnew_gatherer(gatherer):
               if in_source:
                 # Remove ',' in *.dsc information (not needed in *.changes)
                 value = re.sub(", +", " ", value)   # !!!!
-              if self.check_existing_binaries(value.split(' '), srcpkg.s['Queue']):
+              if self.check_existing_binaries(value.split(' '), srcpkg.s['Source'], srcpkg.s['Queue']):
                 srcpkg.s['Queue'] = 'ignore'
                 break
               if in_source:
