@@ -57,6 +57,22 @@ fields_to_pass   = ('Format',
                     'Python-Version')
                     # + startswith('Npp-')
 
+# These fields are not documented (to my knowledge) but just occure from
+# time to time in control files
+# Just suppress warnings about these
+if DEBUG == 0:
+    IGNORED_UNKNOWN_FIELDS = ('Original-Maintainer',
+	                      'Multi-Arch',
+	                      'Python3-Version',
+        	              'Gstreamer-Elements',
+            	              'Gstreamer-Version',
+            	              'Built-Using',
+            	              'Package-Type',
+            	              'Ruby-Versions'
+                	     )
+else:
+    IGNORED_UNKNOWN_FIELDS = ()
+
 dependencies_to_accept = ( 'Depends', 'Recommends', 'Suggests', 'Enhances', 'Pre-Depends',
                            'Breaks',  'Replaces', 'Provides', 'Conflicts')
 
@@ -422,7 +438,7 @@ class ftpnew_gatherer(gatherer):
                 print >>srco, "%s: %s" % (field, value)
               else:
                 # Don't warn about Original-Maintainer field
-                if not field in ('Original-Maintainer', 'Multi-Arch', 'Python3-Version', 'Gstreamer-Elements', 'Gstreamer-Version'):
+                if not field in IGNORED_UNKNOWN_FIELDS:
                   print >>stderr, "Unknown field in %s: %s" % (srcpkg.s['Source'], field)
                 print >>srco, "*%s: %s" % (field, value)
             continue
