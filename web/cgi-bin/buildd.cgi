@@ -190,7 +190,7 @@ if name:
                 url += "%s%%2C" % row[0].replace('+', '%2B')
             url += '&suite=%s&compact=compact' % suite
             data = urlopen(url).read()
-            data = split('<div id="jsmode"></div>', data)[1]
+            data = ''.join(split('(<table class="data">)', data)[1:])
             data = split('</div><div id="footer">', data)[0]
             data = split('(</table>)', data, 1)
             print sub(r'<a href="([ap])', r'<a href="https://buildd.debian.org/status/\1', "".join(data[:-1]))
