@@ -117,7 +117,7 @@ for group in group_list:
         url += '&suite=%s&compact=compact' % suite
         data = urlopen(url).read()
         try:
-            data = split('<div id="jsmode"></div>', data)[1]
+            data = ''.join(split('(<table class="data">)', data)[1:])
             data = split('</div><div id="footer">', data)[0]
         except IndexError:
             print 'No packages'
