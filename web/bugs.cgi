@@ -3,6 +3,7 @@
 require 'dbi'
 require 'pp'
 require 'cgi'
+require 'time'
 
 puts "Content-type: text/html\n\n"
 
@@ -483,7 +484,7 @@ puts "</table>"
 sth2 = dbh.prepare("select max(start_time) from timestamps where source = 'bugs' and command = 'run'")
 sth2.execute ; r2 = sth2.fetch_all
 puts "<p><b>Generated in #{Time::now - tstart} seconds. Last data update: #{r2[0][0]}"
-puts " (%.1f hours ago)</b></p>" % ((Time::now - r2[0][0].to_time) / 3600)
+puts " (%.1f hours ago)</b></p>" % ((Time::now - Time::parse(r2[0][0].to_s)) / 3600)
 puts "<pre>#{q}</pre>"
 end # if cgi.params != {}
 puts <<-EOF
