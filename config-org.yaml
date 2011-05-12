@@ -614,7 +614,7 @@ i18n-apps:
    path: /org/udd.debian.org/mirrors/i18n-apps
    mirror: http://i18n.debian.net/material/data
    files: .*\.gz
-   releases: sid squeeze
+   releases: sid wheezy
    table_apps: i18n_apps
    table_debconf: po_debconf
 
