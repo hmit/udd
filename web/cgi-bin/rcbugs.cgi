@@ -3,7 +3,7 @@
 require 'dbi'
 require 'pp'
 
-URELEASE='natty'
+URELEASE='oneiric'
 
 puts "Content-type: text/html\n\n"
 

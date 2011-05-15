@@ -3,7 +3,7 @@
 
 require 'dbi'
 
-RELEASE='natty'
+RELEASE='oneiric'
 
 puts "Content-type: text/html\n\n"
 

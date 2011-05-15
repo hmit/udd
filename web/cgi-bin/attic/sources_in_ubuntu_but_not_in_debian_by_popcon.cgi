@@ -10,7 +10,7 @@ my $dbh = DBI->connect("dbi:Pg:dbname=udd;port=5441;host=localhost", "guest") or
 my $sth = $dbh->prepare(<<EOF
 	SELECT DISTINCT ubu.source, insts
         FROM (SELECT DISTINCT source FROM ubuntu_sources
-                WHERE release = 'natty')
+                WHERE release = 'oneiric')
           AS ubu,
              ubuntu_popcon_src
         WHERE NOT EXISTS (SELECT * FROM sources WHERE distribution = 'debian'
