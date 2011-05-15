@@ -6,7 +6,7 @@
 
 # lock
 exec 8>/tmp/lock.udd-mirror-notif
-flock -w 14400 8 || (echo 'Lock acquisition failed.' ; exit 1)
+flock -w 43200 8 || (echo 'Lock acquisition failed.' ; exit 1)
 
 # trick.
 check_commandline() {
