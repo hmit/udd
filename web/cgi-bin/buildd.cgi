@@ -193,7 +193,7 @@ if name:
             data = ''.join(split('(<table class="data">)', data)[1:])
             data = split('</div><div id="footer">', data)[0]
             data = split('(</table>)', data, 1)
-            print sub(r'<a href="([ap])', r'<a href="https://buildd.debian.org/status/\1', "".join(data[:-1]))
+            print sub(r'<a href="([aflp])', r'<a href="https://buildd.debian.org/status/\1', "".join(data[:-1]))
             if "".join(data[2:]).startswith('<p>'):
                 print '<h5 onclick="toggleBuildd(\'%s%s\')"> show/hide details</h5>' % (suite, role)
                 print '<div class="%s%s" style="display: none">' % (suite, role)

@@ -122,7 +122,7 @@ for group in group_list:
         except IndexError:
             print 'No packages'
         else:
-            data = sub(r'<a href="([ap])', r'<a href="https://buildd.debian.org/status/\1', data)
+            data = sub(r'<a href="([aflp])', r'<a href="https://buildd.debian.org/status/\1', data)
             print data
         print '</div>'
     print '<hr>'
