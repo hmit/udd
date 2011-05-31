@@ -65,10 +65,17 @@ class lintian_gatherer(gatherer):
         else:
           pkg_type = 'NULL'
 
+        if (pkg == 'manpages-ja' and tag == 'manpage-has-errors-from-man') or \
+           (pkg == 'manpages-zh' and tag == 'manpage-has-errors-from-man') or \
+           (pkg == 'mplayer' and tag == 'manpage-has-errors-from-man'):
+          extra = '' # HACK psycopg2.DataError: invalid byte sequence for encoding "UTF8": 0xbb
         entries.append((pkg, pkg_type, tag, lintian_gatherer.code_to_tag_type_map[code], extra))
-      elif not lintian_gatherer.ignore_re.match(line):
-        print "Can't parse line %d: %s" % (line_number, line.rstrip())
+#      elif not lintian_gatherer.ignore_re.match(line):
+#        print "Can't parse line %d: %s" % (line_number, line.rstrip())
 
+    # for e in entries:
+      # print e
+      # cur.executemany("EXECUTE lintian_insert (%s, %s, %s, %s, %s)", [e])
     cur.executemany("EXECUTE lintian_insert (%s, %s, %s, %s, %s)", entries)
     cur.execute("DEALLOCATE lintian_insert")
     cur.execute("ANALYZE %s" % my_config["table"])
