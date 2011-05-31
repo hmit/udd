@@ -180,7 +180,7 @@ sub run {
 	my $location = $src_config{archived} ? 'archive' : 'db_h';
 	$table = $src_config{archived} ? $archived_table : $table;
 	# Read all bugs
-	my $insert_bugs_handle = $dbh->prepare("INSERT INTO $table (id, package, source, arrival, status, severity, submitter, submitter_name, submitter_email, owner, owner_name, owner_email, done, done_name, done_email, title, forwarded, last_modified, affects_oldstable, affects_stable, affects_testing, affects_unstable, affects_experimental) VALUES (\$1, \$2, \$3, \$4::abstime, \$5, \$6, \$7, \$8, \$9, \$10, \$11, \$12, \$13, \$14, \$15, \$16, \$17, \$18::abstime, \$19, \$20, \$21, \$22, \$23)");
+	my $insert_bugs_handle = $dbh->prepare("INSERT INTO $table (id, package, source, arrival, status, severity, submitter, submitter_name, submitter_email, owner, owner_name, owner_email, done, done_name, done_email, done_date, title, forwarded, last_modified, affects_oldstable, affects_stable, affects_testing, affects_unstable, affects_experimental) VALUES (\$1, \$2, \$3, \$4::abstime, \$5, \$6, \$7, \$8, \$9, \$10, \$11, \$12, \$13, \$14, \$15, \$16::abstime, \$17, \$18, \$19::abstime, \$20, \$21, \$22, \$23, \$24)");
 	my $insert_bugs_packages_handle = $dbh->prepare("INSERT INTO ${table}_packages (id, package, source) VALUES (\$1, \$2, \$3)");
 	my $insert_bugs_found_handle = $dbh->prepare("INSERT INTO ${table}_found_in (id, version) VALUES (\$1, \$2)");
 	my $insert_bugs_fixed_handle = $dbh->prepare("INSERT INTO ${table}_fixed_in (id, version) VALUES (\$1, \$2)");
@@ -213,7 +213,7 @@ sub run {
 			} else {
 				$bug{$_} = 0;
 			}
-		} qw{date log_modified};
+		} qw{date log_modified done_date};
 
 		my $srcpkg;
 		if ($bug{package} =~ /^src:(.*)/)
@@ -312,8 +312,8 @@ sub run {
 		# Insert data into bugs table
 		$insert_bugs_handle->execute($bug_nr, $bug{package}, $srcpkg, $bug{date}, $bug{pending},
 			$bug{severity}, $bug{originator}, $submitter_name, $submitter_email, $bug{owner},
-		       	$owner_name, $owner_email, $bug{done}, $done_name, $done_email, $bug{subject},
-		       	$bug{forwarded}, $bug{log_modified},
+		       	$owner_name, $owner_email, $bug{done}, $done_name, $done_email, $bug{done_date},
+		       	$bug{subject}, $bug{forwarded}, $bug{log_modified},
 			$present_in_oldstable, $present_in_stable, $present_in_testing, $present_in_unstable, $present_in_experimental) or die $!;
 
 		my $src;

@@ -341,3 +341,6 @@ ALTER TABLE ubuntu_sources add ruby_versions text;
 ALTER TABLE ubuntu_packages add ruby_versions text;
 ALTER TABLE derivatives_sources add ruby_versions text;
 ALTER TABLE derivatives_packages add ruby_versions text;
+-- 2011-05-31
+ALTER TABLE bugs add done_date timestamp;
+ALTER TABLE archived_bugs add done_date timestamp;
