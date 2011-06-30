@@ -1,15 +1,15 @@
 #!/bin/bash
 
 set -e
-ungranted=$(echo "select locktype, database, relation, pid, mode, granted from pg_locks where granted='f' and mode !='ShareUpdateExclusiveLock';" | psql -A -q udd | grep row | awk '{print $1}' | cut -c 2-)
+ungranted=$(echo "select locktype, database, relation, pid, mode, granted from pg_locks where granted='f' and mode !='ShareUpdateExclusiveLock';" | psql -p 5441 -A -q udd | grep row | awk '{print $1}' | cut -c 2-)
 
 if [ -z "$ungranted" ]; then
-echo "select locktype, database, relation, pid, mode, granted from pg_locks where granted='f';" | psql -A -q udd
+echo "select locktype, database, relation, pid, mode, granted from pg_locks where granted='f';" | psql -p 5441 -A -q udd
 fi
-[ "$ungranted" -eq 0 ] || echo "select locktype, database, relation, pid, mode, granted from pg_locks where granted='f';" | psql -A -q udd
+[ "$ungranted" -eq 0 ] || echo "select locktype, database, relation, pid, mode, granted from pg_locks where granted='f';" | psql -p 5441 -A -q udd
 
 if [ "$ungranted" -ne 0 ]; then
-  echo "select locktype, database, relation, pid, mode, granted from pg_locks;" | psql -q udd
+  echo "select locktype, database, relation, pid, mode, granted from pg_locks;" | psql -p 5441 -q udd
   echo "##########################"
   ps fx
   echo "##########################"

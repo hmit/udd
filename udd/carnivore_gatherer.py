@@ -5,7 +5,7 @@ This script imports the carnivore data into the database
 See merkel.debian.org:/org/qa.debian.org/carnivore/
 """
 
-from aux import quote
+from aux import quote, validutf8
 import sys
 import gzip
 from gatherer import gatherer
@@ -73,8 +73,17 @@ class carnivore_gatherer(gatherer):
           qs = []
           for email in record["emails"]:
             qs.append("EXECUTE carnivore_email_insert (%d, %s)" % (record_number, quote(email)))
+          added = {}
           for name in record["names"]:
-            qs.append("EXECUTE carnivore_name_insert (%d, %s)" % (record_number, quote(name)))
+            if not validutf8(name):
+              try:
+                name = name.decode('latin1').encode('utf-8')
+              except:
+                print "Error while decoding: " + name
+                continue
+            if not name in added:
+              qs.append("EXECUTE carnivore_name_insert (%d, %s)" % (record_number, quote(name)))
+              added[name] = True
           if "login" in record:
             qs.append("EXECUTE carnivore_login_insert (%d, %s)" % (record_number, quote(record["login"])))
           for key_type in ['keyring', 'ldap', 'emeritus', 'removed', 'dm']:

@@ -103,3 +103,10 @@ def parse_email(str):
     name  = re.sub('^[^\w]*([^<]+[.\w\)\]]) *[<\(][.\w]+@[.\w]+[>\)].*', '\\1', str)
     print_debug("parse_email: %s ---> %s <%s>" % (str, name, email))
   return name, email
+
+def validutf8(str):
+  try:
+    str.decode('utf-8')
+    return True
+  except UnicodeDecodeError:
+    return False

@@ -277,7 +277,7 @@ debian-wheezy-proposed-updates:
 
 debian-sid:
   type: src-pkg
-  archs: [alpha, amd64, armel, hppa, hurd-i386,
+  archs: [amd64, armel, hurd-i386,
           i386, ia64, mips,
           mipsel, powerpc, s390, sparc, kfreebsd-amd64, kfreebsd-i386]       
   directory: /org/mirrors/ftp.debian.org/ftp/dists/sid/
@@ -292,7 +292,7 @@ debian-sid:
 
 debian-experimental:
   type: src-pkg
-  archs: [alpha, amd64, armel, hppa, hurd-i386,
+  archs: [amd64, armel, hurd-i386,
           i386, ia64, mips,
           mipsel, powerpc, s390, sparc, kfreebsd-amd64, kfreebsd-i386]       
   directory: /org/mirrors/ftp.debian.org/ftp/dists/experimental/
@@ -494,6 +494,15 @@ upload-history:
   update-command: if [ ! -e /org/udd.debian.org/tmp/upload-history/ ]; then mkdir /org/udd.debian.org/tmp/upload-history/; fi; cd  /org/udd.debian.org/tmp/upload-history ; lftp -c 'open http://master.debian.org/~lucas/ddc-parser/ ; mirror -e -P .'
   schema: upload_history
   table: upload_history
+  #only-recent: False
+
+ubuntu-upload-history:
+  type: upload-history
+  path: /home/laney/ubuntu-udd/ubuntu-changes/
+  schema: upload_history
+  table: ubuntu_upload_history
+  #only-recent: False
+
 
 hints:
   type: hints

@@ -23,16 +23,12 @@ def print_help():
 def insert_timestamps(config, source, command, start_time, end_time):
   connection = udd.aux.open_connection(config)
   cur = connection.cursor()
-  values = { 'source' : source,
-             'command' : command,
-             'start_time' : start_time,
-             'end_time' : end_time }
   cur.execute("""INSERT INTO timestamps
                  (source, command, start_time, end_time)
-                 VALUES (%(source)s, %(command)s, %(start_time)s,
-                 %(end_time)s)""",
-              values)
+                 VALUES ('%s', '%s', '%s', '%s')""" %
+              (source, command, start_time, end_time))
   connection.commit()
+  connection.close()
 
 def get_timestamp():
   return time.strftime('%Y-%m-%d %H:%M:%S')
@@ -88,7 +84,9 @@ if __name__ == '__main__':
             exec "gatherer.%s()" % command
           connection.commit()
         end_time = get_timestamp()
+#      print "lalala"
       insert_timestamps(config, src, command, start_time, end_time)
+#      print "lalala2"
     except:
       udd.aux.unlock(config, src)
       raise

@@ -166,12 +166,11 @@ sub run {
 	print "Fetching list of ",scalar(@modified_bugs), " bugs to insert: ",(time() - $t),"s\n" if $timing;
 	$t = time();
 
+        my $modbugs = join ',', @modified_bugs;
+
 	foreach my $prefix ($table, $archived_table) {
 		foreach my $postfix (qw{_packages _merged_with _found_in _fixed_in _tags _blocks _blockedby}, '') {
-			my $sth = $dbh->prepare("DELETE FROM $prefix$postfix WHERE id = \$1");
-			map {
-				$sth->execute($_) or die $!;
-			} @modified_bugs;
+			$dbh->do("DELETE FROM $prefix$postfix where id in ($modbugs)") or die
 		}
 	}
 	print "Deleting bugs: ",(time() - $t),"s\n" if $timing;
@@ -189,7 +188,8 @@ sub run {
 	my $insert_bugs_blocks_handle = $dbh->prepare("INSERT INTO ${table}_blocks (id, blocked) VALUES (\$1, \$2)");
 	my $insert_bugs_blockedby_handle = $dbh->prepare("INSERT INTO ${table}_blockedby (id, blocker) VALUES (\$1, \$2)");
 	$insert_bugs_handle->bind_param(4, undef, SQL_INTEGER);
-	$insert_bugs_handle->bind_param(18, undef, SQL_INTEGER);
+	$insert_bugs_handle->bind_param(16, undef, SQL_INTEGER);
+	$insert_bugs_handle->bind_param(19, undef, SQL_INTEGER);
 
 	$t = time();
 	foreach my $bug_nr (@modified_bugs) {

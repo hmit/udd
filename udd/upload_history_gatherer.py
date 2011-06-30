@@ -51,14 +51,18 @@ class upload_history_gatherer(gatherer):
     query_archs = "EXECUTE uh_arch_insert(%(Source)s, %(Version)s, %(arch)s, %(File)s)"
     query_closes = "EXECUTE uh_close_insert(%(Source)s, %(Version)s, %(closes)s, %(File)s)"
     added = {}
-    files = glob(path + '/debian-devel-changes.*')
+    files = glob(path + '/*-changes*mbox*')
     files.sort()
     if onlyrecent:
       files = files[-2:]
+      print files
+    else:
+      print "Doing full import!"
+      cursor.execute("delete from " + self.my_config['table'] + "_architecture")
+      cursor.execute("delete from " + self.my_config['table'] + "_closes")
+      cursor.execute("delete from " + self.my_config['table'])
     for name in files:
-#    for name in files:
       bname = os.path.basename(name).replace(".gz","").replace(".out","")
-#      print bname
       cursor.execute("DELETE FROM " + self.my_config['table'] + "_architecture where file='%s'" % (bname))
       cursor.execute("DELETE FROM " + self.my_config['table'] + "_closes where file='%s'" % (bname))
       cursor.execute("DELETE FROM " + self.my_config['table'] +  " where file='%s'" % (bname))
@@ -70,6 +74,8 @@ class upload_history_gatherer(gatherer):
         f = open(name)
       current = {}
       current['Fingerprint'] = 'N/A' # hack: some entries don't have fp
+      current['NMU'] = False
+      current['Key'] = ''
       current['File'] = bname
       last_field = None
       line_count = 0
@@ -93,10 +99,13 @@ class upload_history_gatherer(gatherer):
           if (current['Source'], current['Version']) in added or \
             (current['Source'], current['Version']) == ('libapache-authznetldap-perl', '0.07-4') or \
             (current['Source'], current['Version']) == ('knj10font', '1.01-1') or \
+            (current['Source'], current['Version']) == ('xmorph', '1:20010421') or \
             current['Message-Date'] == 'None':
               print "Skipping upload: "+current['Source']+" "+current['Version']+" "+current['Date']
               current = {}
               current['Fingerprint'] = 'N/A' # hack: some entries don't have fp
+	      current['NMU'] = False
+	      current['Key'] = ''
 	      current['File'] = bname
               last_field = None
               continue
@@ -113,6 +122,8 @@ class upload_history_gatherer(gatherer):
               uploads_closes.append(current_closes)
           current = {}
           current['Fingerprint'] = 'N/A' # hack: some entries don't have fp
+	  current['NMU'] = False
+	  current['Key'] = ''
 	  current['File'] = bname
           last_field = None
           continue
@@ -129,6 +140,10 @@ class upload_history_gatherer(gatherer):
         
         last_field = field
 
+      #print uploads
+      #for u in uploads:
+      #  print u
+      #  cursor.execute(query, u)
       cursor.executemany(query, uploads)
       cursor.executemany(query_archs, uploads_archs)
       cursor.executemany(query_closes, uploads_closes)
