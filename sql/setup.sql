@@ -481,32 +481,22 @@ GRANT SELECT ON upload_history_nmus TO PUBLIC;
 
 CREATE TABLE ubuntu_upload_history
  (source text, version debversion, date timestamp with time zone,
- changed_by text, changed_by_name text, changed_by_email text, maintainer text, maintainer_name text, maintainer_email text, nmu boolean, signed_by text, signed_by_name text, signed_by_email text, key_id text, distribution text, file text,
- fingerprint text,
+ changed_by text, changed_by_name text, changed_by_email text, maintainer text, maintainer_name text, maintainer_email text, nmu boolean, signed_by text, signed_by_name text, signed_by_email text, key_id text, distribution text, file text, 
+ fingerprint text, original_maintainer text, original_maintainer_name text, original_maintainer_email text,
  PRIMARY KEY (source, version));
-
-CREATE TABLE ubuntu_upload_history_architecture
- (source text, version debversion, architecture text, file text,
- PRIMARY KEY (source, version, architecture),
+CREATE TABLE ubuntu_upload_history_launchpad_closes
+ (source text, version debversion, bug int, file text,
+ PRIMARY KEY (source, version, bug),
 FOREIGN KEY (source, version) REFERENCES ubuntu_upload_history DEFERRABLE);
-  
+
 CREATE TABLE ubuntu_upload_history_closes
  (source text, version debversion, bug int, file text,
  PRIMARY KEY (source, version, bug),
 FOREIGN KEY (source, version) REFERENCES ubuntu_upload_history DEFERRABLE);
 
 GRANT SELECT ON ubuntu_upload_history TO PUBLIC;
-GRANT SELECT ON ubuntu_upload_history_architecture TO PUBLIC;
 GRANT SELECT ON ubuntu_upload_history_closes TO PUBLIC;
-
-CREATE VIEW ubuntu_upload_history_nmus AS
-select uh1.source, count(*) AS nmus
-from ubuntu_upload_history uh1, (select source, max(date) as date from upload_history where nmu = false group by source) uh2
-where uh1.nmu = true
-and uh1.source = uh2.source
-and uh1.date > uh2.date
-group by uh1.source;
-GRANT SELECT ON ubuntu_upload_history_nmus TO PUBLIC;
+GRANT SELECT ON ubuntu_upload_history_launchpad_closes TO PUBLIC;
 
 -- Ubuntu bugs
 CREATE TABLE ubuntu_bugs (

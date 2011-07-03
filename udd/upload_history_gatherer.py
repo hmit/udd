@@ -14,18 +14,14 @@ def get_gatherer(config, connection, source):
 
 class upload_history_gatherer(gatherer):
   def __init__(self, connection, config, source):
+    self.is_ubuntu = source == 'ubuntu-upload-history'
+    self.is_debian = not self.is_ubuntu
     gatherer.__init__(self, connection, config, source)
     if not 'path' in self.my_config:
       raise aux.ConfigException('path not specified for source ' + source)
 
-  def tables(self):
-    return [
-      self.my_config['table'] + '_architecture',
-      self.my_config['table'] + '_closes',
-      self.my_config['table']]
-
-
   def run(self):
+
     path = self.my_config['path']
     if 'only-recent' in self.my_config:
       onlyrecent = self.my_config['only-recent']
@@ -34,12 +30,26 @@ class upload_history_gatherer(gatherer):
 
     cursor = self.cursor()
 
-    cursor.execute("PREPARE uh_insert AS INSERT INTO %s (source, \
-        version, date, changed_by, changed_by_name, changed_by_email, maintainer, maintainer_name, maintainer_email, nmu, signed_by, signed_by_name, signed_by_email, key_id, fingerprint, distribution, file) VALUES \
-        ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)" % self.my_config['table'])
-    cursor.execute("PREPARE uh_arch_insert AS INSERT INTO %s (source, \
+    tables = ['source', 'version', 'date', 'changed_by', 'changed_by_name', 'changed_by_email', 'maintainer', 'maintainer_name', 'maintainer_email', 'nmu', 'signed_by', 'signed_by_name', 'signed_by_email', 'key_id', 'fingerprint', 'distribution', 'file']
+
+    if self.is_ubuntu:
+      tables = tables + ['original_maintainer', 'original_maintainer_name', 'original_maintainer_email']
+
+    indices = ', '.join(map(lambda x: '$' + str(x), range(1,len(tables)+1)))
+    tables = ', '.join(tables)
+
+    cursor.execute("PREPARE uh_insert AS INSERT INTO %s (%s) VALUES \
+      (%s)" % (self.my_config['table'], tables, indices))
+
+    if self.is_debian:
+      cursor.execute("PREPARE uh_arch_insert AS INSERT INTO %s (source, \
         version, architecture, file) VALUES \
         ($1, $2, $3, $4)" % (self.my_config['table'] + '_architecture'))
+
+    if self.is_ubuntu:
+      cursor.execute("PREPARE uh_launchpad_close_insert AS INSERT INTO %s (source, version, bug, file) \
+          VALUES ($1, $2, $3, $4)" % (self.my_config['table'] + '_launchpad_closes'))
+    
     cursor.execute("PREPARE uh_close_insert AS INSERT INTO %s (source, version, bug, file) \
         VALUES ($1, $2, $3, $4)" % (self.my_config['table'] + '_closes'))
 
@@ -48,22 +58,37 @@ class upload_history_gatherer(gatherer):
       %(Maintainer)s, %(Maintainer_name)s, %(Maintainer_email)s, %(NMU)s, \
       %(Signed-By)s, %(Signed-By_name)s, %(Signed-By_email)s, %(Key)s, \
       %(Fingerprint)s, %(Distribution)s, %(File)s)"
-    query_archs = "EXECUTE uh_arch_insert(%(Source)s, %(Version)s, %(arch)s, %(File)s)"
+
+    if self.is_ubuntu:
+        query = query[:-1] + ", %(Original-Maintainer)s, %(Original-Maintainer_name)s, %(Original-Maintainer_email)s)"
+        
+    if self.is_debian:
+        query_archs = "EXECUTE uh_arch_insert(%(Source)s, %(Version)s, %(arch)s, %(File)s)"
+
     query_closes = "EXECUTE uh_close_insert(%(Source)s, %(Version)s, %(closes)s, %(File)s)"
+
+    if self.is_ubuntu:
+        query_launchpad_closes = "EXECUTE uh_launchpad_close_insert(%(Source)s, %(Version)s, %(closes)s, %(File)s)"
+
     added = {}
-    files = glob(path + '/*-changes*mbox*')
+    files = glob(path + '/*-changes*')
     files.sort()
     if onlyrecent:
       files = files[-2:]
-      print files
     else:
       print "Doing full import!"
-      cursor.execute("delete from " + self.my_config['table'] + "_architecture")
+      if self.is_debian:
+        cursor.execute("delete from " + self.my_config['table'] + "_architecture")
+      if self.is_ubuntu:
+        cursor.execute("delete from " + self.my_config['table'] + "_launchpad_closes")
       cursor.execute("delete from " + self.my_config['table'] + "_closes")
       cursor.execute("delete from " + self.my_config['table'])
     for name in files:
       bname = os.path.basename(name).replace(".gz","").replace(".out","")
-      cursor.execute("DELETE FROM " + self.my_config['table'] + "_architecture where file='%s'" % (bname))
+      if self.is_debian:
+        cursor.execute("DELETE FROM " + self.my_config['table'] + "_architecture where file='%s'" % (bname))
+      if self.is_ubuntu:
+        cursor.execute("DELETE FROM " + self.my_config['table'] + "_launchpad_closes where file='%s'" % (bname))
       cursor.execute("DELETE FROM " + self.my_config['table'] + "_closes where file='%s'" % (bname))
       cursor.execute("DELETE FROM " + self.my_config['table'] +  " where file='%s'" % (bname))
 
@@ -82,6 +107,7 @@ class upload_history_gatherer(gatherer):
       uploads = []
       uploads_archs = []
       uploads_closes = []
+      uploads_launchpad_closes = []
 
       for line in f:
         line_count += 1
@@ -95,6 +121,13 @@ class upload_history_gatherer(gatherer):
           else:
             current['Signed-By_name'] = current['Signed-By']
             current['Signed-By_email'] = ''
+
+          if current.has_key('Original-Maintainer'):
+            if current['Original-Maintainer'] != 'N/A':
+              current['Original-Maintainer_name'], current['Original-Maintainer_email'] = aux.parse_email(current['Original-Maintainer'])
+            else:
+              current['Original-Maintainer_name'] = current['Original-Maintainer_email'] = 'N/A'
+            
           current['Message-Date'] = current['Message-Date'].partition('(')[0].replace('+4200','+0000').replace('+4300','+0000').replace('+4100','+0000').replace('+4400','+0000').replace('+4000','+0000')
           if (current['Source'], current['Version']) in added or \
             (current['Source'], current['Version']) == ('libapache-authznetldap-perl', '0.07-4') or \
@@ -104,27 +137,33 @@ class upload_history_gatherer(gatherer):
               print "Skipping upload: "+current['Source']+" "+current['Version']+" "+current['Date']
               current = {}
               current['Fingerprint'] = 'N/A' # hack: some entries don't have fp
-	      current['NMU'] = False
-	      current['Key'] = ''
-	      current['File'] = bname
+              current['NMU'] = False
+              current['Key'] = ''
+              current['File'] = bname
               last_field = None
               continue
           added[(current['Source'], current['Version'])] = True
           uploads.append(current)
-          for arch in set(current['Architecture'].split()):
-            current_arch = {'Source': current['Source'], 'Version': current['Version'], 'File': bname} 
-            current_arch['arch'] = arch
-            uploads_archs.append(current_arch)
+          if self.is_debian:
+            for arch in set(current['Architecture'].split()):
+              current_arch = {'Source': current['Source'], 'Version': current['Version'], 'File': bname} 
+              current_arch['arch'] = arch
+              uploads_archs.append(current_arch)
           if current['Closes'] != 'N/A':
             for closes in set(current['Closes'].split()):
               current_closes = {'Source': current['Source'], 'Version': current['Version'], 'File': bname} 
               current_closes['closes'] = closes
               uploads_closes.append(current_closes)
+          if current.has_key('Launchpad-Bugs-Fixed') and current['Launchpad-Bugs-Fixed'] != 'N/A':
+            for closes in set(current['Launchpad-Bugs-Fixed'].split()):
+              current_closes = {'Source': current['Source'], 'Version': current['Version'], 'File': bname} 
+              current_closes['closes'] = closes
+              uploads_launchpad_closes.append(current_closes)
           current = {}
           current['Fingerprint'] = 'N/A' # hack: some entries don't have fp
-	  current['NMU'] = False
-	  current['Key'] = ''
-	  current['File'] = bname
+          current['NMU'] = False
+          current['Key'] = ''
+          current['File'] = bname
           last_field = None
           continue
 
@@ -145,10 +184,17 @@ class upload_history_gatherer(gatherer):
       #  print u
       #  cursor.execute(query, u)
       cursor.executemany(query, uploads)
-      cursor.executemany(query_archs, uploads_archs)
+      if self.is_debian:
+        cursor.executemany(query_archs, uploads_archs)
+      if self.is_ubuntu:
+        cursor.executemany(query_launchpad_closes, uploads_launchpad_closes)
       cursor.executemany(query_closes, uploads_closes)
       
     cursor.execute("DEALLOCATE uh_insert")
-    cursor.execute("ANALYZE " + self.my_config['table'] + '_architecture')
+    if self.is_debian:
+      cursor.execute("ANALYZE " + self.my_config['table'] + '_architecture')
+    if self.is_ubuntu:
+      cursor.execute("ANALYZE " + self.my_config['table'] + '_launchpad_closes')
+
     cursor.execute("ANALYZE " + self.my_config['table'] + '_closes')
     cursor.execute("ANALYZE " + self.my_config['table'])
