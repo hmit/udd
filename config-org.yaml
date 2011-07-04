@@ -296,7 +296,7 @@ debian-experimental:
           i386, ia64, mips,
           mipsel, powerpc, s390, sparc, kfreebsd-amd64, kfreebsd-i386]       
   directory: /org/mirrors/ftp.debian.org/ftp/dists/experimental/
-  components: [main, contrib, non-free]
+  components: [main, contrib, non-free, main/debian-installer, non-free/debian-installer]
   distribution: debian
   packages-table: packages
   sources-table: sources
@@ -641,7 +641,7 @@ i18n-apps:
 
 debian-ports-sid:
   type: src-pkg
-  archs: [armhf, avr32, hurd-i386, m68k, powerpcspe, sh4, sparc64 ]
+  archs: [alpha, armhf, avr32, hppa, hurd-i386, m68k, powerpcspe, sh4, sparc64 ]
   directory: /org/udd.debian.org/mirrors/debian-ports/unstable/
   components: [main]
   distribution: debian-ports
@@ -670,7 +670,7 @@ debian-ports-unreleased:
 
 debian-ports-experimental:
   type: src-pkg
-  archs: [armhf, avr32, hurd-i386, m68k, powerpcspe, sh4, sparc64 ]
+  archs: [alpha, armhf, avr32, hppa, hurd-i386, m68k, powerpcspe, sh4, sparc64 ]
   directory: /org/udd.debian.org/mirrors/debian-ports/experimental/
   components: [main]
   distribution: debian-ports
