@@ -78,7 +78,7 @@ class lintian_gatherer(gatherer):
       # cur.executemany("EXECUTE lintian_insert (%s, %s, %s, %s, %s)", [e])
     cur.executemany("EXECUTE lintian_insert (%s, %s, %s, %s, %s)", entries)
     cur.execute("DEALLOCATE lintian_insert")
-    cur.execute("ANALYZE %s" % my_config["table"])
+    cur.execute("VACUUM ANALYZE %s" % my_config["table"])
 
 if __name__ == '__main__':
   main()

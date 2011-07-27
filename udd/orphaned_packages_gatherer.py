@@ -70,6 +70,6 @@ class orphaned_packages_gatherer(gatherer):
         except IntegrityError, message:
           print "Integrity Error inserting bug " + str(row[0]) + " " + m.group(2)
           continue
-    cur2.execute("ANALYZE %s" % self.my_config['table'])
+    cur2.execute("VACUUM ANALYZE %s" % self.my_config['table'])
 
 # vim:set et tabstop=2:

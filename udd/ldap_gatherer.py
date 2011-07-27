@@ -60,7 +60,7 @@ class ldap_gatherer(gatherer):
 
     cur.executemany("EXECUTE ldap_insert (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", entries)
     cur.execute("DEALLOCATE ldap_insert")
-    cur.execute("ANALYZE ldap")
+    cur.execute("VACUUM ANALYZE ldap")
 
 if __name__ == '__main__':
   main()

@@ -90,9 +90,9 @@ class popcon_gatherer(gatherer):
       WHERE %(table)s.package = pkgs.package
       GROUP BY pkgs.source;
       """ % my_config)
-    cur.execute("ANALYZE " + table)
-    cur.execute("ANALYZE " + table_src)
-    cur.execute("ANALYZE " + table_src_average)
+    cur.execute("VACUUM ANALYZE " + table)
+    cur.execute("VACUUM ANALYZE " + table_src)
+    cur.execute("VACUUM ANALYZE " + table_src_average)
 
 if __name__ == '__main__':
   main()

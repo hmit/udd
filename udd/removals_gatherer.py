@@ -108,7 +108,7 @@ class removals_gatherer(gatherer):
                                quote(batch_removal.requestor),
                                quote(batch_removal.reasons)))
         cur.execute('DEALLOCATE batch_removals_insert')
-        cur.execute("ANALYZE %s" % pkg_removal_batch_table)
+        cur.execute("VACUUM ANALYZE %s" % pkg_removal_batch_table)
 
         # insert data for removals of individual packages
         cur.execute('PREPARE pkg_removal_insert ' \
@@ -121,7 +121,7 @@ class removals_gatherer(gatherer):
                                 % (i, quote(pkg.name), quote(pkg.version),
                                     quote("{%s}" % ",".join(pkg.arches))))
         cur.execute('DEALLOCATE pkg_removal_insert')
-        cur.execute("ANALYZE %s" % pkg_removal_table)
+        cur.execute("VACUUM ANALYZE %s" % pkg_removal_table)
 
 def test(filename, removal_batches):
     """compare the number of parsed packages against those counted with a

@@ -70,7 +70,7 @@ class debtags_gatherer(gatherer):
             cur.execute('EXECUTE debtags_insert (%s, %s)' \
                             % (quote(pkg), quote(tag)))
         cur.execute('DEALLOCATE debtags_insert')
-        cur.execute("ANALYZE %s" % conf['table'])
+        cur.execute("VACUUM ANALYZE %s" % conf['table'])
 
 
 def test():

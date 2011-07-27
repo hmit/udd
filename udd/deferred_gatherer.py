@@ -83,9 +83,9 @@ class deferred_gatherer(gatherer):
     cur.executemany(q_defarch, da_list)
     cur.executemany(q_defbin, db_list)
     cur.executemany(q_defcloses, dc_list)
-    cur.execute("ANALYZE deferred")
-    cur.execute("ANALYZE deferred_architecture")
-    cur.execute("ANALYZE deferred_binary")
-    cur.execute("ANALYZE deferred_closes")
+    cur.execute("VACUUM ANALYZE deferred")
+    cur.execute("VACUUM ANALYZE deferred_architecture")
+    cur.execute("VACUUM ANALYZE deferred_binary")
+    cur.execute("VACUUM ANALYZE deferred_closes")
 
 # vim:set et tabstop=2:0

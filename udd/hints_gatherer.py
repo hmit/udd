@@ -128,4 +128,4 @@ class hints_gatherer(gatherer):
             hs.append(h.copy())
     cursor.executemany(query, hs)
     cursor.execute("DEALLOCATE h_insert")
-    cursor.execute("ANALYZE hints")
+    cursor.execute("VACUUM ANALYZE hints")

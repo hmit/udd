@@ -246,7 +246,7 @@ class ddtp_gatherer(gatherer):
         self.connection.commit()
 
     cur.execute("DEALLOCATE ddtp_insert")
-    cur.execute("ANALYZE %s" % my_config['table'])
+    cur.execute("VACUUM ANALYZE %s" % my_config['table'])
 
 if __name__ == '__main__':
   main()

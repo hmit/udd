@@ -192,9 +192,9 @@ class upload_history_gatherer(gatherer):
       
     cursor.execute("DEALLOCATE uh_insert")
     if self.is_debian:
-      cursor.execute("ANALYZE " + self.my_config['table'] + '_architecture')
+      cursor.execute("VACUUM ANALYZE " + self.my_config['table'] + '_architecture')
     if self.is_ubuntu:
-      cursor.execute("ANALYZE " + self.my_config['table'] + '_launchpad_closes')
+      cursor.execute("VACUUM ANALYZE " + self.my_config['table'] + '_launchpad_closes')
 
-    cursor.execute("ANALYZE " + self.my_config['table'] + '_closes')
-    cursor.execute("ANALYZE " + self.my_config['table'])
+    cursor.execute("VACUUM ANALYZE " + self.my_config['table'] + '_closes')
+    cursor.execute("VACUUM ANALYZE " + self.my_config['table'])

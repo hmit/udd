@@ -44,7 +44,7 @@ class wannabuild_gatherer(gatherer):
         cur.executemany("EXECUTE wb_insert (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", entries)
         entries = []
     cur.execute("DEALLOCATE wb_insert")
-    cur.execute("ANALYZE wannabuild")
+    cur.execute("VACUUM ANALYZE wannabuild")
 
 if __name__ == '__main__':
   main()

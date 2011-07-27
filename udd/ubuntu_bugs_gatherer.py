@@ -59,11 +59,11 @@ class ubuntu_bugs_gatherer(gatherer):
       except Empty:
         if httpq.qsize() == 0:
           ok = False
-    c.execute("analyze ubuntu_bugs_subscribers")
-    c.execute("analyze ubuntu_bugs_duplicates")
-    c.execute("analyze ubuntu_bugs_tags")
-    c.execute("analyze ubuntu_bugs_tasks")
-    c.execute("analyze ubuntu_bugs")
+    c.execute("VACUUM ANALYZE ubuntu_bugs_subscribers")
+    c.execute("VACUUM ANALYZE ubuntu_bugs_duplicates")
+    c.execute("VACUUM ANALYZE ubuntu_bugs_tags")
+    c.execute("VACUUM ANALYZE ubuntu_bugs_tasks")
+    c.execute("VACUUM ANALYZE ubuntu_bugs")
 
   def fetch_all_bugs(self):
     fh = urllib.urlopen('https://launchpad.net/ubuntu/+bugs-text')

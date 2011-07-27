@@ -70,7 +70,7 @@ class screenshot_gatherer(gatherer):
         print >>stderr, "Unable to inject data for package %s. %s" % (res['name'], err)
         print >>stderr,  "-->", res
     cur.execute("DEALLOCATE screenshots_insert")
-    cur.execute("ANALYZE %s" % my_config['table'])
+    cur.execute("VACUUM ANALYZE %s" % my_config['table'])
 
 if __name__ == '__main__':
   main()

@@ -52,5 +52,5 @@ class testing_migrations_gatherer(gatherer):
          % (package, in_testing, testing_version, in_unstable, unstable_version, sync, sync_version, first_seen))
 
     c.execute("DEALLOCATE mig_insert")
-    c.execute("ANALYZE migrations")
+    c.execute("VACUUM ANALYZE migrations")
 
