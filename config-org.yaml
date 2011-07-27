@@ -501,7 +501,7 @@ ubuntu-upload-history:
   path: /home/laney/ubuntu-udd/ubuntu-changes/
   schema: upload_history
   table: ubuntu_upload_history
-  only-recent: False
+  #only-recent: False
 
 hints:
   type: hints
