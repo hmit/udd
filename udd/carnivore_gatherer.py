@@ -118,7 +118,7 @@ class carnivore_gatherer(gatherer):
               record[info["name"]] = set()
             record[info["name"]].add(content.rstrip())
     for table in ['emails', 'names', 'keys', 'login']:
-      cur.execute("VACUUM ANALYZE %s" % my_config["%s-table" % table])
+      cur.execute("ANALYZE %s" % my_config["%s-table" % table])
 
 if __name__ == '__main__':
   main()

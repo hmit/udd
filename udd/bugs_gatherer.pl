@@ -350,11 +350,11 @@ sub run {
 	print "Inserting bugs: ",(time() - $t),"s\n" if $timing;
 
 	foreach my $postfix (qw{_packages _merged_with _found_in _fixed_in _tags}, '') {
-		my $sth = $dbh->prepare("VACUUM ANALYZE $table$postfix");
+		my $sth = $dbh->prepare("ANALYZE $table$postfix");
 		$sth->execute() or die $!;
 	}
 
-	my $sth = $dbh->prepare("VACUUM ANALYZE ".$src_config{'usertags-table'});
+	my $sth = $dbh->prepare("ANALYZE ".$src_config{'usertags-table'});
 	$sth->execute() or die $!;
 
 	print "Analyzing bugs: ",(time() - $t),"s\n" if $timing;

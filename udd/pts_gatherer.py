@@ -36,5 +36,5 @@ class pts_gatherer(gatherer):
         c.execute("EXECUTE pts_insert(%s, %s)", (package, sub))
 
     c.execute("DEALLOCATE pts_insert")
-    c.execute("VACUUM ANALYZE pts")
+    c.execute("ANALYZE pts")
 

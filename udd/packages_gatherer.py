@@ -211,9 +211,9 @@ class packages_gatherer(gatherer):
       SELECT DISTINCT distribution, release, component, architecture
       FROM %s""" % (table + '_distrelcomparch', table))
 
-    cur.execute("VACUUM ANALYZE %s" % table)
-    cur.execute("VACUUM ANALYZE %s" % table + '_summary')
-    cur.execute("VACUUM ANALYZE %s" % table + '_distrelcomparch')
+    cur.execute("ANALYZE %s" % table)
+    cur.execute("ANALYZE %s" % table + '_summary')
+    cur.execute("ANALYZE %s" % table + '_distrelcomparch')
 
     self.print_warnings()
 

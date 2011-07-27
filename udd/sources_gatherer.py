@@ -185,8 +185,8 @@ class sources_gatherer(gatherer):
       cur.execute("DEALLOCATE source_insert")
       cur.execute("DEALLOCATE uploader_insert")
 
-    cur.execute('VACUUM ANALYZE %s' % table)
-    cur.execute('VACUUM ANALYZE %s' % utable)
+    cur.execute('ANALYZE %s' % table)
+    cur.execute('ANALYZE %s' % utable)
 
     self.print_warnings()
 

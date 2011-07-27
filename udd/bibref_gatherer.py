@@ -55,7 +55,7 @@ class bibref_gatherer(gatherer):
         print >>stderr, "Unable to inject data for package %s, key %s, value %s. %s" % (package, key, value, err)
         print >>stderr,  "-->", res
     cur.execute("DEALLOCATE bibref_insert")
-    cur.execute("VACUUM ANALYZE %s" % my_config['table'])
+    cur.execute("ANALYZE %s" % my_config['table'])
 
 if __name__ == '__main__':
   main()

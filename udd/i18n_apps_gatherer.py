@@ -212,8 +212,8 @@ class i18n_apps_gatherer(gatherer):
       except IOError, err:
         print >>stderr, "Error reading %s (%s)" % (file, err)
 
-    cur.execute("VACUUM ANALYZE %s" % my_config['table_apps'])
-    cur.execute("VACUUM ANALYZE %s" % my_config['table_debconf'])
+    cur.execute("ANALYZE %s" % my_config['table_apps'])
+    cur.execute("ANALYZE %s" % my_config['table_debconf'])
 
 if __name__ == '__main__':
   main()

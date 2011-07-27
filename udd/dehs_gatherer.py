@@ -64,7 +64,7 @@ class dehs_gatherer(gatherer):
 
     cur.executemany("EXECUTE dehs_insert (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", entries)
     cur.execute("DEALLOCATE dehs_insert")
-    cur.execute("VACUUM ANALYZE dehs")
+    cur.execute("ANALYZE dehs")
 
 if __name__ == '__main__':
   main()
