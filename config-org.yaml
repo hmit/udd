@@ -555,7 +555,7 @@ lintian:
 
 dehs:
   type: dehs
-  update-command: rm -f /org/udd.debian.org/mirrors/dehs.txt && wget -q http://dehs.alioth.debian.org/udd_dump.txt  -O /org/udd.debian.org/mirrors/dehs.txt
+  update-command: rm -f /org/udd.debian.org/mirrors/dehs.txt && wget -q http://qa.debian.org/cgi-bin/udd-dehs -O /org/udd.debian.org/mirrors/dehs.txt
   path: /org/udd.debian.org/mirrors/dehs.txt
 
 ldap:

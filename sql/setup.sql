@@ -622,7 +622,7 @@ AND key_type = 'keyring';
 GRANT SELECT ON active_dds TO PUBLIC;
 
 -- DEHS
-CREATE TYPE dehs_status AS ENUM('error', 'uptodate', 'outdated');
+CREATE TYPE dehs_status AS ENUM('error', 'uptodate', 'outdated', 'newer-in-debian');
 CREATE TABLE dehs (
   source TEXT NOT NULL,
   unstable_version debversion,

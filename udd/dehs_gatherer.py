@@ -19,6 +19,7 @@ WHERE (u.dist='unstable' OR u.dist IS NULL) AND (e.dist='experimental' OR e.dist
 from aux import quote
 from gatherer import gatherer
 import re
+import yaml
 
 def get_gatherer(connection, config, source):
   return dehs_gatherer(connection, config, source)
@@ -40,29 +41,30 @@ class dehs_gatherer(gatherer):
 
     cur.execute("""PREPARE dehs_insert 
       AS INSERT INTO dehs
-      (source, unstable_version, unstable_upstream, unstable_parsed_version, unstable_status, unstable_last_uptodate,
-      experimental_version, experimental_upstream, experimental_parsed_version, experimental_status, experimental_last_uptodate)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)""")
+      (source, unstable_version, unstable_upstream, unstable_parsed_version, unstable_status)
+      VALUES ($1, $2, $3, $4, $5)""")
 
-    line_number = 0
     entries = []
-    for line in file(my_config['path']):
-      line_number += 1
+    f = open(my_config['path'])
+    pkgs = yaml.load(f)
+    for e in pkgs:
+      if not 'status' in e:
+          ustat = 'error'
+      elif e['status'] == 'up to date':
+          ustat = 'uptodate'
+      elif e['status'] == 'Newer version available':
+          ustat = 'outdated'
+      else:
+          ustat = 'newer-in-debian'
 
-      try:
-        src, uu, eu, uv, ev, upv, epv, u_utd, e_utd, uf, ef, udate, edate = line.rstrip().split('|')
-      except ValueError:
-         print "Error reading "+line
-         continue
-      if udate == "":
-        udate = None
-      if edate == "":
-        edate = None
-      ustat = 'error' if uf == 't' else ('uptodate' if u_utd == 't' else ('outdated' if u_utd == 'f' else None))
-      estat = 'error' if ef == 't' else ('uptodate' if e_utd == 't' else ('outdated' if e_utd == 'f' else None))
-      entries.append((src, uv, uu, upv, ustat, udate, ev, eu, epv, estat, edate))
+      # add empty fields if missing
+      for k in ('debian-uversion', 'upstream-version', 'debian-mangled-uversion'):
+          if not k in e:
+              e[k] = ''
 
-    cur.executemany("EXECUTE dehs_insert (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", entries)
+      entries.append((e['package'], e['debian-uversion'], e['upstream-version'], e['debian-mangled-uversion'], ustat))
+
+    cur.executemany("EXECUTE dehs_insert (%s, %s, %s, %s, %s)", entries)
     cur.execute("DEALLOCATE dehs_insert")
     cur.execute("ANALYZE dehs")
 
