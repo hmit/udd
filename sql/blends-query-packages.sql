@@ -39,6 +39,7 @@ CREATE OR REPLACE FUNCTION blends_query_packages(text[],text[]) RETURNS SETOF RE
          pt_BR.description AS description_pt_BR, pt_BR.long_description AS long_description_pt_BR,
          ru.description AS description_ru, ru.long_description AS long_description_ru,
          sk.description AS description_sk, sk.long_description AS long_description_sk,
+         sr.description AS description_sr, sr.long_description AS long_description_sr,
          sv.description AS description_sv, sv.long_description AS long_description_sv,
          uk.description AS description_uk, uk.long_description AS long_description_uk,
          zh_CN.description AS description_zh_CN, zh_CN.long_description AS long_description_zh_CN,
@@ -67,6 +68,7 @@ CREATE OR REPLACE FUNCTION blends_query_packages(text[],text[]) RETURNS SETOF RE
     LEFT OUTER JOIN ddtp pt_BR ON pt_BR.language = 'pt_BR' AND pt_BR.package = p.package AND pt_BR.distribution = p.distribution AND pt_BR.release = p.release AND pt_BR.component = p.component AND strip_binary_upload(pt_BR.version) = p.version
     LEFT OUTER JOIN ddtp ru ON ru.language = 'ru' AND ru.package = p.package AND ru.distribution = p.distribution AND ru.release = p.release AND ru.component = p.component AND strip_binary_upload(ru.version) = p.version
     LEFT OUTER JOIN ddtp sk ON sk.language = 'sk' AND sk.package = p.package AND sk.distribution = p.distribution AND sk.release = p.release AND sk.component = p.component AND strip_binary_upload(sk.version) = p.version
+    LEFT OUTER JOIN ddtp sr ON sr.language = 'sr' AND sr.package = p.package AND sr.distribution = p.distribution AND sr.release = p.release AND sr.component = p.component AND strip_binary_upload(sr.version) = p.version
     LEFT OUTER JOIN ddtp sv ON sv.language = 'sv' AND sv.package = p.package AND sv.distribution = p.distribution AND sv.release = p.release AND sv.component = p.component AND strip_binary_upload(sv.version) = p.version
     LEFT OUTER JOIN ddtp uk ON uk.language = 'uk' AND uk.package = p.package AND uk.distribution = p.distribution AND uk.release = p.release AND uk.component = p.component AND strip_binary_upload(uk.version) = p.version
     LEFT OUTER JOIN ddtp zh_CN ON zh_CN.language = 'zh_CN' AND zh_CN.package = p.package AND zh_CN.distribution = p.distribution AND zh_CN.release = p.release AND zh_CN.component = p.component AND strip_binary_upload(zh_CN.version) = p.version
@@ -220,6 +222,7 @@ CREATE OR REPLACE FUNCTION blends_metapackage_translations (text[]) RETURNS SETO
          pt_BR.description_pt_BR, pt_BR.long_description_pt_BR,
          ru.description_ru, ru.long_description_ru,
          sk.description_sk, sk.long_description_sk,
+         sr.description_sr, sr.long_description_sr,
          sv.description_sv, sv.long_description_sv,
          uk.description_uk, uk.long_description_uk,
          zh_CN.description_zh_CN, zh_CN.long_description_zh_CN,
@@ -240,6 +243,7 @@ CREATE OR REPLACE FUNCTION blends_metapackage_translations (text[]) RETURNS SETO
     LEFT OUTER JOIN (SELECT * FROM ddtp_unique('pt_BR', $1) AS (package text, description_pt_BR text, long_description_pt_BR text)) pt_BR ON pt_BR.package = p.package
     LEFT OUTER JOIN (SELECT * FROM ddtp_unique('ru', $1) AS (package text, description_ru text, long_description_ru text)) ru ON ru.package = p.package
     LEFT OUTER JOIN (SELECT * FROM ddtp_unique('sk', $1) AS (package text, description_sk text, long_description_sk text)) sk ON sk.package = p.package
+    LEFT OUTER JOIN (SELECT * FROM ddtp_unique('sr', $1) AS (package text, description_sr text, long_description_sr text)) sr ON sr.package = p.package
     LEFT OUTER JOIN (SELECT * FROM ddtp_unique('sv', $1) AS (package text, description_sv text, long_description_sv text)) sv ON sv.package = p.package
     LEFT OUTER JOIN (SELECT * FROM ddtp_unique('uk', $1) AS (package text, description_uk text, long_description_uk text)) uk ON uk.package = p.package
     LEFT OUTER JOIN (SELECT * FROM ddtp_unique('zh_CN', $1) AS (package text, description_zh_CN text, long_description_zh_CN text)) zh_CN ON zh_CN.package = p.package
