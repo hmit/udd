@@ -33,7 +33,8 @@ class AttrDict(dict):
 
 
 def find_blockers(bug):
-    conn = psycopg2.connect("service=udd")
+    conn = psycopg2.connect(database='udd', port=5441, host='localhost',
+                            user='guest')
     cur = conn.cursor()
     cur.execute("""
     SELECT bugs.id, bugs.source, bugs.severity, bugs.title, bugs.last_modified,
