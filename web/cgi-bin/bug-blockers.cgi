@@ -19,6 +19,12 @@ import sys
 
 import psycopg2
 
+DATABASE = {'database': 'udd',
+            'port': 5441,
+            'host': 'localhost',
+            'user': 'guest',
+           }
+
 
 class AttrDict(dict):
     def __init__(self, **kwargs):
@@ -32,10 +38,7 @@ class AttrDict(dict):
             raise AttributeError(e)
 
 
-def find_blockers(bug):
-    conn = psycopg2.connect(database='udd', port=5441, host='localhost',
-                            user='guest')
-    cur = conn.cursor()
+def find_blockers(cur, bug):
     cur.execute("""
     SELECT bugs.id, bugs.source, bugs.severity, bugs.title, bugs.last_modified,
            bugs.affects_testing,
@@ -77,10 +80,19 @@ def find_blockers(bug):
 
         yield b
 
-    cur.close()
-    conn.close()
 
-result_template="""
+def last_updated(cur):
+    cur.execute("SELECT MAX(start_time) FROM timestamps "
+                "WHERE source = 'bugs' AND command = 'run'")
+    return cur.fetchone()[0]
+
+
+def bug_title(cur, bug):
+    cur.execute("SELECT title FROM bugs WHERE id = %s", (bug,))
+    return cur.fetchone()[0]
+
+
+result_template = """
 <!DOCTYPE html>
 <html>
 <head>
@@ -103,13 +115,17 @@ result_template="""
         td.severity-serious, td.severity-grave, td.severity-critical {
             color: red;
         }
-        td.severity-important, td.severity-serious, td.severity-grave, td.severity-critical {
+        td.severity-important, td.severity-serious, td.severity-grave,
+        td.severity-critical {
             font-weight: bold;
         }
     </style>
 </head>
 <body>
-<h1>Bugs Blocking <a href="http://bugs.debian.org/%(bug)s">#%(bug)s</a></h1>
+<h1>
+    Bugs Blocking <a href="http://bugs.debian.org/%(bug)s">#%(bug)s</a>:
+    %(bug_title)s
+</h1>
 <table border="1" class="sortable">
     <thead>
         <tr>
@@ -126,11 +142,12 @@ result_template="""
 %(table)s
     </tbody>
 </table>
+<p>UDD's Debian BTS data last updated: %(updated)s UTC</p>
 </body>
 </html>
 """.strip()
 
-table_template="""
+table_template = """
         <tr class="%(class)s">
             <td><a href="http://bugs.debian.org/%(id)s">%(id)s</a></td>
             <td><a href="http://packages.qa.debian.org/%(source)s">%(source)s</a></td>
@@ -161,9 +178,12 @@ form_html = """
 </html>
 """.strip()
 
+
 def render_blockers(bug):
+    conn = psycopg2.connect(**DATABASE)
+    cursor = conn.cursor()
     table = []
-    for blocker in find_blockers(bug):
+    for blocker in find_blockers(cursor, bug):
         subst = {
             'class': blocker.attrs['class'],
             'id': blocker.id,
@@ -177,12 +197,18 @@ def render_blockers(bug):
         table.append(table_template % subst)
     subst = {
         'bug': bug,
+        'bug_title': bug_title(cursor, bug),
         'table': ''.join(table),
+        'updated': last_updated(cursor).strftime('%Y-%m-%d %H:%M'),
     }
+    cursor.close()
+    conn.close()
     sys.stdout.write(result_template % subst)
+
 
 def render_form():
     sys.stdout.write(form_html)
+
 
 def main():
     print 'Content-Type: text/html; charset=utf-8'
