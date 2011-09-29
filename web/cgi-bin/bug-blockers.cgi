@@ -167,13 +167,13 @@ form_html = """
 </head>
 <body>
 <h1>Bug Blockers</h1>
-<p>
   <form action="?" accept-charset="UTF-8">
-    <label for="bug">Bug:</label>
-    <input type="number" name="bug" id="bug" placeholder="Bug #">
-    <input type="submit" value="Show Blockers">
+    <p>
+      <label for="bug">Bug:</label>
+      <input type="number" name="bug" id="bug" placeholder="Bug #">
+      <input type="submit" value="Show Blockers">
+    </p>
   </form>
-</p>
 </body>
 </html>
 """.strip()
