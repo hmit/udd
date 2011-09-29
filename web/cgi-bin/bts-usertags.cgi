@@ -111,8 +111,11 @@ def thead(*cols):
 
 
 def tr(*cols, **kwargs):
-    attrs = ['%s=%s' for attr in kwargs.get('attrs', {}).iteritems()]
-    print '  <tr%s>' % ' '.join(attrs)
+    attrs = ['%s="%s"' % attr for attr in kwargs.get('attrs', {}).iteritems()]
+    if attrs:
+        print '  <tr %s>' % ' '.join(attrs)
+    else:
+        print '  <tr>'
     for col in cols:
         print '    <td>%s</td>' % col
     print '  </tr>'
