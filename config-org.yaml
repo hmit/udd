@@ -305,6 +305,7 @@ debian-experimental:
   sources-schema: sources
   release: experimental
 
+
 ubuntu-precise:
   type: src-pkg
   archs: [amd64, i386]
@@ -317,6 +318,59 @@ ubuntu-precise:
   uploaders-table: ubuntu_uploaders
   packages-schema: packages
   sources-schema: sources
+
+ubuntu-precise-security:
+  type: src-pkg
+  archs: [amd64, i386]
+  directory: /org/mirrors/ubuntu.com/ftp/dists/precise/
+  components: [main, multiverse, universe, restricted]
+  distribution: ubuntu
+  release: precise-security
+  packages-table: ubuntu_packages
+  sources-table: ubuntu_sources
+  uploaders-table: ubuntu_uploaders
+  packages-schema: packages
+  sources-schema: sources
+
+ubuntu-precise-updates:
+  type: src-pkg
+  archs: [amd64, i386]
+  directory: /org/mirrors/ubuntu.com/ftp/dists/precise/
+  components: [main, multiverse, universe, restricted]
+  distribution: ubuntu
+  release: precise-updates
+  packages-table: ubuntu_packages
+  sources-table: ubuntu_sources
+  uploaders-table: ubuntu_uploaders
+  packages-schema: packages
+  sources-schema: sources
+
+ubuntu-precise-proposed:
+  type: src-pkg
+  archs: [amd64, i386]
+  directory: /org/mirrors/ubuntu.com/ftp/dists/precise/
+  components: [main, multiverse, universe, restricted]
+  distribution: ubuntu
+  release: precise-proposed
+  packages-table: ubuntu_packages
+  sources-table: ubuntu_sources
+  uploaders-table: ubuntu_uploaders
+  packages-schema: packages
+  sources-schema: sources
+
+ubuntu-precise-backports:
+  type: src-pkg
+  archs: [amd64, i386]
+  directory: /org/mirrors/ubuntu.com/ftp/dists/precise/
+  components: [main, multiverse, universe, restricted]
+  distribution: ubuntu
+  release: precise-backports
+  packages-table: ubuntu_packages
+  sources-table: ubuntu_sources
+  uploaders-table: ubuntu_uploaders
+  packages-schema: packages
+  sources-schema: sources
+
 
 ubuntu-oneiric:
   type: src-pkg
@@ -331,6 +385,59 @@ ubuntu-oneiric:
   packages-schema: packages
   sources-schema: sources
 
+ubuntu-oneiric-security:
+  type: src-pkg
+  archs: [amd64, i386]
+  directory: /org/mirrors/ubuntu.com/ftp/dists/oneiric/
+  components: [main, multiverse, universe, restricted]
+  distribution: ubuntu
+  release: oneiric-security
+  packages-table: ubuntu_packages
+  sources-table: ubuntu_sources
+  uploaders-table: ubuntu_uploaders
+  packages-schema: packages
+  sources-schema: sources
+
+ubuntu-oneiric-updates:
+  type: src-pkg
+  archs: [amd64, i386]
+  directory: /org/mirrors/ubuntu.com/ftp/dists/oneiric/
+  components: [main, multiverse, universe, restricted]
+  distribution: ubuntu
+  release: oneiric-updates
+  packages-table: ubuntu_packages
+  sources-table: ubuntu_sources
+  uploaders-table: ubuntu_uploaders
+  packages-schema: packages
+  sources-schema: sources
+
+ubuntu-oneiric-proposed:
+  type: src-pkg
+  archs: [amd64, i386]
+  directory: /org/mirrors/ubuntu.com/ftp/dists/oneiric/
+  components: [main, multiverse, universe, restricted]
+  distribution: ubuntu
+  release: oneiric-proposed
+  packages-table: ubuntu_packages
+  sources-table: ubuntu_sources
+  uploaders-table: ubuntu_uploaders
+  packages-schema: packages
+  sources-schema: sources
+
+ubuntu-oneiric-backports:
+  type: src-pkg
+  archs: [amd64, i386]
+  directory: /org/mirrors/ubuntu.com/ftp/dists/oneiric/
+  components: [main, multiverse, universe, restricted]
+  distribution: ubuntu
+  release: oneiric-backports
+  packages-table: ubuntu_packages
+  sources-table: ubuntu_sources
+  uploaders-table: ubuntu_uploaders
+  packages-schema: packages
+  sources-schema: sources
+
+
 ubuntu-natty:
   type: src-pkg
   archs: [amd64, i386]
@@ -338,6 +445,58 @@ ubuntu-natty:
   components: [main, multiverse, universe, restricted]
   distribution: ubuntu
   release: natty
+  packages-table: ubuntu_packages
+  sources-table: ubuntu_sources
+  uploaders-table: ubuntu_uploaders
+  packages-schema: packages
+  sources-schema: sources
+
+ubuntu-natty-security:
+  type: src-pkg
+  archs: [amd64, i386]
+  directory: /org/mirrors/ubuntu.com/ftp/dists/natty/
+  components: [main, multiverse, universe, restricted]
+  distribution: ubuntu
+  release: natty-security
+  packages-table: ubuntu_packages
+  sources-table: ubuntu_sources
+  uploaders-table: ubuntu_uploaders
+  packages-schema: packages
+  sources-schema: sources
+
+ubuntu-natty-updates:
+  type: src-pkg
+  archs: [amd64, i386]
+  directory: /org/mirrors/ubuntu.com/ftp/dists/natty/
+  components: [main, multiverse, universe, restricted]
+  distribution: ubuntu
+  release: natty-updates
+  packages-table: ubuntu_packages
+  sources-table: ubuntu_sources
+  uploaders-table: ubuntu_uploaders
+  packages-schema: packages
+  sources-schema: sources
+
+ubuntu-natty-proposed:
+  type: src-pkg
+  archs: [amd64, i386]
+  directory: /org/mirrors/ubuntu.com/ftp/dists/natty/
+  components: [main, multiverse, universe, restricted]
+  distribution: ubuntu
+  release: natty-proposed
+  packages-table: ubuntu_packages
+  sources-table: ubuntu_sources
+  uploaders-table: ubuntu_uploaders
+  packages-schema: packages
+  sources-schema: sources
+
+ubuntu-natty-backports:
+  type: src-pkg
+  archs: [amd64, i386]
+  directory: /org/mirrors/ubuntu.com/ftp/dists/natty/
+  components: [main, multiverse, universe, restricted]
+  distribution: ubuntu
+  release: natty-backports
   packages-table: ubuntu_packages
   sources-table: ubuntu_sources
   uploaders-table: ubuntu_uploaders
@@ -358,6 +517,59 @@ ubuntu-maverick:
   packages-schema: packages
   sources-schema: sources
 
+ubuntu-maverick-security:
+  type: src-pkg
+  archs: [amd64, i386]
+  directory: /org/mirrors/ubuntu.com/ftp/dists/maverick/
+  components: [main, multiverse, universe, restricted]
+  distribution: ubuntu
+  release: maverick-security
+  packages-table: ubuntu_packages
+  sources-table: ubuntu_sources
+  uploaders-table: ubuntu_uploaders
+  packages-schema: packages
+  sources-schema: sources
+
+ubuntu-maverick-updates:
+  type: src-pkg
+  archs: [amd64, i386]
+  directory: /org/mirrors/ubuntu.com/ftp/dists/maverick/
+  components: [main, multiverse, universe, restricted]
+  distribution: ubuntu
+  release: maverick-updates
+  packages-table: ubuntu_packages
+  sources-table: ubuntu_sources
+  uploaders-table: ubuntu_uploaders
+  packages-schema: packages
+  sources-schema: sources
+
+ubuntu-maverick-proposed:
+  type: src-pkg
+  archs: [amd64, i386]
+  directory: /org/mirrors/ubuntu.com/ftp/dists/maverick/
+  components: [main, multiverse, universe, restricted]
+  distribution: ubuntu
+  release: maverick-proposed
+  packages-table: ubuntu_packages
+  sources-table: ubuntu_sources
+  uploaders-table: ubuntu_uploaders
+  packages-schema: packages
+  sources-schema: sources
+
+ubuntu-maverick-backports:
+  type: src-pkg
+  archs: [amd64, i386]
+  directory: /org/mirrors/ubuntu.com/ftp/dists/maverick/
+  components: [main, multiverse, universe, restricted]
+  distribution: ubuntu
+  release: maverick-backports
+  packages-table: ubuntu_packages
+  sources-table: ubuntu_sources
+  uploaders-table: ubuntu_uploaders
+  packages-schema: packages
+  sources-schema: sources
+
+
 ubuntu-lucid:
   type: src-pkg
   archs: [amd64, i386]
@@ -370,6 +582,59 @@ ubuntu-lucid:
   uploaders-table: ubuntu_uploaders
   packages-schema: packages
   sources-schema: sources
+
+ubuntu-lucid-security:
+  type: src-pkg
+  archs: [amd64, i386]
+  directory: /org/mirrors/ubuntu.com/ftp/dists/lucid/
+  components: [main, multiverse, universe, restricted]
+  distribution: ubuntu
+  release: lucid-security
+  packages-table: ubuntu_packages
+  sources-table: ubuntu_sources
+  uploaders-table: ubuntu_uploaders
+  packages-schema: packages
+  sources-schema: sources
+
+ubuntu-lucid-updates:
+  type: src-pkg
+  archs: [amd64, i386]
+  directory: /org/mirrors/ubuntu.com/ftp/dists/lucid/
+  components: [main, multiverse, universe, restricted]
+  distribution: ubuntu
+  release: lucid-updates
+  packages-table: ubuntu_packages
+  sources-table: ubuntu_sources
+  uploaders-table: ubuntu_uploaders
+  packages-schema: packages
+  sources-schema: sources
+
+ubuntu-lucid-proposed:
+  type: src-pkg
+  archs: [amd64, i386]
+  directory: /org/mirrors/ubuntu.com/ftp/dists/lucid/
+  components: [main, multiverse, universe, restricted]
+  distribution: ubuntu
+  release: lucid-proposed
+  packages-table: ubuntu_packages
+  sources-table: ubuntu_sources
+  uploaders-table: ubuntu_uploaders
+  packages-schema: packages
+  sources-schema: sources
+
+ubuntu-lucid-backports:
+  type: src-pkg
+  archs: [amd64, i386]
+  directory: /org/mirrors/ubuntu.com/ftp/dists/lucid/
+  components: [main, multiverse, universe, restricted]
+  distribution: ubuntu
+  release: lucid-backports
+  packages-table: ubuntu_packages
+  sources-table: ubuntu_sources
+  uploaders-table: ubuntu_uploaders
+  packages-schema: packages
+  sources-schema: sources
+
 
 ubuntu-karmic:
   type: src-pkg
@@ -384,6 +649,59 @@ ubuntu-karmic:
   packages-schema: packages
   sources-schema: sources
 
+ubuntu-karmic-security:
+  type: src-pkg
+  archs: [amd64, i386]
+  directory: /org/mirrors/ubuntu.com/ftp/dists/karmic/
+  components: [main, multiverse, universe, restricted]
+  distribution: ubuntu
+  release: karmic-security
+  packages-table: ubuntu_packages
+  sources-table: ubuntu_sources
+  uploaders-table: ubuntu_uploaders
+  packages-schema: packages
+  sources-schema: sources
+
+ubuntu-karmic-updates:
+  type: src-pkg
+  archs: [amd64, i386]
+  directory: /org/mirrors/ubuntu.com/ftp/dists/karmic/
+  components: [main, multiverse, universe, restricted]
+  distribution: ubuntu
+  release: karmic-updates
+  packages-table: ubuntu_packages
+  sources-table: ubuntu_sources
+  uploaders-table: ubuntu_uploaders
+  packages-schema: packages
+  sources-schema: sources
+
+ubuntu-karmic-proposed:
+  type: src-pkg
+  archs: [amd64, i386]
+  directory: /org/mirrors/ubuntu.com/ftp/dists/karmic/
+  components: [main, multiverse, universe, restricted]
+  distribution: ubuntu
+  release: karmic-proposed
+  packages-table: ubuntu_packages
+  sources-table: ubuntu_sources
+  uploaders-table: ubuntu_uploaders
+  packages-schema: packages
+  sources-schema: sources
+
+ubuntu-karmic-backports:
+  type: src-pkg
+  archs: [amd64, i386]
+  directory: /org/mirrors/ubuntu.com/ftp/dists/karmic/
+  components: [main, multiverse, universe, restricted]
+  distribution: ubuntu
+  release: karmic-backports
+  packages-table: ubuntu_packages
+  sources-table: ubuntu_sources
+  uploaders-table: ubuntu_uploaders
+  packages-schema: packages
+  sources-schema: sources
+
+
 #ubuntu-jaunty:
 #  type: src-pkg
 #  archs: [amd64, i386]
@@ -396,7 +714,7 @@ ubuntu-karmic:
 #  uploaders-table: ubuntu_uploaders
 #  packages-schema: packages
 #  sources-schema: sources
-#
+
 #ubuntu-intrepid:
 #  type: src-pkg
 #  archs: [amd64, i386]
@@ -410,6 +728,7 @@ ubuntu-karmic:
 #  packages-schema: packages
 #  sources-schema: sources
 
+
 ubuntu-hardy:
   type: src-pkg
   archs: [amd64, i386]
@@ -422,6 +741,59 @@ ubuntu-hardy:
   uploaders-table: ubuntu_uploaders
   packages-schema: packages
   sources-schema: sources
+
+ubuntu-hardy-security:
+  type: src-pkg
+  archs: [amd64, i386]
+  directory: /org/mirrors/ubuntu.com/ftp/dists/hardy/
+  components: [main, multiverse, universe, restricted]
+  distribution: ubuntu
+  release: hardy-security
+  packages-table: ubuntu_packages
+  sources-table: ubuntu_sources
+  uploaders-table: ubuntu_uploaders
+  packages-schema: packages
+  sources-schema: sources
+
+ubuntu-hardy-updates:
+  type: src-pkg
+  archs: [amd64, i386]
+  directory: /org/mirrors/ubuntu.com/ftp/dists/hardy/
+  components: [main, multiverse, universe, restricted]
+  distribution: ubuntu
+  release: hardy-updates
+  packages-table: ubuntu_packages
+  sources-table: ubuntu_sources
+  uploaders-table: ubuntu_uploaders
+  packages-schema: packages
+  sources-schema: sources
+
+ubuntu-hardy-proposed:
+  type: src-pkg
+  archs: [amd64, i386]
+  directory: /org/mirrors/ubuntu.com/ftp/dists/hardy/
+  components: [main, multiverse, universe, restricted]
+  distribution: ubuntu
+  release: hardy-proposed
+  packages-table: ubuntu_packages
+  sources-table: ubuntu_sources
+  uploaders-table: ubuntu_uploaders
+  packages-schema: packages
+  sources-schema: sources
+
+ubuntu-hardy-backports:
+  type: src-pkg
+  archs: [amd64, i386]
+  directory: /org/mirrors/ubuntu.com/ftp/dists/hardy/
+  components: [main, multiverse, universe, restricted]
+  distribution: ubuntu
+  release: hardy-backports
+  packages-table: ubuntu_packages
+  sources-table: ubuntu_sources
+  uploaders-table: ubuntu_uploaders
+  packages-schema: packages
+  sources-schema: sources
+
 
 #ubuntu-dapper:
 #  type: src-pkg
