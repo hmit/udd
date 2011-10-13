@@ -371,31 +371,31 @@ ubuntu-karmic:
   packages-schema: packages
   sources-schema: sources
 
-ubuntu-jaunty:
-  type: src-pkg
-  archs: [amd64, i386]
-  directory: /org/mirrors/ubuntu.com/ftp/dists/jaunty/
-  components: [main, multiverse, universe, restricted]
-  distribution: ubuntu
-  release: jaunty
-  packages-table: ubuntu_packages
-  sources-table: ubuntu_sources
-  uploaders-table: ubuntu_uploaders
-  packages-schema: packages
-  sources-schema: sources
-
-ubuntu-intrepid:
-  type: src-pkg
-  archs: [amd64, i386]
-  directory: /org/mirrors/ubuntu.com/ftp/dists/intrepid/
-  components: [main, multiverse, universe, restricted]
-  distribution: ubuntu
-  release: intrepid
-  packages-table: ubuntu_packages
-  sources-table: ubuntu_sources
-  uploaders-table: ubuntu_uploaders
-  packages-schema: packages
-  sources-schema: sources
+#ubuntu-jaunty:
+#  type: src-pkg
+#  archs: [amd64, i386]
+#  directory: /org/mirrors/ubuntu.com/ftp/dists/jaunty/
+#  components: [main, multiverse, universe, restricted]
+#  distribution: ubuntu
+#  release: jaunty
+#  packages-table: ubuntu_packages
+#  sources-table: ubuntu_sources
+#  uploaders-table: ubuntu_uploaders
+#  packages-schema: packages
+#  sources-schema: sources
+#
+#ubuntu-intrepid:
+#  type: src-pkg
+#  archs: [amd64, i386]
+#  directory: /org/mirrors/ubuntu.com/ftp/dists/intrepid/
+#  components: [main, multiverse, universe, restricted]
+#  distribution: ubuntu
+#  release: intrepid
+#  packages-table: ubuntu_packages
+#  sources-table: ubuntu_sources
+#  uploaders-table: ubuntu_uploaders
+#  packages-schema: packages
+#  sources-schema: sources
 
 ubuntu-hardy:
   type: src-pkg
@@ -410,18 +410,18 @@ ubuntu-hardy:
   packages-schema: packages
   sources-schema: sources
 
-ubuntu-dapper:
-  type: src-pkg
-  archs: [amd64, i386]
-  directory: /org/mirrors/ubuntu.com/ftp/dists/dapper/
-  components: [main, multiverse, universe, restricted]
-  distribution: ubuntu
-  release: dapper
-  packages-table: ubuntu_packages
-  sources-table: ubuntu_sources
-  uploaders-table: ubuntu_uploaders
-  packages-schema: packages
-  sources-schema: sources
+#ubuntu-dapper:
+#  type: src-pkg
+#  archs: [amd64, i386]
+#  directory: /org/mirrors/ubuntu.com/ftp/dists/dapper/
+#  components: [main, multiverse, universe, restricted]
+#  distribution: ubuntu
+#  release: dapper
+#  packages-table: ubuntu_packages
+#  sources-table: ubuntu_sources
+#  uploaders-table: ubuntu_uploaders
+#  packages-schema: packages
+#  sources-schema: sources
 
 aptosid:
   type: src-pkg
