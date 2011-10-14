@@ -79,7 +79,7 @@ case "$ARCHIVE" in
      $UAR debian-wheezy debian-squeeze debian-sid debian-experimental debian-lenny debian-lenny-proposed-updates  debian-squeeze-proposed-updates debian-wheezy-proposed-updates debian-squeeze-updates
       ;;
    ubuntu)
-      $UAR ubuntu-oneiric ubuntu-natty ubuntu-lucid ubuntu-hardy
+      $UAR ubuntu-{precise,oneiric,natty,maverick,lucid,karmic,hardy}{,-security,-updates,-proposed,-backports}
       ;;
    security)
       $UAR debian-lenny-security debian-squeeze-security debian-wheezy-security
