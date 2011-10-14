@@ -322,7 +322,7 @@ ubuntu-precise:
 ubuntu-precise-security:
   type: src-pkg
   archs: [amd64, i386]
-  directory: /org/mirrors/ubuntu.com/ftp/dists/precise/
+  directory: /org/mirrors/ubuntu.com/ftp/dists/precise-security/
   components: [main, multiverse, universe, restricted]
   distribution: ubuntu
   release: precise-security
@@ -335,7 +335,7 @@ ubuntu-precise-security:
 ubuntu-precise-updates:
   type: src-pkg
   archs: [amd64, i386]
-  directory: /org/mirrors/ubuntu.com/ftp/dists/precise/
+  directory: /org/mirrors/ubuntu.com/ftp/dists/precise-updates/
   components: [main, multiverse, universe, restricted]
   distribution: ubuntu
   release: precise-updates
@@ -348,7 +348,7 @@ ubuntu-precise-updates:
 ubuntu-precise-proposed:
   type: src-pkg
   archs: [amd64, i386]
-  directory: /org/mirrors/ubuntu.com/ftp/dists/precise/
+  directory: /org/mirrors/ubuntu.com/ftp/dists/precise-proposed/
   components: [main, multiverse, universe, restricted]
   distribution: ubuntu
   release: precise-proposed
@@ -361,7 +361,7 @@ ubuntu-precise-proposed:
 ubuntu-precise-backports:
   type: src-pkg
   archs: [amd64, i386]
-  directory: /org/mirrors/ubuntu.com/ftp/dists/precise/
+  directory: /org/mirrors/ubuntu.com/ftp/dists/precise-backports/
   components: [main, multiverse, universe, restricted]
   distribution: ubuntu
   release: precise-backports
@@ -388,7 +388,7 @@ ubuntu-oneiric:
 ubuntu-oneiric-security:
   type: src-pkg
   archs: [amd64, i386]
-  directory: /org/mirrors/ubuntu.com/ftp/dists/oneiric/
+  directory: /org/mirrors/ubuntu.com/ftp/dists/oneiric-security/
   components: [main, multiverse, universe, restricted]
   distribution: ubuntu
   release: oneiric-security
@@ -401,7 +401,7 @@ ubuntu-oneiric-security:
 ubuntu-oneiric-updates:
   type: src-pkg
   archs: [amd64, i386]
-  directory: /org/mirrors/ubuntu.com/ftp/dists/oneiric/
+  directory: /org/mirrors/ubuntu.com/ftp/dists/oneiric-updates/
   components: [main, multiverse, universe, restricted]
   distribution: ubuntu
   release: oneiric-updates
@@ -414,7 +414,7 @@ ubuntu-oneiric-updates:
 ubuntu-oneiric-proposed:
   type: src-pkg
   archs: [amd64, i386]
-  directory: /org/mirrors/ubuntu.com/ftp/dists/oneiric/
+  directory: /org/mirrors/ubuntu.com/ftp/dists/oneiric-proposed/
   components: [main, multiverse, universe, restricted]
   distribution: ubuntu
   release: oneiric-proposed
@@ -427,7 +427,7 @@ ubuntu-oneiric-proposed:
 ubuntu-oneiric-backports:
   type: src-pkg
   archs: [amd64, i386]
-  directory: /org/mirrors/ubuntu.com/ftp/dists/oneiric/
+  directory: /org/mirrors/ubuntu.com/ftp/dists/oneiric-backports/
   components: [main, multiverse, universe, restricted]
   distribution: ubuntu
   release: oneiric-backports
@@ -454,7 +454,7 @@ ubuntu-natty:
 ubuntu-natty-security:
   type: src-pkg
   archs: [amd64, i386]
-  directory: /org/mirrors/ubuntu.com/ftp/dists/natty/
+  directory: /org/mirrors/ubuntu.com/ftp/dists/natty-security/
   components: [main, multiverse, universe, restricted]
   distribution: ubuntu
   release: natty-security
@@ -467,7 +467,7 @@ ubuntu-natty-security:
 ubuntu-natty-updates:
   type: src-pkg
   archs: [amd64, i386]
-  directory: /org/mirrors/ubuntu.com/ftp/dists/natty/
+  directory: /org/mirrors/ubuntu.com/ftp/dists/natty-updates/
   components: [main, multiverse, universe, restricted]
   distribution: ubuntu
   release: natty-updates
@@ -480,7 +480,7 @@ ubuntu-natty-updates:
 ubuntu-natty-proposed:
   type: src-pkg
   archs: [amd64, i386]
-  directory: /org/mirrors/ubuntu.com/ftp/dists/natty/
+  directory: /org/mirrors/ubuntu.com/ftp/dists/natty-proposed/
   components: [main, multiverse, universe, restricted]
   distribution: ubuntu
   release: natty-proposed
@@ -493,7 +493,7 @@ ubuntu-natty-proposed:
 ubuntu-natty-backports:
   type: src-pkg
   archs: [amd64, i386]
-  directory: /org/mirrors/ubuntu.com/ftp/dists/natty/
+  directory: /org/mirrors/ubuntu.com/ftp/dists/natty-backports/
   components: [main, multiverse, universe, restricted]
   distribution: ubuntu
   release: natty-backports
@@ -520,7 +520,7 @@ ubuntu-maverick:
 ubuntu-maverick-security:
   type: src-pkg
   archs: [amd64, i386]
-  directory: /org/mirrors/ubuntu.com/ftp/dists/maverick/
+  directory: /org/mirrors/ubuntu.com/ftp/dists/maverick-security/
   components: [main, multiverse, universe, restricted]
   distribution: ubuntu
   release: maverick-security
@@ -533,7 +533,7 @@ ubuntu-maverick-security:
 ubuntu-maverick-updates:
   type: src-pkg
   archs: [amd64, i386]
-  directory: /org/mirrors/ubuntu.com/ftp/dists/maverick/
+  directory: /org/mirrors/ubuntu.com/ftp/dists/maverick-updates/
   components: [main, multiverse, universe, restricted]
   distribution: ubuntu
   release: maverick-updates
@@ -546,7 +546,7 @@ ubuntu-maverick-updates:
 ubuntu-maverick-proposed:
   type: src-pkg
   archs: [amd64, i386]
-  directory: /org/mirrors/ubuntu.com/ftp/dists/maverick/
+  directory: /org/mirrors/ubuntu.com/ftp/dists/maverick-proposed/
   components: [main, multiverse, universe, restricted]
   distribution: ubuntu
   release: maverick-proposed
@@ -559,7 +559,7 @@ ubuntu-maverick-proposed:
 ubuntu-maverick-backports:
   type: src-pkg
   archs: [amd64, i386]
-  directory: /org/mirrors/ubuntu.com/ftp/dists/maverick/
+  directory: /org/mirrors/ubuntu.com/ftp/dists/maverick-backports/
   components: [main, multiverse, universe, restricted]
   distribution: ubuntu
   release: maverick-backports
@@ -586,7 +586,7 @@ ubuntu-lucid:
 ubuntu-lucid-security:
   type: src-pkg
   archs: [amd64, i386]
-  directory: /org/mirrors/ubuntu.com/ftp/dists/lucid/
+  directory: /org/mirrors/ubuntu.com/ftp/dists/lucid-security/
   components: [main, multiverse, universe, restricted]
   distribution: ubuntu
   release: lucid-security
@@ -599,7 +599,7 @@ ubuntu-lucid-security:
 ubuntu-lucid-updates:
   type: src-pkg
   archs: [amd64, i386]
-  directory: /org/mirrors/ubuntu.com/ftp/dists/lucid/
+  directory: /org/mirrors/ubuntu.com/ftp/dists/lucid-updates/
   components: [main, multiverse, universe, restricted]
   distribution: ubuntu
   release: lucid-updates
@@ -612,7 +612,7 @@ ubuntu-lucid-updates:
 ubuntu-lucid-proposed:
   type: src-pkg
   archs: [amd64, i386]
-  directory: /org/mirrors/ubuntu.com/ftp/dists/lucid/
+  directory: /org/mirrors/ubuntu.com/ftp/dists/lucid-proposed/
   components: [main, multiverse, universe, restricted]
   distribution: ubuntu
   release: lucid-proposed
@@ -625,7 +625,7 @@ ubuntu-lucid-proposed:
 ubuntu-lucid-backports:
   type: src-pkg
   archs: [amd64, i386]
-  directory: /org/mirrors/ubuntu.com/ftp/dists/lucid/
+  directory: /org/mirrors/ubuntu.com/ftp/dists/lucid-backports/
   components: [main, multiverse, universe, restricted]
   distribution: ubuntu
   release: lucid-backports
@@ -652,7 +652,7 @@ ubuntu-karmic:
 ubuntu-karmic-security:
   type: src-pkg
   archs: [amd64, i386]
-  directory: /org/mirrors/ubuntu.com/ftp/dists/karmic/
+  directory: /org/mirrors/ubuntu.com/ftp/dists/karmic-security/
   components: [main, multiverse, universe, restricted]
   distribution: ubuntu
   release: karmic-security
@@ -665,7 +665,7 @@ ubuntu-karmic-security:
 ubuntu-karmic-updates:
   type: src-pkg
   archs: [amd64, i386]
-  directory: /org/mirrors/ubuntu.com/ftp/dists/karmic/
+  directory: /org/mirrors/ubuntu.com/ftp/dists/karmic-updates/
   components: [main, multiverse, universe, restricted]
   distribution: ubuntu
   release: karmic-updates
@@ -678,7 +678,7 @@ ubuntu-karmic-updates:
 ubuntu-karmic-proposed:
   type: src-pkg
   archs: [amd64, i386]
-  directory: /org/mirrors/ubuntu.com/ftp/dists/karmic/
+  directory: /org/mirrors/ubuntu.com/ftp/dists/karmic-proposed/
   components: [main, multiverse, universe, restricted]
   distribution: ubuntu
   release: karmic-proposed
@@ -691,7 +691,7 @@ ubuntu-karmic-proposed:
 ubuntu-karmic-backports:
   type: src-pkg
   archs: [amd64, i386]
-  directory: /org/mirrors/ubuntu.com/ftp/dists/karmic/
+  directory: /org/mirrors/ubuntu.com/ftp/dists/karmic-backports/
   components: [main, multiverse, universe, restricted]
   distribution: ubuntu
   release: karmic-backports
@@ -745,7 +745,7 @@ ubuntu-hardy:
 ubuntu-hardy-security:
   type: src-pkg
   archs: [amd64, i386]
-  directory: /org/mirrors/ubuntu.com/ftp/dists/hardy/
+  directory: /org/mirrors/ubuntu.com/ftp/dists/hardy-security/
   components: [main, multiverse, universe, restricted]
   distribution: ubuntu
   release: hardy-security
@@ -758,7 +758,7 @@ ubuntu-hardy-security:
 ubuntu-hardy-updates:
   type: src-pkg
   archs: [amd64, i386]
-  directory: /org/mirrors/ubuntu.com/ftp/dists/hardy/
+  directory: /org/mirrors/ubuntu.com/ftp/dists/hardy-updates/
   components: [main, multiverse, universe, restricted]
   distribution: ubuntu
   release: hardy-updates
@@ -771,7 +771,7 @@ ubuntu-hardy-updates:
 ubuntu-hardy-proposed:
   type: src-pkg
   archs: [amd64, i386]
-  directory: /org/mirrors/ubuntu.com/ftp/dists/hardy/
+  directory: /org/mirrors/ubuntu.com/ftp/dists/hardy-proposed/
   components: [main, multiverse, universe, restricted]
   distribution: ubuntu
   release: hardy-proposed
@@ -784,7 +784,7 @@ ubuntu-hardy-proposed:
 ubuntu-hardy-backports:
   type: src-pkg
   archs: [amd64, i386]
-  directory: /org/mirrors/ubuntu.com/ftp/dists/hardy/
+  directory: /org/mirrors/ubuntu.com/ftp/dists/hardy-backports/
   components: [main, multiverse, universe, restricted]
   distribution: ubuntu
   release: hardy-backports
