@@ -76,10 +76,18 @@ update-archive() {
 UAR=/org/udd.debian.org/udd/update-and-run.sh
 case "$ARCHIVE" in
    "")
-     $UAR debian-wheezy debian-squeeze debian-sid debian-experimental debian-lenny debian-lenny-proposed-updates  debian-squeeze-proposed-updates debian-wheezy-proposed-updates debian-squeeze-updates
+      if [ $(($RANDOM % 10)) -eq 0 ]; then
+	      $UAR debian-{wheezy,squeeze,sid,experimental,lenny} debian-{lenny,squeeze,wheezy}-proposed-updates debian-squeeze-updates
+      else
+	      $UAR debian-{wheezy,sid,experimental} debian-wheezy-proposed-updates
+      fi
       ;;
    ubuntu)
-      $UAR ubuntu-{precise,oneiric,natty,maverick,lucid,karmic,hardy}{,-security,-updates,-proposed,-backports}
+      if [ $(($RANDOM % 10)) -eq 0 ]; then
+	      $UAR ubuntu-{precise,oneiric,natty,maverick,lucid,karmic,hardy}{,-security,-updates,-proposed,-backports}
+      else
+	      $UAR ubuntu-precise{,-security,-updates,-proposed,-backports}
+      fi
       ;;
    security)
       $UAR debian-lenny-security debian-squeeze-security debian-wheezy-security
