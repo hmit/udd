@@ -6,7 +6,7 @@ require 'uri'
 require 'net/http'
 require 'cgi'
 
-URELEASE='oneiric'
+URELEASE='precise'
 
 $cgi = CGI::new
 

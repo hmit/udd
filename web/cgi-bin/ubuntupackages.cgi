@@ -3,7 +3,7 @@
 
 require 'dbi'
 
-RELEASE='oneiric'
+RELEASE='precise'
 
 puts "Content-type: text/plain\n\n"
 

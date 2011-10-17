@@ -10,7 +10,7 @@ sth = dbh.prepare("SELECT tbugs.package, bugs, patches
 from (select package, count(distinct bugs.bug) as bugs
 from ubuntu_bugs_tasks tasks,ubuntu_bugs bugs
 where tasks.bug = bugs.bug
-and distro in ('', 'Ubuntu')
+and distro in ('Ubuntu')
 and status not in ('Invalid', 'Fix Released', 'Won''t Fix', 'Opinion')
 group by package) tbugs
 full join

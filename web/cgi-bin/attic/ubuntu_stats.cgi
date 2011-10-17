@@ -2,7 +2,7 @@
 
 require 'dbi'
 require 'pp'
-RELEASE='maverick'
+RELEASE='precise'
 
 puts "Content-type: text/plain\n\n"
 
