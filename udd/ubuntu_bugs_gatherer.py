@@ -119,11 +119,9 @@ class ubuntu_bugs_gatherer(gatherer):
               hq.put(b)
           else:
             print "[", currentThread().getName(), "] Bug ", b, ": Wrong status: ", r.status, " ", r.reason
-            if r.status == 302:
-              print "Exiting."
-              _exit(1)
             ok = False
-            hq.put(b)
+            if r.status != 302:
+              hq.put(b)
         except httplib.BadStatusLine, line:
           print "[", currentThread().getName(), "] Bug ", b, ": BadStatusLine: ", line
           print str(r.getheaders())
