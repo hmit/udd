@@ -77,7 +77,8 @@ UAR=/org/udd.debian.org/udd/update-and-run.sh
 case "$ARCHIVE" in
    "")
       if [ $(($RANDOM % 10)) -eq 0 ]; then
-	      $UAR debian-{wheezy,squeeze,sid,experimental,lenny} debian-{lenny,squeeze,wheezy}-proposed-updates debian-squeeze-updates
+#	      $UAR debian-{wheezy,squeeze,sid,experimental,lenny} debian-{lenny,squeeze,wheezy}-proposed-updates debian-squeeze-updates
+	      $UAR debian-{wheezy,squeeze,sid,experimental} debian-{squeeze,wheezy}-proposed-updates debian-squeeze-updates
       else
 	      $UAR debian-{wheezy,sid,experimental} debian-wheezy-proposed-updates
       fi
@@ -90,13 +91,15 @@ case "$ARCHIVE" in
       fi
       ;;
    security)
-      $UAR debian-lenny-security debian-squeeze-security debian-wheezy-security
+#      $UAR debian-lenny-security debian-squeeze-security debian-wheezy-security
+      $UAR debian-squeeze-security debian-wheezy-security
       ;;
    volatile)
-      $UAR debian-volatile-lenny debian-volatile-sloppy-lenny debian-volatile-proposed-lenny
+  #   $UAR debian-volatile-lenny debian-volatile-sloppy-lenny debian-volatile-proposed-lenny
       ;;
    backports)
-      $UAR debian-backports-lenny debian-backports-lenny-sloppy debian-backports-squeeze
+#      $UAR debian-backports-lenny debian-backports-lenny-sloppy debian-backports-squeeze
+      $UAR debian-backports-squeeze
       ;;
    debian-ports)
       $UAR debian-ports-sid debian-ports-experimental debian-ports-unreleased

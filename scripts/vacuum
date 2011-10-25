@@ -1,0 +1,16 @@
+#!/usr/bin/ruby -w
+
+require 'pp'
+require 'date'
+require 'thread'
+require 'dbi'
+Thread::abort_on_exception = true
+
+dbh = DBI::connect('DBI:Pg:dbname=udd;port=5441', 'udd')
+sth = dbh.prepare("select relname from pg_class where relkind='r' and relowner='16386' and relnamespace='2200'")
+sth.execute
+sth.fetch_all[0].each do |rel|
+   sth = dbh.prepare("vacuum full verbose analyze #{rel}")
+   sth.execute
+end
+exit(0)
