@@ -33,7 +33,7 @@ class upload_history_gatherer(gatherer):
     tables = ['source', 'version', 'date', 'changed_by', 'changed_by_name', 'changed_by_email', 'maintainer', 'maintainer_name', 'maintainer_email', 'nmu', 'signed_by', 'signed_by_name', 'signed_by_email', 'key_id', 'fingerprint', 'distribution', 'file']
 
     if self.is_ubuntu:
-      tables = tables + ['original_maintainer', 'original_maintainer_name', 'original_maintainer_email']
+      tables = tables + ['original_maintainer', 'original_maintainer_name', 'original_maintainer_email', 'component']
 
     indices = ', '.join(map(lambda x: '$' + str(x), range(1,len(tables)+1)))
     tables = ', '.join(tables)
@@ -60,7 +60,7 @@ class upload_history_gatherer(gatherer):
       %(Fingerprint)s, %(Distribution)s, %(File)s)"
 
     if self.is_ubuntu:
-        query = query[:-1] + ", %(Original-Maintainer)s, %(Original-Maintainer_name)s, %(Original-Maintainer_email)s)"
+        query = query[:-1] + ", %(Original-Maintainer)s, %(Original-Maintainer_name)s, %(Original-Maintainer_email)s, %(Component)s)"
         
     if self.is_debian:
         query_archs = "EXECUTE uh_arch_insert(%(Source)s, %(Version)s, %(arch)s, %(File)s)"
@@ -127,7 +127,8 @@ class upload_history_gatherer(gatherer):
               current['Original-Maintainer_name'], current['Original-Maintainer_email'] = aux.parse_email(current['Original-Maintainer'])
             else:
               current['Original-Maintainer_name'] = current['Original-Maintainer_email'] = 'N/A'
-            
+          if not current.has_key('Message-Date') and current.has_key('Date'):
+            current['Message-Date'] = current['Date']
           current['Message-Date'] = current['Message-Date'].partition('(')[0].replace('+4200','+0000').replace('+4300','+0000').replace('+4100','+0000').replace('+4400','+0000').replace('+4000','+0000')
           if (current['Source'], current['Version']) in added or \
             (current['Source'], current['Version']) == ('libapache-authznetldap-perl', '0.07-4') or \
