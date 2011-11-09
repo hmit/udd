@@ -938,6 +938,13 @@ lintian:
   table: lintian
   schema: lintian
 
+ubuntu-lintian:
+  type: lintian
+  update-command: rm -f /org/udd.debian.org/mirrors/ubuntu.lintian.log && wget -q http://lintian.ubuntuwire.org/lintian.log -O /org/udd.debian.org/mirrors/ubuntu.lintian.log
+  path: /org/udd.debian.org/mirrors/ubuntu.lintian.log
+  table: ubuntu_lintian
+  schema: lintian
+
 dehs:
   type: dehs
   update-command: rm -f /org/udd.debian.org/mirrors/dehs.txt && wget -q http://qa.debian.org/cgi-bin/udd-dehs -O /org/udd.debian.org/mirrors/dehs.txt

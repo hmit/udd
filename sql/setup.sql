@@ -416,6 +416,16 @@ CREATE TABLE lintian (
 
 GRANT SELECT ON lintian TO PUBLIC;
 
+CREATE TABLE ubuntu_lintian (
+  package TEXT NOT NULL,
+  tag_type lintian_tagtype NOT NULL,
+  package_type TEXT,
+  tag TEXT NOT NULL,
+  information TEXT
+);
+
+GRANT SELECT ON ubuntu_lintian TO PUBLIC;
+
 -- Debtags
 
 -- one row per <package, tag> *pair*
