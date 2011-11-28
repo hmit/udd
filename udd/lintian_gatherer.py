@@ -14,9 +14,12 @@ def get_gatherer(connection, config, source):
 
 class lintian_gatherer(gatherer):
   #RE to parse lintian output, pushing the tag code to $1, package name
-  #to $2, pkg type to $3, tag name to $4 and extra info to $5
-  # (stolen from Russ Allbery, thanks dude)
-  output_re = re.compile("([EWIXOP]): (\S+)(?: (\S+))?: (\S+)(?:\s+(.*))?");
+  #to $2, pkg type to $3, pkg version to $4, pkg arch to $5, tag name to $6 and
+  # extra info to $7. Taken from Niels Thykier in #647917
+  verarch = "(?: \s*\(([^)]+?)\)\s*\[([^)]+?)\])"
+                #  vers               arch
+  output_re = re.compile("([EWIXOP]): (\S+)(?: (\S+)(?:%s)?)?: (\S+)(?:\s+(.*))?" % verarch)
+                         #  code      pkg      type  verarch:  tag     extra
 
   ignore_re = re.compile("^((gpg|secmem usage|warning|(/bin/)?tar|internal error|/usr/bin/xgettext|ERROR): |     |Use of uninitialized value in numeric lt .*)");
 
@@ -58,7 +61,7 @@ class lintian_gatherer(gatherer):
 
       match = lintian_gatherer.output_re.match(line)
       if match:
-        (code, pkg, pkg_type, tag, extra) = match.groups();
+        (code, pkg, pkg_type, vers, arch, tag, extra) = match.groups();
         #this one is optional:
         if pkg_type:
           pkg_type = quote(pkg_type)
