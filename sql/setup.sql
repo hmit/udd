@@ -410,6 +410,8 @@ CREATE TABLE lintian (
   package TEXT NOT NULL,
   tag_type lintian_tagtype NOT NULL,
   package_type TEXT,
+  package_version debversion,
+  package_arch TEXT,
   tag TEXT NOT NULL,
   information TEXT
 );
@@ -420,6 +422,8 @@ CREATE TABLE ubuntu_lintian (
   package TEXT NOT NULL,
   tag_type lintian_tagtype NOT NULL,
   package_type TEXT,
+  package_version debversion,
+  package_arch TEXT,
   tag TEXT NOT NULL,
   information TEXT
 );
