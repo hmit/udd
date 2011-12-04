@@ -116,9 +116,8 @@ class upload_history_gatherer(gatherer):
         if line == '':
           current['Changed-By_name'], current['Changed-By_email'] = aux.parse_email(current['Changed-By'])
           current['Maintainer_name'], current['Maintainer_email'] = aux.parse_email(current['Maintainer'])
-          if current['Signed-By'].find('@') != -1:
-            current['Signed-By_name'], current['Signed-By_email'] = aux.parse_email(current['Signed-By'])
-          else:
+          current['Signed-By_name'], current['Signed-By_email'] = aux.parse_email(current['Signed-By'])
+          if current['Signed-By_name'] == '':
             current['Signed-By_name'] = current['Signed-By']
             current['Signed-By_email'] = ''
 
