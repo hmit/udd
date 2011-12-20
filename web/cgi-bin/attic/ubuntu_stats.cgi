@@ -2,7 +2,7 @@
 
 require 'dbi'
 require 'pp'
-RELEASE='precise'
+RELEASE='oneiric'
 
 puts "Content-type: text/plain\n\n"
 
@@ -39,11 +39,11 @@ group by component")
 sth.execute ; rows = sth.fetch_all
 pp getnums(rows)
 
-puts "Not Ubuntu specific, not in debian (not in lenny or sid):"
+puts "Not Ubuntu specific, not in debian (not in lenny or squeeze or wheezy or sid):"
 sth = dbh.prepare("select component, count(*) from ubuntu_sources where distribution = 'ubuntu' and release = '#{RELEASE}'
 AND source !~ '^language-(support|pack)-.*' AND source !~ '^kde-l10n-.*'
 AND source !~ 'ubuntu' AND source !~ 'launchpad'
-AND source not in (select source from sources where distribution='debian' and release in ('sid', 'lenny'))
+AND source not in (select source from sources where distribution='debian' and release in ('sid', 'wheezy', 'squeeze', 'lenny'))
  group by component")
 sth.execute ; rows = sth.fetch_all
 pp getnums(rows)
@@ -51,7 +51,7 @@ pp getnums(rows)
 puts "Also in debian, version ~ /ubuntu/:"
 sth = dbh.prepare("select component, count(*) from ubuntu_sources where distribution = 'ubuntu' and release = '#{RELEASE}'
 AND source !~ '^language-(support|pack)-.*' AND source !~ '^kde-l10n-.*' AND source !~ 'ubuntu' AND source !~ 'launchpad'
-AND source in (select source from sources where distribution='debian' and release in ('sid', 'lenny'))
+AND source in (select source from sources where distribution='debian' and release in ('sid', 'wheezy', 'squeeze', 'lenny'))
 AND version ~ 'ubuntu'
  group by component")
 sth.execute ; rows = sth.fetch_all
@@ -60,7 +60,7 @@ pp getnums(rows)
 puts "Also in Debian, diverged + new upstream (version ~ /-0ubuntu/):"
 sth = dbh.prepare("select component, count(*) from ubuntu_sources where distribution = 'ubuntu' and release = '#{RELEASE}'
 AND source !~ '^language-(support|pack)-.*' AND source !~ '^kde-l10n-.*' AND source !~ 'ubuntu' AND source !~ 'launchpad'
-AND source in (select source from sources where distribution='debian' and release in ('sid', 'lenny'))
+AND source in (select source from sources where distribution='debian' and release in ('sid', 'wheezy', 'squeeze', 'lenny'))
 AND version ~ '-0ubuntu'
  group by component")
 sth.execute ; rows = sth.fetch_all
@@ -69,7 +69,7 @@ pp getnums(rows)
 puts "Also in Debian, (version !~ /ubuntu/):"
 sth = dbh.prepare("select component, count(*) from ubuntu_sources where distribution = 'ubuntu' and release = '#{RELEASE}'
 AND source !~ '^language-(support|pack)-.*' AND source !~ '^kde-l10n-.*' AND source !~ 'ubuntu' AND source !~ 'launchpad'
-AND source in (select source from sources where distribution='debian' and release in ('sid', 'lenny'))
+AND source in (select source from sources where distribution='debian' and release in ('sid', 'wheezy', 'squeeze', 'lenny'))
 AND version !~ 'ubuntu'
  group by component")
 sth.execute ; rows = sth.fetch_all
@@ -79,7 +79,7 @@ pp getnums(rows)
 puts "diverged+new upstream (main):"
 sth = dbh.prepare("select source from ubuntu_sources where distribution = 'ubuntu' and release = '#{RELEASE}' and component = 'main'
 AND source !~ '^language-(support|pack)-.*' AND source !~ '^kde-l10n-.*' AND source !~ 'ubuntu' AND source !~ 'launchpad'
-AND source in (select source from sources where distribution='debian' and release in ('sid', 'lenny'))
+AND source in (select source from sources where distribution='debian' and release in ('sid', 'wheezy', 'squeeze', 'lenny'))
 AND version ~ '-0ubuntu' order by source")
 sth.execute ; rows = sth.fetch_all
 rows.each do |r|
@@ -91,7 +91,7 @@ puts
 puts "diverged+new upstream (universe):"
 sth = dbh.prepare("select source from ubuntu_sources where distribution = 'ubuntu' and release = '#{RELEASE}' and component = 'universe'
 AND source !~ '^language-(support|pack)-.*' AND source !~ '^kde-l10n-.*' AND source !~ 'ubuntu' AND source !~ 'launchpad'
-AND source in (select source from sources where distribution='debian' and release in ('sid', 'lenny'))
+AND source in (select source from sources where distribution='debian' and release in ('sid', 'wheezy', 'squeeze', 'lenny'))
 AND version ~ '-0ubuntu' order by source")
 sth.execute ; rows = sth.fetch_all
 rows.each do |r|
@@ -104,7 +104,7 @@ sth = dbh.prepare("select u.source, u.version, d.version from ubuntu_sources u, 
 where u.distribution = 'ubuntu' and u.release = '#{RELEASE}' and u.component = 'main'
 and d.distribution = 'debian' and d.release = 'wheezy'
 AND u.source !~ '^language-(support|pack)-.*' AND u.source !~ '^kde-l10n-.*' AND u.source !~ 'ubuntu' AND u.source !~ 'launchpad'
-AND u.source in (select source from sources where distribution='debian' and release in ('sid', 'lenny'))
+AND u.source in (select source from sources where distribution='debian' and release in ('sid', 'wheezy', 'squeeze', 'lenny'))
 AND u.version ~ '-0ubuntu'
 AND u.source = d.source
 AND u.version > d.version
@@ -121,7 +121,7 @@ sth = dbh.prepare("select u.source, u.version, d.version from ubuntu_sources u, 
 where u.distribution = 'ubuntu' and u.release = '#{RELEASE}' and u.component = 'universe'
 and d.distribution = 'debian' and d.release = 'wheezy'
 AND u.source !~ '^language-(support|pack)-.*' AND u.source !~ '^kde-l10n-.*' AND u.source !~ 'ubuntu' AND u.source !~ 'launchpad'
-AND u.source in (select source from sources where distribution='debian' and release in ('sid', 'lenny'))
+AND u.source in (select source from sources where distribution='debian' and release in ('sid', 'wheezy', 'squeeze', 'lenny'))
 AND u.version ~ '-0ubuntu'
 AND u.source = d.source
 AND u.version > d.version
