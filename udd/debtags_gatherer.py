@@ -35,6 +35,9 @@ def parse_tags(fname):
     tags_db = file(fname)
     for line in tags_db:
         line_no += 1
+        # Packages without tags are represented as ^package$; ignore these
+        if not ": " in line:
+            continue
         line = line.strip()
         parsed_line = tag_line_RE.match(line)
         if not parsed_line:
