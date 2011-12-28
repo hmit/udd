@@ -58,6 +58,7 @@ print '''Content-Type: text/html\n\n
 <th>Package</th>
 <th>Debian version</th>
 <th>Ubuntu version</th>
+<th>Ubuntu patches</th>
 </tr>
 '''
 
@@ -67,7 +68,9 @@ for row in rows:
            (row[0], row[1]))
     print ('<td><a href="http://launchpad.net/ubuntu/+source/%s">%s</a></td>' %
            (row[0], row[2]))
-    print '</tr>'
+    print ('''<td><a href="http://ubuntudiff.debian.net/?query=%s">
+              Show patch</a>''' % row[0])
+    print '</td></tr>'
 
 print '''</table>
 <hr/>
