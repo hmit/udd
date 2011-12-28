@@ -125,25 +125,6 @@ href="https://buildd.debian.org/status/media/status.css" />
     border:1px solid #d8d8d8;
 }
 </style>
-<script type="text/javascript">
-//<![CDATA[
-function toggleBuildd(suite) {
-    var children = document.getElementsByTagName("*");
-    for (var i = 0; i < children.length; i++) {
-        if(!children[i].hasAttribute("class"))
-            continue;
-        c = children[i].getAttribute("class").split(" ");
-        for(var j = 0; j < c.length; j++) {
-            if(c[j] == suite) {
-                if (children[i].style.display == '')
-                    children[i].style.display = 'none';
-                else children[i].style.display = '';
-            }
-        }
-    }
-}
-//]]>
-</script>
 </head>
 <body>
 <table id="header" width="100%%">
