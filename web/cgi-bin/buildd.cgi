@@ -22,7 +22,6 @@ from __future__ import print_function
 from cgi import FieldStorage
 from psycopg2 import connect
 from re import split, sub
-from urllib import urlopen
 
 packages = {'sid': {'maintained': {}, 'team': {}, 'NMUed': {},
                     'QA/other': {}, 'sponsored': {}},
