@@ -46,7 +46,6 @@ wbstatus = {'BD-Uninstallable': ('bduninstallable', 'BD-Uninstallable', '∉'),
             'Uploaded': ('uploaded', 'Uploaded', '♐'),
             'Not-For-Us': ('notforus', 'Not-For-Us', '⎇'),
             'Auto-Not-For-Us': ('', '', '')}
-
 query = '''WITH last_sources AS (
                  SELECT source, max(version) AS version,
                  maintainer, uploaders, release
@@ -69,39 +68,6 @@ query = '''WITH last_sources AS (
                OR u.changed_by LIKE '%%%(name)s%%'
                OR u.signed_by LIKE '%%%(name)s%%'
                ORDER BY s.source''' % {'name': name}
-
-conn = connect(database='udd', port=5441, host='localhost', user='guest')
-cur = conn.cursor()
-cur.execute(query)
-rows = cur.fetchall()
-cur.close()
-conn.close()
-
-for row in rows:
-    if name in row[1]:
-        if not row[0] in packages[row[6]]['maintained']:
-            packages[row[6]]['maintained'][row[0]] = {}
-        packages[row[6]]['maintained'][row[0]][row[7]] = row[8]
-    elif row[2] and name in row[2]:
-        if not row[0] in packages[row[6]]['team']:
-            packages[row[6]]['team'][row[0]] = {}
-        packages[row[6]]['team'][row[0]][row[7]] = row[8]
-    elif name in row[4]:
-        if row[5]:
-            if not row[0] in packages[row[6]]['NMUed']:
-                packages[row[6]]['NMUed'][row[0]] = {}
-            packages[row[6]]['NMUed'][row[0]][row[7]] = row[8]
-        else:
-            if name not in row[1] and (not row[2] or name not in row[2]):
-                if name in row[3]:
-                    if not row[0] in packages[row[6]]['QA/other']:
-                        packages[row[6]]['QA/other'][row[0]] = {}
-                    packages[row[6]]['QA/other'][row[0]][row[7]] = row[8]
-                else:
-                    if not row[0] in packages[row[6]]['sponsored']:
-                        packages[row[6]]['sponsored'][row[0]] = {}
-                    packages[row[6]]['sponsored'][row[0]][row[7]] = row[8]
-    architectures.add(row[7])
 
 print('''Content-Type: text/html\n\n
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
@@ -137,6 +103,39 @@ alt="Debian Logo" height="60" /></td>
 <hr/>''')
 
 if name:
+    conn = connect(database='udd', port=5441, host='localhost', user='guest')
+    cur = conn.cursor()
+    cur.execute(query)
+    rows = cur.fetchall()
+    cur.close()
+    conn.close()
+    
+    for row in rows:
+        if name in row[1]:
+            if not row[0] in packages[row[6]]['maintained']:
+                packages[row[6]]['maintained'][row[0]] = {}
+            packages[row[6]]['maintained'][row[0]][row[7]] = row[8]
+        elif row[2] and name in row[2]:
+            if not row[0] in packages[row[6]]['team']:
+                packages[row[6]]['team'][row[0]] = {}
+            packages[row[6]]['team'][row[0]][row[7]] = row[8]
+        elif name in row[4]:
+            if row[5]:
+                if not row[0] in packages[row[6]]['NMUed']:
+                    packages[row[6]]['NMUed'][row[0]] = {}
+                packages[row[6]]['NMUed'][row[0]][row[7]] = row[8]
+            else:
+                if name not in row[1] and (not row[2] or name not in row[2]):
+                    if name in row[3]:
+                        if not row[0] in packages[row[6]]['QA/other']:
+                            packages[row[6]]['QA/other'][row[0]] = {}
+                        packages[row[6]]['QA/other'][row[0]][row[7]] = row[8]
+                    else:
+                        if not row[0] in packages[row[6]]['sponsored']:
+                            packages[row[6]]['sponsored'][row[0]] = {}
+                        packages[row[6]]['sponsored'][row[0]][row[7]] = row[8]
+        architectures.add(row[7])
+
     for suite in suites:
         for role in roles:
             if not len(packages[suite][role]):
