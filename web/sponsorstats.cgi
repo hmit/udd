@@ -38,7 +38,7 @@ puts "<html><body>"
 puts "<h1>Sponsoring stats, powered by UDD!</h1>"
 puts "<p>Uploads in <b>bold</b> were NMUs.</p>"
 puts "<p>That excludes uploads done for people who are now DD, even if the upload was done while they were not DD.</p>"
-puts '<a href="http://svn.debian.org/wsvn/collab-qa/udd/web/cgi-bin/sponsorstats.cgi?op=file&rev=0&sc=0">source code</a><br/>'
+puts '<a href="http://anonscm.debian.org/viewvc/collab-qa/udd/web/sponsorstats.cgi?view=markup">source code</a><br/>'
 
 puts "<ul>"
 rank = 0
