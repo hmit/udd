@@ -5,6 +5,9 @@ BEGIN;
 DROP TABLE IF EXISTS new_sources CASCADE;
 DROP TABLE IF EXISTS new_packages CASCADE;
 
+DROP VIEW IF EXISTS new_sources_madison;
+DROP VIEW IF EXISTS new_packages_madison;
+
 -- Sources
 CREATE TABLE new_sources (
        source text,
@@ -62,6 +65,17 @@ CREATE TABLE new_packages (
 
 GRANT SELECT ON new_packages TO PUBLIC;
 GRANT SELECT ON new_sources TO PUBLIC;
+
+-- These are required to avoid too much duplication in madison.cgi
+CREATE VIEW new_sources_madison AS SELECT source, version, component,
+distribution AS release, TEXT 'debian' AS distribution FROM new_sources;
+
+CREATE VIEW new_packages_madison AS SELECT package, version, distribution AS
+release, architecture, component, TEXT 'debian' AS distribution from
+new_packages;
+
+GRANT SELECT ON new_sources_madison TO PUBLIC;
+GRANT SELECT ON new_packages_madison TO PUBLIC;
 
 COMMIT;
 
