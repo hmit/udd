@@ -1015,7 +1015,7 @@ removals:
 
 pts:
   type: pts
-  update-command: ssh -i /org/udd.debian.org/.ssh/id_ptsdata qa@quantz.debian.org /org/packages.qa.debian.org/bin/export-data-to-udd > /org/udd.debian.org/tmp/pts.txt
+  update-command: ssh -i /org/udd.debian.org/.ssh/id_ptsdata qa@quantz.debian.org /srv/packages.qa.debian.org/bin/export-data-to-udd > /org/udd.debian.org/tmp/pts.txt
   path: /org/udd.debian.org/tmp/pts.txt
 
 history-daily:
