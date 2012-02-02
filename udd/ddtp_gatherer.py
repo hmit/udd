@@ -22,7 +22,7 @@ from os import listdir, access, F_OK
 from sys import stderr, exit
 from filecmp import cmp
 import gzip
-# import bz2
+import bz2
 from psycopg2 import IntegrityError, InternalError
 
 import logging
@@ -57,7 +57,8 @@ class ddtp():
 class ddtp_gatherer(gatherer):
   # DDTP translations
 
-  select_language_re    = re.compile('^Translation-(\w+)\.gz$')
+  select_language_gz_re    = re.compile('^Translation-(\w+)\.gz$')
+  select_language_bz2_re   = re.compile('^Translation-(\w+)\.bz2$')
 
   def __init__(self, connection, config, source):
     gatherer.__init__(self, connection, config, source)
@@ -136,9 +137,14 @@ class ddtp_gatherer(gatherer):
 	self.log.error("Directory %s for release %s does not exist", dir, rel)
         continue
       for filename in listdir(dir):
-        match = ddtp_gatherer.select_language_re.match(filename)
+        match = ddtp_gatherer.select_language_gz_re.match(filename)
         if not match:
-          continue
+          match = ddtp_gatherer.select_language_bz2_re.match(filename)
+          if not match:
+            continue
+          COMPRESSIONEXTENSION='bz2'
+        else:
+          COMPRESSIONEXTENSION='gz'
         lang = match.groups()[0]
         md5file=dir + 'Translation-' + lang + '.md5'
         try:
@@ -159,7 +165,10 @@ class ddtp_gatherer(gatherer):
 
         i18n_error_flag=0
         descstring = 'Description-'+lang
-        g = gzip.GzipFile(dir + filename)
+        if COMPRESSIONEXTENSION =='gz':
+          g = gzip.GzipFile(dir + filename)
+        else:
+          g = bz2.BZ2File(dir + filename)
         try:
           for stanza in deb822.Sources.iter_paragraphs(g, shared_storage=False):
             if i18n_error_flag == 1:
