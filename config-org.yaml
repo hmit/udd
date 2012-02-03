@@ -965,9 +965,11 @@ ubuntu-bugs:
 
 ddtp:
    type: ddtp
-   update-command: /org/udd.debian.org/udd/scripts/fetch_ddtp_translations.sh /org/udd.debian.org/mirrors/ddtp ddtp.debian.net/Translation_udd sid lenny squeeze
+   xxx-update-command: /org/udd.debian.org/udd/scripts/fetch_ddtp_translations.sh /org/udd.debian.org/mirrors/ddtp ddtp.debian.net/Translation_udd sid lenny squeeze
+   update-command: /org/udd.debian.org/udd/scripts/fetch_ddtp_translations.sh /org/udd.debian.org/mirrors/ddtp ftp.debian.org/debian sid lenny squeeze
    path: /org/udd.debian.org/mirrors/ddtp
-   mirror: ddtp.debian.net/Translation_udd
+   xxx-mirror: ddtp.debian.net/Translation_udd
+   mirror: ftp.debian.org/debian
    files: Translation-.*\.gz
    releases: sid lenny squeeze
    table: ddtp

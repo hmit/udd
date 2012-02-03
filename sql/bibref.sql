@@ -8,6 +8,7 @@ CREATE TABLE bibref (
 	package			text NOT NULL,
 	key			text NOT NULL,
 	value			text NOT NULL
+	-- , PRIMARY KEY (package,key) -- this helps preventing more than one times the same key for a single package
 );
 
 GRANT SELECT ON bibref TO PUBLIC;
