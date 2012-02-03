@@ -59,7 +59,7 @@ component text, architecture text);
 
 CREATE TABLE packages
   (package text, version debversion, architecture text, maintainer text, maintainer_name text, maintainer_email text, description
-    text, long_description text, source text, source_version debversion, essential text, depends text,
+    text, long_description text, description_md5 text, source text, source_version debversion, essential text, depends text,
     recommends text, suggests text, enhances text, pre_depends text, breaks text,
     installed_size int, homepage text, size int,
     build_essential text, origin text, sha1 text, replaces text, section text,
@@ -113,7 +113,7 @@ component text, architecture text);
 
 CREATE TABLE ubuntu_packages
   (package text, version debversion, architecture text, maintainer text, maintainer_name text, maintainer_email text, description
-    text, long_description text, source text, source_version debversion, essential text, depends text,
+    text, long_description text, description_md5 text, source text, source_version debversion, essential text, depends text,
     recommends text, suggests text, enhances text, pre_depends text, breaks text,
     installed_size int, homepage text, size int,
     build_essential text, origin text, sha1 text, replaces text, section text,
@@ -168,7 +168,7 @@ component text, architecture text);
 
 CREATE TABLE derivatives_packages
   (package text, version debversion, architecture text, maintainer text, maintainer_name text, maintainer_email text, description
-    text, long_description text, source text, source_version debversion, essential text, depends text,
+    text, long_description text, description_md5 text, source text, source_version debversion, essential text, depends text,
     recommends text, suggests text, enhances text, pre_depends text, breaks text,
     installed_size int, homepage text, size int,
     build_essential text, origin text, sha1 text, replaces text, section text,

@@ -344,3 +344,9 @@ ALTER TABLE derivatives_packages add ruby_versions text;
 -- 2011-05-31
 ALTER TABLE bugs add done_date timestamp;
 ALTER TABLE archived_bugs add done_date timestamp;
+
+-- 2012-01-23
+-- description-less packages files
+ALTER TABLE packages add description_md5 text;
+ALTER TABLE ubuntu_packages add description_md5 text;
+ALTER TABLE derivatives_packages add description_md5 text;
