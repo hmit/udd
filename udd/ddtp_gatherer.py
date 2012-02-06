@@ -159,22 +159,15 @@ class ddtp_gatherer(gatherer):
             for line in lines[1:]:
               self.pkg.long_description += line + "\n"
 
-            query = "EXECUTE ddtp_check_before_insert (%s, %s, %s, %s, %s)" % \
-                        tuple([quote(item) for item in (self.pkg.package, \
-                         self.pkg.release, self.pkg.language, self.pkg.description, \
-                         self.pkg.description_md5)])
-            cur.execute(query)
+            paramtuple = (self.pkg.package, self.pkg.release, self.pkg.language, self.pkg.description, self.pkg.description_md5)
+            cur.execute('EXECUTE ddtp_check_before_insert (%s, %s, %s, %s, %s)', paramtuple)
             if cur.fetchone()[0] > 0:
-              self.log.error("Duplicated key in release %s in language %s for package %s: %s", \
-                              self.pkg.release, self.pkg.language, self.pkg.package, self.pkg.description_md5)
+              self.log.error("Duplicated key for package %s in release %s in language %s: %s / %s" % paramtuple)
             else:
-              query = "EXECUTE ddtp_insert (%s, %s, %s, %s, %s, %s)" % \
-                        tuple([quote(item) for item in (self.pkg.package, \
-                         self.pkg.release, self.pkg.language, self.pkg.description, \
-                         self.pkg.long_description, self.pkg.description_md5)])
+              query = 'EXECUTE ddtp_insert (%s, %s, %s, %s, %s, %s)'
               try:
-                self.log.debug("execute query %s", query)
-                cur.execute(query)
+                self.log.debug(query, tuple([quote(item) for item in paramtuple]))
+                cur.execute(query, (self.pkg.package, self.pkg.release, self.pkg.language, self.pkg.description, self.pkg.long_description, self.pkg.description_md5))
                 # self.connection.commit() # commit every single insert as long as translation files are featuring duplicated keys
               except IntegrityError, err:
                 self.log.exception("Duplicated key in language %s: (%s)", self.pkg.language,
