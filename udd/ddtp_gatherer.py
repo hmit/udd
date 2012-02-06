@@ -4,11 +4,7 @@
 This script imports translations from the Debian Description
 translation project into the database.  It parses the translation
 files at
-     http://ddtp.debian.net/Translation_udd
-which are enriched by the version numbers of the packages that
-are described which makes it qut simple to assotiate a primary
-key to the translation even if it might be redundant information
-because you have the MD5sum of the descriptions
+    http://ftp.debian.org/debian/dists/${release}/${component}/i18n/
 """
 
 from aux import quote
@@ -23,7 +19,7 @@ from sys import stderr, exit
 from filecmp import cmp
 import gzip
 import bz2
-from psycopg2 import IntegrityError, InternalError
+from psycopg2 import IntegrityError, InternalError, ProgrammingError
 
 import logging
 import logging.handlers
@@ -41,13 +37,11 @@ def get_gatherer(connection, config, source):
 class ddtp():
   def __init__(self, package, release, language):
     self.package          = package
-    self.distribution     = 'debian' # No DDTP translations for debian-backports / debian-volatile
     self.release          = release
-    self.component        = 'main'   # Only main translated for the moment
     self.language         = language
     self.description      = ''
     self.long_description = ''
-    self.md5sum           = ''
+    self.description_md5  = ''
     self.version          = ''
 
   def __str__(self):
@@ -76,49 +70,18 @@ class ddtp_gatherer(gatherer):
 
     cur = self.cursor()
     query = "PREPARE ddtp_delete (text, text) AS DELETE FROM %s WHERE release = $1 AND language = $2" % my_config['table']
-    # self.log.debug("execute query %s", query)
+    self.log.debug("execute query %s", query)
     cur.execute(query)
     query = """PREPARE ddtp_insert AS INSERT INTO %s
-                   (package, distribution, component, release, language, version, description, long_description, md5sum)
-                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)""" % (my_config['table'])
-    # self.log.debug("execute query %s", query)
+                   (package, release, language, description, long_description, description_md5)
+                    VALUES ($1, $2, $3, $4, $5, $6)""" % (my_config['table'])
+    self.log.debug("execute query %s", query)
     cur.execute(query)
 
-    query = """PREPARE ddtp_check_before_insert (text, text, text, text, text, text) AS
+    query = """PREPARE ddtp_check_before_insert (text, text, text, text, text) AS
                   SELECT COUNT(*) FROM %s
-                    WHERE package = $1 AND distribution = $2 AND component = $3 AND
-                          release = $4 AND language = $5 AND version = $6""" % (my_config['table'])
-    # self.log.debug("execute query %s", query)
-    cur.execute(query)
-
-    query = """PREPARE ddtp_get_duplicate (text, text, text, text, text, text) AS
-                  SELECT description, long_description, md5sum FROM %s
-                    WHERE package = $1 AND distribution = $2 AND component = $3 AND
-                          release = $4 AND language = $5 AND version = $6""" % (my_config['table'])
-    # self.log.debug("execute query %s", query)
-    cur.execute(query)
-
-    # Query for english package description of the i386 architecture because this is the
-    # most popular arch.  In case a package description might differ in very seldom cases
-    # we put the translation of the i386 architecture into UDD
-    query = """PREPARE ddtp_packages_recieve_description_md5 (text, text, text, text, text) AS 
-               SELECT md5(full_description || E'\n' ) AS md5,
-               full_description FROM (
-                 SELECT DISTINCT
-                   description || E'\n' || long_description AS full_description
-                  FROM packages
-                  WHERE package = $1 AND distribution = $2 AND component = $3 AND
-                  release = $4 AND version = $5 AND architecture in ('all', 'i386', 'amd64')
-               ) AS tmp GROUP BY full_description LIMIT 1"""
-    # self.log.debug("execute query %s", query)
-    cur.execute(query)
-
-    # In some cases a just imported translation has to be removed again because
-    # of a further translation which matches MD5 sum of i386 architecture
-    query = """PREPARE ddtp_delete_duplicate(text, text, text, text, text, text) AS 
-               DELETE FROM %s
-                    WHERE package = $1 AND distribution = $2 AND component = $3 AND
-                          release = $4 AND language = $5 AND version = $6""" % (my_config['table'])
+                    WHERE package = $1 AND release = $2 AND language = $3 AND 
+                          description = $4 AND description_md5 = $5""" % (my_config['table'])
     # self.log.debug("execute query %s", query)
     cur.execute(query)
 
@@ -149,19 +112,24 @@ class ddtp_gatherer(gatherer):
         md5file=dir + 'Translation-' + lang + '.md5'
         try:
           if ( cmp(md5file, md5file + '.prev' ) ):
-            # self.log.debug("%s has not changed.  No update needed.", md5file)
+            self.log.debug("%s has not changed.  No update needed.", md5file)
             continue
           else:
-            # self.log.debug("%s changed.  Go on updating language %s", md5file, lang)
+            self.log.debug("%s changed.  Go on updating language %s (%s)", md5file, lang, rel)
             pass
         except OSError:
-          self.log.info('md5file for %s missing,  Go updating', lang)
+          self.log.info('md5file for language %s in release %s missing -> Go updating', lang, rel)
 
         # Delete only records where we actually have Translation files.  This
         # prevents dump deletion of all data in case of broken downloads
-        query = "EXECUTE ddtp_delete (%s, %s)" % (quote(rel), quote(lang))
-        # self.log.debug("execute query %s", query)
-        cur.execute(query)
+        cur.execute('EXECUTE ddtp_delete (%s, %s)', (rel, lang))
+        self.log.debug('EXECUTE ddtp_delete (%s, %s)', (rel, lang))
+        
+        if debug == 1:
+    	  cur.execute("SELECT COUNT(*) FROM ddtp WHERE release = '%s' AND language = '%s'" % (rel, lang))
+          if cur.rowcount > 0:
+            remaining = cur.fetchone()[0]
+            self.log.debug("Remaining translations for language %s in release %s: %s" %(lang, rel, str(remaining)))
 
         i18n_error_flag=0
         descstring = 'Description-'+lang
@@ -173,85 +141,54 @@ class ddtp_gatherer(gatherer):
           for stanza in deb822.Sources.iter_paragraphs(g, shared_storage=False):
             if i18n_error_flag == 1:
               continue
-            self.pkg             = ddtp(stanza['package'], rel, lang)
-            self.pkg.md5sum      = stanza['Description-md5']
-            self.pkg.version     = stanza['Version']
+            self.pkg                 = ddtp(stanza['package'], rel, lang)
+            self.pkg.description_md5 = stanza['Description-md5']
             try:
               desc               = stanza[descstring]
             except KeyError, err:
-              self.log.error("file=%s%s, pkg=%s, version=%s (%s)" % (dir, filename, self.pkg.package, self.pkg.version, err))
+              self.log.error("file=%s%s, pkg=%s, description_md5=%s (%s)" % (dir, filename, self.pkg.package, self.pkg.description_md5, err))
               i18n_error_flag=1
               continue
             lines                = desc.splitlines()
             try:
               self.pkg.description = lines[0]
             except IndexError, err:
-              self.log.exception("Did not found first line in description: file=%s%s, pkg=%s, version=%s" % (dir, filename, self.pkg.package, self.pkg.version))
+              self.log.exception("Did not found first line in description: file=%s%s, pkg=%s, description_md5=%s" % (dir, filename, self.pkg.package, self.pkg.description_md5))
               i18n_error_flag=1
               continue
             for line in lines[1:]:
               self.pkg.long_description += line + "\n"
-            query = "EXECUTE ddtp_check_before_insert (%s, %s, %s, %s, %s, %s)" % \
-                    tuple([quote(item) for item in (self.pkg.package, self.pkg.distribution, self.pkg.component, 
-                     self.pkg.release, self.pkg.language, self.pkg.version)])
-            # self.log.debug("execute query %s", query)
-            try:
-              cur.execute(query)
-            except InternalError, err:
-              self.log.exception("Encoding problem reading %s%s", dir, filename)
-              i18n_error_flag=1
-              continue
+
+            query = "EXECUTE ddtp_check_before_insert (%s, %s, %s, %s, %s)" % \
+                        tuple([quote(item) for item in (self.pkg.package, \
+                         self.pkg.release, self.pkg.language, self.pkg.description, \
+                         self.pkg.description_md5)])
+            cur.execute(query)
             if cur.fetchone()[0] > 0:
-              self.log.debug("Just imported key in language %s: (%s)", self.pkg.language,
-                             ", ".join([self.pkg.package, self.pkg.distribution, self.pkg.component, self.pkg.release,
-                                      self.pkg.version, self.pkg.description, self.pkg.md5sum]))
-              query = " EXECUTE ddtp_packages_recieve_description_md5 (%s, %s, %s, %s, %s)" % \
-                    tuple([quote(item) for item in (self.pkg.package, self.pkg.distribution, self.pkg.component, \
-                     self.pkg.release, self.pkg.version)])
-              self.log.debug("execute query %s", query)
-              cur.execute(query)
-              if cur.rowcount <= 0:
-                self.log.warning("Did not find description for most frequent architectures in %s",
-                                 ", ".join([self.pkg.package, self.pkg.distribution, self.pkg.component,
-                                            self.pkg.release, self.pkg.version]))
+              self.log.error("Duplicated key in release %s in language %s for package %s: %s", \
+                              self.pkg.release, self.pkg.language, self.pkg.package, self.pkg.description_md5)
+            else:
+              query = "EXECUTE ddtp_insert (%s, %s, %s, %s, %s, %s)" % \
+                        tuple([quote(item) for item in (self.pkg.package, \
+                         self.pkg.release, self.pkg.language, self.pkg.description, \
+                         self.pkg.long_description, self.pkg.description_md5)])
+              try:
+                self.log.debug("execute query %s", query)
+                cur.execute(query)
+                # self.connection.commit() # commit every single insert as long as translation files are featuring duplicated keys
+              except IntegrityError, err:
+                self.log.exception("Duplicated key in language %s: (%s)", self.pkg.language,
+                                 ", ".join([to_unicode(item) for item in (self.pkg.package, self.pkg.release, self.pkg.description, self.pkg.description_md5)]))
+                self.connection.rollback()
                 continue
-
-              md5sum = cur.fetchone()[0]
-              if  md5sum.startswith(self.pkg.md5sum):
-                self.log.debug("Correct translation is just in the Database.")
+              except ProgrammingError, err:
+                self.log.exception("Problem inserting translation %s: (%s)", self.pkg.language,
+                                 ", ".join([to_unicode(item) for item in (self.pkg.package, self.pkg.release, self.pkg.description, self.pkg.description_md5)]))
+                self.connection.rollback()
                 continue
-
-              query = "EXECUTE ddtp_get_duplicate (%s, %s, %s, %s, %s, %s)" % \
-                    tuple([quote(item) for item in (self.pkg.package, self.pkg.distribution, self.pkg.component, \
-                     self.pkg.release, self.pkg.language, self.pkg.version)])
-              # self.log.debug("execute query %s", query)
-              cur.execute(query)
-              for r in cur.fetchall():
-                if md5sum.startswith(r[2]):
-                  query = "EXECUTE ddtp_delete_duplicate (%s, %s, %s, %s, %s, %s)" % \
-                      tuple([quote(item) for item in (self.pkg.package, self.pkg.distribution, self.pkg.component, \
-                       self.pkg.release, self.pkg.language, self.pkg.version)])
-                  # self.log.debug("execute query %s", query)
-                  cur.execute(query)
-
-            query = "EXECUTE ddtp_insert (%s, %s, %s, %s, %s, %s, %s, %s, %s)" % \
-                        tuple([quote(item) for item in (self.pkg.package, self.pkg.distribution, \
-                         self.pkg.component, self.pkg.release, \
-                         self.pkg.language, self.pkg.version, \
-                         self.pkg.description, \
-                         self.pkg.long_description, \
-                         self.pkg.md5sum)])
-            try:
-              # self.log.debug("execute query %s", query)
-              cur.execute(query)
-            except IntegrityError, err:
-              self.log.exception("Duplicated key in language %s: (%s)", self.pkg.language,
-                                 ", ".join([to_unicode(item) for item in (self.pkg.package, self.pkg.version, self.pkg.description, self.pkg.md5sum)]))
-              self.connection.rollback()
-              continue
         except IOError, err:
           self.log.exception("Error reading %s%s", dir, filename)
-        # commit every successfully language to make sure we get any languages in an willnot be blocked by a single failing import
+        # commit every successfully language to make sure we get any languages in an will not be blocked by a single failing import
         self.connection.commit()
 
     cur.execute("DEALLOCATE ddtp_insert")

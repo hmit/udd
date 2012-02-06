@@ -350,3 +350,18 @@ ALTER TABLE archived_bugs add done_date timestamp;
 ALTER TABLE packages add description_md5 text;
 ALTER TABLE ubuntu_packages add description_md5 text;
 ALTER TABLE derivatives_packages add description_md5 text;
+
+-- 2012-02-06
+-- Translation files are now featuring description_md5 fields which enable
+-- more easy determination of package entries
+DROP TABLE ddtp;
+CREATE TABLE ddtp (
+       package      text,
+       release      text,
+       language     text,
+       description  text,
+       long_description text,
+       description_md5  text, -- md5 sum of the original English description
+    PRIMARY KEY (package, release, language, description, description_md5)
+);
+GRANT SELECT ON ddtp TO PUBLIC;

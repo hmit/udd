@@ -52,32 +52,32 @@ CREATE OR REPLACE FUNCTION blends_query_packages(text[],text[]) RETURNS SETOF RE
     FROM (
       SELECT DISTINCT 
              package, distribution, release, component, strip_binary_upload(version) AS version,
-             maintainer, source, section, task, homepage, description, long_description
+             maintainer, source, section, task, homepage, description, long_description, description_md5
         FROM packages
        WHERE package = ANY ($1)
     ) p
     --                                                                                                                                                                   ---+  Ensure we get no old stuff from non-free
     --                                                                                                                                                                      v  packages with different architectures
-    LEFT OUTER JOIN ddtp cs ON cs.language = 'cs' AND cs.package = p.package AND cs.distribution = p.distribution AND cs.release = p.release AND cs.component = p.component AND strip_binary_upload(cs.version) = p.version
-    LEFT OUTER JOIN ddtp da ON da.language = 'da' AND da.package = p.package AND da.distribution = p.distribution AND da.release = p.release AND da.component = p.component AND strip_binary_upload(da.version) = p.version
-    LEFT OUTER JOIN ddtp de ON de.language = 'de' AND de.package = p.package AND de.distribution = p.distribution AND de.release = p.release AND de.component = p.component AND strip_binary_upload(de.version) = p.version
-    LEFT OUTER JOIN ddtp es ON es.language = 'es' AND es.package = p.package AND es.distribution = p.distribution AND es.release = p.release AND es.component = p.component AND strip_binary_upload(es.version) = p.version
-    LEFT OUTER JOIN ddtp fi ON fi.language = 'fi' AND fi.package = p.package AND fi.distribution = p.distribution AND fi.release = p.release AND fi.component = p.component AND strip_binary_upload(fi.version) = p.version
-    LEFT OUTER JOIN ddtp fr ON fr.language = 'fr' AND fr.package = p.package AND fr.distribution = p.distribution AND fr.release = p.release AND fr.component = p.component AND strip_binary_upload(fr.version) = p.version
-    LEFT OUTER JOIN ddtp hu ON hu.language = 'hu' AND hu.package = p.package AND hu.distribution = p.distribution AND hu.release = p.release AND hu.component = p.component AND strip_binary_upload(hu.version) = p.version
-    LEFT OUTER JOIN ddtp it ON it.language = 'it' AND it.package = p.package AND it.distribution = p.distribution AND it.release = p.release AND it.component = p.component AND strip_binary_upload(it.version) = p.version
-    LEFT OUTER JOIN ddtp ja ON ja.language = 'ja' AND ja.package = p.package AND ja.distribution = p.distribution AND ja.release = p.release AND ja.component = p.component AND strip_binary_upload(ja.version) = p.version
-    LEFT OUTER JOIN ddtp ko ON ko.language = 'ko' AND ko.package = p.package AND ko.distribution = p.distribution AND ko.release = p.release AND ko.component = p.component AND strip_binary_upload(ko.version) = p.version
-    LEFT OUTER JOIN ddtp nl ON nl.language = 'nl' AND nl.package = p.package AND nl.distribution = p.distribution AND nl.release = p.release AND nl.component = p.component AND strip_binary_upload(nl.version) = p.version
-    LEFT OUTER JOIN ddtp pl ON pl.language = 'pl' AND pl.package = p.package AND pl.distribution = p.distribution AND pl.release = p.release AND pl.component = p.component AND strip_binary_upload(pl.version) = p.version
-    LEFT OUTER JOIN ddtp pt_BR ON pt_BR.language = 'pt_BR' AND pt_BR.package = p.package AND pt_BR.distribution = p.distribution AND pt_BR.release = p.release AND pt_BR.component = p.component AND strip_binary_upload(pt_BR.version) = p.version
-    LEFT OUTER JOIN ddtp ru ON ru.language = 'ru' AND ru.package = p.package AND ru.distribution = p.distribution AND ru.release = p.release AND ru.component = p.component AND strip_binary_upload(ru.version) = p.version
-    LEFT OUTER JOIN ddtp sk ON sk.language = 'sk' AND sk.package = p.package AND sk.distribution = p.distribution AND sk.release = p.release AND sk.component = p.component AND strip_binary_upload(sk.version) = p.version
-    LEFT OUTER JOIN ddtp sr ON sr.language = 'sr' AND sr.package = p.package AND sr.distribution = p.distribution AND sr.release = p.release AND sr.component = p.component AND strip_binary_upload(sr.version) = p.version
-    LEFT OUTER JOIN ddtp sv ON sv.language = 'sv' AND sv.package = p.package AND sv.distribution = p.distribution AND sv.release = p.release AND sv.component = p.component AND strip_binary_upload(sv.version) = p.version
-    LEFT OUTER JOIN ddtp uk ON uk.language = 'uk' AND uk.package = p.package AND uk.distribution = p.distribution AND uk.release = p.release AND uk.component = p.component AND strip_binary_upload(uk.version) = p.version
-    LEFT OUTER JOIN ddtp zh_CN ON zh_CN.language = 'zh_CN' AND zh_CN.package = p.package AND zh_CN.distribution = p.distribution AND zh_CN.release = p.release AND zh_CN.component = p.component AND strip_binary_upload(zh_CN.version) = p.version
-    LEFT OUTER JOIN ddtp zh_TW ON zh_TW.language = 'zh_TW' AND zh_TW.package = p.package AND zh_TW.distribution = p.distribution AND zh_TW.release = p.release AND zh_TW.component = p.component AND strip_binary_upload(zh_TW.version) = p.version
+    LEFT OUTER JOIN ddtp cs ON cs.language = 'cs' AND cs.package = p.package AND cs.release = p.release  AND cs.description_md5 = p.description_md5
+    LEFT OUTER JOIN ddtp da ON da.language = 'da' AND da.package = p.package AND da.release = p.release  AND da.description_md5 = p.description_md5
+    LEFT OUTER JOIN ddtp de ON de.language = 'de' AND de.package = p.package AND de.release = p.release  AND de.description_md5 = p.description_md5
+    LEFT OUTER JOIN ddtp es ON es.language = 'es' AND es.package = p.package AND es.release = p.release  AND es.description_md5 = p.description_md5
+    LEFT OUTER JOIN ddtp fi ON fi.language = 'fi' AND fi.package = p.package AND fi.release = p.release  AND fi.description_md5 = p.description_md5
+    LEFT OUTER JOIN ddtp fr ON fr.language = 'fr' AND fr.package = p.package AND fr.release = p.release  AND fr.description_md5 = p.description_md5
+    LEFT OUTER JOIN ddtp hu ON hu.language = 'hu' AND hu.package = p.package AND hu.release = p.release  AND hu.description_md5 = p.description_md5
+    LEFT OUTER JOIN ddtp it ON it.language = 'it' AND it.package = p.package AND it.release = p.release  AND it.description_md5 = p.description_md5
+    LEFT OUTER JOIN ddtp ja ON ja.language = 'ja' AND ja.package = p.package AND ja.release = p.release  AND ja.description_md5 = p.description_md5
+    LEFT OUTER JOIN ddtp ko ON ko.language = 'ko' AND ko.package = p.package AND ko.release = p.release  AND ko.description_md5 = p.description_md5
+    LEFT OUTER JOIN ddtp nl ON nl.language = 'nl' AND nl.package = p.package AND nl.release = p.release  AND nl.description_md5 = p.description_md5
+    LEFT OUTER JOIN ddtp pl ON pl.language = 'pl' AND pl.package = p.package AND pl.release = p.release  AND pl.description_md5 = p.description_md5
+    LEFT OUTER JOIN ddtp pt_BR ON pt_BR.language = 'pt_BR' AND pt_BR.package = p.package AND pt_BR.release = p.release AND pt_BR.description_md5 = p.description_md5
+    LEFT OUTER JOIN ddtp ru ON ru.language = 'ru' AND ru.package = p.package AND ru.release = p.release  AND ru.description_md5 = p.description_md5
+    LEFT OUTER JOIN ddtp sk ON sk.language = 'sk' AND sk.package = p.package AND sk.release = p.release  AND sk.description_md5 = p.description_md5
+    LEFT OUTER JOIN ddtp sr ON sr.language = 'sr' AND sr.package = p.package AND sr.release = p.release  AND sr.description_md5 = p.description_md5
+    LEFT OUTER JOIN ddtp sv ON sv.language = 'sv' AND sv.package = p.package AND sv.release = p.release  AND sv.description_md5 = p.description_md5
+    LEFT OUTER JOIN ddtp uk ON uk.language = 'uk' AND uk.package = p.package AND uk.release = p.release  AND uk.description_md5 = p.description_md5
+    LEFT OUTER JOIN ddtp zh_CN ON zh_CN.language = 'zh_CN' AND zh_CN.package = p.package AND zh_CN.release = p.release AND zh_CN.description_md5 = p.description_md5
+    LEFT OUTER JOIN ddtp zh_TW ON zh_TW.language = 'zh_TW' AND zh_TW.package = p.package AND zh_TW.release = p.release AND zh_TW.description_md5 = p.description_md5
     -- extract one single package with highest version and release
     JOIN (
       -- select packages which have versions outside experimental
@@ -200,17 +200,14 @@ DROP FUNCTION IF EXISTS ddtp_unique(text);
 CREATE OR REPLACE FUNCTION ddtp_unique(text, text[]) RETURNS SETOF RECORD AS $$
   SELECT DISTINCT d.package, d.description, d.long_description FROM ddtp d
     JOIN (
-      SELECT dr.package, dr.version, (SELECT release FROM releases WHERE sort = MAX(r.sort)) AS release FROM ddtp dr
-        JOIN (
-          SELECT package, MAX(version) AS version FROM ddtp WHERE language = $1 AND package = ANY ($2) GROUP BY package
-        ) duv ON duv.package = dr.package AND duv.version = dr.version
+      SELECT dr.package, (SELECT release FROM releases WHERE sort = MAX(r.sort)) AS release FROM ddtp dr
         JOIN releases r ON dr.release = r.release
         WHERE language = $1 AND dr.package = ANY ($2)
-        GROUP BY dr.package, dr.version
+        GROUP BY dr.package
     -- sometimes there are different translations of the same package version in different releases
     -- because translators moved on working inbetween releases but we need to select only one of these
     -- (the last one)
-    ) duvr ON duvr.package = d.package AND duvr.version = d.version AND duvr.release = d.release
+    ) duvr ON duvr.package = d.package AND duvr.release = d.release
     WHERE language = $1 AND d.package = ANY ($2)
  $$ LANGUAGE 'SQL';
 
