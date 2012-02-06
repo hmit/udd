@@ -126,7 +126,7 @@ class ddtp_gatherer(gatherer):
         self.log.debug('EXECUTE ddtp_delete (%s, %s)', (rel, lang))
         
         if debug == 1:
-    	  cur.execute("SELECT COUNT(*) FROM ddtp WHERE release = '%s' AND language = '%s'" % (rel, lang))
+    	  cur.execute('SELECT COUNT(*) FROM ddtp WHERE release = %s AND language = %s', (rel, lang))
           if cur.rowcount > 0:
             remaining = cur.fetchone()[0]
             self.log.debug("Remaining translations for language %s in release %s: %s" %(lang, rel, str(remaining)))
