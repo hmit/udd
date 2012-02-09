@@ -28,7 +28,7 @@ CREATE OR REPLACE FUNCTION blends_query_packages(text[],text[]) RETURNS SETOF RE
          bibauthor.value AS "Published-Authors",
          bibdoi.value    AS "Published-DOI",
          bibpmid.value   AS "Published-PubMed",
-         p.description  AS description_en, p.long_description  AS long_description_en,
+         en.description AS description_en, en.long_description AS long_description_en,
          cs.description AS description_cs, cs.long_description AS long_description_cs,
          da.description AS description_da, da.long_description AS long_description_da,
          de.description AS description_de, de.long_description AS long_description_de,
@@ -52,12 +52,13 @@ CREATE OR REPLACE FUNCTION blends_query_packages(text[],text[]) RETURNS SETOF RE
     FROM (
       SELECT DISTINCT 
              package, distribution, release, component, strip_binary_upload(version) AS version,
-             maintainer, source, section, task, homepage, description, long_description, description_md5
+             maintainer, source, section, task, homepage, description, description_md5
         FROM packages
        WHERE package = ANY ($1)
     ) p
     --                                                                                                                                                                   ---+  Ensure we get no old stuff from non-free
     --                                                                                                                                                                      v  packages with different architectures
+    LEFT OUTER JOIN ddtp en ON en.language = 'en' AND en.package = p.package AND en.release = p.release  AND en.description_md5 = p.description_md5
     LEFT OUTER JOIN ddtp cs ON cs.language = 'cs' AND cs.package = p.package AND cs.release = p.release  AND cs.description_md5 = p.description_md5
     LEFT OUTER JOIN ddtp da ON da.language = 'da' AND da.package = p.package AND da.release = p.release  AND da.description_md5 = p.description_md5
     LEFT OUTER JOIN ddtp de ON de.language = 'de' AND de.package = p.package AND de.release = p.release  AND de.description_md5 = p.description_md5
@@ -214,6 +215,7 @@ CREATE OR REPLACE FUNCTION ddtp_unique(text, text[]) RETURNS SETOF RECORD AS $$
 CREATE OR REPLACE FUNCTION blends_metapackage_translations (text[]) RETURNS SETOF RECORD AS $$
   SELECT
          p.package,
+         p.description,     en.long_description_en,
          cs.description_cs, cs.long_description_cs,
          da.description_da, da.long_description_da,
          de.description_de, de.long_description_de,
@@ -235,6 +237,7 @@ CREATE OR REPLACE FUNCTION blends_metapackage_translations (text[]) RETURNS SETO
          zh_CN.description_zh_CN, zh_CN.long_description_zh_CN,
          zh_TW.description_zh_TW, zh_TW.long_description_zh_TW
     FROM packages p
+    LEFT OUTER JOIN (SELECT * FROM ddtp_unique('en', $1) AS (package text, description_en text, long_description_en text)) en ON en.package = p.package
     LEFT OUTER JOIN (SELECT * FROM ddtp_unique('cs', $1) AS (package text, description_cs text, long_description_cs text)) cs ON cs.package = p.package
     LEFT OUTER JOIN (SELECT * FROM ddtp_unique('da', $1) AS (package text, description_da text, long_description_da text)) da ON da.package = p.package
     LEFT OUTER JOIN (SELECT * FROM ddtp_unique('de', $1) AS (package text, description_de text, long_description_de text)) de ON de.package = p.package
