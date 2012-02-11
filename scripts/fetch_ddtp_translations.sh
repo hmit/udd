@@ -1,42 +1,30 @@
 #!/bin/sh
+# Translation files will be taken from the mirror available on the local machine
+# However, we are doing some housekeeping to register what translations did really
+# changed and need to be importet and which one are not touched by translators
+# and thus can be ignored.
 
 set -e
 
-ZIPEXT=bz2
-
 TARGETPATH=$1
 MIRROR=$2
-shift
-shift
-RELEASES=$*
-HTTPMIRROR="http://$MIRROR"
-# RSYNCMIRROR="$MIRROR::debian/"
-# rm -rf "$TARGETPATH"
-for rel in $RELEASES; do
-    TARGETDIR="$TARGETPATH"/${rel}
-    find "$TARGETPATH"/${rel} -name '*.md5' -exec mv '{}' '{}'.prev \;
-    rm -rf "$TARGETDIR"/*.${ZIPEXT}
-    [ -d $TARGETDIR ] || mkdir -p $TARGETDIR
-    # store a copy of md5 sums of previous files
-    `dirname $0`/getlinks.pl "$HTTPMIRROR"/dists/${rel}/main/i18n/ "$TARGETPATH"/${rel} "Translation-.*\.${ZIPEXT}$"
-    # create md5 sums of translation files to enable deciding whether processing is needed or not
-    for zipfile in `find "$TARGETPATH"/${rel} -name "*.${ZIPEXT}"` ; do md5sum $zipfile > "$TARGETPATH"/${rel}/`basename $zipfile .${ZIPEXT}`.md5 ; done
-    # getlinks.pl always returns 0 independently from success so we have to verify that the target dir is
-    # not empty.
-    NUMFILES=`ls "$TARGETPATH"/${rel} | wc -l`
-    if [ $NUMFILES -le 0 ] ; then
-	echo "Downloading translation for release ${rel} failed. Stopped."
-	exit 66
+
+for indexdir in `find $MIRROR -name i18n -type d | sed "s?$MIRROR/\(.\+\)/i18n?\1?"` ; do
+    # rel=`echo $index | sed "s?$MIRROR/*\([^/]\+\)/.*?\1?"`
+    targetfile="${TARGETPATH}/${indexdir}"
+    mkdir -p `dirname $targetfile`
+    # create backup of previous index file
+    if [ -f "$targetfile" ] ; then
+	mv "$targetfile" "$targetfile".prev
     fi
-    ## The rsync-able Translations do not (yet) contain package version info
-    ## This might happen later but it requires deeper changes in several tools
-    ## including apt - so we have to download via http from ddtp directly which
-    ## does not support rsync
-    # rsync -a --no-motd --include "Translation-*.${ZIPEXT}" --exclude "*" "$RSYNCMIRROR"/dists/${rel}/main/i18n/ $TARGETDIR
+    index=${MIRROR}/$indexdir/i18n/Index
+    if [ -f $index ] ; then
+	grep "\.bz2" $index | sed -e 's/^ //' -e 's/ \+/ /g' > $targetfile
+    else
+	for trans in `find ${MIRROR}/$indexdir/i18n -mindepth 1 -maxdepth 1 -name "*.bz2"` ; do
+	    echo "`sha1sum $trans | cut -d' ' -f1``ls -l $trans | sed 's/^[-rwlx]\+ [0-9]\+ [^ ]\+ [^ ]\+\([ 0-9]\+[0-9]\) .*/\1/'` `basename $trans`" >> $targetfile
+	done
+    fi
 done
 
 exit 0
-
-# alternatively use wget
-cd "$TARGETPATH"
-wget -erobots=off -m $HTTPMIRROR

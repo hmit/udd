@@ -14,11 +14,12 @@ try:
     from debian import deb822
 except:
     from debian_bundle import deb822
-from os import listdir, access, F_OK
+from os import listdir, path, access, F_OK
 from sys import stderr, exit
 from filecmp import cmp
 import gzip
 import bz2
+import hashlib
 from psycopg2 import IntegrityError, InternalError, ProgrammingError
 
 import logging
@@ -51,12 +52,11 @@ class ddtp():
 class ddtp_gatherer(gatherer):
   # DDTP translations
 
-  select_language_gz_re    = re.compile('^Translation-(\w+)\.gz$')
-  select_language_bz2_re   = re.compile('^Translation-(\w+)\.bz2$')
+  select_language_re   = re.compile('^Translation-(\w+)\.bz2$')
 
   def __init__(self, connection, config, source):
     gatherer.__init__(self, connection, config, source)
-    self.assert_my_config('path', 'files', 'table', 'releases')
+    self.assert_my_config('path', 'files', 'mirrorpath', 'table')
     my_config = self.my_config
     self.log = logging.getLogger(self.__class__.__name__)
     if debug==1:
@@ -89,54 +89,63 @@ class ddtp_gatherer(gatherer):
 
   def run(self):
     my_config = self.my_config
-    #start harassing the DB, preparing the final inserts and making place
-    #for the new data:
     cur = self.cursor()
 
-    releases=my_config['releases'].split(' ')
+    cur.execute('SELECT component FROM packages GROUP by component')
+    rows = cur.fetchall()
+    valid_components = []
+    for r in rows:
+        valid_components.append(r[0])
+    releases = listdir(my_config['path'])
     for rel in releases:
-      dir = my_config['path']+'/'+rel+'/'
-      if not access(dir, F_OK):
-	self.log.error("Directory %s for release %s does not exist", dir, rel)
-        continue
-      for filename in listdir(dir):
-        match = ddtp_gatherer.select_language_gz_re.match(filename)
-        if not match:
-          match = ddtp_gatherer.select_language_bz2_re.match(filename)
+      cpath = my_config['path']+'/'+rel+'/'
+      components = listdir(cpath)
+      for comp in components:
+        if comp not in valid_components:
+          self.log.error("Invallid component '%s' file found in %s", comp, cpath)
+          continue
+        cfp = open(cpath+'/'+comp,'r')
+        trfilepath = my_config['mirrorpath']+'/'+rel+'/'+comp+'/i18n/'
+        for line in cfp.readlines():
+          (sha1, size, file) = line.strip().split(' ')
+          trfile = trfilepath + file
+          # check whether hash recorded in index file fits real file
+          f = open(trfile)
+          h = hashlib.sha1()
+          h.update(f.read())
+          hash = h.hexdigest()
+          f.close()
+          if sha1 != hash:
+            self.log.error("Hash mismatch between file %s and index found in %s/%s.", trfile, cpath, comp)
+            continue
+          fsize = path.getsize(trfile)
+          if int(size) != fsize:
+            self.log.error("Size mismatch between file %s (%i) and index found in %s/%s (%s).", trfile, fsize, cpath, comp, size)
+            continue
+          match = ddtp_gatherer.select_language_re.match(file)
           if not match:
+            self.log.error("Can not parse language of file %s.", trfile)
             continue
-          COMPRESSIONEXTENSION='bz2'
-        else:
-          COMPRESSIONEXTENSION='gz'
-        lang = match.groups()[0]
-        md5file=dir + 'Translation-' + lang + '.md5'
-        try:
-          if ( cmp(md5file, md5file + '.prev' ) ):
-            self.log.debug("%s has not changed.  No update needed.", md5file)
-            continue
-          else:
-            self.log.debug("%s changed.  Go on updating language %s (%s)", md5file, lang, rel)
-            pass
-        except OSError:
-          self.log.info('md5file for language %s in release %s missing -> Go updating', lang, rel)
+          lang = match.groups()[0]
+          self.import_translations(trfile, rel, lang)
+        cfp.close()
+       
+    cur.execute("DEALLOCATE ddtp_insert")
+    cur.execute("ANALYZE %s" % my_config['table'])
 
+
+  def import_translations(self, trfile, rel, lang):
+        print trfile, rel, lang
+
+        cur = self.cursor()
         # Delete only records where we actually have Translation files.  This
         # prevents dump deletion of all data in case of broken downloads
         cur.execute('EXECUTE ddtp_delete (%s, %s)', (rel, lang))
         self.log.debug('EXECUTE ddtp_delete (%s, %s)', (rel, lang))
-        
-        if debug == 1:
-    	  cur.execute('SELECT COUNT(*) FROM ddtp WHERE release = %s AND language = %s', (rel, lang))
-          if cur.rowcount > 0:
-            remaining = cur.fetchone()[0]
-            self.log.debug("Remaining translations for language %s in release %s: %s" %(lang, rel, str(remaining)))
 
         i18n_error_flag=0
         descstring = 'Description-'+lang
-        if COMPRESSIONEXTENSION =='gz':
-          g = gzip.GzipFile(dir + filename)
-        else:
-          g = bz2.BZ2File(dir + filename)
+        g = bz2.BZ2File(trfile)
         try:
           for stanza in deb822.Sources.iter_paragraphs(g, shared_storage=False):
             if i18n_error_flag == 1:
@@ -183,9 +192,6 @@ class ddtp_gatherer(gatherer):
           self.log.exception("Error reading %s%s", dir, filename)
         # commit every successfully language to make sure we get any languages in an will not be blocked by a single failing import
         self.connection.commit()
-
-    cur.execute("DEALLOCATE ddtp_insert")
-    cur.execute("ANALYZE %s" % my_config['table'])
 
 if __name__ == '__main__':
   main()
