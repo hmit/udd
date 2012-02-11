@@ -14,6 +14,7 @@ from gatherer import gatherer
 from time import time
 import email.Utils
 import re
+import hashlib
 
 def get_gatherer(connection, config, source):
   return packages_gatherer(connection, config, source)
@@ -38,13 +39,17 @@ class packages_gatherer(gatherer):
 
   pkgquery = """EXECUTE package_insert
       (%(Package)s, %(Version)s, %(Architecture)s, %(Maintainer)s, %(maintainer_name)s, %(maintainer_email)s,
-      %(Description)s, %(Long_Description)s, %(Description-md5)s, %(Source)s, %(Source_Version)s, %(Essential)s,
+      %(Description)s, %(Description-md5)s, %(Source)s, %(Source_Version)s, %(Essential)s,
       %(Depends)s, %(Recommends)s, %(Suggests)s, %(Enhances)s,
       %(Pre-Depends)s, %(Breaks)s, %(Installed-Size)s, %(Homepage)s, %(Size)s,
       %(Build-Essential)s, %(Origin)s, %(SHA1)s,
       %(Replaces)s, %(Section)s, %(MD5sum)s, %(Bugs)s, %(Priority)s,
       %(Tag)s, %(Task)s, %(Python-Version)s, %(Ruby-Versions)s, %(Provides)s,
       %(Conflicts)s, %(SHA256)s, %(Original-Maintainer)s)"""
+
+  descriptionquery = """EXECUTE description_insert
+      (%(Package)s, %(Language)s,
+      %(Description)s, %(Long_Description)s, %(Description-md5)s)"""
 
   def __init__(self, connection, config, source):
     gatherer.__init__(self, connection, config, source)
@@ -58,6 +63,7 @@ class packages_gatherer(gatherer):
     # because different architectures include packages for architecture 'all'
     # with the same version, and we don't want these duplicate entries
     self.imported_all_pkgs = {}
+    self.add_descriptions = False
 
   def build_dict(self, control):
     """Build a dictionary from the control dictionary.
@@ -89,6 +95,7 @@ class packages_gatherer(gatherer):
     it is called.The Format of the sequence is expected to be that of a
     debian packages file."""
     pkgs = []
+    pkgdescs = []
 
     # The fields that are to be read. Other fields are ignored
     for control in debian.deb822.Packages.iter_paragraphs(sequence):
@@ -103,11 +110,20 @@ class packages_gatherer(gatherer):
 
       # We split the description
       if 'Description' in d:
-	if len(d['Description'].split("\n",1)) > 1:
-	  d['Long_Description'] = d['Description'].split("\n",1)[1]
-	else:
-	  d['Long_Description'] = ''
-	d['Description'] = d['Description'].split("\n",1)[0]
+        if self.add_descriptions and \
+            ('Description-md5' not in d or not d['Description-md5']):
+          try:
+            d['Description-md5'] = hashlib.md5((d['Description']+"\n").encode('utf-8')).hexdigest()
+            d['Language'] = 'en'
+            pkgdescs.append(d)
+          except UnicodeEncodeError:
+            self.warned_about['%s description encoding' % d['Package']] = 1
+        if len(d['Description'].split("\n",1)) > 1:
+          d['Long_Description'] = d['Description'].split("\n",1)[1]
+        else:
+          d['Long_Description'] = ''
+        d['Description'] = d['Description'].split("\n",1)[0]
+	# Calculate Description-md5 for releases that don't include it
 
       # Convert numbers to numbers
       for f in ['Installed-Size', 'Size']:
@@ -132,6 +148,12 @@ class packages_gatherer(gatherer):
       cur.executemany(self.pkgquery, pkgs)
     except psycopg2.ProgrammingError:
       print "Error while inserting packages"
+      raise
+    try:
+      if self.add_descriptions:
+        cur.executemany(self.descriptionquery, pkgdescs)
+    except psycopg2.ProgrammingError:
+      print "Error while inserting descriptions"
       raise
 
   def setup(self):
@@ -159,6 +181,9 @@ class packages_gatherer(gatherer):
     # Get distribution ID
     self._distr = src_cfg['distribution']
 
+    self.add_descriptions = ('descriptions-table' in self.my_config
+                              and self.my_config['descriptions-table'])
+
     cur = self.cursor()
     # defer constraints checking until the end of the transaction
     cur.execute("SET CONSTRAINTS ALL DEFERRED")
@@ -166,12 +191,17 @@ class packages_gatherer(gatherer):
     # For every part and every architecture, import the packages into the DB
     for comp in src_cfg['components']:
       cur.execute("DELETE FROM %s WHERE distribution = '%s' AND release = '%s' AND component = '%s'" %\
-	(table, self._distr, src_cfg['release'], comp))
+        (table, self._distr, src_cfg['release'], comp))
+      # For releases that have long descriptions in Packages and not in Translation,
+      # add the description to the configured descriptions table.
+      if self.add_descriptions:
+        cur.execute("DELETE FROM %s WHERE release = '%s' AND language = '%s'" %\
+          (src_cfg['descriptions-table'], src_cfg['release'], 'en'))
       for arch in src_cfg['archs']:
 	path = os.path.join(src_cfg['directory'], comp, 'binary-' + arch, 'Packages.gz')
 	try:
 	  cur.execute("""PREPARE package_insert AS INSERT INTO %s
-	    (Package, Version, Architecture, Maintainer, maintainer_name, maintainer_email, Description, Long_Description, description_md5, Source,
+	    (Package, Version, Architecture, Maintainer, maintainer_name, maintainer_email, Description, description_md5, Source,
 	    Source_Version, Essential, Depends, Recommends, Suggests, Enhances,
 	    Pre_Depends, Breaks, Installed_Size, Homepage, Size,
 	    build_essential, origin, sha1, replaces, section,
@@ -181,8 +211,22 @@ class packages_gatherer(gatherer):
 	  VALUES
 	    ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15,
 	      $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28,
-	      $29, $30, $31, $32, $33, $34, $35, $36, $37, '%s', '%s', '%s')
+	      $29, $30, $31, $32, $33, $34, $35, $36, '%s', '%s', '%s')
 	    """ %  (table, self._distr, src_cfg['release'], comp))
+          if self.add_descriptions:
+            cur.execute("""PREPARE description_insert AS
+              INSERT INTO %s
+                (package, release, language, description, long_description, description_md5)
+                (SELECT $1 AS package, '%s' AS release, $2 AS language,
+                        $3 AS description, $4 AS long_description, $5 AS description_md5
+                  WHERE NOT EXISTS
+                  (SELECT 1
+                    FROM %s
+                    WHERE package=$1 AND release='%s' AND language=$2 AND
+                          description=$3 AND long_description=$4 AND description_md5=$5))
+
+            """ % (src_cfg['descriptions-table'], src_cfg['release'],
+                    src_cfg['descriptions-table'], src_cfg['release']))
 #	  aux.print_debug("Reading file " + path)
 	  # Copy content from gzipped file to temporary file, so that apt_pkg is
 	  # used by debian
@@ -197,7 +241,9 @@ class packages_gatherer(gatherer):
 	except IOError, (e, message):
 	  print "Could not read packages from %s: %s" % (path, message)
           sys.exit(1)
-	cur.execute("DEALLOCATE package_insert")
+        cur.execute("DEALLOCATE package_insert")
+        if self.add_descriptions:
+          cur.execute("DEALLOCATE description_insert")
     # Fill the summary tables
     cur.execute("DELETE FROM %s" % (table + '_summary'));
     cur.execute("""INSERT INTO %s (package, version, source, source_version,

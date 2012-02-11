@@ -365,3 +365,38 @@ CREATE TABLE ddtp (
     PRIMARY KEY (package, release, language, description, description_md5)
 );
 GRANT SELECT ON ddtp TO PUBLIC;
+-- 2012-02-09
+-- Add description tables for ubuntu and derivatives; rename ddtp table
+ALTER TABLE ddtp RENAME TO descriptions;
+GRANT SELECT ON descriptions TO PUBLIC;
+
+CREATE TABLE ubuntu_descriptions (
+       package      text,
+       release      text,
+       language     text,
+       description  text,
+       long_description text,
+       description_md5  text, -- md5 sum of the original English description
+    PRIMARY KEY (package, release, language, description, description_md5)
+);
+GRANT SELECT ON ubuntu_descriptions TO PUBLIC;
+
+CREATE TABLE derivatives_descriptions (
+       package      text,
+       release      text,
+       language     text,
+       description  text,
+       long_description text,
+       description_md5  text, -- md5 sum of the original English description
+    PRIMARY KEY (package, release, language, description, description_md5)
+);
+GRANT SELECT ON derivatives_descriptions TO PUBLIC;
+
+DROP VIEW all_packages;
+ALTER TABLE packages DROP COLUMN long_description;
+ALTER TABLE ubuntu_packages DROP COLUMN long_description;
+ALTER TABLE derivatives_packages DROP COLUMN long_description;
+CREATE VIEW all_packages AS
+SELECT * FROM packages
+UNION ALL SELECT * FROM ubuntu_packages
+UNION ALL SELECT * FROM derivatives_packages;

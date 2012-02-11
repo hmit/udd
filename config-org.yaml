@@ -168,6 +168,7 @@ debian-squeeze:
   packages-schema: packages
   sources-schema: sources
   release: squeeze
+  descriptions-table: descriptions
 
 debian-squeeze-security:
   type: src-pkg
@@ -183,6 +184,7 @@ debian-squeeze-security:
   packages-schema: packages
   sources-schema: sources
   release: squeeze-security
+  descriptions-table: descriptions
 
 debian-squeeze-proposed-updates:
   type: src-pkg
@@ -196,6 +198,7 @@ debian-squeeze-proposed-updates:
   packages-schema: packages
   sources-schema: sources
   release: squeeze-proposed-updates
+  descriptions-table: descriptions
 
 debian-squeeze-updates:
   type: src-pkg
@@ -209,6 +212,7 @@ debian-squeeze-updates:
   packages-schema: packages
   sources-schema: sources
   release: squeeze-updates
+  descriptions-table: descriptions
 
 debian-backports-squeeze:
   type: src-pkg
@@ -222,6 +226,7 @@ debian-backports-squeeze:
   packages-schema: packages
   sources-schema: sources
   release: squeeze
+  descriptions-table: descriptions
 
 #debian-backports-squeeze-sloppy:
 #  type: src-pkg
@@ -235,6 +240,7 @@ debian-backports-squeeze:
 #  packages-schema: packages
 #  sources-schema: sources
 #  release: squeeze
+#  descriptions-table: descriptions
 
 debian-wheezy:
   type: src-pkg
@@ -450,6 +456,7 @@ ubuntu-natty:
   uploaders-table: ubuntu_uploaders
   packages-schema: packages
   sources-schema: sources
+  descriptions-table: ubuntu_descriptions
 
 ubuntu-natty-security:
   type: src-pkg
@@ -463,6 +470,7 @@ ubuntu-natty-security:
   uploaders-table: ubuntu_uploaders
   packages-schema: packages
   sources-schema: sources
+  descriptions-table: ubuntu_descriptions
 
 ubuntu-natty-updates:
   type: src-pkg
@@ -476,6 +484,7 @@ ubuntu-natty-updates:
   uploaders-table: ubuntu_uploaders
   packages-schema: packages
   sources-schema: sources
+  descriptions-table: ubuntu_descriptions
 
 ubuntu-natty-proposed:
   type: src-pkg
@@ -489,6 +498,7 @@ ubuntu-natty-proposed:
   uploaders-table: ubuntu_uploaders
   packages-schema: packages
   sources-schema: sources
+  descriptions-table: ubuntu_descriptions
 
 ubuntu-natty-backports:
   type: src-pkg
@@ -502,6 +512,7 @@ ubuntu-natty-backports:
   uploaders-table: ubuntu_uploaders
   packages-schema: packages
   sources-schema: sources
+  descriptions-table: ubuntu_descriptions
 
 
 ubuntu-maverick:
@@ -516,6 +527,7 @@ ubuntu-maverick:
   uploaders-table: ubuntu_uploaders
   packages-schema: packages
   sources-schema: sources
+  descriptions-table: ubuntu_descriptions
 
 ubuntu-maverick-security:
   type: src-pkg
@@ -529,6 +541,7 @@ ubuntu-maverick-security:
   uploaders-table: ubuntu_uploaders
   packages-schema: packages
   sources-schema: sources
+  descriptions-table: ubuntu_descriptions
 
 ubuntu-maverick-updates:
   type: src-pkg
@@ -542,6 +555,7 @@ ubuntu-maverick-updates:
   uploaders-table: ubuntu_uploaders
   packages-schema: packages
   sources-schema: sources
+  descriptions-table: ubuntu_descriptions
 
 ubuntu-maverick-proposed:
   type: src-pkg
@@ -555,6 +569,7 @@ ubuntu-maverick-proposed:
   uploaders-table: ubuntu_uploaders
   packages-schema: packages
   sources-schema: sources
+  descriptions-table: ubuntu_descriptions
 
 ubuntu-maverick-backports:
   type: src-pkg
@@ -568,6 +583,7 @@ ubuntu-maverick-backports:
   uploaders-table: ubuntu_uploaders
   packages-schema: packages
   sources-schema: sources
+  descriptions-table: ubuntu_descriptions
 
 
 ubuntu-lucid:
@@ -582,6 +598,7 @@ ubuntu-lucid:
   uploaders-table: ubuntu_uploaders
   packages-schema: packages
   sources-schema: sources
+  descriptions-table: ubuntu_descriptions
 
 ubuntu-lucid-security:
   type: src-pkg
@@ -595,6 +612,7 @@ ubuntu-lucid-security:
   uploaders-table: ubuntu_uploaders
   packages-schema: packages
   sources-schema: sources
+  descriptions-table: ubuntu_descriptions
 
 ubuntu-lucid-updates:
   type: src-pkg
@@ -608,6 +626,7 @@ ubuntu-lucid-updates:
   uploaders-table: ubuntu_uploaders
   packages-schema: packages
   sources-schema: sources
+  descriptions-table: ubuntu_descriptions
 
 ubuntu-lucid-proposed:
   type: src-pkg
@@ -621,6 +640,7 @@ ubuntu-lucid-proposed:
   uploaders-table: ubuntu_uploaders
   packages-schema: packages
   sources-schema: sources
+  descriptions-table: ubuntu_descriptions
 
 ubuntu-lucid-backports:
   type: src-pkg
@@ -634,6 +654,7 @@ ubuntu-lucid-backports:
   uploaders-table: ubuntu_uploaders
   packages-schema: packages
   sources-schema: sources
+  descriptions-table: ubuntu_descriptions
 
 
 ubuntu-karmic:
@@ -648,6 +669,7 @@ ubuntu-karmic:
   uploaders-table: ubuntu_uploaders
   packages-schema: packages
   sources-schema: sources
+  descriptions-table: ubuntu_descriptions
 
 ubuntu-karmic-security:
   type: src-pkg
@@ -661,6 +683,7 @@ ubuntu-karmic-security:
   uploaders-table: ubuntu_uploaders
   packages-schema: packages
   sources-schema: sources
+  descriptions-table: ubuntu_descriptions
 
 ubuntu-karmic-updates:
   type: src-pkg
@@ -674,6 +697,7 @@ ubuntu-karmic-updates:
   uploaders-table: ubuntu_uploaders
   packages-schema: packages
   sources-schema: sources
+  descriptions-table: ubuntu_descriptions
 
 ubuntu-karmic-proposed:
   type: src-pkg
@@ -687,6 +711,7 @@ ubuntu-karmic-proposed:
   uploaders-table: ubuntu_uploaders
   packages-schema: packages
   sources-schema: sources
+  descriptions-table: ubuntu_descriptions
 
 ubuntu-karmic-backports:
   type: src-pkg
@@ -700,6 +725,7 @@ ubuntu-karmic-backports:
   uploaders-table: ubuntu_uploaders
   packages-schema: packages
   sources-schema: sources
+  descriptions-table: ubuntu_descriptions
 
 
 #ubuntu-jaunty:
@@ -741,6 +767,7 @@ ubuntu-hardy:
   uploaders-table: ubuntu_uploaders
   packages-schema: packages
   sources-schema: sources
+  descriptions-table: ubuntu_descriptions
 
 ubuntu-hardy-security:
   type: src-pkg
@@ -754,6 +781,7 @@ ubuntu-hardy-security:
   uploaders-table: ubuntu_uploaders
   packages-schema: packages
   sources-schema: sources
+  descriptions-table: ubuntu_descriptions
 
 ubuntu-hardy-updates:
   type: src-pkg
@@ -767,6 +795,7 @@ ubuntu-hardy-updates:
   uploaders-table: ubuntu_uploaders
   packages-schema: packages
   sources-schema: sources
+  descriptions-table: ubuntu_descriptions
 
 ubuntu-hardy-proposed:
   type: src-pkg
@@ -780,6 +809,7 @@ ubuntu-hardy-proposed:
   uploaders-table: ubuntu_uploaders
   packages-schema: packages
   sources-schema: sources
+  descriptions-table: ubuntu_descriptions
 
 ubuntu-hardy-backports:
   type: src-pkg
@@ -793,6 +823,7 @@ ubuntu-hardy-backports:
   uploaders-table: ubuntu_uploaders
   packages-schema: packages
   sources-schema: sources
+  descriptions-table: ubuntu_descriptions
 
 
 #ubuntu-dapper:
@@ -965,14 +996,11 @@ ubuntu-bugs:
 
 ddtp:
    type: ddtp
-   xxx-update-command: /org/udd.debian.org/udd/scripts/fetch_ddtp_translations.sh /org/udd.debian.org/mirrors/ddtp ddtp.debian.net/Translation_udd sid lenny squeeze
-   update-command: /org/udd.debian.org/udd/scripts/fetch_ddtp_translations.sh /org/udd.debian.org/mirrors/ddtp ftp.debian.org/debian sid lenny squeeze
+   update-command: /org/udd.debian.org/udd/scripts/fetch_ddtp_translations.sh /org/udd.debian.org/mirrors/ddtp /org/mirrors/ftp.debian.org/ftp/dists
    path: /org/udd.debian.org/mirrors/ddtp
-   xxx-mirror: ddtp.debian.net/Translation_udd
-   mirror: ftp.debian.org/debian
    files: Translation-.*\.gz
-   releases: sid lenny squeeze
-   table: ddtp
+   mirrorpath: /org/mirrors/ftp.debian.org/ftp/dists
+   table: descriptions
    schema: ddtp
 
 ftpnew:
