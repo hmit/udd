@@ -58,27 +58,27 @@ CREATE OR REPLACE FUNCTION blends_query_packages(text[],text[]) RETURNS SETOF RE
     ) p
     --                                                                                                                                                                   ---+  Ensure we get no old stuff from non-free
     --                                                                                                                                                                      v  packages with different architectures
-    LEFT OUTER JOIN ddtp en ON en.language = 'en' AND en.package = p.package AND en.release = p.release  AND en.description_md5 = p.description_md5
-    LEFT OUTER JOIN ddtp cs ON cs.language = 'cs' AND cs.package = p.package AND cs.release = p.release  AND cs.description_md5 = p.description_md5
-    LEFT OUTER JOIN ddtp da ON da.language = 'da' AND da.package = p.package AND da.release = p.release  AND da.description_md5 = p.description_md5
-    LEFT OUTER JOIN ddtp de ON de.language = 'de' AND de.package = p.package AND de.release = p.release  AND de.description_md5 = p.description_md5
-    LEFT OUTER JOIN ddtp es ON es.language = 'es' AND es.package = p.package AND es.release = p.release  AND es.description_md5 = p.description_md5
-    LEFT OUTER JOIN ddtp fi ON fi.language = 'fi' AND fi.package = p.package AND fi.release = p.release  AND fi.description_md5 = p.description_md5
-    LEFT OUTER JOIN ddtp fr ON fr.language = 'fr' AND fr.package = p.package AND fr.release = p.release  AND fr.description_md5 = p.description_md5
-    LEFT OUTER JOIN ddtp hu ON hu.language = 'hu' AND hu.package = p.package AND hu.release = p.release  AND hu.description_md5 = p.description_md5
-    LEFT OUTER JOIN ddtp it ON it.language = 'it' AND it.package = p.package AND it.release = p.release  AND it.description_md5 = p.description_md5
-    LEFT OUTER JOIN ddtp ja ON ja.language = 'ja' AND ja.package = p.package AND ja.release = p.release  AND ja.description_md5 = p.description_md5
-    LEFT OUTER JOIN ddtp ko ON ko.language = 'ko' AND ko.package = p.package AND ko.release = p.release  AND ko.description_md5 = p.description_md5
-    LEFT OUTER JOIN ddtp nl ON nl.language = 'nl' AND nl.package = p.package AND nl.release = p.release  AND nl.description_md5 = p.description_md5
-    LEFT OUTER JOIN ddtp pl ON pl.language = 'pl' AND pl.package = p.package AND pl.release = p.release  AND pl.description_md5 = p.description_md5
-    LEFT OUTER JOIN ddtp pt_BR ON pt_BR.language = 'pt_BR' AND pt_BR.package = p.package AND pt_BR.release = p.release AND pt_BR.description_md5 = p.description_md5
-    LEFT OUTER JOIN ddtp ru ON ru.language = 'ru' AND ru.package = p.package AND ru.release = p.release  AND ru.description_md5 = p.description_md5
-    LEFT OUTER JOIN ddtp sk ON sk.language = 'sk' AND sk.package = p.package AND sk.release = p.release  AND sk.description_md5 = p.description_md5
-    LEFT OUTER JOIN ddtp sr ON sr.language = 'sr' AND sr.package = p.package AND sr.release = p.release  AND sr.description_md5 = p.description_md5
-    LEFT OUTER JOIN ddtp sv ON sv.language = 'sv' AND sv.package = p.package AND sv.release = p.release  AND sv.description_md5 = p.description_md5
-    LEFT OUTER JOIN ddtp uk ON uk.language = 'uk' AND uk.package = p.package AND uk.release = p.release  AND uk.description_md5 = p.description_md5
-    LEFT OUTER JOIN ddtp zh_CN ON zh_CN.language = 'zh_CN' AND zh_CN.package = p.package AND zh_CN.release = p.release AND zh_CN.description_md5 = p.description_md5
-    LEFT OUTER JOIN ddtp zh_TW ON zh_TW.language = 'zh_TW' AND zh_TW.package = p.package AND zh_TW.release = p.release AND zh_TW.description_md5 = p.description_md5
+    LEFT OUTER JOIN descriptions en ON en.language = 'en' AND en.package = p.package AND en.release = p.release  AND en.description_md5 = p.description_md5
+    LEFT OUTER JOIN descriptions cs ON cs.language = 'cs' AND cs.package = p.package AND cs.release = p.release  AND cs.description_md5 = p.description_md5
+    LEFT OUTER JOIN descriptions da ON da.language = 'da' AND da.package = p.package AND da.release = p.release  AND da.description_md5 = p.description_md5
+    LEFT OUTER JOIN descriptions de ON de.language = 'de' AND de.package = p.package AND de.release = p.release  AND de.description_md5 = p.description_md5
+    LEFT OUTER JOIN descriptions es ON es.language = 'es' AND es.package = p.package AND es.release = p.release  AND es.description_md5 = p.description_md5
+    LEFT OUTER JOIN descriptions fi ON fi.language = 'fi' AND fi.package = p.package AND fi.release = p.release  AND fi.description_md5 = p.description_md5
+    LEFT OUTER JOIN descriptions fr ON fr.language = 'fr' AND fr.package = p.package AND fr.release = p.release  AND fr.description_md5 = p.description_md5
+    LEFT OUTER JOIN descriptions hu ON hu.language = 'hu' AND hu.package = p.package AND hu.release = p.release  AND hu.description_md5 = p.description_md5
+    LEFT OUTER JOIN descriptions it ON it.language = 'it' AND it.package = p.package AND it.release = p.release  AND it.description_md5 = p.description_md5
+    LEFT OUTER JOIN descriptions ja ON ja.language = 'ja' AND ja.package = p.package AND ja.release = p.release  AND ja.description_md5 = p.description_md5
+    LEFT OUTER JOIN descriptions ko ON ko.language = 'ko' AND ko.package = p.package AND ko.release = p.release  AND ko.description_md5 = p.description_md5
+    LEFT OUTER JOIN descriptions nl ON nl.language = 'nl' AND nl.package = p.package AND nl.release = p.release  AND nl.description_md5 = p.description_md5
+    LEFT OUTER JOIN descriptions pl ON pl.language = 'pl' AND pl.package = p.package AND pl.release = p.release  AND pl.description_md5 = p.description_md5
+    LEFT OUTER JOIN descriptions pt_BR ON pt_BR.language = 'pt_BR' AND pt_BR.package = p.package AND pt_BR.release = p.release AND pt_BR.description_md5 = p.description_md5
+    LEFT OUTER JOIN descriptions ru ON ru.language = 'ru' AND ru.package = p.package AND ru.release = p.release  AND ru.description_md5 = p.description_md5
+    LEFT OUTER JOIN descriptions sk ON sk.language = 'sk' AND sk.package = p.package AND sk.release = p.release  AND sk.description_md5 = p.description_md5
+    LEFT OUTER JOIN descriptions sr ON sr.language = 'sr' AND sr.package = p.package AND sr.release = p.release  AND sr.description_md5 = p.description_md5
+    LEFT OUTER JOIN descriptions sv ON sv.language = 'sv' AND sv.package = p.package AND sv.release = p.release  AND sv.description_md5 = p.description_md5
+    LEFT OUTER JOIN descriptions uk ON uk.language = 'uk' AND uk.package = p.package AND uk.release = p.release  AND uk.description_md5 = p.description_md5
+    LEFT OUTER JOIN descriptions zh_CN ON zh_CN.language = 'zh_CN' AND zh_CN.package = p.package AND zh_CN.release = p.release AND zh_CN.description_md5 = p.description_md5
+    LEFT OUTER JOIN descriptions zh_TW ON zh_TW.language = 'zh_TW' AND zh_TW.package = p.package AND zh_TW.release = p.release AND zh_TW.description_md5 = p.description_md5
     -- extract one single package with highest version and release
     JOIN (
       -- select packages which have versions outside experimental
@@ -199,9 +199,9 @@ DROP FUNCTION IF EXISTS ddtp_unique(text);
 -- Select unique DDTP translation for highest package version for a given language
 -- ATTENTION: The execution of this query is quite slow and should be optimized
 CREATE OR REPLACE FUNCTION ddtp_unique(text, text[]) RETURNS SETOF RECORD AS $$
-  SELECT DISTINCT d.package, d.description, d.long_description FROM ddtp d
+  SELECT DISTINCT d.package, d.description, d.long_description FROM descriptions d
     JOIN (
-      SELECT dr.package, (SELECT release FROM releases WHERE sort = MAX(r.sort)) AS release FROM ddtp dr
+      SELECT dr.package, (SELECT release FROM releases WHERE sort = MAX(r.sort)) AS release FROM descriptions dr
         JOIN releases r ON dr.release = r.release
         WHERE language = $1 AND dr.package = ANY ($2)
         GROUP BY dr.package
