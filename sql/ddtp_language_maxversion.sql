@@ -4,6 +4,9 @@ BEGIN ;
 
 DROP TYPE IF EXISTS DdtpRecordType CASCADE;
 
+/* Should not be needed any more - if yes, it needs adaption to
+   new table layout and storing of version in packages table
+
 CREATE TYPE DdtpRecordType AS (
     package      text,
     distribution text,
@@ -44,5 +47,7 @@ CREATE OR REPLACE FUNCTION DdtpLanguageMaxVersion(text)
 
      RETURN;
 END; $$ LANGUAGE 'plpgsql';
+
+*/
 
 COMMIT ;
