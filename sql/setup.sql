@@ -634,6 +634,19 @@ CREATE TABLE derivatives_descriptions (
 );
 GRANT SELECT ON derivatives_descriptions TO PUBLIC;
 
+-- Add house keeping table to enable deciding whether some translation file
+-- was imported previousely and thus reducing workload on UDD host in
+-- preventing doing duplicate work
+CREATE TABLE description_imports (
+    release                     text,
+    component                   text,
+    language                    text,
+    translationfile             text,
+    translationfile_sha1        text,
+    import_date                 timestamp default now(),
+    PRIMARY KEY (release, component, language)
+);
+
 -- active_dds view
 CREATE VIEW active_dds AS
 SELECT DISTINCT carnivore_login.id, login

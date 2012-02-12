@@ -400,3 +400,17 @@ CREATE VIEW all_packages AS
 SELECT * FROM packages
 UNION ALL SELECT * FROM ubuntu_packages
 UNION ALL SELECT * FROM derivatives_packages;
+
+-- 2012-02-12
+-- Add house keeping table to enable deciding whether some translation file
+-- was imported previousely and thus reducing workload on UDD host in
+-- preventing doing duplicate work
+CREATE TABLE description_imports (
+    release			text,
+    component			text,
+    language			text,
+    translationfile		text,
+    translationfile_sha1	text,
+    import_date			timestamp default now(),
+    PRIMARY KEY (release, component, language)
+);
