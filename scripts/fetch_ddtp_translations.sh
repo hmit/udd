@@ -13,10 +13,6 @@ for indexdir in `find $MIRROR -name i18n -type d | sed "s?$MIRROR/\(.\+\)/i18n?\
     # rel=`echo $index | sed "s?$MIRROR/*\([^/]\+\)/.*?\1?"`
     targetfile="${TARGETPATH}/${indexdir}"
     mkdir -p `dirname $targetfile`
-    # create backup of previous index file
-    if [ -f "$targetfile" ] ; then
-	mv "$targetfile" "$targetfile".prev
-    fi
     index=${MIRROR}/$indexdir/i18n/Index
     if [ -f $index ] ; then
 	grep "\.bz2" $index | sed -e 's/^ //' -e 's/ \+/ /g' > $targetfile
