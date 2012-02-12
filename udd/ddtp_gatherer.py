@@ -70,19 +70,31 @@ class ddtp_gatherer(gatherer):
 
     cur = self.cursor()
     query = "PREPARE ddtp_delete (text, text) AS DELETE FROM %s WHERE release = $1 AND language = $2" % my_config['table']
-    self.log.debug("execute query %s", query)
     cur.execute(query)
+
     query = """PREPARE ddtp_insert AS INSERT INTO %s
                    (package, release, language, description, long_description, description_md5)
                     VALUES ($1, $2, $3, $4, $5, $6)""" % (my_config['table'])
-    self.log.debug("execute query %s", query)
     cur.execute(query)
 
     query = """PREPARE ddtp_check_before_insert (text, text, text, text, text) AS
                   SELECT COUNT(*) FROM %s
                     WHERE package = $1 AND release = $2 AND language = $3 AND 
                           description = $4 AND description_md5 = $5""" % (my_config['table'])
-    # self.log.debug("execute query %s", query)
+    cur.execute(query)
+
+    query = """PREPARE ddtp_check_previous_import (text, text, text) AS
+                  SELECT translationfile_sha1, import_date FROM description_imports
+                    WHERE release = $1 AND component = $2 AND language = $3"""
+    cur.execute(query)
+
+    query = """PREPARE ddtp_update_current_import (text, text, text) AS
+                  UPDATE description_imports SET import_date = now() WHERE release = $1 AND component = $2 AND language = $3"""
+    cur.execute(query)
+
+    query = """PREPARE ddtp_insert_current_import (text, text, text, text, text) AS
+                  INSERT INTO description_imports (release, component, language, translationfile, translationfile_sha1)
+                         VALUES ($1, $2, $3, $4, $5)"""
     cur.execute(query)
 
     pkg = None
@@ -127,7 +139,23 @@ class ddtp_gatherer(gatherer):
             self.log.error("Can not parse language of file %s.", trfile)
             continue
           lang = match.groups()[0]
+
+          cur.execute('EXECUTE ddtp_check_previous_import (%s, %s, %s)', (rel, comp, lang))
+          if cur.rowcount <= 0:
+            has_previous_import = False
+          else:
+            has_previous_import = True
+            prev_import = cur.fetchone()
+            if prev_import[0] == sha1:
+              self.log.info("File %s was imported at %s and has not changed since then" % (trfile, prev_import[1])) 
+              continue
           self.import_translations(trfile, rel, lang)
+          if has_previous_import == True:
+            cur.execute("EXECUTE ddtp_update_current_import (%s, %s, %s)", (rel, comp, lang))
+          else:
+            cur.execute("EXECUTE ddtp_insert_current_import (%s, %s, %s, %s, %s)", (rel, comp, lang, trfile, sha1))
+          # commit every successfully language to make sure we get any languages in and will not be blocked by a single failing import
+          self.connection.commit()
         cfp.close()
        
     cur.execute("DEALLOCATE ddtp_insert")
@@ -135,7 +163,7 @@ class ddtp_gatherer(gatherer):
 
 
   def import_translations(self, trfile, rel, lang):
-        print trfile, rel, lang
+        self.log.info("Importing file %s for release %s in language %s" % (trfile, rel, lang))
 
         cur = self.cursor()
         # Delete only records where we actually have Translation files.  This
@@ -190,8 +218,6 @@ class ddtp_gatherer(gatherer):
                 continue
         except IOError, err:
           self.log.exception("Error reading %s%s", dir, filename)
-        # commit every successfully language to make sure we get any languages in an will not be blocked by a single failing import
-        self.connection.commit()
 
 if __name__ == '__main__':
   main()
