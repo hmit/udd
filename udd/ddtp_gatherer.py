@@ -43,7 +43,6 @@ class ddtp():
     self.description      = ''
     self.long_description = ''
     self.description_md5  = ''
-    self.version          = ''
 
   def __str__(self):
     return "Package %s: %s, %s\n%s" % \
