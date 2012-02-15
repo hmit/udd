@@ -17,6 +17,7 @@ for indexdir in `find $MIRROR -name i18n -type d | sed "s?$MIRROR/\(.\+\)/i18n?\
     if [ -f $index ] ; then
 	grep "\.bz2" $index | sed -e 's/^ //' -e 's/ \+/ /g' > $targetfile
     else
+	rm -f $targetfile
 	for trans in `find ${MIRROR}/$indexdir/i18n -mindepth 1 -maxdepth 1 -name "*.bz2"` ; do
 	    echo "`sha1sum $trans | cut -d' ' -f1``ls -l $trans | sed 's/^[-rwlx]\+ [0-9]\+ [^ ]\+ [^ ]\+\([ 0-9]\+[0-9]\) .*/\1/'` `basename $trans`" >> $targetfile
 	done
