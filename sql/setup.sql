@@ -604,6 +604,7 @@ GRANT SELECT ON all_bugs TO PUBLIC;
 CREATE TABLE descriptions (
        package      text,
        release      text,
+       component    text,
        language     text,
        description  text,
        long_description text,
@@ -615,6 +616,7 @@ GRANT SELECT ON descriptions TO PUBLIC;
 CREATE TABLE ubuntu_descriptions (
        package      text,
        release      text,
+       component    text,
        language     text,
        description  text,
        long_description text,
@@ -626,6 +628,7 @@ GRANT SELECT ON ubuntu_descriptions TO PUBLIC;
 CREATE TABLE derivatives_descriptions (
        package      text,
        release      text,
+       component    text,
        language     text,
        description  text,
        long_description text,

@@ -414,3 +414,45 @@ CREATE TABLE description_imports (
     import_date			timestamp default now(),
     PRIMARY KEY (release, component, language)
 );
+
+-- 2012-02-16
+-- It is necessary to add component and we simply recreate the table to
+-- have a reasonable sequence of columns
+DROP TABLE descriptions;
+CREATE TABLE descriptions (
+       package      text,
+       release      text,
+       component    text,
+       language     text,
+       description  text,
+       long_description text,
+       description_md5  text, -- md5 sum of the original English description
+    PRIMARY KEY (package, release, language, description, description_md5)
+);
+GRANT SELECT ON descriptions TO PUBLIC;
+
+DROP TABLE ubuntu_descriptions;
+CREATE TABLE ubuntu_descriptions (
+       package      text,
+       release      text,
+       component    text,
+       language     text,
+       description  text,
+       long_description text,
+       description_md5  text, -- md5 sum of the original English description
+    PRIMARY KEY (package, release, language, description, description_md5)
+);
+GRANT SELECT ON ubuntu_descriptions TO PUBLIC;
+
+DROP TABLE derivatives_descriptions;
+CREATE TABLE derivatives_descriptions (
+       package      text,
+       release      text,
+       component    text,
+       language     text,
+       description  text,
+       long_description text,
+       description_md5  text, -- md5 sum of the original English description
+    PRIMARY KEY (package, release, language, description, description_md5)
+);
+GRANT SELECT ON derivatives_descriptions TO PUBLIC;

@@ -36,9 +36,10 @@ def get_gatherer(connection, config, source):
   return ddtp_gatherer(connection, config, source)
 
 class ddtp():
-  def __init__(self, package, release, language):
+  def __init__(self, package, release, component, language):
     self.package          = package
     self.release          = release
+    self.component        = component
     self.language         = language
     self.description      = ''
     self.long_description = ''
@@ -68,18 +69,18 @@ class ddtp_gatherer(gatherer):
     self.log.addHandler(handler)
 
     cur = self.cursor()
-    query = "PREPARE ddtp_delete (text, text) AS DELETE FROM %s WHERE release = $1 AND language = $2" % my_config['table']
+    query = "PREPARE ddtp_delete (text, text) AS DELETE FROM %s WHERE release = $1 AND component = $2 AND language = $3" % my_config['table']
     cur.execute(query)
 
     query = """PREPARE ddtp_insert AS INSERT INTO %s
-                   (package, release, language, description, long_description, description_md5)
-                    VALUES ($1, $2, $3, $4, $5, $6)""" % (my_config['table'])
+                   (package, release, component, language, description, long_description, description_md5)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7)""" % (my_config['table'])
     cur.execute(query)
 
-    query = """PREPARE ddtp_check_before_insert (text, text, text, text, text) AS
+    query = """PREPARE ddtp_check_before_insert (text, text, text, text, text, text) AS
                   SELECT COUNT(*) FROM %s
-                    WHERE package = $1 AND release = $2 AND language = $3 AND 
-                          description = $4 AND description_md5 = $5""" % (my_config['table'])
+                    WHERE package = $1 AND release = $2 AND component = $3 AND language = $4 AND 
+                          description = $5 AND description_md5 = $6""" % (my_config['table'])
     cur.execute(query)
 
     query = """PREPARE ddtp_check_previous_import (text, text, text) AS
@@ -148,7 +149,7 @@ class ddtp_gatherer(gatherer):
             if prev_import[0] == sha1:
               self.log.info("File %s was imported at %s and has not changed since then" % (trfile, prev_import[1])) 
               continue
-          self.import_translations(trfile, rel, lang)
+          self.import_translations(trfile, rel, comp, lang)
           if has_previous_import == True:
             cur.execute("EXECUTE ddtp_update_current_import (%s, %s, %s)", (rel, comp, lang))
           else:
@@ -161,14 +162,14 @@ class ddtp_gatherer(gatherer):
     cur.execute("ANALYZE %s" % my_config['table'])
 
 
-  def import_translations(self, trfile, rel, lang):
-        self.log.info("Importing file %s for release %s in language %s" % (trfile, rel, lang))
+  def import_translations(self, trfile, rel, comp, lang):
+        self.log.info("Importing file %s for release %s, component %s in language %s" % (trfile, rel, comp, lang))
 
         cur = self.cursor()
         # Delete only records where we actually have Translation files.  This
         # prevents dump deletion of all data in case of broken downloads
-        cur.execute('EXECUTE ddtp_delete (%s, %s)', (rel, lang))
-        self.log.debug('EXECUTE ddtp_delete (%s, %s)', (rel, lang))
+        cur.execute('EXECUTE ddtp_delete (%s, %s, %s)', (rel, comp, lang))
+        self.log.debug('EXECUTE ddtp_delete (%s, %s, %s)', (rel, comp, lang))
 
         i18n_error_flag=0
         descstring = 'Description-'+lang
@@ -177,7 +178,7 @@ class ddtp_gatherer(gatherer):
           for stanza in deb822.Sources.iter_paragraphs(g, shared_storage=False):
             if i18n_error_flag == 1:
               continue
-            self.pkg                 = ddtp(stanza['package'], rel, lang)
+            self.pkg                 = ddtp(stanza['package'], rel, comp, lang)
             self.pkg.description_md5 = stanza['Description-md5']
             try:
               desc               = stanza[descstring]
@@ -195,24 +196,24 @@ class ddtp_gatherer(gatherer):
             for line in lines[1:]:
               self.pkg.long_description += line + "\n"
 
-            paramtuple = (self.pkg.package, self.pkg.release, self.pkg.language, self.pkg.description, self.pkg.description_md5)
-            cur.execute('EXECUTE ddtp_check_before_insert (%s, %s, %s, %s, %s)', paramtuple)
+            paramtuple = (self.pkg.package, self.pkg.release, self.pkg.component, self.pkg.language, self.pkg.description, self.pkg.description_md5)
+            cur.execute('EXECUTE ddtp_check_before_insert (%s, %s, %s, %s, %s, %s)', paramtuple)
             if cur.fetchone()[0] > 0:
-              self.log.error("Duplicated key for package %s in release %s in language %s: %s / %s" % paramtuple)
+              self.log.error("Duplicated key for package %s in release %s component %s in language %s: %s / %s" % paramtuple)
             else:
-              query = 'EXECUTE ddtp_insert (%s, %s, %s, %s, %s, %s)'
+              query = 'EXECUTE ddtp_insert (%s, %s, %s, %s, %s, %s, %s)'
               try:
                 self.log.debug(query, tuple([quote(item) for item in paramtuple]))
-                cur.execute(query, (self.pkg.package, self.pkg.release, self.pkg.language, self.pkg.description, self.pkg.long_description, self.pkg.description_md5))
+                cur.execute(query, (self.pkg.package, self.pkg.release, self.pkg.component, self.pkg.language, self.pkg.description, self.pkg.long_description, self.pkg.description_md5))
                 # self.connection.commit() # commit every single insert as long as translation files are featuring duplicated keys
               except IntegrityError, err:
                 self.log.exception("Duplicated key in language %s: (%s)", self.pkg.language,
-                                 ", ".join([to_unicode(item) for item in (self.pkg.package, self.pkg.release, self.pkg.description, self.pkg.description_md5)]))
+                                 ", ".join([to_unicode(item) for item in (self.pkg.package, self.pkg.release, self.pkg.component, self.pkg.description, self.pkg.description_md5)]))
                 self.connection.rollback()
                 continue
               except ProgrammingError, err:
                 self.log.exception("Problem inserting translation %s: (%s)", self.pkg.language,
-                                 ", ".join([to_unicode(item) for item in (self.pkg.package, self.pkg.release, self.pkg.description, self.pkg.description_md5)]))
+                                 ", ".join([to_unicode(item) for item in (self.pkg.package, self.pkg.release, self.pkg.component, self.pkg.description, self.pkg.description_md5)]))
                 self.connection.rollback()
                 continue
         except IOError, err:
