@@ -216,17 +216,17 @@ class packages_gatherer(gatherer):
           if self.add_descriptions:
             cur.execute("""PREPARE description_insert AS
               INSERT INTO %s
-                (package, release, language, description, long_description, description_md5)
-                (SELECT $1 AS package, '%s' AS release, $2 AS language,
+                (package, release, component, language, description, long_description, description_md5)
+                (SELECT $1 AS package, '%s' AS release, '%s' AS component, $2 AS language,
                         $3 AS description, $4 AS long_description, $5 AS description_md5
                   WHERE NOT EXISTS
                   (SELECT 1
                     FROM %s
-                    WHERE package=$1 AND release='%s' AND language=$2 AND
+                    WHERE package=$1 AND release='%s' AND component='%s' AND language=$2 AND
                           description=$3 AND long_description=$4 AND description_md5=$5))
 
-            """ % (src_cfg['descriptions-table'], src_cfg['release'],
-                    src_cfg['descriptions-table'], src_cfg['release']))
+            """ % (src_cfg['descriptions-table'], src_cfg['release'], comp,
+                    src_cfg['descriptions-table'], src_cfg['release'], comp))
 #	  aux.print_debug("Reading file " + path)
 	  # Copy content from gzipped file to temporary file, so that apt_pkg is
 	  # used by debian
