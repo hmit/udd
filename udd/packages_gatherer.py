@@ -195,8 +195,8 @@ class packages_gatherer(gatherer):
       # For releases that have long descriptions in Packages and not in Translation,
       # add the description to the configured descriptions table.
       if self.add_descriptions:
-        cur.execute("DELETE FROM %s WHERE release = '%s' AND language = '%s'" %\
-          (src_cfg['descriptions-table'], src_cfg['release'], 'en'))
+        cur.execute("DELETE FROM %s WHERE release = '%s' AND component = '%s' AND language = '%s'" %\
+          (src_cfg['descriptions-table'], src_cfg['release'], comp, 'en'))
       for arch in src_cfg['archs']:
 	path = os.path.join(src_cfg['directory'], comp, 'binary-' + arch, 'Packages.gz')
 	try:
