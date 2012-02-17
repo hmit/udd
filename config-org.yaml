@@ -53,6 +53,7 @@ debian-lenny:
   packages-schema: packages
   sources-schema: sources
   release: lenny
+  descriptions-table: descriptions
 
 debian-lenny-security:
   type: src-pkg
@@ -68,6 +69,7 @@ debian-lenny-security:
   packages-schema: packages
   sources-schema: sources
   release: lenny-security
+  descriptions-table: descriptions
 
 debian-lenny-proposed-updates:
   type: src-pkg
@@ -83,6 +85,7 @@ debian-lenny-proposed-updates:
   packages-schema: packages
   sources-schema: sources
   release: lenny-proposed-updates
+  descriptions-table: descriptions
 
 debian-backports-lenny:
   type: src-pkg
@@ -97,6 +100,7 @@ debian-backports-lenny:
   packages-schema: packages
   sources-schema: sources
   release: lenny
+  descriptions-table: descriptions
 
 debian-backports-lenny-sloppy:
   type: src-pkg
@@ -111,6 +115,7 @@ debian-backports-lenny-sloppy:
   packages-schema: packages
   sources-schema: sources
   release: lenny
+  descriptions-table: descriptions
 
 debian-volatile-lenny:
   type: src-pkg
@@ -125,6 +130,7 @@ debian-volatile-lenny:
   packages-schema: packages
   sources-schema: sources
   release: lenny
+  descriptions-table: descriptions
 
 debian-volatile-sloppy-lenny:
   type: src-pkg
@@ -139,6 +145,7 @@ debian-volatile-sloppy-lenny:
   packages-schema: packages
   sources-schema: sources
   release: lenny
+  descriptions-table: descriptions
 
 debian-volatile-proposed-lenny:
   type: src-pkg
@@ -153,6 +160,7 @@ debian-volatile-proposed-lenny:
   packages-schema: packages
   sources-schema: sources
   release: lenny
+  descriptions-table: descriptions
 
 debian-squeeze:
   type: src-pkg
