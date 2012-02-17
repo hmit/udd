@@ -456,3 +456,6 @@ CREATE TABLE derivatives_descriptions (
     PRIMARY KEY (package, release, language, description, description_md5)
 );
 GRANT SELECT ON derivatives_descriptions TO PUBLIC;
+
+GRANT SELECT ON packages TO PUBLIC;
+GRANT SELECT ON releases TO PUBLIC;
