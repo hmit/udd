@@ -457,5 +457,5 @@ CREATE TABLE derivatives_descriptions (
 );
 GRANT SELECT ON derivatives_descriptions TO PUBLIC;
 
-GRANT SELECT ON packages TO PUBLIC;
-GRANT SELECT ON releases TO PUBLIC;
+-- Totally missed to update the release table
+UPDATE releases SET releasedate = '2011-02-06' WHERE release like 'squeeze%' ;
