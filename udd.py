@@ -62,7 +62,9 @@ if __name__ == '__main__':
         if "update-command" in src_config:
           result = system(src_config['update-command']) 
           if result != 0:
-            sys.exit(result)
+            # Returning result does not necessarily end up as "false"
+            # see http://lists.debian.org/debian-qa/2012/02/msg00068.html
+            sys.exit(1)
         end_time = get_timestamp()
       else:
         (src_command,rest) = types[type].split(None, 1)
