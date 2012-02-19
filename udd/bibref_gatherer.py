@@ -21,18 +21,6 @@ class bibref_gatherer(gatherer):
   def __init__(self, connection, config, source):
     gatherer.__init__(self, connection, config, source)
     self.assert_my_config('table')
-    my_config = self.my_config
-
-    cur = self.cursor()
-    query = "DELETE FROM %s" % my_config['table']
-    cur.execute(query)
-    query = """PREPARE bibref_insert (text, text, text) AS
-                   INSERT INTO %s
-                   (package, key, value)
-                    VALUES ($1, $2, $3)""" % (my_config['table'])
-    cur.execute(query)
-
-    pkg = None
 
   def run(self):
     my_config = self.my_config
@@ -44,6 +32,16 @@ class bibref_gatherer(gatherer):
     fp = open(bibref_file, 'r')
     result = fp.read()
     fp.close()
+
+    if not len(result) > 0:
+      print >>stderr, "BibRef input file does not contain data.  Leave table %s unchanged and stop processing here" % (my_config['table'])
+      exit(1)
+    cur.execute("TRUNCATE %s" % (my_config['table']))
+    query = """PREPARE bibref_insert (text, text, text) AS
+                   INSERT INTO %s
+                   (package, key, value)
+                    VALUES ($1, $2, $3)""" % (my_config['table'])
+    cur.execute(query)
 
     for res in safe_load_all(result):
       package, key, value = res
