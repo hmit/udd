@@ -351,47 +351,6 @@ ALTER TABLE packages add description_md5 text;
 ALTER TABLE ubuntu_packages add description_md5 text;
 ALTER TABLE derivatives_packages add description_md5 text;
 
--- 2012-02-06
--- Translation files are now featuring description_md5 fields which enable
--- more easy determination of package entries
-DROP TABLE ddtp;
-CREATE TABLE ddtp (
-       package      text,
-       release      text,
-       language     text,
-       description  text,
-       long_description text,
-       description_md5  text, -- md5 sum of the original English description
-    PRIMARY KEY (package, release, language, description, description_md5)
-);
-GRANT SELECT ON ddtp TO PUBLIC;
--- 2012-02-09
--- Add description tables for ubuntu and derivatives; rename ddtp table
-ALTER TABLE ddtp RENAME TO descriptions;
-GRANT SELECT ON descriptions TO PUBLIC;
-
-CREATE TABLE ubuntu_descriptions (
-       package      text,
-       release      text,
-       language     text,
-       description  text,
-       long_description text,
-       description_md5  text, -- md5 sum of the original English description
-    PRIMARY KEY (package, release, language, description, description_md5)
-);
-GRANT SELECT ON ubuntu_descriptions TO PUBLIC;
-
-CREATE TABLE derivatives_descriptions (
-       package      text,
-       release      text,
-       language     text,
-       description  text,
-       long_description text,
-       description_md5  text, -- md5 sum of the original English description
-    PRIMARY KEY (package, release, language, description, description_md5)
-);
-GRANT SELECT ON derivatives_descriptions TO PUBLIC;
-
 DROP VIEW all_packages;
 ALTER TABLE packages DROP COLUMN long_description;
 ALTER TABLE ubuntu_packages DROP COLUMN long_description;
@@ -401,7 +360,56 @@ SELECT * FROM packages
 UNION ALL SELECT * FROM ubuntu_packages
 UNION ALL SELECT * FROM derivatives_packages;
 
--- 2012-02-12
+-- Totally missed to update the release table
+UPDATE releases SET releasedate = '2011-02-06' WHERE release like 'squeeze%' ;
+
+-- 2012-02-22
+-- Finally assemble necessary changes for description-less packages file
+--   - ddtp table renamed to descriptions
+--   - add ubuntu_descriptions & derivative_descriptions
+--   - fix primary key constraint (It is necessary to add component because
+--     there is at least one case (clustalw) which has the same
+--     (package,release, language, description, description_md5)
+--     key because it was freed in squeeze-backports and thus
+--     component needs to be regarded
+DROP TABLE ddtp;
+CREATE TABLE descriptions (
+       package      text not null,
+       release      text not null,
+       component    text not null,
+       language     text not null,
+       description  text not null,
+       long_description text not null,
+       description_md5  text not null, -- md5 sum of the original English description
+    PRIMARY KEY (package, release, component, language, description, description_md5)
+);
+GRANT SELECT ON descriptions TO PUBLIC;
+DROP TABLE ubuntu_descriptions;
+CREATE TABLE ubuntu_descriptions (
+       package      text not null,
+       release      text not null,
+       component    text not null,
+       language     text not null,
+       description  text not null,
+       long_description text not null,
+       description_md5  text not null, -- md5 sum of the original English description
+    PRIMARY KEY (package, release, component, language, description, description_md5)
+);
+GRANT SELECT ON ubuntu_descriptions TO PUBLIC;
+
+DROP TABLE derivatives_descriptions;
+CREATE TABLE derivatives_descriptions (
+       package      text not null,
+       release      text not null,
+       component    text not null,
+       language     text not null,
+       description  text not null,
+       long_description text not null,
+       description_md5  text not null, -- md5 sum of the original English description
+    PRIMARY KEY (package, release, component, language, description, description_md5)
+);
+GRANT SELECT ON derivatives_descriptions TO PUBLIC;
+
 -- Add house keeping table to enable deciding whether some translation file
 -- was imported previousely and thus reducing workload on UDD host in
 -- preventing doing duplicate work
@@ -415,47 +423,3 @@ CREATE TABLE description_imports (
     PRIMARY KEY (release, component, language)
 );
 
--- 2012-02-16
--- It is necessary to add component and we simply recreate the table to
--- have a reasonable sequence of columns
-DROP TABLE descriptions;
-CREATE TABLE descriptions (
-       package      text,
-       release      text,
-       component    text,
-       language     text,
-       description  text,
-       long_description text,
-       description_md5  text, -- md5 sum of the original English description
-    PRIMARY KEY (package, release, language, description, description_md5)
-);
-GRANT SELECT ON descriptions TO PUBLIC;
-
-DROP TABLE ubuntu_descriptions;
-CREATE TABLE ubuntu_descriptions (
-       package      text,
-       release      text,
-       component    text,
-       language     text,
-       description  text,
-       long_description text,
-       description_md5  text, -- md5 sum of the original English description
-    PRIMARY KEY (package, release, language, description, description_md5)
-);
-GRANT SELECT ON ubuntu_descriptions TO PUBLIC;
-
-DROP TABLE derivatives_descriptions;
-CREATE TABLE derivatives_descriptions (
-       package      text,
-       release      text,
-       component    text,
-       language     text,
-       description  text,
-       long_description text,
-       description_md5  text, -- md5 sum of the original English description
-    PRIMARY KEY (package, release, language, description, description_md5)
-);
-GRANT SELECT ON derivatives_descriptions TO PUBLIC;
-
--- Totally missed to update the release table
-UPDATE releases SET releasedate = '2011-02-06' WHERE release like 'squeeze%' ;

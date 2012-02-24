@@ -602,38 +602,38 @@ GRANT SELECT ON all_packages_distrelcomparch TO PUBLIC;
 GRANT SELECT ON all_bugs TO PUBLIC;
 
 CREATE TABLE descriptions (
-       package      text,
-       release      text,
-       component    text,
-       language     text,
-       description  text,
-       long_description text,
-       description_md5  text, -- md5 sum of the original English description
-    PRIMARY KEY (package, release, language, description, description_md5)
+       package      text not null,
+       release      text not null,
+       component    text not null,
+       language     text not null,
+       description  text not null,
+       long_description text not null,
+       description_md5  text not null, -- md5 sum of the original English description
+    PRIMARY KEY (package, release, component, language, description, description_md5)
 );
 GRANT SELECT ON descriptions TO PUBLIC;
 
 CREATE TABLE ubuntu_descriptions (
-       package      text,
-       release      text,
-       component    text,
-       language     text,
-       description  text,
-       long_description text,
-       description_md5  text, -- md5 sum of the original English description
-    PRIMARY KEY (package, release, language, description, description_md5)
+       package      text not null,
+       release      text not null,
+       component    text not null,
+       language     text not null,
+       description  text not null,
+       long_description text not null,
+       description_md5  text not null, -- md5 sum of the original English description
+    PRIMARY KEY (package, release, component, language, description, description_md5)
 );
 GRANT SELECT ON ubuntu_descriptions TO PUBLIC;
 
 CREATE TABLE derivatives_descriptions (
-       package      text,
-       release      text,
-       component    text,
-       language     text,
-       description  text,
-       long_description text,
-       description_md5  text, -- md5 sum of the original English description
-    PRIMARY KEY (package, release, language, description, description_md5)
+       package      text not null,
+       release      text not null,
+       component    text not null,
+       language     text not null,
+       description  text not null,
+       long_description text not null,
+       description_md5  text not null, -- md5 sum of the original English description
+    PRIMARY KEY (package, release, component, language, description, description_md5)
 );
 GRANT SELECT ON derivatives_descriptions TO PUBLIC;
 
