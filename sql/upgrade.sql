@@ -367,59 +367,70 @@ UPDATE releases SET releasedate = '2011-02-06' WHERE release like 'squeeze%' ;
 -- Finally assemble necessary changes for description-less packages file
 --   - ddtp table renamed to descriptions
 --   - add ubuntu_descriptions & derivative_descriptions
---   - fix primary key constraint (It is necessary to add component because
---     there is at least one case (clustalw) which has the same
---     (package,release, language, description, description_md5)
---     key because it was freed in squeeze-backports and thus
---     component needs to be regarded
-DROP TABLE ddtp;
+--   - fix primary key constraint (It is necessary to add
+--      - component because  there is at least one case (clustalw) which
+--        has the same
+--         (package, release, language, description, description_md5)
+--        key because it was freed in squeeze-backports and thus
+--        component needs to be regarded
+--      - distribution because the subsequent import of debian-squeeze
+--        and debian-backports-squeeze deletes descriptions of the previous
+--        one so the last imported distribution would win
+DROP TABLE IF EXISTS  ddtp;
+DROP TABLE IF EXISTS  descriptions;
 CREATE TABLE descriptions (
-       package      text not null,
-       release      text not null,
-       component    text not null,
-       language     text not null,
-       description  text not null,
-       long_description text not null,
-       description_md5  text not null, -- md5 sum of the original English description
-    PRIMARY KEY (package, release, component, language, description, description_md5)
+    package          text not null,
+    distribution     text not null,
+    release          text not null,
+    component        text not null,
+    language         text not null,
+    description      text not null,
+    long_description text not null,
+    description_md5  text not null, -- md5 sum of the original English description
+    PRIMARY KEY (package, distribution, release, component, language, description, description_md5)
 );
 GRANT SELECT ON descriptions TO PUBLIC;
-DROP TABLE ubuntu_descriptions;
+
+DROP TABLE IF EXISTS ubuntu_descriptions;
 CREATE TABLE ubuntu_descriptions (
-       package      text not null,
-       release      text not null,
-       component    text not null,
-       language     text not null,
-       description  text not null,
-       long_description text not null,
-       description_md5  text not null, -- md5 sum of the original English description
-    PRIMARY KEY (package, release, component, language, description, description_md5)
+    package          text not null,
+    distribution     text not null,
+    release          text not null,
+    component        text not null,
+    language         text not null,
+    description      text not null,
+    long_description text not null,
+    description_md5  text not null, -- md5 sum of the original English description
+    PRIMARY KEY (package, distribution, release, component, language, description, description_md5)
 );
 GRANT SELECT ON ubuntu_descriptions TO PUBLIC;
 
-DROP TABLE derivatives_descriptions;
+DROP TABLE IF EXISTS derivatives_descriptions;
 CREATE TABLE derivatives_descriptions (
-       package      text not null,
-       release      text not null,
-       component    text not null,
-       language     text not null,
-       description  text not null,
-       long_description text not null,
-       description_md5  text not null, -- md5 sum of the original English description
-    PRIMARY KEY (package, release, component, language, description, description_md5)
+    package          text not null,
+    distribution     text not null,
+    release          text not null,
+    component        text not null,
+    language         text not null,
+    description      text not null,
+    long_description text not null,
+    description_md5  text not null, -- md5 sum of the original English description
+    PRIMARY KEY (package, distribution, release, component, language, description, description_md5)
 );
 GRANT SELECT ON derivatives_descriptions TO PUBLIC;
 
 -- Add house keeping table to enable deciding whether some translation file
 -- was imported previousely and thus reducing workload on UDD host in
 -- preventing doing duplicate work
+DROP TABLE IF EXISTS description_imports;
 CREATE TABLE description_imports (
-    release			text,
-    component			text,
-    language			text,
-    translationfile		text,
-    translationfile_sha1	text,
-    import_date			timestamp default now(),
-    PRIMARY KEY (release, component, language)
+    distribution         text not null,
+    release              text not null,
+    component            text not null,
+    language             text not null,
+    translationfile      text not null,
+    translationfile_sha1 text not null,
+    import_date          timestamp default now(),
+    PRIMARY KEY (distribution, release, component, language)
 );
 

@@ -195,8 +195,8 @@ class packages_gatherer(gatherer):
       # For releases that have long descriptions in Packages and not in Translation,
       # add the description to the configured descriptions table.
       if self.add_descriptions:
-        cur.execute("DELETE FROM %s WHERE release = '%s' AND component = '%s' AND language = '%s'" %\
-          (src_cfg['descriptions-table'], src_cfg['release'], comp, 'en'))
+        cur.execute("DELETE FROM %s WHERE distribution = '%s' AND release = '%s' AND component = '%s' AND language = '%s'" %\
+          (src_cfg['descriptions-table'], self._distr, src_cfg['release'], comp, 'en'))
       for arch in src_cfg['archs']:
 	path = os.path.join(src_cfg['directory'], comp, 'binary-' + arch, 'Packages.gz')
 	try:
@@ -216,8 +216,8 @@ class packages_gatherer(gatherer):
           if self.add_descriptions:
             cur.execute("""PREPARE description_insert AS
               INSERT INTO %s
-                (package, release, component, language, description, long_description, description_md5)
-                (SELECT $1 AS package, '%s' AS release, '%s' AS component, $2 AS language,
+                (package, distribution, release, component, language, description, long_description, description_md5)
+                (SELECT $1 AS package, '%s' AS distribution, '%s' AS release, '%s' AS component, $2 AS language,
                         $3 AS description, $4 AS long_description, $5 AS description_md5
                   WHERE NOT EXISTS
                   (SELECT 1
@@ -225,7 +225,7 @@ class packages_gatherer(gatherer):
                     WHERE package=$1 AND release='%s' AND component='%s' AND language=$2 AND
                           description=$3 AND long_description=$4 AND description_md5=$5))
 
-            """ % (src_cfg['descriptions-table'], src_cfg['release'], comp,
+            """ % (src_cfg['descriptions-table'], self._distr, src_cfg['release'], comp,
                     src_cfg['descriptions-table'], src_cfg['release'], comp))
 #	  aux.print_debug("Reading file " + path)
 	  # Copy content from gzipped file to temporary file, so that apt_pkg is

@@ -871,7 +871,8 @@ ddtp:
    path: /org/udd.debian.org/mirrors/ddtp
    files: Translation-.*\.gz
    mirrorpath: /org/mirrors/ftp.debian.org/ftp/dists
-   table: descriptions
+   descriptions-table: descriptions
+   imports-table: description_imports
    schema: ddtp
 
 ftpnew:

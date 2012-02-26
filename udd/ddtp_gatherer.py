@@ -56,8 +56,9 @@ class ddtp_gatherer(gatherer):
 
   def __init__(self, connection, config, source):
     gatherer.__init__(self, connection, config, source)
-    self.assert_my_config('path', 'files', 'mirrorpath', 'table')
-    my_config = self.my_config
+    # The ID for the distribution we want to include
+    self._distr = None
+    self.assert_my_config('path', 'files', 'mirrorpath', 'descriptions-table', 'imports-table')
     self.log = logging.getLogger(self.__class__.__name__)
     if debug==1:
 	self.log.setLevel(logging.DEBUG)
@@ -69,55 +70,53 @@ class ddtp_gatherer(gatherer):
     self.log.addHandler(handler)
 
     cur = self.cursor()
-    query = "PREPARE ddtp_delete (text, text) AS DELETE FROM %s WHERE release = $1 AND component = $2 AND language = $3" % my_config['table']
-    cur.execute(query)
-
-    query = """PREPARE ddtp_insert AS INSERT INTO %s
-                   (package, release, component, language, description, long_description, description_md5)
-                    VALUES ($1, $2, $3, $4, $5, $6, $7)""" % (my_config['table'])
-    cur.execute(query)
-
-    query = """PREPARE ddtp_check_before_insert (text, text, text, text, text, text) AS
-                  SELECT COUNT(*) FROM %s
-                    WHERE package = $1 AND release = $2 AND component = $3 AND language = $4 AND 
-                          description = $5 AND description_md5 = $6""" % (my_config['table'])
-    cur.execute(query)
-
-    query = """PREPARE ddtp_check_previous_import (text, text, text) AS
-                  SELECT translationfile_sha1, import_date FROM description_imports
-                    WHERE release = $1 AND component = $2 AND language = $3"""
-    cur.execute(query)
-
-    query = """PREPARE ddtp_update_current_import (text, text, text) AS
-                  UPDATE description_imports SET import_date = now() WHERE release = $1 AND component = $2 AND language = $3"""
-    cur.execute(query)
-
-    query = """PREPARE ddtp_insert_current_import (text, text, text, text, text) AS
-                  INSERT INTO description_imports (release, component, language, translationfile, translationfile_sha1)
-                         VALUES ($1, $2, $3, $4, $5)"""
-    cur.execute(query)
 
     pkg = None
 
   def run(self):
-    my_config = self.my_config
+    src_cfg = self.my_config
+    
+    table = src_cfg['descriptions-table']
+    imports = src_cfg['imports-table']
+    
+    # Set distribution ID
+    # FIXME: This simple and straightforeward setting does only work
+    #        as long as backports and security does not contain i18n files
+    #        The right way to go would be to read the config file again fo
+    #        each release below
+    self._distr = 'debian'
+
     cur = self.cursor()
+    query = """PREPARE ddtp_check_previous_import (text, text, text) AS
+                  SELECT translationfile_sha1, import_date FROM %s
+                    WHERE distribution = '%s' AND release = $1 AND component = $2 AND language = $3""" \
+            % (imports, self._distr)
+    cur.execute(query)
+    query = """PREPARE ddtp_update_current_import (text, text, text) AS
+                  UPDATE %s SET import_date = now() WHERE distribution = '%s' AND release = $1 AND component = $2 AND language = $3""" \
+            % (imports, self._distr)
+    cur.execute(query)
+    query = """PREPARE ddtp_insert_current_import (text, text, text, text, text) AS
+                  INSERT INTO %s (distribution, release, component, language, translationfile, translationfile_sha1)
+                         VALUES ('%s', $1, $2, $3, $4, $5)""" \
+            % (imports, self._distr)
+    cur.execute(query)
 
     cur.execute('SELECT component FROM packages GROUP by component')
     rows = cur.fetchall()
     valid_components = []
     for r in rows:
         valid_components.append(r[0])
-    releases = listdir(my_config['path'])
+    releases = listdir(src_cfg['path'])
     for rel in releases:
-      cpath = my_config['path']+'/'+rel+'/'
+      cpath = src_cfg['path']+'/'+rel+'/'
       components = listdir(cpath)
       for comp in components:
         if comp not in valid_components:
           self.log.error("Invallid component '%s' file found in %s", comp, cpath)
           continue
         cfp = open(cpath+'/'+comp,'r')
-        trfilepath = my_config['mirrorpath']+'/'+rel+'/'+comp+'/i18n/'
+        trfilepath = src_cfg['mirrorpath']+'/'+rel+'/'+comp+'/i18n/'
         for line in cfp.readlines():
           (sha1, size, file) = line.strip().split(' ')
           trfile = trfilepath + file
@@ -149,6 +148,24 @@ class ddtp_gatherer(gatherer):
             if prev_import[0] == sha1:
               self.log.info("File %s was imported at %s and has not changed since then" % (trfile, prev_import[1])) 
               continue
+
+          # Once it is sure that the file needs to be imported prepare the relevant statements
+          query = """PREPARE ddtp_delete (text) AS DELETE FROM %s
+                        WHERE distribution = '%s' AND release = '%s' AND component = '%s' AND language = $1""" \
+                     % ( table, self._distr, rel, comp )
+          cur.execute(query)
+          query = """PREPARE ddtp_check_before_insert (text, text, text, text) AS
+                        SELECT COUNT(*) FROM %s
+                        WHERE package = $1 AND distribution = '%s' AND release = '%s' AND component = '%s' AND
+                              language = $2 AND description = $3 AND description_md5 = $4""" \
+                     % (table, self._distr, rel, comp)
+          cur.execute(query)
+          query = """PREPARE ddtp_insert (text, text, text, text, text) AS INSERT INTO %s
+                        (package, distribution, release, component, language, description, long_description, description_md5)
+                        VALUES ($1, '%s', '%s', '%s', $2, $3, $4, $5)""" \
+                     % (table, self._distr, rel, comp)
+          cur.execute(query)
+
           self.import_translations(trfile, rel, comp, lang)
           if has_previous_import == True:
             cur.execute("EXECUTE ddtp_update_current_import (%s, %s, %s)", (rel, comp, lang))
@@ -156,10 +173,12 @@ class ddtp_gatherer(gatherer):
             cur.execute("EXECUTE ddtp_insert_current_import (%s, %s, %s, %s, %s)", (rel, comp, lang, trfile, sha1))
           # commit every successfully language to make sure we get any languages in and will not be blocked by a single failing import
           self.connection.commit()
+          cur.execute("DEALLOCATE ddtp_delete")
+          cur.execute("DEALLOCATE ddtp_check_before_insert")
+          cur.execute("DEALLOCATE ddtp_insert")
         cfp.close()
        
-    cur.execute("DEALLOCATE ddtp_insert")
-    cur.execute("ANALYZE %s" % my_config['table'])
+    cur.execute("ANALYZE %s" % table)
 
 
   def import_translations(self, trfile, rel, comp, lang):
@@ -168,8 +187,7 @@ class ddtp_gatherer(gatherer):
         cur = self.cursor()
         # Delete only records where we actually have Translation files.  This
         # prevents dump deletion of all data in case of broken downloads
-        cur.execute('EXECUTE ddtp_delete (%s, %s, %s)', (rel, comp, lang))
-        self.log.debug('EXECUTE ddtp_delete (%s, %s, %s)', (rel, comp, lang))
+        self.log.debug('EXECUTE ddtp_delete (%s)', (lang))
 
         i18n_error_flag=0
         descstring = 'Description-'+lang
@@ -196,16 +214,16 @@ class ddtp_gatherer(gatherer):
             for line in lines[1:]:
               self.pkg.long_description += line + "\n"
 
-            paramtuple = (self.pkg.package, self.pkg.release, self.pkg.component, self.pkg.language, self.pkg.description, self.pkg.description_md5)
-            cur.execute('EXECUTE ddtp_check_before_insert (%s, %s, %s, %s, %s, %s)', paramtuple)
+            paramtuple = (self.pkg.package, self.pkg.language, self.pkg.description, self.pkg.description_md5)
+            cur.execute('EXECUTE ddtp_check_before_insert (%s, %s, %s, %s)', paramtuple)
             if cur.fetchone()[0] > 0:
-              self.log.error("Duplicated key for package %s in release %s component %s in language %s: %s / %s" % paramtuple)
+              self.log.error("Duplicated key for package %s in release %s component %s in language %s: %s / %s" % \
+                (self.pkg.package, rel, comp, self.pkg.language, self.pkg.description, self.pkg.description_md5))
             else:
-              query = 'EXECUTE ddtp_insert (%s, %s, %s, %s, %s, %s, %s)'
+              query = 'EXECUTE ddtp_insert (%s, %s, %s, %s, %s)'
               try:
                 self.log.debug(query, tuple([quote(item) for item in paramtuple]))
-                cur.execute(query, (self.pkg.package, self.pkg.release, self.pkg.component, self.pkg.language, self.pkg.description, self.pkg.long_description, self.pkg.description_md5))
-                # self.connection.commit() # commit every single insert as long as translation files are featuring duplicated keys
+                cur.execute(query, (self.pkg.package, self.pkg.language, self.pkg.description, self.pkg.long_description, self.pkg.description_md5))
               except IntegrityError, err:
                 self.log.exception("Duplicated key in language %s: (%s)", self.pkg.language,
                                  ", ".join([to_unicode(item) for item in (self.pkg.package, self.pkg.release, self.pkg.component, self.pkg.description, self.pkg.description_md5)]))

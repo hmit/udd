@@ -602,38 +602,41 @@ GRANT SELECT ON all_packages_distrelcomparch TO PUBLIC;
 GRANT SELECT ON all_bugs TO PUBLIC;
 
 CREATE TABLE descriptions (
-       package      text not null,
-       release      text not null,
-       component    text not null,
-       language     text not null,
-       description  text not null,
-       long_description text not null,
-       description_md5  text not null, -- md5 sum of the original English description
-    PRIMARY KEY (package, release, component, language, description, description_md5)
+    package          text not null,
+    distribution     text not null,
+    release          text not null,
+    component        text not null,
+    language         text not null,
+    description      text not null,
+    long_description text not null,
+    description_md5  text not null, -- md5 sum of the original English description
+    PRIMARY KEY (package, distribution, release, component, language, description, description_md5)
 );
 GRANT SELECT ON descriptions TO PUBLIC;
 
 CREATE TABLE ubuntu_descriptions (
-       package      text not null,
-       release      text not null,
-       component    text not null,
-       language     text not null,
-       description  text not null,
-       long_description text not null,
-       description_md5  text not null, -- md5 sum of the original English description
-    PRIMARY KEY (package, release, component, language, description, description_md5)
+    package          text not null,
+    distribution     text not null,
+    release          text not null,
+    component        text not null,
+    language         text not null,
+    description      text not null,
+    long_description text not null,
+    description_md5  text not null, -- md5 sum of the original English description
+    PRIMARY KEY (package, distribution, release, component, language, description, description_md5)
 );
 GRANT SELECT ON ubuntu_descriptions TO PUBLIC;
 
 CREATE TABLE derivatives_descriptions (
-       package      text not null,
-       release      text not null,
-       component    text not null,
-       language     text not null,
-       description  text not null,
-       long_description text not null,
-       description_md5  text not null, -- md5 sum of the original English description
-    PRIMARY KEY (package, release, component, language, description, description_md5)
+    package          text not null,
+    distribution     text not null,
+    release          text not null,
+    component        text not null,
+    language         text not null,
+    description      text not null,
+    long_description text not null,
+    description_md5  text not null, -- md5 sum of the original English description
+    PRIMARY KEY (package, distribution, release, component, language, description, description_md5)
 );
 GRANT SELECT ON derivatives_descriptions TO PUBLIC;
 
@@ -641,13 +644,14 @@ GRANT SELECT ON derivatives_descriptions TO PUBLIC;
 -- was imported previousely and thus reducing workload on UDD host in
 -- preventing doing duplicate work
 CREATE TABLE description_imports (
-    release                     text,
-    component                   text,
-    language                    text,
-    translationfile             text,
-    translationfile_sha1        text,
-    import_date                 timestamp default now(),
-    PRIMARY KEY (release, component, language)
+    distribution         text not null,
+    release              text not null,
+    component            text not null,
+    language             text not null,
+    translationfile      text not null,
+    translationfile_sha1 text not null,
+    import_date          timestamp default now(),
+    PRIMARY KEY (distribution, release, component, language)
 );
 
 -- active_dds view
