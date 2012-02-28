@@ -187,7 +187,7 @@ class ddtp_gatherer(gatherer):
         cur = self.cursor()
         # Delete only records where we actually have Translation files.  This
         # prevents dump deletion of all data in case of broken downloads
-        self.log.debug('EXECUTE ddtp_delete (%s)', (lang))
+        cur.execute('EXECUTE ddtp_delete (%s)', (lang,))
 
         i18n_error_flag=0
         descstring = 'Description-'+lang
