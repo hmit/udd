@@ -104,13 +104,13 @@ debian-backports-squeeze:
   archs: [amd64, armel, i386, ia64, mips, mipsel, powerpc, s390, sparc, kfreebsd-amd64, kfreebsd-i386]       
   directory: /org/mirrors/debian-backports/dists/squeeze-backports/
   components: [main, contrib, non-free, main/debian-installer]
-  distribution: debian-backports
+  distribution: debian
   packages-table: packages
   sources-table: sources
   uploaders-table: uploaders
   packages-schema: packages
   sources-schema: sources
-  release: squeeze
+  release: squeeze-backports
   descriptions-table: descriptions
 
 #debian-backports-squeeze-sloppy:
