@@ -44,11 +44,12 @@ class popcon_gatherer(gatherer):
     cur.execute("DELETE FROM " + table_src_average)
 
     # used for ignoring ubuntu's broken popcon lines
-    ascii_match = re.compile("^[A-Za-z0-9-.+_]+$")
+    ascii_match = re.compile("^(?P<package>[A-Za-z0-9-.+_]+)(:(?P<arch>[a-z0-9]+))?$")
 
     linenr = 0
-    d = {}
+    votes = {}
     for line in popcon:
+      d = {}
       linenr += 1
       name, data = line.split(None, 1)
       if name == "Submissions:":
@@ -57,18 +58,24 @@ class popcon_gatherer(gatherer):
         continue
       try:
         (name, vote, old, recent, nofiles) = data.split()
-        d['name'] = name
         for k in ['vote', 'old', 'recent', 'nofiles']:
           exec '%s = int(%s)' % (k,k)
           exec 'd["%s"] = %s' % (k,k)
         d['insts'] = vote + old + recent + nofiles
-        if ascii_match.match(name) == None:
+        matches = ascii_match.match(name)
+        if matches == None:
           print "%s:%d - illegal package name %s" % (my_config['path'], linenr, line.rstrip("\n"))
           continue
-        query = "EXECUTE pop_insert(%(name)s, %(insts)s, %(vote)s, %(old)s, %(recent)s, %(nofiles)s)"
-        cur.execute(query, d)
+        d['name'] = matches.group('package')
+        if d['name'] in votes:
+          for k in ['vote', 'old', 'recent', 'nofiles', 'insts']:
+            votes[d['name']][k] += d[k]
+        else:
+          votes[d['name']] = d
       except ValueError:
         continue
+    query = "EXECUTE pop_insert(%(name)s, %(insts)s, %(vote)s, %(old)s, %(recent)s, %(nofiles)s)"
+    cur.executemany(query, votes.values())
 
     cur.execute("DEALLOCATE pop_insert")
 
