@@ -1,3 +1,9 @@
 To check if vacuum is working:
 SELECT relname, reltuples, relpages FROM pg_class ORDER BY relpages DESC;
 (thanks Q_)
+
+
+In case a transaction is waiting in idle mode you should do the following:
+
+ 1. psql udd -c "select * from dsa_kill_all_idle_transactions();"
+ 2. kill running importers
