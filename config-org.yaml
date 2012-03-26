@@ -895,7 +895,7 @@ screenshots:
 
 bibref:
   type: bibref
-  update-command: /org/udd.debian.org/udd/scripts/fetch_bibref.sh
+  update-command: /org/udd.debian.org/udd/scripts/fetch_bibref.sh /org/udd.debian.org/mirrors/bibref svn://svn.debian.org/svn/collab-qa/packages-metadata
   path: /org/udd.debian.org/mirrors/bibref
   cache: /org/udd.debian.org/mirrors/cache
   table: bibref

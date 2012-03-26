@@ -6,21 +6,100 @@ This script imports bibliographic references from upstream-metadata.debian.net.
 
 from gatherer import gatherer
 from sys import stderr, exit
-from yaml import safe_load_all
+from os import listdir
+from fnmatch import fnmatch
+import yaml
+from psycopg2 import IntegrityError, InternalError
+import re
+import logging
+import logging.handlers
 
-online=0
+debug=0
 
 def get_gatherer(connection, config, source):
   return bibref_gatherer(connection, config, source)
 
 class bibref_gatherer(gatherer):
   """
-  Bibliographic references from upstream-metadata.debian.net.
+  Bibliographic references from debian/upstream files
   """
 
   def __init__(self, connection, config, source):
     gatherer.__init__(self, connection, config, source)
     self.assert_my_config('table')
+
+    self.log = logging.getLogger(self.__class__.__name__)
+    if debug==1:
+        self.log.setLevel(logging.DEBUG)
+    else:
+        self.log.setLevel(logging.INFO)
+    handler = logging.handlers.RotatingFileHandler(filename=self.__class__.__name__+'.log',mode='w')
+    formatter = logging.Formatter("%(asctime)s - %(levelname)s - (%(lineno)d): %(message)s")
+    handler.setFormatter(formatter)
+    self.log.addHandler(handler)
+
+    self.bibrefs = []
+    self.bibrefsinglelist = []
+
+  def setref(self, references, package, rank):
+    year=''
+    defined_fields = { 'article'   : 0,
+                       'author'    : 0,
+                       'booktitle' : 0,
+                       'doi'       : 0,
+                       'editor'    : 0,
+                       'eprint'    : 0,
+                       'issn'      : 0,
+                       'journal'   : 0,
+                       'license'   : 0,
+                       'month'     : 0,
+                       'number'    : 0,
+                       'pages'     : 0,
+                       'publisher' : 0,
+                       'pmid'      : 0,
+                       'title'     : 0,
+                       'url'       : 0,
+                       'volume'    : 0,
+                       'year'      : 0,
+                     }
+    for r in references.keys():
+      key = r.lower()
+      if defined_fields.has_key(key):
+        if defined_fields[key] > 0:
+          self.log.error("Duplicated key in package '%s': %s", package, key)
+          continue
+        else:
+          defined_fields[key] = 1
+      else:
+          self.log.warning("Unexpected key in package '%s': %s", package, key)
+          defined_fields[key] = 1
+      ref={}
+      ref['rank']    = rank
+      ref['package'] = package
+      ref['key']     = key
+      if isinstance(references[r], int):
+        ref['value']   = str(references[r])
+      else:
+        ref['value']   = references[r]
+      self.bibrefs.append(ref)
+      if r.lower() == 'year':
+        year = ref['value']
+    # Create unique BibTeX key
+    bibtexkey = package
+    if bibtexkey in self.bibrefsinglelist and year != '':
+      bibtexkey = package+year
+    if bibtexkey in self.bibrefsinglelist:
+      # if there are more than one reference per package and even in
+      # the same year append the rank as letter
+      bibtexkey += 'abcdefghijklmnopqrstuvwxyz'[rank]
+    ref={}
+    ref['rank']    = rank
+    ref['package'] = package
+    ref['key']     = 'bibtex'
+    ref['value']   = bibtexkey
+    self.bibrefsinglelist.append(bibtexkey)
+    self.bibrefs.append(ref)
+    return ref
 
   def run(self):
     my_config = self.my_config
@@ -28,30 +107,98 @@ class bibref_gatherer(gatherer):
     #for the new data:
     cur = self.cursor()
 
-    bibref_file = my_config['bibref_yaml']
-    fp = open(bibref_file, 'r')
-    result = fp.read()
-    fp.close()
+    u_dirs = listdir(my_config['path'])
 
-    if not len(result) > 0:
-      print >>stderr, "BibRef input file does not contain data.  Leave table %s unchanged and stop processing here" % (my_config['table'])
+    for u in u_dirs:
+      upath=my_config['path']+'/'+u
+      packages = []
+      for file in listdir(upath):
+        if fnmatch(file, '*.upstream'):
+          packages.append(re.sub("\.upstream", "", file))
+      # packages = listdir(upath)
+      for package in packages:
+        print package
+        ufile = upath+'/'+package+'.upstream'
+        uf = open(ufile)
+        try:
+          fields = yaml.load(uf.read())
+        except yaml.scanner.ScannerError, err:
+          self.log.error("Syntax error in file %s: %s" % (ufile, str(err)))
+          continue
+        try:
+          references=fields['Reference']
+        except KeyError:
+          self.log.warning("No references found for package %s (Keys: %s)" % (package,str(fields.keys())))
+          continue
+        except TypeError:
+          self.log.warning("debian/upstream file of package %s does not seem to be a YAML file" % (package))
+          continue
+
+        if isinstance(references, list):
+          # upstream file contains more than one reference
+          rank=0
+          for singleref in references:
+            self.setref(singleref, package, rank)
+            rank += 1
+        elif isinstance(references, str):
+          # upstream file has wrongly formatted reference
+          self.log.error("File %s has following references: %s" % (ufile, references))
+        else:
+          # upstream file has exactly one reference
+          self.setref(references, package, 0)
+
+        for key in fields.keys():
+          keyl=key.lower()
+    	  if keyl.startswith('reference-'):
+    	    # sometimes DOI and PMID are stored separately:
+    	    if keyl.endswith('doi'):
+    	      if references.has_key('doi') or references.has_key('DOI'):
+                self.log.warning("Extra key in package '%s': %s - please remove from upstream file!", package, key)
+    	        continue
+              rdoi={}
+              rdoi['rank']    = 0
+              rdoi['package'] = package
+              rdoi['key']     = 'doi'
+              rdoi['value']   = fields[key]
+              self.bibrefs.append(rdoi)
+    	    elif keyl.endswith('pmid'):
+    	      if references.has_key('pmid') or references.has_key('PMID'):
+                self.log.warning("Extra key in package '%s': %s - please remove from upstream file!", package, key)
+    	        continue
+              rpmid={}
+              rpmid['rank']    = 0
+              rpmid['package'] = package
+              rpmid['key']     = 'pmid'
+              rpmid['value']   = fields[key]
+              self.bibrefs.append(rpmid)
+    	    else:
+    	      print "Package %s has %s : %s" % (package, key, fields[key])
+    # only truncate table if there are really some references found
+    if len(self.bibrefs) == 0:
+      self.log.error("No references found in any upstream file.")
       exit(1)
+
+    # print self.bibrefsinglelist
     cur.execute("TRUNCATE %s" % (my_config['table']))
-    query = """PREPARE bibref_insert (text, text, text) AS
+    query = """PREPARE bibref_insert (text, text, text, int) AS
                    INSERT INTO %s
-                   (package, key, value)
-                    VALUES ($1, $2, $3)""" % (my_config['table'])
+                   (package, key, value, rank)
+                    VALUES ($1, $2, $3, $4)""" % (my_config['table'])
     cur.execute(query)
 
-    for res in safe_load_all(result):
-      package, key, value = res
-      value = unicode(value)
-      query = "EXECUTE bibref_insert (%s, %s, %s)"
+    query = "EXECUTE bibref_insert (%(package)s, %(key)s, %(value)s, %(rank)s)"
+    for ref in self.bibrefs:
       try:
-        cur.execute(query, (package, key, value.encode('utf-8')))
+        cur.execute(query, ref)
       except UnicodeEncodeError, err:
-        print >>stderr, "Unable to inject data for package %s, key %s, value %s. %s" % (package, key, value, err)
-        print >>stderr,  "-->", res
+        self.log.error("Unable to inject data: %s\n%s" % (str(ref),str(err)))
+        exit(1)
+      except IntegrityError, err:
+        self.log.error("Unable to inject data: %s\n%s" % (str(ref),str(err)))
+        exit(1)
+      except InternalError, err:
+        self.log.error("Unable to inject data: %s\n%s" % (str(ref),str(err)))
+        exit(1)
     cur.execute("DEALLOCATE bibref_insert")
     cur.execute("ANALYZE %s" % my_config['table'])
 
