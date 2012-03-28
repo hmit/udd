@@ -23,11 +23,16 @@ CREATE OR REPLACE FUNCTION blends_query_packages(text[],text[]) RETURNS SETOF RE
 	 pop.vote, pop.recent,
          tags.debtags,
          screenshot_versions, large_image_urls, small_image_urls,
-         bibyear.value   AS "Published-Year",
-         bibtitle.value  AS "Published-Title",
-         bibauthor.value AS "Published-Authors",
-         bibdoi.value    AS "Published-DOI",
-         bibpmid.value   AS "Published-PubMed",
+         bibyear.value    AS "year",
+         bibtitle.value   AS "title",
+         bibauthor.value  AS "authors",
+         bibdoi.value     AS "doi",
+         bibpmid.value    AS "pubmed",
+         biburl.value     AS "url",
+         bibjournal.value AS "journal",
+         bibvolume.value  AS "volume",
+         bibnumber.value  AS "number",
+         bibpages.value   AS "pages",
          en.description AS description_en, en.long_description AS long_description_en,
          cs.description AS description_cs, cs.long_description AS long_description_cs,
          da.description AS description_da, da.long_description AS long_description_da,
@@ -185,11 +190,16 @@ CREATE OR REPLACE FUNCTION blends_query_packages(text[],text[]) RETURNS SETOF RE
          WHERE enhances LIKE ANY( $2 )
       ) AS tmpenh GROUP BY package
     ) enh ON enh.package = p.package
-    LEFT OUTER JOIN bibref bibyear   ON p.package = bibyear.package   AND bibyear.key   = 'Reference-Year'
-    LEFT OUTER JOIN bibref bibtitle  ON p.package = bibtitle.package  AND bibtitle.key  = 'Reference-Title'
-    LEFT OUTER JOIN bibref bibauthor ON p.package = bibauthor.package AND bibauthor.key = 'Reference-Author'
-    LEFT OUTER JOIN bibref bibdoi    ON p.package = bibdoi.package    AND bibdoi.key    = 'DOI'
-    LEFT OUTER JOIN bibref bibpmid   ON p.package = bibpmid.package   AND bibpmid.key   = 'PMID'
+    LEFT OUTER JOIN bibref bibyear    ON p.source = bibyear.source    AND bibyear.rank = 0   AND bibyear.key    = 'year'
+    LEFT OUTER JOIN bibref bibtitle   ON p.source = bibtitle.source   AND bibtitle.rank = 0   AND bibtitle.key   = 'title'
+    LEFT OUTER JOIN bibref bibauthor  ON p.source = bibauthor.source  AND bibauthor.rank = 0  AND bibauthor.key  = 'author'
+    LEFT OUTER JOIN bibref bibdoi     ON p.source = bibdoi.source     AND bibdoi.rank = 0     AND bibdoi.key     = 'doi'
+    LEFT OUTER JOIN bibref bibpmid    ON p.source = bibpmid.source    AND bibpmid.rank = 0    AND bibpmid.key    = 'pmid'
+    LEFT OUTER JOIN bibref biburl     ON p.source = biburl.source     AND biburl.rank = 0     AND biburl.key     = 'url'
+    LEFT OUTER JOIN bibref bibjournal ON p.source = bibjournal.source AND bibjournal.rank = 0 AND bibjournal.key = 'journal'
+    LEFT OUTER JOIN bibref bibvolume  ON p.source = bibvolume.source  AND bibvolume.rank = 0  AND bibvolume.key  = 'volume'
+    LEFT OUTER JOIN bibref bibnumber  ON p.source = bibnumber.source  AND bibnumber.rank = 0  AND bibnumber.key  = 'number'
+    LEFT OUTER JOIN bibref bibpages   ON p.source = bibpages.source   AND bibpages.rank = 0   AND bibpages.key   = 'pages'
     ORDER BY p.package
  $$ LANGUAGE 'SQL';
 

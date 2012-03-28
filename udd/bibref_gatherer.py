@@ -41,7 +41,7 @@ class bibref_gatherer(gatherer):
     self.bibrefs = []
     self.bibrefsinglelist = []
 
-  def setref(self, references, package, rank):
+  def setref(self, references, source, rank):
     year=''
     defined_fields = { 'article'   : 0,
                        'author'    : 0,
@@ -66,16 +66,16 @@ class bibref_gatherer(gatherer):
       key = r.lower()
       if defined_fields.has_key(key):
         if defined_fields[key] > 0:
-          self.log.error("Duplicated key in package '%s': %s", package, key)
+          self.log.error("Duplicated key in source package '%s': %s", source, key)
           continue
         else:
           defined_fields[key] = 1
       else:
-          self.log.warning("Unexpected key in package '%s': %s", package, key)
+          self.log.warning("Unexpected key in source package '%s': %s", source, key)
           defined_fields[key] = 1
       ref={}
       ref['rank']    = rank
-      ref['package'] = package
+      ref['source']  = source
       ref['key']     = key
       if isinstance(references[r], int):
         ref['value']   = str(references[r])
@@ -85,16 +85,16 @@ class bibref_gatherer(gatherer):
       if r.lower() == 'year':
         year = ref['value']
     # Create unique BibTeX key
-    bibtexkey = package
+    bibtexkey = source
     if bibtexkey in self.bibrefsinglelist and year != '':
-      bibtexkey = package+year
+      bibtexkey = source+year
     if bibtexkey in self.bibrefsinglelist:
-      # if there are more than one reference per package and even in
+      # if there are more than one reference per source package and even in
       # the same year append the rank as letter
       bibtexkey += 'abcdefghijklmnopqrstuvwxyz'[rank]
     ref={}
     ref['rank']    = rank
-    ref['package'] = package
+    ref['source']  = source
     ref['key']     = 'bibtex'
     ref['value']   = bibtexkey
     self.bibrefsinglelist.append(bibtexkey)
@@ -111,14 +111,13 @@ class bibref_gatherer(gatherer):
 
     for u in u_dirs:
       upath=my_config['path']+'/'+u
-      packages = []
+      sources = []
       for file in listdir(upath):
         if fnmatch(file, '*.upstream'):
-          packages.append(re.sub("\.upstream", "", file))
-      # packages = listdir(upath)
-      for package in packages:
-        print package
-        ufile = upath+'/'+package+'.upstream'
+          sources.append(re.sub("\.upstream", "", file))
+      for source in sources:
+        print source
+        ufile = upath+'/'+source+'.upstream'
         uf = open(ufile)
         try:
           fields = yaml.load(uf.read())
@@ -128,24 +127,24 @@ class bibref_gatherer(gatherer):
         try:
           references=fields['Reference']
         except KeyError:
-          self.log.warning("No references found for package %s (Keys: %s)" % (package,str(fields.keys())))
+          self.log.warning("No references found for source package %s (Keys: %s)" % (source, str(fields.keys())))
           continue
         except TypeError:
-          self.log.warning("debian/upstream file of package %s does not seem to be a YAML file" % (package))
+          self.log.warning("debian/upstream file of source package %s does not seem to be a YAML file" % (source))
           continue
 
         if isinstance(references, list):
           # upstream file contains more than one reference
           rank=0
           for singleref in references:
-            self.setref(singleref, package, rank)
+            self.setref(singleref, source, rank)
             rank += 1
         elif isinstance(references, str):
           # upstream file has wrongly formatted reference
           self.log.error("File %s has following references: %s" % (ufile, references))
         else:
           # upstream file has exactly one reference
-          self.setref(references, package, 0)
+          self.setref(references, source, 0)
 
         for key in fields.keys():
           keyl=key.lower()
@@ -153,26 +152,26 @@ class bibref_gatherer(gatherer):
     	    # sometimes DOI and PMID are stored separately:
     	    if keyl.endswith('doi'):
     	      if references.has_key('doi') or references.has_key('DOI'):
-                self.log.warning("Extra key in package '%s': %s - please remove from upstream file!", package, key)
+                self.log.warning("Extra key in source package '%s': %s - please remove from upstream file!", source, key)
     	        continue
               rdoi={}
               rdoi['rank']    = 0
-              rdoi['package'] = package
+              rdoi['source']  = source
               rdoi['key']     = 'doi'
               rdoi['value']   = fields[key]
               self.bibrefs.append(rdoi)
     	    elif keyl.endswith('pmid'):
     	      if references.has_key('pmid') or references.has_key('PMID'):
-                self.log.warning("Extra key in package '%s': %s - please remove from upstream file!", package, key)
+                self.log.warning("Extra key in source package '%s': %s - please remove from upstream file!", source, key)
     	        continue
               rpmid={}
               rpmid['rank']    = 0
-              rpmid['package'] = package
+              rpmid['source']  = source
               rpmid['key']     = 'pmid'
               rpmid['value']   = fields[key]
               self.bibrefs.append(rpmid)
     	    else:
-    	      print "Package %s has %s : %s" % (package, key, fields[key])
+    	      print "Source package %s has %s : %s" % (source, key, fields[key])
     # only truncate table if there are really some references found
     if len(self.bibrefs) == 0:
       self.log.error("No references found in any upstream file.")
@@ -182,11 +181,11 @@ class bibref_gatherer(gatherer):
     cur.execute("TRUNCATE %s" % (my_config['table']))
     query = """PREPARE bibref_insert (text, text, text, int) AS
                    INSERT INTO %s
-                   (package, key, value, rank)
+                   (source, key, value, rank)
                     VALUES ($1, $2, $3, $4)""" % (my_config['table'])
     cur.execute(query)
 
-    query = "EXECUTE bibref_insert (%(package)s, %(key)s, %(value)s, %(rank)s)"
+    query = "EXECUTE bibref_insert (%(source)s, %(key)s, %(value)s, %(rank)s)"
     for ref in self.bibrefs:
       try:
         cur.execute(query, ref)
