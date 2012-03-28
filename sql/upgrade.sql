@@ -434,3 +434,6 @@ CREATE TABLE description_imports (
     PRIMARY KEY (distribution, release, component, language)
 );
 
+-- 2012-03-28
+-- need to set permission after recreating the view
+GRANT SELECT ON all_packages TO PUBLIC;
