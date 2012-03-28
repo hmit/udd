@@ -116,7 +116,7 @@ class bibref_gatherer(gatherer):
         if fnmatch(file, '*.upstream'):
           sources.append(re.sub("\.upstream", "", file))
       for source in sources:
-        print source
+        # print source
         ufile = upath+'/'+source+'.upstream'
         uf = open(ufile)
         try:
