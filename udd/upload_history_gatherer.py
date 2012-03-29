@@ -126,7 +126,7 @@ class upload_history_gatherer(gatherer):
               current['Original-Maintainer_name'], current['Original-Maintainer_email'] = aux.parse_email(current['Original-Maintainer'])
             else:
               current['Original-Maintainer_name'] = current['Original-Maintainer_email'] = 'N/A'
-          if not current.has_key('Message-Date') and current.has_key('Date'):
+          if (not current.has_key('Message-Date')) and (current.has_key('Date')):
             current['Message-Date'] = current['Date']
           current['Message-Date'] = current['Message-Date'].partition('(')[0].replace('+4200','+0000').replace('+4300','+0000').replace('+4100','+0000').replace('+4400','+0000').replace('+4000','+0000')
           if (current['Source'], current['Version']) in added or \
