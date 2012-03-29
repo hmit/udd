@@ -369,6 +369,7 @@ CREATE VIEW all_packages AS
 SELECT * FROM packages
 UNION ALL SELECT * FROM ubuntu_packages
 UNION ALL SELECT * FROM derivatives_packages;
+GRANT SELECT ON all_packages TO PUBLIC;
 
 -- Totally missed to update the release table
 UPDATE releases SET releasedate = '2011-02-06' WHERE release like 'squeeze%' ;
