@@ -11,7 +11,7 @@ general:
     testing-migrations: module udd.testing_migrations_gatherer
     upload-history: module udd.upload_history_gatherer
     orphaned-packages: module udd.orphaned_packages_gatherer
-    bugs: exec DEBBUGS_CONFIG_FILE=/org/bugs.debian.org/etc/config perl /org/udd.debian.org/udd/udd/bugs_gatherer.pl 
+    bugs: exec DEBBUGS_CONFIG_FILE=/org/udd.debian.org/udd/bugs-config perl /org/udd.debian.org/udd/udd/bugs_gatherer.pl 
     carnivore: module udd.carnivore_gatherer
     lintian: module udd.lintian_gatherer
     debtags: module udd.debtags_gatherer
@@ -38,6 +38,129 @@ general:
     sh3eb, sh4, sh4eb, sh, knetbsd-i386, netbsd-alpha, sparc64,
     netbsd-i386, hurd-powerpc, kfreebsd-powerpc, netbsd-powerpc, hurd-sparc,
     kfreebsd-sparc, netbsd-sparc, darwin-i386, freebsd-i386, openbsd-i386, darwin-powerpc]
+
+debian-lenny:
+  type: src-pkg
+  archs: [alpha, amd64, arm, armel, hppa,
+          i386, ia64, mips,
+          mipsel, powerpc, s390, sparc]       
+  directory: /org/mirrors/ftp.debian.org/ftp/dists/lenny/
+  components: [main, contrib, non-free, main/debian-installer, non-free/debian-installer]
+  distribution: debian
+  packages-table: packages
+  sources-table: sources
+  uploaders-table: uploaders
+  packages-schema: packages
+  sources-schema: sources
+  release: lenny
+  descriptions-table: descriptions
+
+debian-lenny-security:
+  type: src-pkg
+  archs: [alpha, amd64, arm, armel, hppa,
+          i386, ia64, mips,
+          mipsel, powerpc, s390, sparc]       
+  directory: /org/mirrors/debian-security/dists/lenny/updates/
+  components: [main, contrib, non-free]
+  distribution: debian
+  packages-table: packages
+  sources-table: sources
+  uploaders-table: uploaders
+  packages-schema: packages
+  sources-schema: sources
+  release: lenny-security
+  descriptions-table: descriptions
+
+debian-lenny-proposed-updates:
+  type: src-pkg
+  archs: [alpha, amd64, arm, armel, hppa,
+          i386, ia64, mips,
+          mipsel, powerpc, s390, sparc]       
+  directory: /org/mirrors/ftp.debian.org/ftp/dists/lenny-proposed-updates/
+  components: [main, contrib, non-free]
+  distribution: debian
+  packages-table: packages
+  sources-table: sources
+  uploaders-table: uploaders
+  packages-schema: packages
+  sources-schema: sources
+  release: lenny-proposed-updates
+  descriptions-table: descriptions
+
+debian-backports-lenny:
+  type: src-pkg
+  archs: [alpha, amd64, arm, armel, hppa, i386, ia64,  mips,
+          mipsel, powerpc, s390, sparc]       
+  directory: /org/mirrors/debian-backports/dists/lenny-backports/
+  components: [main, contrib, non-free, main/debian-installer]
+  distribution: debian
+  packages-table: packages
+  sources-table: sources
+  uploaders-table: uploaders
+  packages-schema: packages
+  sources-schema: sources
+  release: lenny-backports
+  descriptions-table: descriptions
+
+debian-backports-lenny-sloppy:
+  type: src-pkg
+  archs: [alpha, amd64, arm, armel, hppa, i386, ia64,  mips,
+          mipsel, powerpc, s390, sparc]       
+  directory: /org/mirrors/debian-backports/dists/lenny-backports-sloppy/
+  components: [main, contrib, non-free ]
+  distribution: debian
+  packages-table: packages
+  sources-table: sources
+  uploaders-table: uploaders
+  packages-schema: packages
+  sources-schema: sources
+  release: lenny-backports-sloppy
+  descriptions-table: descriptions
+
+debian-volatile-lenny:
+  type: src-pkg
+  archs: [alpha, amd64, arm, armel, hppa, i386, ia64,  mips,
+          mipsel, powerpc, s390, sparc]       
+  directory: /org/mirrors/volatile.debian.org/archive/dists/lenny/volatile/
+  components: [main, contrib, non-free]
+  distribution: debian
+  packages-table: packages
+  sources-table: sources
+  uploaders-table: uploaders
+  packages-schema: packages
+  sources-schema: sources
+  release: lenny-volatile
+  descriptions-table: descriptions
+
+debian-volatile-sloppy-lenny:
+  type: src-pkg
+  archs: [alpha, amd64, arm, armel, hppa, i386, ia64,  mips,
+          mipsel, powerpc, s390, sparc]       
+  directory: /org/mirrors/volatile.debian.org/archive/dists/lenny/volatile-sloppy/
+  components: [main, contrib, non-free]
+  distribution: debian
+  packages-table: packages
+  sources-table: sources
+  uploaders-table: uploaders
+  packages-schema: packages
+  sources-schema: sources
+  release: lenny-volatile-sloppy
+  descriptions-table: descriptions
+
+debian-volatile-proposed-lenny:
+  type: src-pkg
+  archs: [alpha, amd64, arm, armel, hppa, i386, ia64,  mips,
+          mipsel, powerpc, s390, sparc]       
+  directory: /org/mirrors/volatile.debian.org/archive/dists/lenny-proposed-updates/volatile/
+  components: [main, contrib, non-free]
+  distribution: debian
+  packages-table: packages
+  sources-table: sources
+  uploaders-table: uploaders
+  packages-schema: packages
+  sources-schema: sources
+  release: lenny-volatile-proposed
+  descriptions-table: descriptions
 
 debian-squeeze:
   type: src-pkg
