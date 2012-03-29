@@ -1,2 +1,8 @@
 Kill all idle transactions:
 udd=> select * from dsa_kill_all_idle_transactions();
+
+size of DB:
+SELECT pg_size_pretty(pg_database_size('udd'));
+
+size of relations:
+select relname, pg_total_relation_size(relname::text) size from pg_class where relnamespace=2200 and relkind='r' order by size desc;
