@@ -1,3 +1,13 @@
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-- This file is used to document the changes that should be done at other     --
+-- instances of UDD.  Please do not apply it blindly to the main instance at  --
+-- udd.debian.org.                                                            --
+-- If you need to apply singular changes please document this here including  --
+-- date and purpose and do not forget to commit to SVN.                       --
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
 -- 2008-09-22: Change severity from text to bugs_severity enum:
 CREATE TYPE bugs_severity AS ENUM ('fixed', 'wishlist', 'minor', 'normal', 'important', 'serious', 'grave', 'critical');
 ALTER TABLE bugs add severity2 bugs_severity;
