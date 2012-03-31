@@ -41,7 +41,7 @@ class bibref_gatherer(gatherer):
     self.bibrefs = []
     self.bibrefsinglelist = []
 
-  def setref(self, references, source, rank):
+  def setref(self, references, source, package, rank):
     year=''
     defined_fields = { 'article'   : 0,
                        'author'    : 0,
@@ -66,7 +66,10 @@ class bibref_gatherer(gatherer):
                        'year'      : 0,
                      }
     for r in references.keys():
+      # print r
       key = r.lower()
+      if key == 'debian-package':
+        continue
       if defined_fields.has_key(key):
         if defined_fields[key] > 0:
           self.log.error("Duplicated key in source package '%s': %s", source, key)
@@ -80,6 +83,7 @@ class bibref_gatherer(gatherer):
       ref['rank']    = rank
       ref['source']  = source
       ref['key']     = key
+      ref['package'] = package
       if isinstance(references[r], int):
         ref['value']   = str(references[r])
       else:
@@ -100,6 +104,7 @@ class bibref_gatherer(gatherer):
     ref['source']  = source
     ref['key']     = 'bibtex'
     ref['value']   = bibtexkey
+    ref['package'] = package
     self.bibrefsinglelist.append(bibtexkey)
     self.bibrefs.append(ref)
     return ref
@@ -138,16 +143,43 @@ class bibref_gatherer(gatherer):
 
         if isinstance(references, list):
           # upstream file contains more than one reference
-          rank=0
+          rank={}      # record different ranks per binary package
+          rank[''] = 0 # default is to have no specific Debian package which is marked by '' in the package column
+          refid = 0
           for singleref in references:
-            self.setref(singleref, source, rank)
-            rank += 1
+            singleref['refid'] = refid # refid is not used currently but might make sense to identify references internally
+            singleref['package'] = ''
+            package_found = False
+            for r in singleref.keys():
+              key = r.lower()
+              if key != 'debian-package':
+                continue
+              self.log.warning("Source package '%s' has key 'debian-package'", source)
+              pkg = singleref['package'] = singleref[r]
+              package_found = True
+              if rank.has_key(pkg):
+                rank[pkg] += 1
+              else:
+                rank[pkg]  = 0
+              singleref['rank'] = rank[pkg]
+            if not package_found:
+              singleref['rank'] = rank['']
+              rank[''] += 1
+          for singleref in references:
+            self.setref(singleref, source, singleref['package'], singleref['rank'])
         elif isinstance(references, str):
           # upstream file has wrongly formatted reference
           self.log.error("File %s has following references: %s" % (ufile, references))
         else:
           # upstream file has exactly one reference
-          self.setref(references, source, 0)
+          package = ''
+          for r in references.keys():
+            key = r.lower()
+            if key != 'debian-package':
+              continue
+            self.log.warning("Source package '%s' has key 'debian-package'", source)
+            package = references[r]
+          self.setref(references, source, package, 0)
 
         for key in fields.keys():
           keyl=key.lower()
@@ -162,6 +194,7 @@ class bibref_gatherer(gatherer):
               rdoi['source']  = source
               rdoi['key']     = 'doi'
               rdoi['value']   = fields[key]
+              rdoi['package'] = ''          ### Hack!!! we should get rid of Reference-DOI soon to enable specifying 'debian-package' relieable
               self.bibrefs.append(rdoi)
     	    elif keyl.endswith('pmid'):
     	      if references.has_key('pmid') or references.has_key('PMID'):
@@ -172,6 +205,7 @@ class bibref_gatherer(gatherer):
               rpmid['source']  = source
               rpmid['key']     = 'pmid'
               rpmid['value']   = fields[key]
+              rpmid['package'] = ''          ### Hack!!! we should get rid of Reference-PMID soon to enable specifying 'debian-package' relieable
               self.bibrefs.append(rpmid)
     	    else:
     	      print "Source package %s has %s : %s" % (source, key, fields[key])
@@ -182,13 +216,13 @@ class bibref_gatherer(gatherer):
 
     # print self.bibrefsinglelist
     cur.execute("TRUNCATE %s" % (my_config['table']))
-    query = """PREPARE bibref_insert (text, text, text, int) AS
+    query = """PREPARE bibref_insert (text, text, text, text, int) AS
                    INSERT INTO %s
-                   (source, key, value, rank)
-                    VALUES ($1, $2, $3, $4)""" % (my_config['table'])
+                   (source, key, value, package, rank)
+                    VALUES ($1, $2, $3, $4, $5)""" % (my_config['table'])
     cur.execute(query)
 
-    query = "EXECUTE bibref_insert (%(source)s, %(key)s, %(value)s, %(rank)s)"
+    query = "EXECUTE bibref_insert (%(source)s, %(key)s, %(value)s, %(package)s, %(rank)s)"
     for ref in self.bibrefs:
       try:
         cur.execute(query, ref)
@@ -199,6 +233,9 @@ class bibref_gatherer(gatherer):
         self.log.error("Unable to inject data: %s\n%s" % (str(ref),str(err)))
         exit(1)
       except InternalError, err:
+        self.log.error("Unable to inject data: %s\n%s" % (str(ref),str(err)))
+        exit(1)
+      except KeyError, err:
         self.log.error("Unable to inject data: %s\n%s" % (str(ref),str(err)))
         exit(1)
     cur.execute("DEALLOCATE bibref_insert")
