@@ -87,7 +87,7 @@ class bibref_gatherer(gatherer):
       if isinstance(references[r], int):
         ref['value']   = str(references[r])
       else:
-        ref['value']   = references[r]
+        ref['value']   = references[r].strip()
       self.bibrefs.append(ref)
       if r.lower() == 'year':
         year = ref['value']
