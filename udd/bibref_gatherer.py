@@ -77,7 +77,8 @@ class bibref_gatherer(gatherer):
         else:
           defined_fields[key] = 1
       else:
-          self.log.warning("Unexpected key in source package '%s': %s", source, key)
+          if key not in ('rank', 'package', 'refid'): # ignore internal maintenance fields
+            self.log.warning("Unexpected key in source package '%s': %s", source, key)
           defined_fields[key] = 1
       ref={}
       ref['rank']    = rank
@@ -130,6 +131,9 @@ class bibref_gatherer(gatherer):
         try:
           fields = yaml.load(uf.read())
         except yaml.scanner.ScannerError, err:
+          self.log.error("Syntax error in file %s: %s" % (ufile, str(err)))
+          continue
+        except yaml.parser.ParserError, err:
           self.log.error("Syntax error in file %s: %s" % (ufile, str(err)))
           continue
         try:
