@@ -33,6 +33,7 @@ CREATE OR REPLACE FUNCTION blends_query_packages(text[],text[]) RETURNS SETOF RE
          bibvolume.value  AS "volume",
          bibnumber.value  AS "number",
          bibpages.value   AS "pages",
+         bibeprint.value  AS "eprint",
          en.description AS description_en, en.long_description AS long_description_en,
          cs.description AS description_cs, cs.long_description AS long_description_cs,
          da.description AS description_da, da.long_description AS long_description_da,
@@ -190,7 +191,7 @@ CREATE OR REPLACE FUNCTION blends_query_packages(text[],text[]) RETURNS SETOF RE
          WHERE enhances LIKE ANY( $2 )
       ) AS tmpenh GROUP BY package
     ) enh ON enh.package = p.package
-    LEFT OUTER JOIN bibref bibyear    ON p.source = bibyear.source    AND bibyear.rank = 0   AND bibyear.key    = 'year'
+    LEFT OUTER JOIN bibref bibyear    ON p.source = bibyear.source    AND bibyear.rank = 0    AND bibyear.key    = 'year'
     LEFT OUTER JOIN bibref bibtitle   ON p.source = bibtitle.source   AND bibtitle.rank = 0   AND bibtitle.key   = 'title'
     LEFT OUTER JOIN bibref bibauthor  ON p.source = bibauthor.source  AND bibauthor.rank = 0  AND bibauthor.key  = 'author'
     LEFT OUTER JOIN bibref bibdoi     ON p.source = bibdoi.source     AND bibdoi.rank = 0     AND bibdoi.key     = 'doi'
@@ -200,6 +201,7 @@ CREATE OR REPLACE FUNCTION blends_query_packages(text[],text[]) RETURNS SETOF RE
     LEFT OUTER JOIN bibref bibvolume  ON p.source = bibvolume.source  AND bibvolume.rank = 0  AND bibvolume.key  = 'volume'
     LEFT OUTER JOIN bibref bibnumber  ON p.source = bibnumber.source  AND bibnumber.rank = 0  AND bibnumber.key  = 'number'
     LEFT OUTER JOIN bibref bibpages   ON p.source = bibpages.source   AND bibpages.rank = 0   AND bibpages.key   = 'pages'
+    LEFT OUTER JOIN bibref bibeprint  ON p.source = bibeprint.source  AND bibeprint.rank = 0  AND bibeprint.key  = 'eprint'
     ORDER BY p.package
  $$ LANGUAGE 'SQL';
 
