@@ -136,6 +136,9 @@ class bibref_gatherer(gatherer):
         except yaml.parser.ParserError, err:
           self.log.error("Syntax error in file %s: %s" % (ufile, str(err)))
           continue
+        except yaml.reader.ReaderError, err:
+          self.log.error("Encoding problem in file %s: %s" % (ufile, str(err)))
+          continue
         try:
           references=fields['Reference']
         except KeyError:
