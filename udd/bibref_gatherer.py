@@ -19,6 +19,8 @@ debug=0
 def get_gatherer(connection, config, source):
   return bibref_gatherer(connection, config, source)
 
+other_known_keys = ('Archive', 'Contact', 'CRAN', 'Donation', 'Download', 'Help', 'Homepage', 'Name', 'Watch', 'Webservice')
+
 class bibref_gatherer(gatherer):
   """
   Bibliographic references from debian/upstream files
@@ -142,7 +144,12 @@ class bibref_gatherer(gatherer):
         try:
           references=fields['Reference']
         except KeyError:
-          self.log.warning("No references found for source package %s (Keys: %s)" % (source, str(fields.keys())))
+          warn_keys = []
+          for key in fields.keys():
+            if key not in other_known_keys:
+              warn_keys.append(key)
+          if len(warn_keys) > 0:
+            self.log.warning("No references found for source package %s (Keys: %s)" % (source, str(warn_keys)))
           continue
         except TypeError:
           self.log.warning("debian/upstream file of source package %s does not seem to be a YAML file" % (source))
