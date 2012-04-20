@@ -152,7 +152,7 @@ class bibref_gatherer(gatherer):
             self.log.warning("No references found for source package %s (Keys: %s)" % (source, str(warn_keys)))
           continue
         except TypeError:
-          self.log.warning("debian/upstream file of source package %s does not seem to be a YAML file" % (source))
+          self.log.info("debian/upstream file of source package %s does not seem to be a YAML file" % (source))
           continue
 
         if isinstance(references, list):
