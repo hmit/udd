@@ -7,7 +7,7 @@ files at
     http://ftp.debian.org/debian/dists/${release}/${component}/i18n/
 """
 
-from aux import quote
+from aux import quote, to_unicode
 from gatherer import gatherer
 import re
 try:
@@ -26,11 +26,6 @@ import logging
 import logging.handlers
 
 debug=0
-def to_unicode(value, encoding='utf-8'):
-    if isinstance(value, str):
-	return value.decode(encoding)
-    else:
-        return unicode(value)
 
 def get_gatherer(connection, config, source):
   return ddtp_gatherer(connection, config, source)

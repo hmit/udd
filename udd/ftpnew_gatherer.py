@@ -12,10 +12,8 @@ except:
     from debian_bundle import deb822
 from os import access, mkdir, unlink, W_OK
 from sys import stderr
-import aux
-from aux import quote
+from aux import quote, to_unicode, parse_email
 from gatherer import gatherer
-import email.Utils
 import re
 from time import ctime
 from psycopg2 import IntegrityError, ProgrammingError
@@ -24,11 +22,6 @@ def get_gatherer(connection, config, source):
   return ftpnew_gatherer(connection, config, source)
 
 DEBUG=0
-def to_unicode(value, encoding='utf-8'):
-    if isinstance(value, str):
-	return value.decode(encoding)
-    else:
-        return unicode(value)
 
 # When parsing src html pages we have to get rid of certain html strings
 def de_html(string):
@@ -309,7 +302,7 @@ class ftpnew_gatherer(gatherer):
             elif field == 'Maintainer':
               if in_source:
                 srcpkg.s[field]   = to_unicode(value)
-                srcpkg.s['maintainer_name'], srcpkg.s['maintainer_email'] = email.Utils.parseaddr(srcpkg.s[field])
+                srcpkg.s['maintainer_name'], srcpkg.s['maintainer_email'] = parse_email(srcpkg.s[field])
               else:
                 binpkg.b[field]   = value
               print >>srco, "%s: %s" % (field, value)

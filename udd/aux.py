@@ -110,3 +110,9 @@ def validutf8(str):
     return True
   except UnicodeDecodeError:
     return False
+
+def to_unicode(value, encoding='utf-8'):
+    if isinstance(value, str):
+        return value.decode(encoding)
+    else:
+        return unicode(value)
