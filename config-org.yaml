@@ -1019,7 +1019,7 @@ screenshots:
 bibref:
   type: bibref
   update-command: /org/udd.debian.org/udd/scripts/fetch_bibref.sh /org/udd.debian.org/mirrors/bibref svn://svn.debian.org/svn/collab-qa/packages-metadata
-  path: /org/udd.debian.org/mirrors/bibref
+  path: /org/udd.debian.org/mirrors/bibref/packages-metadata
   cache: /org/udd.debian.org/mirrors/cache
   table: bibref
   bibref_yaml: /org/udd.debian.org/mirrors/bibref/bibref.yaml
