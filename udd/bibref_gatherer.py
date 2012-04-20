@@ -133,10 +133,10 @@ class bibref_gatherer(gatherer):
         try:
           fields = yaml.load(uf.read())
         except yaml.scanner.ScannerError, err:
-          self.log.error("Syntax error in file %s: %s" % (ufile, str(err)))
+          self.log.error("Scanner error in file %s: %s" % (ufile, str(err)))
           continue
         except yaml.parser.ParserError, err:
-          self.log.error("Syntax error in file %s: %s" % (ufile, str(err)))
+          self.log.error("Parser error in file %s: %s" % (ufile, str(err)))
           continue
         except yaml.reader.ReaderError, err:
           self.log.error("Encoding problem in file %s: %s" % (ufile, str(err)))
