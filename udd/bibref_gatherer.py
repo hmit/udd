@@ -13,6 +13,7 @@ from psycopg2 import IntegrityError, InternalError
 import re
 import logging
 import logging.handlers
+from aux import to_unicode
 
 debug=0
 
@@ -42,6 +43,8 @@ class bibref_gatherer(gatherer):
 
     self.bibrefs = []
     self.bibrefsinglelist = []
+    
+    self.bibtexfile = open('debian.bib', 'w')
 
   def setref(self, references, source, package, rank):
     year=''
@@ -67,6 +70,30 @@ class bibref_gatherer(gatherer):
                        'volume'    : 0,
                        'year'      : 0,
                      }
+    # Create unique BibTeX key
+    ## first calculate year in case we might need it for unique bibtex key
+    for r in references.keys():
+      if r.lower() == 'year':
+        year = str(references[r])
+        break
+    bibtexkey = source
+    if bibtexkey in self.bibrefsinglelist and year != '':
+      bibtexkey = source+year
+    if bibtexkey in self.bibrefsinglelist:
+      # if there are more than one reference per source package and even in
+      # the same year append the rank as letter
+      bibtexkey += 'abcdefghijklmnopqrstuvwxyz'[rank]
+    ref={}
+    ref['rank']    = rank
+    ref['source']  = source
+    ref['key']     = 'bibtex'
+    ref['value']   = bibtexkey
+    ref['package'] = package
+    self.bibrefsinglelist.append(bibtexkey)
+    self.bibrefs.append(ref)
+    print >>self.bibtexfile, "@Article{%s," % bibtexkey
+
+    # Now parse remaining references
     for r in references.keys():
       # print r
       key = r.lower()
@@ -92,24 +119,12 @@ class bibref_gatherer(gatherer):
       else:
         ref['value']   = references[r].strip()
       self.bibrefs.append(ref)
-      if r.lower() == 'year':
-        year = ref['value']
-    # Create unique BibTeX key
-    bibtexkey = source
-    if bibtexkey in self.bibrefsinglelist and year != '':
-      bibtexkey = source+year
-    if bibtexkey in self.bibrefsinglelist:
-      # if there are more than one reference per source package and even in
-      # the same year append the rank as letter
-      bibtexkey += 'abcdefghijklmnopqrstuvwxyz'[rank]
-    ref={}
-    ref['rank']    = rank
-    ref['source']  = source
-    ref['key']     = 'bibtex'
-    ref['value']   = bibtexkey
-    ref['package'] = package
-    self.bibrefsinglelist.append(bibtexkey)
-    self.bibrefs.append(ref)
+      if key not in ('package', 'refid'):
+        try:
+          print >>self.bibtexfile, '  %s = "{%s}",' % (ref['key'], ref['value'].encode("utf-8"))
+        except UnicodeEncodeError, err:
+          self.log.error("Problem printing value %s of source %s (%s)" % (ref['key'], source, str(err)))
+    print >>self.bibtexfile, "}\n"
     return ref
 
   def run(self):
