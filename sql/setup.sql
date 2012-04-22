@@ -654,6 +654,17 @@ CREATE TABLE description_imports (
     PRIMARY KEY (distribution, release, component, language)
 );
 
+CREATE TABLE ubuntu_description_imports (
+    distribution         text not null,
+    release              text not null,
+    component            text not null,
+    language             text not null,
+    translationfile      text not null,
+    translationfile_sha1 text not null,
+    import_date          timestamp default now(),
+    PRIMARY KEY (distribution, release, component, language)
+);
+
 -- active_dds view
 CREATE VIEW active_dds AS
 SELECT DISTINCT carnivore_login.id, login

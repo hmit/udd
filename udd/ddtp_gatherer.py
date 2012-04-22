@@ -79,7 +79,7 @@ class ddtp_gatherer(gatherer):
     #        as long as backports and security does not contain i18n files
     #        The right way to go would be to read the config file again fo
     #        each release below
-    self._distr = 'debian'
+    self._distr = src_cfg.get('disribution', 'debian')
 
     cur = self.cursor()
     query = """PREPARE ddtp_check_previous_import (text, text, text) AS

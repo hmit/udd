@@ -998,6 +998,17 @@ ddtp:
    imports-table: description_imports
    schema: ddtp
 
+ubuntu-ddtp:
+   type: ddtp
+   update-command: /org/udd.debian.org/udd/scripts/fetch_ddtp_translations.sh /org/udd.debian.org/mirrors/ubuntu-ddtp /org/mirrors/ubuntu.com/dists
+   path: /org/udd.debian.org/mirrors/ubuntu-ddtp
+   files: Translation-.*\.gz
+   mirrorpath: /org/mirrors/ubuntu.com/ftp/dists
+   descriptions-table: ubuntu_descriptions
+   imports-table: ubuntu_description_imports
+   schema: ddtp
+   distribution: ubuntu
+
 ftpnew:
   type: ftpnew
   update-command: /org/udd.debian.org/udd/scripts/fetch_ftpnew.sh
