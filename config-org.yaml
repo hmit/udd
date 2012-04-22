@@ -1000,7 +1000,7 @@ ddtp:
 
 ubuntu-ddtp:
    type: ddtp
-   update-command: /org/udd.debian.org/udd/scripts/fetch_ddtp_translations.sh /org/udd.debian.org/mirrors/ubuntu-ddtp /org/mirrors/ubuntu.com/dists
+   update-command: /org/udd.debian.org/udd/scripts/fetch_ddtp_translations.sh /org/udd.debian.org/mirrors/ubuntu-ddtp /org/mirrors/ubuntu.com/ftp/dists
    path: /org/udd.debian.org/mirrors/ubuntu-ddtp
    files: Translation-.*\.gz
    mirrorpath: /org/mirrors/ubuntu.com/ftp/dists
