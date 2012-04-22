@@ -8,10 +8,8 @@ import os
 import sys
 import aux
 import tempfile
-from aux import ConfigException
 import psycopg2
 from gatherer import gatherer
-from time import time
 import email.Utils
 import re
 import hashlib
