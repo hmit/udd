@@ -183,7 +183,7 @@ class bibref_gatherer(gatherer):
               key = r.lower()
               if key != 'debian-package':
                 continue
-              self.log.warning("Source package '%s' has key 'debian-package'", source)
+              # self.log.warning("Source package '%s' has key 'debian-package'", source)
               pkg = singleref['package'] = singleref[r]
               package_found = True
               if rank.has_key(pkg):
