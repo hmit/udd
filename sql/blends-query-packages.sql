@@ -191,17 +191,22 @@ CREATE OR REPLACE FUNCTION blends_query_packages(text[],text[]) RETURNS SETOF RE
          WHERE enhances LIKE ANY( $2 )
       ) AS tmpenh GROUP BY package
     ) enh ON enh.package = p.package
-    LEFT OUTER JOIN bibref bibyear    ON p.source = bibyear.source    AND bibyear.rank = 0    AND bibyear.key    = 'year'
-    LEFT OUTER JOIN bibref bibtitle   ON p.source = bibtitle.source   AND bibtitle.rank = 0   AND bibtitle.key   = 'title'
-    LEFT OUTER JOIN bibref bibauthor  ON p.source = bibauthor.source  AND bibauthor.rank = 0  AND bibauthor.key  = 'author'
-    LEFT OUTER JOIN bibref bibdoi     ON p.source = bibdoi.source     AND bibdoi.rank = 0     AND bibdoi.key     = 'doi'
-    LEFT OUTER JOIN bibref bibpmid    ON p.source = bibpmid.source    AND bibpmid.rank = 0    AND bibpmid.key    = 'pmid'
-    LEFT OUTER JOIN bibref biburl     ON p.source = biburl.source     AND biburl.rank = 0     AND biburl.key     = 'url'
-    LEFT OUTER JOIN bibref bibjournal ON p.source = bibjournal.source AND bibjournal.rank = 0 AND bibjournal.key = 'journal'
-    LEFT OUTER JOIN bibref bibvolume  ON p.source = bibvolume.source  AND bibvolume.rank = 0  AND bibvolume.key  = 'volume'
-    LEFT OUTER JOIN bibref bibnumber  ON p.source = bibnumber.source  AND bibnumber.rank = 0  AND bibnumber.key  = 'number'
-    LEFT OUTER JOIN bibref bibpages   ON p.source = bibpages.source   AND bibpages.rank = 0   AND bibpages.key   = 'pages'
-    LEFT OUTER JOIN bibref bibeprint  ON p.source = bibeprint.source  AND bibeprint.rank = 0  AND bibeprint.key  = 'eprint'
+    -- FIXME: To get reasonable querying of publications for specific packages and also multiple citations the table structure
+    --        of the bibref table most probably needs to be changed to one entry per citation
+    --        for the moment the specification of package is ignored because otherwise those citations would spoil the
+    --        whole query
+    --        example: if `bib*.package = ''` would be left out acedb-other would get more than 500 results !!!
+    LEFT OUTER JOIN bibref bibyear    ON p.source = bibyear.source    AND bibyear.rank = 0    AND bibyear.key    = 'year'    AND bibyear.package = ''
+    LEFT OUTER JOIN bibref bibtitle   ON p.source = bibtitle.source   AND bibtitle.rank = 0   AND bibtitle.key   = 'title'   AND bibtitle.package = ''
+    LEFT OUTER JOIN bibref bibauthor  ON p.source = bibauthor.source  AND bibauthor.rank = 0  AND bibauthor.key  = 'author'  AND bibauthor.package = ''
+    LEFT OUTER JOIN bibref bibdoi     ON p.source = bibdoi.source     AND bibdoi.rank = 0     AND bibdoi.key     = 'doi'     AND bibdoi.package = ''
+    LEFT OUTER JOIN bibref bibpmid    ON p.source = bibpmid.source    AND bibpmid.rank = 0    AND bibpmid.key    = 'pmid'    AND bibpmid.package = ''
+    LEFT OUTER JOIN bibref biburl     ON p.source = biburl.source     AND biburl.rank = 0     AND biburl.key     = 'url'     AND biburl.package = ''
+    LEFT OUTER JOIN bibref bibjournal ON p.source = bibjournal.source AND bibjournal.rank = 0 AND bibjournal.key = 'journal' AND bibjournal.package = ''
+    LEFT OUTER JOIN bibref bibvolume  ON p.source = bibvolume.source  AND bibvolume.rank = 0  AND bibvolume.key  = 'volume'  AND bibvolume.package = ''
+    LEFT OUTER JOIN bibref bibnumber  ON p.source = bibnumber.source  AND bibnumber.rank = 0  AND bibnumber.key  = 'number'  AND bibnumber.package = ''
+    LEFT OUTER JOIN bibref bibpages   ON p.source = bibpages.source   AND bibpages.rank = 0   AND bibpages.key   = 'pages'   AND bibpages.package = ''
+    LEFT OUTER JOIN bibref bibeprint  ON p.source = bibeprint.source  AND bibeprint.rank = 0  AND bibeprint.key  = 'eprint'  AND bibeprint.package = ''
     ORDER BY p.package
  $$ LANGUAGE 'SQL';
 
