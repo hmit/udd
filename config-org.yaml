@@ -320,6 +320,72 @@ debian-experimental:
   release: experimental
 
 
+ubuntu-quantal:
+  type: src-pkg
+  archs: [amd64, i386]
+  directory: /org/mirrors/ubuntu.com/ftp/dists/quantal/
+  components: [main, multiverse, universe, restricted]
+  distribution: ubuntu
+  release: quantal
+  packages-table: ubuntu_packages
+  sources-table: ubuntu_sources
+  uploaders-table: ubuntu_uploaders
+  packages-schema: packages
+  sources-schema: sources
+
+ubuntu-quantal-security:
+  type: src-pkg
+  archs: [amd64, i386]
+  directory: /org/mirrors/ubuntu.com/ftp/dists/quantal-security/
+  components: [main, multiverse, universe, restricted]
+  distribution: ubuntu
+  release: quantal-security
+  packages-table: ubuntu_packages
+  sources-table: ubuntu_sources
+  uploaders-table: ubuntu_uploaders
+  packages-schema: packages
+  sources-schema: sources
+
+ubuntu-quantal-updates:
+  type: src-pkg
+  archs: [amd64, i386]
+  directory: /org/mirrors/ubuntu.com/ftp/dists/quantal-updates/
+  components: [main, multiverse, universe, restricted]
+  distribution: ubuntu
+  release: quantal-updates
+  packages-table: ubuntu_packages
+  sources-table: ubuntu_sources
+  uploaders-table: ubuntu_uploaders
+  packages-schema: packages
+  sources-schema: sources
+
+ubuntu-quantal-proposed:
+  type: src-pkg
+  archs: [amd64, i386]
+  directory: /org/mirrors/ubuntu.com/ftp/dists/quantal-proposed/
+  components: [main, multiverse, universe, restricted]
+  distribution: ubuntu
+  release: quantal-proposed
+  packages-table: ubuntu_packages
+  sources-table: ubuntu_sources
+  uploaders-table: ubuntu_uploaders
+  packages-schema: packages
+  sources-schema: sources
+
+ubuntu-quantal-backports:
+  type: src-pkg
+  archs: [amd64, i386]
+  directory: /org/mirrors/ubuntu.com/ftp/dists/quantal-backports/
+  components: [main, multiverse, universe, restricted]
+  distribution: ubuntu
+  release: quantal-backports
+  packages-table: ubuntu_packages
+  sources-table: ubuntu_sources
+  uploaders-table: ubuntu_uploaders
+  packages-schema: packages
+  sources-schema: sources
+
+
 ubuntu-precise:
   type: src-pkg
   archs: [amd64, i386]
@@ -665,75 +731,75 @@ ubuntu-lucid-backports:
   descriptions-table: ubuntu_descriptions
 
 
-ubuntu-karmic:
-  type: src-pkg
-  archs: [amd64, i386]
-  directory: /org/mirrors/ubuntu.com/ftp/dists/karmic/
-  components: [main, multiverse, universe, restricted]
-  distribution: ubuntu
-  release: karmic
-  packages-table: ubuntu_packages
-  sources-table: ubuntu_sources
-  uploaders-table: ubuntu_uploaders
-  packages-schema: packages
-  sources-schema: sources
-  descriptions-table: ubuntu_descriptions
-
-ubuntu-karmic-security:
-  type: src-pkg
-  archs: [amd64, i386]
-  directory: /org/mirrors/ubuntu.com/ftp/dists/karmic-security/
-  components: [main, multiverse, universe, restricted]
-  distribution: ubuntu
-  release: karmic-security
-  packages-table: ubuntu_packages
-  sources-table: ubuntu_sources
-  uploaders-table: ubuntu_uploaders
-  packages-schema: packages
-  sources-schema: sources
-  descriptions-table: ubuntu_descriptions
-
-ubuntu-karmic-updates:
-  type: src-pkg
-  archs: [amd64, i386]
-  directory: /org/mirrors/ubuntu.com/ftp/dists/karmic-updates/
-  components: [main, multiverse, universe, restricted]
-  distribution: ubuntu
-  release: karmic-updates
-  packages-table: ubuntu_packages
-  sources-table: ubuntu_sources
-  uploaders-table: ubuntu_uploaders
-  packages-schema: packages
-  sources-schema: sources
-  descriptions-table: ubuntu_descriptions
-
-ubuntu-karmic-proposed:
-  type: src-pkg
-  archs: [amd64, i386]
-  directory: /org/mirrors/ubuntu.com/ftp/dists/karmic-proposed/
-  components: [main, multiverse, universe, restricted]
-  distribution: ubuntu
-  release: karmic-proposed
-  packages-table: ubuntu_packages
-  sources-table: ubuntu_sources
-  uploaders-table: ubuntu_uploaders
-  packages-schema: packages
-  sources-schema: sources
-  descriptions-table: ubuntu_descriptions
-
-ubuntu-karmic-backports:
-  type: src-pkg
-  archs: [amd64, i386]
-  directory: /org/mirrors/ubuntu.com/ftp/dists/karmic-backports/
-  components: [main, multiverse, universe, restricted]
-  distribution: ubuntu
-  release: karmic-backports
-  packages-table: ubuntu_packages
-  sources-table: ubuntu_sources
-  uploaders-table: ubuntu_uploaders
-  packages-schema: packages
-  sources-schema: sources
-  descriptions-table: ubuntu_descriptions
+#ubuntu-karmic:
+#  type: src-pkg
+#  archs: [amd64, i386]
+#  directory: /org/mirrors/ubuntu.com/ftp/dists/karmic/
+#  components: [main, multiverse, universe, restricted]
+#  distribution: ubuntu
+#  release: karmic
+#  packages-table: ubuntu_packages
+#  sources-table: ubuntu_sources
+#  uploaders-table: ubuntu_uploaders
+#  packages-schema: packages
+#  sources-schema: sources
+#  descriptions-table: ubuntu_descriptions
+#
+#ubuntu-karmic-security:
+#  type: src-pkg
+#  archs: [amd64, i386]
+#  directory: /org/mirrors/ubuntu.com/ftp/dists/karmic-security/
+#  components: [main, multiverse, universe, restricted]
+#  distribution: ubuntu
+#  release: karmic-security
+#  packages-table: ubuntu_packages
+#  sources-table: ubuntu_sources
+#  uploaders-table: ubuntu_uploaders
+#  packages-schema: packages
+#  sources-schema: sources
+#  descriptions-table: ubuntu_descriptions
+#
+#ubuntu-karmic-updates:
+#  type: src-pkg
+#  archs: [amd64, i386]
+#  directory: /org/mirrors/ubuntu.com/ftp/dists/karmic-updates/
+#  components: [main, multiverse, universe, restricted]
+#  distribution: ubuntu
+#  release: karmic-updates
+#  packages-table: ubuntu_packages
+#  sources-table: ubuntu_sources
+#  uploaders-table: ubuntu_uploaders
+#  packages-schema: packages
+#  sources-schema: sources
+#  descriptions-table: ubuntu_descriptions
+#
+#ubuntu-karmic-proposed:
+#  type: src-pkg
+#  archs: [amd64, i386]
+#  directory: /org/mirrors/ubuntu.com/ftp/dists/karmic-proposed/
+#  components: [main, multiverse, universe, restricted]
+#  distribution: ubuntu
+#  release: karmic-proposed
+#  packages-table: ubuntu_packages
+#  sources-table: ubuntu_sources
+#  uploaders-table: ubuntu_uploaders
+#  packages-schema: packages
+#  sources-schema: sources
+#  descriptions-table: ubuntu_descriptions
+#
+#ubuntu-karmic-backports:
+#  type: src-pkg
+#  archs: [amd64, i386]
+#  directory: /org/mirrors/ubuntu.com/ftp/dists/karmic-backports/
+#  components: [main, multiverse, universe, restricted]
+#  distribution: ubuntu
+#  release: karmic-backports
+#  packages-table: ubuntu_packages
+#  sources-table: ubuntu_sources
+#  uploaders-table: ubuntu_uploaders
+#  packages-schema: packages
+#  sources-schema: sources
+#  descriptions-table: ubuntu_descriptions
 
 
 #ubuntu-jaunty:
