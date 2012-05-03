@@ -3,7 +3,7 @@
 
 require 'dbi'
 
-RELEASE='precise'
+RELEASE='quantal'
 
 puts "Content-type: text/html\n\n"
 

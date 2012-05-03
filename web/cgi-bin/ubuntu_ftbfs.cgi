@@ -6,7 +6,7 @@ require 'uri'
 require 'net/http'
 require 'cgi'
 
-URELEASE='precise'
+URELEASE='quantal'
 
 $cgi = CGI::new
 

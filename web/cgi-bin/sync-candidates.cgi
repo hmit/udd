@@ -9,7 +9,7 @@ require 'json/pure'
 puts "Content-type: application/json\n\n"
 
 DREL='sid'
-UREL='precise'
+UREL='quantal'
 
 dbh = DBI::connect('DBI:Pg:dbname=udd;port=5441;host=localhost', 'guest')
 
