@@ -14,6 +14,8 @@ import re
 import logging
 import logging.handlers
 
+from types import *
+
 debug=0
 
 def get_gatherer(connection, config, source):
@@ -43,7 +45,8 @@ class bibref_gatherer(gatherer):
     self.bibrefs = []
     self.bibrefsinglelist = []
 
-    self.bibtexfile = open('debian.bib', 'w')
+    self.bibtexfile = 'debian.bib'
+    self.bibtex_example_tex = 'debian.tex'
 
   def setref(self, references, source, package, rank):
     year=''
@@ -257,9 +260,34 @@ class bibref_gatherer(gatherer):
     cur.execute("DEALLOCATE bibref_insert")
     cur.execute("ANALYZE %s" % my_config['table'])
 
+    bf = open(self.bibtexfile, 'w')
     cur.execute("SELECT * FROM bibtex()")
     for row in cur.fetchall():
-	print >>self.bibtexfile, row[0]
+	print >>bf, row[0]
+    bf.close()
+
+    bf = open(self.bibtex_example_tex, 'w')
+    print >>bf, """\documentclass{article}
+\usepackage[T1]{fontenc}
+\usepackage[left=2mm,top=2mm,right=2mm,bottom=2mm,nohead,nofoot]{geometry}
+\usepackage{longtable}
+\setlongtables
+\\begin{document}
+\\begin{longtable}{llp{70mm}l}
+\\bf package & \\bf source & \\bf description & BibTeX key \\\\ \hline"""
+
+    cur.execute("SELECT * FROM bibtex_example_data() AS (package text, source text, bibkey text, description text)")
+    for row in cur.fetchall():
+	print >>bf, row[0], '&', row[1], '&', row[3] , '&', row[2]+'\cite{'+row[2]+'} \\\\'
+
+    print >>bf, """\end{longtable}
+
+\\bibliographystyle{plain}
+\\bibliography{debian}
+
+\end{document}
+"""
+    bf.close()
 
 if __name__ == '__main__':
   main()
