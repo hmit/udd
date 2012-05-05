@@ -29,7 +29,7 @@ AS $$
   SELECT DISTINCT
          '@Article{' || bibkey.value ||
             CASE WHEN bibauthor.value  IS NOT NULL THEN E',\n  Author  = "{' || bibauthor.value  || '}"' ELSE '' END ||
-            CASE WHEN bibtitle.value   IS NOT NULL THEN E',\n  Title   = "{' || bibtitle.value   || '}"' ELSE '' END ||
+            CASE WHEN bibtitle.value   IS NOT NULL THEN E',\n  Title   = "{' || replace(bibtitle.value, '_', '\_') || '}"' ELSE '' END ||
             CASE WHEN bibbooktitle.value IS NOT NULL THEN E',\n  Booktitle = "{' || bibbooktitle.value || '}"' ELSE '' END ||
             CASE WHEN bibyear.value    IS NOT NULL THEN E',\n  Year    = "{' || bibyear.value    || '}"' ELSE '' END ||
             CASE WHEN bibmonth.value   IS NOT NULL THEN E',\n  Month   = "{' || bibmonth.value   || '}"' ELSE '' END ||
@@ -69,5 +69,27 @@ AS $$
     LEFT OUTER JOIN bibref bibin      ON p.source = bibin.source      AND bibin.rank      = p.rank AND bibin.package      = p.package AND bibin.key      = 'in'
     LEFT OUTER JOIN bibref bibissn    ON p.source = bibissn.source    AND bibissn.rank    = p.rank AND bibissn.package    = p.package AND bibissn.key    = 'issn'
     ORDER BY bibentry -- p.source
+;
+$$;
+
+/************************************************************************************
+ * Example data for above BibTeX data                                               *
+ ************************************************************************************/
+
+CREATE OR REPLACE FUNCTION bibtex_example_data ()
+RETURNS SETOF RECORD LANGUAGE SQL
+AS $$
+SELECT package, source, bibkey, description FROM (
+  SELECT DISTINCT
+         p.package        AS package,
+         p.source         AS source,
+         b.package        AS bpackage,
+         b.value          AS bibkey,
+         p.description    AS description
+    FROM packages p
+    JOIN (SELECT DISTINCT source, package, value FROM bibref WHERE key = 'bibtex') b ON b.source = p.source
+ ) tmp
+ WHERE package = bpackage OR bpackage = ''
+ ORDER BY package
 ;
 $$;
