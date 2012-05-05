@@ -1,3 +1,7 @@
+/************************************************************************************
+ * Storing and handling publication references maintained in debian/upstream files  *
+ ************************************************************************************/
+
 BEGIN;
 
 DROP TABLE IF EXISTS bibref CASCADE;
@@ -15,3 +19,55 @@ GRANT SELECT ON bibref TO PUBLIC;
 
 COMMIT;
 
+/************************************************************************************
+ * Create a BibTex file from references                                             *
+ ************************************************************************************/
+
+CREATE OR REPLACE FUNCTION bibtex ()
+RETURNS SETOF TEXT LANGUAGE SQL
+AS $$
+  SELECT DISTINCT
+         '@Article{' || bibkey.value ||
+            CASE WHEN bibauthor.value  IS NOT NULL THEN E',\n  Author  = "{' || bibauthor.value  || '}"' ELSE '' END ||
+            CASE WHEN bibtitle.value   IS NOT NULL THEN E',\n  Title   = "{' || bibtitle.value   || '}"' ELSE '' END ||
+            CASE WHEN bibbooktitle.value IS NOT NULL THEN E',\n  Booktitle = "{' || bibbooktitle.value || '}"' ELSE '' END ||
+            CASE WHEN bibyear.value    IS NOT NULL THEN E',\n  Year    = "{' || bibyear.value    || '}"' ELSE '' END ||
+            CASE WHEN bibmonth.value   IS NOT NULL THEN E',\n  Month   = "{' || bibmonth.value   || '}"' ELSE '' END ||
+            CASE WHEN bibjournal.value IS NOT NULL THEN E',\n  Journal = "{' || bibjournal.value || '}"' ELSE '' END ||
+            CASE WHEN bibaddress.value IS NOT NULL THEN E',\n  Address = "{' || bibaddress.value || '}"' ELSE '' END ||
+            CASE WHEN bibpublisher.value IS NOT NULL THEN E',\n  Publisher = "{' || bibpublisher.value || '}"' ELSE '' END ||
+            CASE WHEN bibvolume.value  IS NOT NULL THEN E',\n  Volume  = "{' || bibvolume.value  || '}"' ELSE '' END ||
+            CASE WHEN bibnumber.value  IS NOT NULL THEN E',\n  Number  = "{' || bibnumber.value  || '}"' ELSE '' END ||
+            CASE WHEN bibpages.value   IS NOT NULL THEN E',\n  Pages   = "{' || bibpages.value   || '}"' ELSE '' END ||
+            CASE WHEN biburl.value     IS NOT NULL THEN E',\n  URL     = "{' || biburl.value     || '}"' ELSE '' END ||
+            CASE WHEN bibdoi.value     IS NOT NULL THEN E',\n  DOI     = "{' || bibdoi.value     || '}"' ELSE '' END ||
+            CASE WHEN bibpmid.value    IS NOT NULL THEN E',\n  PMID    = "{' || bibpmid.value    || '}"' ELSE '' END ||
+            CASE WHEN bibeprint.value  IS NOT NULL THEN E',\n  EPrint  = "{' || bibeprint.value  || '}"' ELSE '' END ||
+            CASE WHEN bibin.value      IS NOT NULL THEN E',\n  In      = "{' || bibin.value      || '}"' ELSE '' END ||
+            CASE WHEN bibissn.value    IS NOT NULL THEN E',\n  ISSN    = "{' || bibissn.value    || '}"' ELSE '' END ||
+            E',\n}\n'
+            AS bibentry
+--         p.source         AS source,
+--         p.rank           AS rank,
+    FROM (SELECT DISTINCT source, package, rank FROM bibref) p
+    LEFT OUTER JOIN bibref bibkey     ON p.source = bibkey.source     AND bibkey.rank     = p.rank AND bibkey.package     = p.package AND bibkey.key     = 'bibtex'
+    LEFT OUTER JOIN bibref bibyear    ON p.source = bibyear.source    AND bibyear.rank    = p.rank AND bibyear.package    = p.package AND bibyear.key    = 'year'  
+    LEFT OUTER JOIN bibref bibmonth   ON p.source = bibmonth.source   AND bibmonth.rank   = p.rank AND bibmonth.package   = p.package AND bibmonth.key   = 'month'  
+    LEFT OUTER JOIN bibref bibtitle   ON p.source = bibtitle.source   AND bibtitle.rank   = p.rank AND bibtitle.package   = p.package AND bibtitle.key   = 'title'  
+    LEFT OUTER JOIN bibref bibbooktitle ON p.source = bibbooktitle.source AND bibbooktitle.rank = p.rank AND bibbooktitle.package = p.package AND bibbooktitle.key = 'booktitle'  
+    LEFT OUTER JOIN bibref bibauthor  ON p.source = bibauthor.source  AND bibauthor.rank  = p.rank AND bibauthor.package  = p.package AND bibauthor.key  = 'author'
+    LEFT OUTER JOIN bibref bibjournal ON p.source = bibjournal.source AND bibjournal.rank = p.rank AND bibjournal.package = p.package AND bibjournal.key = 'journal'
+    LEFT OUTER JOIN bibref bibaddress ON p.source = bibaddress.source AND bibaddress.rank = p.rank AND bibaddress.package = p.package AND bibaddress.key = 'address'
+    LEFT OUTER JOIN bibref bibpublisher ON p.source = bibpublisher.source AND bibpublisher.rank = p.rank AND bibpublisher.package = p.package AND bibpublisher.key = 'publisher'
+    LEFT OUTER JOIN bibref bibvolume  ON p.source = bibvolume.source  AND bibvolume.rank  = p.rank AND bibvolume.package  = p.package AND bibvolume.key  = 'volume'
+    LEFT OUTER JOIN bibref bibdoi     ON p.source = bibdoi.source     AND bibdoi.rank     = p.rank AND bibdoi.package     = p.package AND bibdoi.key     = 'doi'
+    LEFT OUTER JOIN bibref bibpmid    ON p.source = bibpmid.source    AND bibpmid.rank    = p.rank AND bibpmid.package    = p.package AND bibpmid.key    = 'pmid'
+    LEFT OUTER JOIN bibref biburl     ON p.source = biburl.source     AND biburl.rank     = p.rank AND biburl.package     = p.package AND biburl.key     = 'url'
+    LEFT OUTER JOIN bibref bibnumber  ON p.source = bibnumber.source  AND bibnumber.rank  = p.rank AND bibnumber.package  = p.package AND bibnumber.key  = 'number'
+    LEFT OUTER JOIN bibref bibpages   ON p.source = bibpages.source   AND bibpages.rank   = p.rank AND bibpages.package   = p.package AND bibpages.key   = 'pages'
+    LEFT OUTER JOIN bibref bibeprint  ON p.source = bibeprint.source  AND bibeprint.rank  = p.rank AND bibeprint.package  = p.package AND bibeprint.key  = 'eprint'
+    LEFT OUTER JOIN bibref bibin      ON p.source = bibin.source      AND bibin.rank      = p.rank AND bibin.package      = p.package AND bibin.key      = 'in'
+    LEFT OUTER JOIN bibref bibissn    ON p.source = bibissn.source    AND bibissn.rank    = p.rank AND bibissn.package    = p.package AND bibissn.key    = 'issn'
+    ORDER BY bibentry -- p.source
+;
+$$;
