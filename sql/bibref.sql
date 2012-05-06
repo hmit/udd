@@ -31,9 +31,9 @@ AS $$
             CASE WHEN bibauthor.value  IS NOT NULL THEN E',\n  Author  = "{' || bibauthor.value  || '}"' ELSE '' END ||
             CASE WHEN bibtitle.value   IS NOT NULL THEN E',\n  Title   = "{' || 
                   replace(replace(replace(bibtitle.value,
-                        '_', '\_'),            --
-                        '%', '\%'),            --
-                        E'\xe2\x80\x89', '\,') -- TeX syntax for '_' and UTF-8 "thin space"
+                        '_', E'\\_'),            --
+                        '%', E'\\%'),            --
+                        E'\xe2\x80\x89', E'\\,') -- TeX syntax for '_' and UTF-8 "thin space"
                                                -- see http://www.utf8-chartable.de/unicode-utf8-table.pl?start=8192&number=128&utf8=string-literal
                    || '}"'
                  ELSE '' END ||
@@ -92,7 +92,7 @@ SELECT package, source, bibkey, description FROM (
          p.source         AS source,
          b.package        AS bpackage,
          b.value          AS bibkey,
-         replace(p.description, E'\xc2\xa0', '\ ') AS description -- replace non-breaking spaces to TeX syntax
+         replace(p.description, E'\xc2\xa0', E'\\ ') AS description -- replace non-breaking spaces to TeX syntax
     FROM ( -- Make sure we have only one (package,source,description) record fitting the latest release with highest version
        SELECT package, source, description FROM
          (SELECT *, rank() OVER (PARTITION BY package ORDER BY rsort DESC, version DESC) FROM
