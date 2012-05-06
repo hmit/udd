@@ -84,16 +84,23 @@ CREATE OR REPLACE FUNCTION bibtex_example_data ()
 RETURNS SETOF RECORD LANGUAGE SQL
 AS $$
 SELECT package, source, bibkey, description FROM (
-  SELECT DISTINCT
+  SELECT -- DISTINCT
          p.package        AS package,
          p.source         AS source,
          b.package        AS bpackage,
          b.value          AS bibkey,
          replace(p.description, E'\xc2\xa0', '\ ') AS description -- replace non-breaking spaces to TeX syntax
-    FROM packages p
+    FROM ( -- Make sure we have only one (package,source,description) record fitting the latest release with highest version
+       SELECT package, source, description FROM
+         (SELECT *, rank() OVER (PARTITION BY package ORDER BY rsort DESC, version DESC) FROM
+           (SELECT DISTINCT package, source, description, sort as rsort, version FROM packages p
+              JOIN releases r ON p.release = r. release
+           ) tmp
+         ) tmp WHERE rank = 1
+    ) p
     JOIN (SELECT DISTINCT source, package, value FROM bibref WHERE key = 'bibtex') b ON b.source = p.source
  ) tmp
  WHERE package = bpackage OR bpackage = ''
- ORDER BY package
+ ORDER BY package, bibkey
 ;
 $$;
