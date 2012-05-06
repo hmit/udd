@@ -85,7 +85,7 @@ SELECT package, source, bibkey, description FROM (
          p.source         AS source,
          b.package        AS bpackage,
          b.value          AS bibkey,
-         p.description    AS description
+         replace(p.description, E'\xc2\xa0', '\ ') AS description -- replace non-breaking spaces to TeX syntax
     FROM packages p
     JOIN (SELECT DISTINCT source, package, value FROM bibref WHERE key = 'bibtex') b ON b.source = p.source
  ) tmp
