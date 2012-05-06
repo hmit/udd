@@ -45,7 +45,7 @@ AS $$
             CASE WHEN bibpublisher.value IS NOT NULL THEN E',\n  Publisher = "{' || bibpublisher.value || '}"' ELSE '' END ||
             CASE WHEN bibvolume.value  IS NOT NULL THEN E',\n  Volume  = "{' || bibvolume.value  || '}"' ELSE '' END ||
             CASE WHEN bibnumber.value  IS NOT NULL THEN E',\n  Number  = "{' || bibnumber.value  || '}"' ELSE '' END ||
-            CASE WHEN bibpages.value   IS NOT NULL THEN E',\n  Pages   = "{' || bibpages.value   || '}"' ELSE '' END ||
+            CASE WHEN bibpages.value   IS NOT NULL THEN E',\n  Pages   = "{' || regexp_replace(bibpages.value, '(\d)-(\d)', '\1--\2')   || '}"' ELSE '' END ||
             CASE WHEN biburl.value     IS NOT NULL THEN E',\n  URL     = "{' || biburl.value     || '}"' ELSE '' END ||
             CASE WHEN bibdoi.value     IS NOT NULL THEN E',\n  DOI     = "{' || bibdoi.value     || '}"' ELSE '' END ||
             CASE WHEN bibpmid.value    IS NOT NULL THEN E',\n  PMID    = "{' || bibpmid.value    || '}"' ELSE '' END ||
