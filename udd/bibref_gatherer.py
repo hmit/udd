@@ -29,6 +29,28 @@ def rm_f(file):
   except OSError:
     pass
 
+def cleanup_tex_logs(basetexfile):
+  rm_f(basetexfile+'.aux')
+  rm_f(basetexfile+'.bbl')
+  rm_f(basetexfile+'.blg')
+  rm_f(basetexfile+'.log')
+
+
+def open_tex_process(texexe, basetexfile):
+  if texexe == 'pdflatex':
+    ptex = Popen(['pdflatex', '-interaction=nonstopmode', basetexfile], shell=False, stdout=PIPE)
+  elif texexe == 'bibtex':
+    ptex = Popen(['bibtex', basetexfile], shell=False, stdout=PIPE)
+  else:
+    return(False, 'Wrong exe: '+texexe)
+  errstring=""
+  if ptex.wait():
+    for logrow in ptex.communicate()[0].splitlines():
+      if logrow.startswith('!'):
+        errstring += logrow
+    return(False, errstring)
+  return(True, errstring)
+
 other_known_keys = ('Archive', 'Contact', 'CRAN', 'Donation', 'Download', 'Help', 'Homepage', 'Name', 'Watch', 'Webservice')
 
 class bibref_gatherer(gatherer):
@@ -306,33 +328,31 @@ class bibref_gatherer(gatherer):
 
       # try to build debian.pdf file to test aboc LaTeX file
       basetexfile = self.bibtex_example_tex.replace('.tex','')
-      rm_f(basetexfile+'.aux')
-      rm_f(basetexfile+'.bbl')
-      rm_f(basetexfile+'.blg')
-      rm_f(basetexfile+'.log')
+      cleanup_tex_logs(basetexfile)
       try:
         rename(basetexfile+'.pdf', basetexfile+'.pdf~')
       except OSError:
         pass
-      pdftex1 = Popen(['pdflatex', '-interaction=nonstopmode', basetexfile], shell=False, stdout=PIPE)
-      if pdftex1.wait():
-        self.log.error("Problem in 1. PdfLaTeX run of %s" % (basetexfile))
-      bibtex = Popen(['bibtex', basetexfile], shell=False, stdout=PIPE)
-      if bibtex.wait():
-        self.log.error("Problem in BibTeX run of %s" % (basetexfile))
-      pdftex2 = Popen(['pdflatex', '-interaction=nonstopmode', basetexfile], shell=False, stdout=PIPE)
-      if pdftex2.wait():
-        self.log.error("Problem in 2. PdfLaTeX run of %s" % (basetexfile))
-        for logrow in pdftex2.communicate()[0].splitlines():
-    	  if logrow.startswith('!'):
-            print logrow
+
+
+      (retcode,errstring) = open_tex_process('pdflatex', basetexfile)
+      if not retcode:
+        self.log.error("Problem in 1. PdfLaTeX run of %s.tex: `%s` --> please inspect %s.log" % (basetexfile, errstring, basetexfile))
         exit(1)
-      print "DEBUG: 3. LaTeX-Lauf"
-      pdftex_process = Popen(['pdflatex', '-interaction=nonstopmode', basetexfile], shell=False, stdout=PIPE)
-      rm_f(basetexfile+'.aux')
-      rm_f(basetexfile+'.bbl')
-      rm_f(basetexfile+'.blg')
-      rm_f(basetexfile+'.log')
+      (retcode,errstring) = open_tex_process('bibtex', basetexfile)
+      if not retcode:
+        self.log.error("Problem in BibTeX run of %s.bib: `%s`" % (basetexfile, errstring))
+        exit(1)
+      (retcode,errstring) = open_tex_process('pdflatex', basetexfile)
+      if not retcode:
+        self.log.error("Problem in 2. PdfLaTeX run of %s.tex: `%s` --> please inspect %s.log" % (basetexfile, errstring, basetexfile))
+        exit(1)
+      (retcode,errstring) = open_tex_process('pdflatex', basetexfile)
+      if not retcode:
+        self.log.error("Problem in 3. PdfLaTeX run of %s.tex: `%s` --> please inspect %s.log" % (basetexfile, errstring, basetexfile))
+        exit(1)
+
+      cleanup_tex_logs(basetexfile)
 
 if __name__ == '__main__':
   main()
