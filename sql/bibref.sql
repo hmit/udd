@@ -29,7 +29,11 @@ AS $$
   SELECT DISTINCT
          '@Article{' || bibkey.value ||
             CASE WHEN bibauthor.value  IS NOT NULL THEN E',\n  Author  = "{' || bibauthor.value  || '}"' ELSE '' END ||
-            CASE WHEN bibtitle.value   IS NOT NULL THEN E',\n  Title   = "{' || replace(bibtitle.value, '_', '\_') || '}"' ELSE '' END ||
+            CASE WHEN bibtitle.value   IS NOT NULL THEN E',\n  Title   = "{' || 
+                  replace(replace(bibtitle.value, '_', '\_'), E'\xe2\x80\x89', '\,') -- TeX syntax for '_' and UTF-8 "thin space"
+                                                                                     -- see http://www.utf8-chartable.de/unicode-utf8-table.pl?start=8192&number=128&utf8=string-literal
+                   || '}"'
+                 ELSE '' END ||
             CASE WHEN bibbooktitle.value IS NOT NULL THEN E',\n  Booktitle = "{' || bibbooktitle.value || '}"' ELSE '' END ||
             CASE WHEN bibyear.value    IS NOT NULL THEN E',\n  Year    = "{' || bibyear.value    || '}"' ELSE '' END ||
             CASE WHEN bibmonth.value   IS NOT NULL THEN E',\n  Month   = "{' || bibmonth.value   || '}"' ELSE '' END ||
