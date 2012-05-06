@@ -6,13 +6,15 @@ This script imports bibliographic references from upstream-metadata.debian.net.
 
 from gatherer import gatherer
 from sys import stderr, exit
-from os import listdir
+from os import listdir, unlink, rename, access, X_OK
+from os.path import isfile
 from fnmatch import fnmatch
 import yaml
 from psycopg2 import IntegrityError, InternalError
 import re
 import logging
 import logging.handlers
+from subprocess import Popen, PIPE
 
 from types import *
 
@@ -20,6 +22,12 @@ debug=0
 
 def get_gatherer(connection, config, source):
   return bibref_gatherer(connection, config, source)
+
+def rm_f(file):
+  try:
+    unlink(file)
+  except OSError:
+    pass
 
 other_known_keys = ('Archive', 'Contact', 'CRAN', 'Donation', 'Download', 'Help', 'Homepage', 'Name', 'Watch', 'Webservice')
 
@@ -260,14 +268,20 @@ class bibref_gatherer(gatherer):
     cur.execute("DEALLOCATE bibref_insert")
     cur.execute("ANALYZE %s" % my_config['table'])
 
-    bf = open(self.bibtexfile, 'w')
-    cur.execute("SELECT * FROM bibtex()")
-    for row in cur.fetchall():
+    # if there is a working LaTeX installation try to build a BibTeX database and test it by creating a debian.pdf file
+    if isfile('/usr/bin/pdflatex') and access('/usr/bin/pdflatex', X_OK) and \
+       isfile('/usr/bin/bibtex')   and access('/usr/bin/bibtex', X_OK) and \
+       isfile('/usr/share/texlive/texmf-dist/fonts/source/jknappen/ec/ecrm.mf'):
+      # create BibTeX file
+      bf = open(self.bibtexfile, 'w')
+      cur.execute("SELECT * FROM bibtex()")
+      for row in cur.fetchall():
 	print >>bf, row[0]
-    bf.close()
+      bf.close()
 
-    bf = open(self.bibtex_example_tex, 'w')
-    print >>bf, """\documentclass{article}
+      # create LaTeX file to test BibTeX functionality
+      bf = open(self.bibtex_example_tex, 'w')
+      print >>bf, """\documentclass{article}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage[left=2mm,top=2mm,right=2mm,bottom=2mm,nohead,nofoot]{geometry}
@@ -277,18 +291,48 @@ class bibref_gatherer(gatherer):
 \\begin{longtable}{llp{70mm}l}
 \\bf package & \\bf source & \\bf description & BibTeX key \\\\ \hline"""
 
-    cur.execute("SELECT * FROM bibtex_example_data() AS (package text, source text, bibkey text, description text)")
-    for row in cur.fetchall():
+      cur.execute("SELECT * FROM bibtex_example_data() AS (package text, source text, bibkey text, description text)")
+      for row in cur.fetchall():
 	print >>bf, row[0], '&', row[1], '&', row[3] , '&', row[2]+'\cite{'+row[2]+'} \\\\'
 
-    print >>bf, """\end{longtable}
+      print >>bf, """\end{longtable}
 
 \\bibliographystyle{plain}
 \\bibliography{debian}
 
 \end{document}
 """
-    bf.close()
+      bf.close()
+
+      # try to build debian.pdf file to test aboc LaTeX file
+      basetexfile = self.bibtex_example_tex.replace('.tex','')
+      rm_f(basetexfile+'.aux')
+      rm_f(basetexfile+'.bbl')
+      rm_f(basetexfile+'.blg')
+      rm_f(basetexfile+'.log')
+      try:
+        rename(basetexfile+'.pdf', basetexfile+'.pdf~')
+      except OSError:
+        pass
+      pdftex1 = Popen(['pdflatex', '-interaction=nonstopmode', basetexfile], shell=False, stdout=PIPE)
+      if pdftex1.wait():
+        self.log.error("Problem in 1. PdfLaTeX run of %s" % (basetexfile))
+      bibtex = Popen(['bibtex', basetexfile], shell=False, stdout=PIPE)
+      if bibtex.wait():
+        self.log.error("Problem in BibTeX run of %s" % (basetexfile))
+      pdftex2 = Popen(['pdflatex', '-interaction=nonstopmode', basetexfile], shell=False, stdout=PIPE)
+      if pdftex2.wait():
+        self.log.error("Problem in 2. PdfLaTeX run of %s" % (basetexfile))
+        for logrow in pdftex2.communicate()[0].splitlines():
+    	  if logrow.startswith('!'):
+            print logrow
+        exit(1)
+      print "DEBUG: 3. LaTeX-Lauf"
+      pdftex_process = Popen(['pdflatex', '-interaction=nonstopmode', basetexfile], shell=False, stdout=PIPE)
+      rm_f(basetexfile+'.aux')
+      rm_f(basetexfile+'.bbl')
+      rm_f(basetexfile+'.blg')
+      rm_f(basetexfile+'.log')
 
 if __name__ == '__main__':
   main()
