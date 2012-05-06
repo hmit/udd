@@ -293,7 +293,8 @@ class bibref_gatherer(gatherer):
     # if there is a working LaTeX installation try to build a BibTeX database and test it by creating a debian.pdf file
     if isfile('/usr/bin/pdflatex') and access('/usr/bin/pdflatex', X_OK) and \
        isfile('/usr/bin/bibtex')   and access('/usr/bin/bibtex', X_OK) and \
-       isfile('/usr/share/texlive/texmf-dist/fonts/source/jknappen/ec/ecrm.mf'):
+       ( isfile('/usr/share/texlive/texmf-dist/fonts/source/jknappen/ec/ecrm.mf') or \
+         isfile('/usr/share/texmf-texlive/fonts/source/jknappen/ec/ecrm.mf'):
       # create BibTeX file
       bf = open(self.bibtexfile, 'w')
       cur.execute("SELECT * FROM bibtex()")
