@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -e
 TARGETDIR=/org/udd.debian.org/mirrors/i18n-apps
 mkdir -p $TARGETDIR
 rm -rf $TARGETDIR/*

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -e
 TARGETDIR=/org/udd.debian.org/mirrors/
 SUBDIR=machine-readable
 rm -rf $TARGETDIR/${SUBDIR}
