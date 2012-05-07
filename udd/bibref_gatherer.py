@@ -80,7 +80,8 @@ class bibref_gatherer(gatherer):
 
   def setref(self, references, source, package, rank):
     year=''
-    defined_fields = { 'article'   : 0,
+    defined_fields = { 'address'   : 0,
+                       'article'   : 0,
                        'author'    : 0,
                        'booktitle' : 0,
                        'comment'   : 0,
@@ -98,6 +99,7 @@ class bibref_gatherer(gatherer):
                        'publisher' : 0,
                        'pmid'      : 0,
                        'title'     : 0,
+                       'type'      : 0,
                        'url'       : 0,
                        'volume'    : 0,
                        'year'      : 0,
