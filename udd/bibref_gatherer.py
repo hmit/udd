@@ -126,6 +126,12 @@ class bibref_gatherer(gatherer):
         ref['value']   = str(references[r])
       else:
         ref['value']   = references[r].strip()
+        if key == 'author':
+          # Try to catch broken author formating
+          new_author = re.sub(',\s* and\s*' , ' and ', ref['value'])
+          if new_author != ref['value']:
+            self.log.warning("Author of source package %s does contain invalid BibTeX format: %s will be turned into %s", source, ref['value'], new_author)
+            ref['value'] = new_author
       self.bibrefs.append(ref)
       if r.lower() == 'year':
         year = ref['value']
