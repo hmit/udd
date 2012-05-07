@@ -134,6 +134,8 @@ class bibref_gatherer(gatherer):
           if new_author != ref['value']:
             self.log.warning("Author of source package %s does contain invalid BibTeX format: %s will be turned into %s", source, ref['value'], new_author)
             ref['value'] = new_author
+          if ref['value'].count(',') > ref['value'].count(' and ') + 1:
+            self.log.warning("Suspicious authors field in source package %s with way more ',' than ' and ' strings: %s", source, ref['value'])
       self.bibrefs.append(ref)
       if r.lower() == 'year':
         year = ref['value']
