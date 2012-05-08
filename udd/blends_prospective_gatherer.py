@@ -47,7 +47,9 @@ class blends_prospective_gatherer(gatherer):
     my_config = self.my_config
     cur = self.cursor()
 
-    find_itp_re = re.compile('\s+\*\s+initial\s+release.+closes:\s+#(\d+)', flags=re.IGNORECASE|re.MULTILINE)
+    find_itp_re = re.compile('\s+\*\s+.*(initial\s+release|ITP).+closes:\s+(Bug|)#(\d+)', flags=re.IGNORECASE|re.MULTILINE)
+    # might need enhancement (see http://www.debian.org/doc/manuals/developers-reference/pkgs.html#upload-bugfix)
+    # --> /closes:\s*(?:bug)?\#\s*\d+(?:,\s*(?:bug)?\#\s*\d+)*/ig
     vcs_type_re = re.compile('Vcs-(Svn|Git|Bzr|Darcs|Hg|Cvs|Arch|Mtn)')
     
     cur.execute('TRUNCATE %s' % my_config['table'])
@@ -106,7 +108,7 @@ class blends_prospective_gatherer(gatherer):
           match = find_itp_re.search(changes)
           sprosp['wnpp'] = 0
           if match:
-            wnpp = match.groups()[0]
+            wnpp = match.groups()[2]
             if wnpp not in sprosp['closes']:
               self.log.warning("Strange WNPP in changelog of '%s': wnpp=%s - closed bugs=%s" % (source, wnpp, str(sprosp['closes'])))
             try:
