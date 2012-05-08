@@ -22,6 +22,31 @@ debug=0
 def get_gatherer(connection, config, source):
   return blends_prospective_gatherer(connection, config, source)
 
+def RowDictionaries(cursor):
+    """Return a list of dictionaries which specify the values by their column names"""
+
+    description = cursor.description
+    if not description:
+        # even if there are no data sets to return the description should contain the table structure.  If not something went
+        # wrong and we return NULL as to represent a problem
+        return NULL
+    if cursor.rowcount <= 0:
+        # if there are no rows in the cursor we return an empty list
+        return []
+
+    data = cursor.fetchall()
+    result = []
+                                                                                          
+    for row in data:
+        resultrow = {}
+        i = 0
+        for dd in description:
+            resultrow[dd[0]] = row[i]
+            i += 1
+        result.append(resultrow)
+    return result
+
+
 class blends_prospective_gatherer(gatherer):
   """
   Not yet uploaded packages prepared by Blends teams in Vcs
@@ -54,6 +79,11 @@ class blends_prospective_gatherer(gatherer):
     
     cur.execute('TRUNCATE %s' % my_config['table'])
     cur.execute("PREPARE check_source (text) AS SELECT COUNT(*) FROM sources WHERE source = $1")
+
+    cur.execute("""PREPARE check_itp (int) AS
+                  SELECT id, arrival, submitter, owner, title, last_modified, submitter_name, submitter_email, owner_name, owner_email
+                    FROM bugs
+                    WHERE id = $1 AND package = 'wnpp' and source = 'wnpp' """)
 
     u_dirs = listdir(my_config['path'])
 
@@ -113,12 +143,19 @@ class blends_prospective_gatherer(gatherer):
               self.log.warning("Strange WNPP in changelog of '%s': wnpp=%s - closed bugs=%s" % (source, wnpp, str(sprosp['closes'])))
             try:
               iwnpp = int(wnpp)
-              if iwnpp == 12345: # that seems to be a fake ITP
-                self.log.warning("Fake WNPP no. 12345 in changelog of '%s'" % (source))
+            except:
+              iwnpp = 0
+              self.log.warning("WNPP is not integer in changelog of '%s': wnpp=%s" % (source, wnpp))
+            if iwnpp == 12345: # that seems to be a fake ITP
+              self.log.warning("Fake WNPP no. 12345 in changelog of '%s'" % (source))
+            elif iwnpp > 0:
+              cur.execute("EXECUTE check_itp (%s)", (iwnpp,))
+              if cur.rowcount > 0:
+                wnppbug = RowDictionaries(cur)[0]
+		self.log.info("ITP bug %i for package %s found: `%s`" % (iwnpp, source, wnppbug['title']))
               else:
-                sprosp['wnpp'] = iwnpp
-    	    except:
-    	      self.log.warning("WNPP is not integer in changelog of '%s': wnpp=%s" % (source, wnpp))
+		self.log.warning("ITP bug %i for package %s is not open any more or can otherwise not be found" % (iwnpp, source))
+              sprosp['wnpp'] = iwnpp
     	
     	# Read Vcs fields
         vcsfile = upath+'/'+source+'.vcs'
