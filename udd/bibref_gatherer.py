@@ -314,13 +314,14 @@ class bibref_gatherer(gatherer):
 
       # create LaTeX file to test BibTeX functionality
       bf = open(self.bibtex_example_tex, 'w')
-      print >>bf, """\documentclass{article}
+      print >>bf, """\documentclass[10]{article}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage[left=2mm,top=2mm,right=2mm,bottom=2mm,nohead,nofoot]{geometry}
 \usepackage{longtable}
 \setlongtables
 \\begin{document}
+\small
 \\begin{longtable}{llp{70mm}l}
 \\bf package & \\bf source & \\bf description & BibTeX key \\\\ \hline"""
 
@@ -331,6 +332,8 @@ class bibref_gatherer(gatherer):
       print >>bf, """\end{longtable}
 
 \\bibliographystyle{plain}
+% Try a bit harder ...
+%\\bibliographystyle{plainnat}
 \\bibliography{debian}
 
 \end{document}

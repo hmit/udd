@@ -46,10 +46,27 @@ AS $$
             CASE WHEN bibvolume.value  IS NOT NULL THEN E',\n  Volume  = "{' || bibvolume.value  || '}"' ELSE '' END ||
             CASE WHEN bibnumber.value  IS NOT NULL THEN E',\n  Number  = "{' || bibnumber.value  || '}"' ELSE '' END ||
             CASE WHEN bibpages.value   IS NOT NULL THEN E',\n  Pages   = "{' || regexp_replace(bibpages.value, '(\d)-(\d)', '\1--\2')   || '}"' ELSE '' END ||
-            CASE WHEN biburl.value     IS NOT NULL THEN E',\n  URL     = "{' || biburl.value     || '}"' ELSE '' END ||
-            CASE WHEN bibdoi.value     IS NOT NULL THEN E',\n  DOI     = "{' || bibdoi.value     || '}"' ELSE '' END ||
+            CASE WHEN biburl.value     IS NOT NULL THEN E',\n  URL     = "{' ||
+                  replace(replace(replace(biburl.value,
+                        '_', E'\\_'),           --
+                        '%', E'\\%'),           --
+                        '&', E'\\&')            --
+                   || '}"'
+                 ELSE '' END ||
+            CASE WHEN bibdoi.value     IS NOT NULL THEN E',\n  DOI     = "{' ||
+                  replace(replace(bibdoi.value,
+                        '_', E'\\_'),           --
+                        '&', E'\\&')            --
+                   || '}"'
+                 ELSE '' END ||
             CASE WHEN bibpmid.value    IS NOT NULL THEN E',\n  PMID    = "{' || bibpmid.value    || '}"' ELSE '' END ||
-            CASE WHEN bibeprint.value  IS NOT NULL THEN E',\n  EPrint  = "{' || bibeprint.value  || '}"' ELSE '' END ||
+            CASE WHEN bibeprint.value  IS NOT NULL THEN E',\n  EPrint  = "{' ||
+                  replace(replace(replace(bibeprint.value,
+                        '_', E'\\_'),           --
+                        '%', E'\\%'),           --
+                        '&', E'\\&')            --
+                   || '}"'
+                 ELSE '' END ||
             CASE WHEN bibin.value      IS NOT NULL THEN E',\n  In      = "{' || bibin.value      || '}"' ELSE '' END ||
             CASE WHEN bibissn.value    IS NOT NULL THEN E',\n  ISSN    = "{' || bibissn.value    || '}"' ELSE '' END ||
             E',\n}\n'
