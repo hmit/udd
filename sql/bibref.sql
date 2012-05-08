@@ -28,7 +28,7 @@ RETURNS SETOF TEXT LANGUAGE SQL
 AS $$
   SELECT DISTINCT
          '@Article{' || bibkey.value ||
-            CASE WHEN bibauthor.value  IS NOT NULL THEN E',\n  Author  = "{' || bibauthor.value  || '}"' ELSE '' END ||
+            CASE WHEN bibauthor.value  IS NOT NULL THEN E',\n  Author  = {' || bibauthor.value  || '}' ELSE '' END ||
             CASE WHEN bibtitle.value   IS NOT NULL THEN E',\n  Title   = "{' || 
                   replace(replace(replace(bibtitle.value,
                         '_', E'\\_'),            --
@@ -38,37 +38,37 @@ AS $$
                    || '}"'
                  ELSE '' END ||
             CASE WHEN bibbooktitle.value IS NOT NULL THEN E',\n  Booktitle = "{' || bibbooktitle.value || '}"' ELSE '' END ||
-            CASE WHEN bibyear.value    IS NOT NULL THEN E',\n  Year    = "{' || bibyear.value    || '}"' ELSE '' END ||
-            CASE WHEN bibmonth.value   IS NOT NULL THEN E',\n  Month   = "{' || bibmonth.value   || '}"' ELSE '' END ||
-            CASE WHEN bibjournal.value IS NOT NULL THEN E',\n  Journal = "{' || bibjournal.value || '}"' ELSE '' END ||
-            CASE WHEN bibaddress.value IS NOT NULL THEN E',\n  Address = "{' || bibaddress.value || '}"' ELSE '' END ||
-            CASE WHEN bibpublisher.value IS NOT NULL THEN E',\n  Publisher = "{' || bibpublisher.value || '}"' ELSE '' END ||
-            CASE WHEN bibvolume.value  IS NOT NULL THEN E',\n  Volume  = "{' || bibvolume.value  || '}"' ELSE '' END ||
-            CASE WHEN bibnumber.value  IS NOT NULL THEN E',\n  Number  = "{' || bibnumber.value  || '}"' ELSE '' END ||
-            CASE WHEN bibpages.value   IS NOT NULL THEN E',\n  Pages   = "{' || regexp_replace(bibpages.value, '(\d)-(\d)', '\1--\2')   || '}"' ELSE '' END ||
-            CASE WHEN biburl.value     IS NOT NULL THEN E',\n  URL     = "{' ||
+            CASE WHEN bibyear.value    IS NOT NULL THEN E',\n  Year    = {' || bibyear.value    || '}' ELSE '' END ||
+            CASE WHEN bibmonth.value   IS NOT NULL THEN E',\n  Month   = {' || bibmonth.value   || '}' ELSE '' END ||
+            CASE WHEN bibjournal.value IS NOT NULL THEN E',\n  Journal = {' || bibjournal.value || '}' ELSE '' END ||
+            CASE WHEN bibaddress.value IS NOT NULL THEN E',\n  Address = {' || bibaddress.value || '}' ELSE '' END ||
+            CASE WHEN bibpublisher.value IS NOT NULL THEN E',\n  Publisher = {' || bibpublisher.value || '}' ELSE '' END ||
+            CASE WHEN bibvolume.value  IS NOT NULL THEN E',\n  Volume  = {' || bibvolume.value  || '}' ELSE '' END ||
+            CASE WHEN bibnumber.value  IS NOT NULL THEN E',\n  Number  = {' || bibnumber.value  || '}' ELSE '' END ||
+            CASE WHEN bibpages.value   IS NOT NULL THEN E',\n  Pages   = {' || regexp_replace(bibpages.value, '(\d)-(\d)', '\1--\2')   || '}' ELSE '' END ||
+            CASE WHEN biburl.value     IS NOT NULL THEN E',\n  URL     = {' ||
                   replace(replace(replace(biburl.value,
                         '_', E'\\_'),           --
                         '%', E'\\%'),           --
                         '&', E'\\&')            --
-                   || '}"'
+                   || '}'
                  ELSE '' END ||
-            CASE WHEN bibdoi.value     IS NOT NULL THEN E',\n  DOI     = "{' ||
+            CASE WHEN bibdoi.value     IS NOT NULL THEN E',\n  DOI     = {' ||
                   replace(replace(bibdoi.value,
                         '_', E'\\_'),           --
                         '&', E'\\&')            --
-                   || '}"'
+                   || '}'
                  ELSE '' END ||
-            CASE WHEN bibpmid.value    IS NOT NULL THEN E',\n  PMID    = "{' || bibpmid.value    || '}"' ELSE '' END ||
-            CASE WHEN bibeprint.value  IS NOT NULL THEN E',\n  EPrint  = "{' ||
+            CASE WHEN bibpmid.value    IS NOT NULL THEN E',\n  PMID    = {' || bibpmid.value    || '}' ELSE '' END ||
+            CASE WHEN bibeprint.value  IS NOT NULL THEN E',\n  EPrint  = {' ||
                   replace(replace(replace(bibeprint.value,
                         '_', E'\\_'),           --
                         '%', E'\\%'),           --
                         '&', E'\\&')            --
-                   || '}"'
+                   || '}'
                  ELSE '' END ||
-            CASE WHEN bibin.value      IS NOT NULL THEN E',\n  In      = "{' || bibin.value      || '}"' ELSE '' END ||
-            CASE WHEN bibissn.value    IS NOT NULL THEN E',\n  ISSN    = "{' || bibissn.value    || '}"' ELSE '' END ||
+            CASE WHEN bibin.value      IS NOT NULL THEN E',\n  In      = {' || bibin.value      || '}' ELSE '' END ||
+            CASE WHEN bibissn.value    IS NOT NULL THEN E',\n  ISSN    = {' || bibissn.value    || '}' ELSE '' END ||
             E',\n}\n'
             AS bibentry
 --         p.source         AS source,
