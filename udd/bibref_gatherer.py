@@ -45,10 +45,17 @@ def open_tex_process(texexe, basetexfile):
     return(False, 'Wrong exe: '+texexe)
   errstring=""
   if ptex.wait():
-    for logrow in ptex.communicate()[0].splitlines():
-      if logrow.startswith('!'):
-        errstring += logrow
-    return(False, errstring)
+    if texexe == 'pdflatex':
+      for logrow in ptex.communicate()[0].splitlines():
+        if logrow.startswith('!'):
+          errstring += logrow
+      return(False, errstring)
+    else:
+      for logrow in ptex.communicate()[0].splitlines():
+        if logrow.startswith('This is BibTeX'):
+          continue
+        errstring += logrow + '\n'
+      return(False, errstring)
   return(True, errstring)
 
 other_known_keys = ('Archive', 'Contact', 'CRAN', 'Donation', 'Download', 'Help', 'Homepage', 'Name', 'Watch', 'Webservice')
