@@ -17,7 +17,6 @@ CREATE TABLE bibref (
 
 GRANT SELECT ON bibref TO PUBLIC;
 
-COMMIT;
 
 /************************************************************************************
  * Create a BibTex file from references                                             *
@@ -27,7 +26,9 @@ CREATE OR REPLACE FUNCTION bibtex ()
 RETURNS SETOF TEXT LANGUAGE SQL
 AS $$
   SELECT DISTINCT
-         '@Article{' || bibkey.value ||
+         CASE WHEN bibjournal.value IS NULL AND bibin.value IS NOT NULL AND bibpublisher.value IS NOT NULL THEN '@Book{'
+              ELSE CASE WHEN bibauthor.value IS NULL OR bibjournal.value IS NULL THEN '@Misc{'
+              ELSE '@Article{' END END || bibkey.value ||
             CASE WHEN bibauthor.value  IS NOT NULL THEN E',\n  Author  = {' || bibauthor.value  || '}' ELSE '' END ||
             CASE WHEN bibtitle.value   IS NOT NULL THEN E',\n  Title   = "{' || 
                   replace(replace(replace(bibtitle.value,
@@ -126,3 +127,5 @@ SELECT package, source, bibkey, description FROM (
  ORDER BY package, bibkey
 ;
 $$;
+
+COMMIT;
