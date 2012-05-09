@@ -363,7 +363,6 @@ class bibref_gatherer(gatherer):
         exit(1)
       (retcode,errstring) = open_tex_process('bibtex', basetexfile)
       if errstring != "":
-        print "BibTeX:", retcode
         if not retcode:
           self.log.error("Problem in BibTeX run of %s.bib: `%s`" % (basetexfile, errstring))
           exit(1)
