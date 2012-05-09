@@ -35,6 +35,8 @@ def cleanup_tex_logs(basetexfile):
   rm_f(basetexfile+'.blg')
   rm_f(basetexfile+'.log')
 
+# seek for authors separated by ',' rather than by ' and '
+seek_broken_authors_re = re.compile('^[^\s^,]+\s+[^\s^,]+\s*,\s*[^\s^,]+\s+[^\s^,]')
 
 def open_tex_process(texexe, basetexfile):
   if texexe == 'pdflatex':
@@ -143,6 +145,9 @@ class bibref_gatherer(gatherer):
             ref['value'] = new_author
           if ref['value'].count(',') > ref['value'].lower().count(' and ') + 1:
             self.log.warning("Suspicious authors field in source package %s with way more ',' than ' and ' strings: %s", source, ref['value'])
+          match = seek_broken_authors_re.search(ref['value'])
+          if match:
+            self.log.warning("Suspicious authors field in source package %s - seems to have comma separated authors: %s", source, ref['value'])
       self.bibrefs.append(ref)
       if r.lower() == 'year':
         year = ref['value']
