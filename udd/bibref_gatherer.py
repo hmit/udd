@@ -55,7 +55,7 @@ def open_tex_process(texexe, basetexfile):
         if logrow.startswith('This is BibTeX'):
           continue
         errstring += logrow + '\n'
-      return(False, errstring)
+      return(True, errstring)
   return(True, errstring)
 
 other_known_keys = ('Archive', 'Contact', 'CRAN', 'Donation', 'Download', 'Help', 'Homepage', 'Name', 'Watch', 'Webservice')
@@ -158,7 +158,7 @@ class bibref_gatherer(gatherer):
     ref['rank']    = rank
     ref['source']  = source
     ref['key']     = 'bibtex'
-    ref['value']   = bibtexkey
+    ref['value']   = re.sub('\+', '-', re.sub('\.', '-', bibtexkey)) # avoid '.' and '+' in BibTeX keys
     ref['package'] = package
     self.bibrefsinglelist.append(bibtexkey)
     self.bibrefs.append(ref)
@@ -326,6 +326,7 @@ class bibref_gatherer(gatherer):
 \usepackage[utf8]{inputenc}
 \usepackage[left=2mm,top=2mm,right=2mm,bottom=2mm,nohead,nofoot]{geometry}
 \usepackage{longtable}
+\usepackage[super]{natbib}
 \setlongtables
 \\begin{document}
 \small
@@ -338,9 +339,9 @@ class bibref_gatherer(gatherer):
 
       print >>bf, """\end{longtable}
 
-\\bibliographystyle{plain}
-% Try a bit harder ...
-%\\bibliographystyle{plainnat}
+% \\bibliographystyle{plain}
+% Try a bit harder by also including URL+DOI
+\\bibliographystyle{plainnat}
 \\bibliography{debian}
 
 \end{document}
@@ -361,9 +362,12 @@ class bibref_gatherer(gatherer):
         self.log.error("Problem in 1. PdfLaTeX run of %s.tex: `%s` --> please inspect %s.log" % (basetexfile, errstring, basetexfile))
         exit(1)
       (retcode,errstring) = open_tex_process('bibtex', basetexfile)
-      if not retcode:
-        self.log.error("Problem in BibTeX run of %s.bib: `%s`" % (basetexfile, errstring))
-        exit(1)
+      if errstring != "":
+        print "BibTeX:", retcode
+        if not retcode:
+          self.log.error("Problem in BibTeX run of %s.bib: `%s`" % (basetexfile, errstring))
+          exit(1)
+        self.log.error("Ignore the following problems in BibTeX run of %s.bib: `%s`" % (basetexfile, errstring))
       (retcode,errstring) = open_tex_process('pdflatex', basetexfile)
       if not retcode:
         self.log.error("Problem in 2. PdfLaTeX run of %s.tex: `%s` --> please inspect %s.log" % (basetexfile, errstring, basetexfile))
