@@ -26,9 +26,10 @@ CREATE OR REPLACE FUNCTION bibtex ()
 RETURNS SETOF TEXT LANGUAGE SQL
 AS $$
   SELECT DISTINCT
-         CASE WHEN bibjournal.value IS NULL AND bibin.value IS NOT NULL AND bibpublisher.value IS NOT NULL THEN '@Book{'
-              ELSE CASE WHEN bibauthor.value IS NULL OR bibjournal.value IS NULL THEN '@Misc{'
-              ELSE '@Article{' END END || bibkey.value ||
+         CASE WHEN bibjournal.value IS NULL AND bibin.value IS NOT NULL AND bibpublisher.value IS NOT NULL THEN '@Book{' || bibkey.value
+              ELSE CASE WHEN bibauthor.value IS NULL OR bibjournal.value IS NULL THEN '@Misc{'|| bibkey.value ||
+                   CASE WHEN bibauthor.value IS NULL THEN E',\n  Key     = "' || bibkey.value || '"' ELSE '' END -- without author we need a sorting key
+              ELSE '@Article{' || bibkey.value END END  ||
             CASE WHEN bibauthor.value  IS NOT NULL THEN E',\n  Author  = {' || bibauthor.value  || '}' ELSE '' END ||
             CASE WHEN bibtitle.value   IS NOT NULL THEN E',\n  Title   = "{' || 
                   replace(replace(replace(bibtitle.value,
