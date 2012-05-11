@@ -1,7 +1,8 @@
 DROP TABLE IF EXISTS blends_prospectivepackages CASCADE;
 
 CREATE TABLE blends_prospectivepackages
-  (package text,
+  (blend text,
+   package text,
    source text,
    maintainer text,
    maintainer_name text,
@@ -21,6 +22,7 @@ CREATE TABLE blends_prospectivepackages
    vcs_browser text,
    wnpp int,
    wnpp_type text,
+   wnpp_desc text,
    license text,
    chlog_date text, -- time,
    chlog_version debversion
