@@ -138,6 +138,7 @@ class blends_prospective_gatherer(gatherer):
           changes                      = stanza['changes']
           match = find_itp_re.search(changes)
           sprosp['wnpp'] = 0
+          sprosp['wnpp_type'] = ''
           if match:
             wnpp = match.groups()[2]
             if wnpp not in sprosp['closes']:
@@ -155,7 +156,9 @@ class blends_prospective_gatherer(gatherer):
                 wnppbug = RowDictionaries(cur)[0]
                 itpmatch = parse_itp_re.search(wnppbug['title'])
                 if itpmatch:
-                  self.log.info("Source %s: WNPP-type=%s, package name = %s, short description = %s" % (source, itpmatch.groups()[0], itpmatch.groups()[1], itpmatch.groups()[2]))
+                  sprosp['wnpp_type'] = itpmatch.groups()[0]
+                  if source != itpmatch.groups()[1]:
+                    self.log.info("Source name of %s differs from name in %s bug: package name = %s, short description = %s" % (source, itpmatch.groups()[0], itpmatch.groups()[1], itpmatch.groups()[2]))
                 else:
                   self.log.warning("Cannot parse ITP bug %i for package %s: `%s`" % (iwnpp, source, wnppbug['title']))
               else:
@@ -298,7 +301,7 @@ class blends_prospective_gatherer(gatherer):
          description, long_description,
          homepage, section, priority,
          vcs_type, vcs_url, vcs_browser,
-         wnpp, license, chlog_date, chlog_version)
+         wnpp, wnpp_type, license, chlog_date, chlog_version)
         VALUES
         ( $1, $2,
           $3, $4, $5,
@@ -307,7 +310,7 @@ class blends_prospective_gatherer(gatherer):
           $10, $11,
           $12, $13, $14,
           $15, $16, $17,
-          $18, $19, $20, $21)
+          $18, $19, $20, $21, $22)
         """ %  (my_config['table']))
     pkgquery = """EXECUTE package_insert
       (%(package)s, %(source)s,
@@ -317,7 +320,7 @@ class blends_prospective_gatherer(gatherer):
        %(description)s, %(long_description)s,
        %(homepage)s, %(section)s, %(priority)s,
        %(vcs_type)s, %(vcs_url)s, %(vcs_browser)s,
-       %(wnpp)s, %(license)s, %(chlog_date)s, %(chlog_version)s)"""
+       %(wnpp)s, %(wnpp_type)s, %(license)s, %(chlog_date)s, %(chlog_version)s)"""
     try:
       cur.executemany(pkgquery, pkgs)
     except ProgrammingError:
