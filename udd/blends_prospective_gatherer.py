@@ -232,11 +232,14 @@ class blends_prospective_gatherer(gatherer):
     	      self.log.warning("Control file for source '%s' is lacking source field" % (source))
     	    if src.has_key('vcs-browser'):
     	      if sprosp['vcs_browser'] != src['vcs-browser']:
-    	        abc = re.sub('/$', '', sprosp['vcs_browser']) # ignore forgotten '/' at end of Vcs-Browser
-    	        if abc != src['vcs-browser']:
-    	          abc = re.sub('^git:', 'http:', src['vcs-browser']) # check for usual error in specifying Vcs-Browser by just leaving 'git:' as protocol
-    	          if abc == sprosp['vcs_browser']:
-    	            self.log.error("%s - Wrong Vcs-Browser: Use 'http:' instead of 'git:' in '%s'." % (source, src['Vcs-Browser']))
+                tmp_prosp = re.sub('/$', '', sprosp['vcs_browser']) # ignore forgotten '/' at end of Vcs-Browser
+                tmp_src = re.sub('/$', '', src['vcs-browser'])     # same with string in debian/control to enable comparison after further changes below
+                tmp_src = re.sub('/viewsvn/', '/wsvn/', tmp_src) # machine-readable gatherer implies /wsvn/ but specifying /viewsvn/ does no harm
+                tmp_src = re.sub('/anonscm.debian.org/viewvc', '/svn.debian.org/wsvn', tmp_src) # FIXME: is it correct to assume SVN here??? - probably not
+    	        if tmp_prosp != tmp_src:
+    	          tmp_src = re.sub('^git:', 'http:', tmp_src) # check for usual error in specifying Vcs-Browser by just leaving 'git:' as protocol
+    	          if tmp_src == sprosp['vcs_browser']:
+    	            self.log.error("%s - Wrong Vcs-Browser: Use 'http:' instead of 'git:' in '%s' ('%s')." % (source, src['Vcs-Browser'], sprosp['vcs_browser']))
     	          else:
                     self.log.warning("%s - Differing Vcs-Browser:  Obtained from Vcs-Browser='%s' <-> control has '%s'." % (source, sprosp['vcs_browser'], src['Vcs-Browser']))
             else:
