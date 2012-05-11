@@ -162,7 +162,7 @@ class blends_prospective_gatherer(gatherer):
                 else:
                   self.log.warning("Cannot parse ITP bug %i for package %s: `%s`" % (iwnpp, source, wnppbug['title']))
               else:
-		self.log.warning("ITP bug %i for package %s is not open any more or can otherwise not be found" % (iwnpp, source))
+		self.log.debug("ITP bug %i for package %s is not open any more or can otherwise not be found" % (iwnpp, source))
               sprosp['wnpp'] = iwnpp
     	
     	# Read Vcs fields
@@ -207,7 +207,7 @@ class blends_prospective_gatherer(gatherer):
     	    continue
     	  if linenr == 0:
     	    if field != 'Format':
-    	      self.log.info("Copyright file for source '%s' does not seem to regard DEP5.  Found line `%s`" % (source, line.strip()))
+    	      self.log.debug("Copyright file for source '%s' does not seem to regard DEP5.  Found line `%s`" % (source, line.strip()))
     	      found_files = True # one flag is enough to control this - we do not need another warning in the logs
     	      break
     	  linenr += 1
@@ -219,7 +219,7 @@ class blends_prospective_gatherer(gatherer):
     	    sprosp['license'] = value
     	    break
     	if not found_files:
-          self.log.info("No 'Files: *' specification found in copyright file for source '%s'" % (source, ))
+          self.log.debug("No 'Files: *' specification found in copyright file for source '%s'" % (source, ))
 
     	# Try to read debian/control
     	ctrl = None
@@ -242,6 +242,7 @@ class blends_prospective_gatherer(gatherer):
     	      if sprosp['vcs_browser'] != src['vcs-browser']:
                 tmp_prosp = re.sub('/$', '', sprosp['vcs_browser']) # ignore forgotten '/' at end of Vcs-Browser
                 tmp_src = re.sub('/$', '', src['vcs-browser'])     # same with string in debian/control to enable comparison after further changes below
+                tmp_src = re.sub('\.git;a=summary$', '.git', tmp_src)
                 tmp_src = re.sub('/viewsvn/', '/wsvn/', tmp_src) # machine-readable gatherer implies /wsvn/ but specifying /viewsvn/ does no harm
                 tmp_src = re.sub('/anonscm.debian.org/viewvc', '/svn.debian.org/wsvn', tmp_src) # FIXME: is it correct to assume SVN here??? - probably not
     	        if tmp_prosp != tmp_src:
@@ -266,7 +267,10 @@ class blends_prospective_gatherer(gatherer):
                 sprosp[prop] = src[prop]
               else:
                 sprosp[prop] = ''
-                self.log.warning("Control file for source '%s' is lacking %s field" % (source,prop))
+                if prop != 'uploaders':
+                  self.log.warning("Control file for source '%s' is lacking %s field" % (source,prop))
+                else:
+                  self.log.debug("Control file for source '%s' is lacking %s field" % (source,prop))
 
             pkg = ictrl.next()
             while pkg:
