@@ -139,6 +139,7 @@ class blends_prospective_gatherer(gatherer):
           match = find_itp_re.search(changes)
           sprosp['wnpp'] = 0
           sprosp['wnpp_type'] = ''
+          sprosp['wnpp_desc'] = ''
           if match:
             wnpp = match.groups()[2]
             if wnpp not in sprosp['closes']:
@@ -157,6 +158,7 @@ class blends_prospective_gatherer(gatherer):
                 itpmatch = parse_itp_re.search(wnppbug['title'])
                 if itpmatch:
                   sprosp['wnpp_type'] = itpmatch.groups()[0]
+                  sprosp['wnpp_desc'] = itpmatch.groups()[2]
                   if source != itpmatch.groups()[1]:
                     self.log.info("Source name of %s differs from name in %s bug: package name = %s, short description = %s" % (source, itpmatch.groups()[0], itpmatch.groups()[1], itpmatch.groups()[2]))
                 else:
@@ -175,7 +177,9 @@ class blends_prospective_gatherer(gatherer):
     	  (field,value) = line.split(': ')
     	  field = field.strip()
     	  value = value.strip()
-    	  if field == 'Vcs-Browser':
+    	  if field == 'Blend':
+    	    sprosp['blend'] = value
+    	  elif field == 'Vcs-Browser':
     	    sprosp['vcs_browser'] = value
     	  else:
             matchvcs = vcs_type_re.match(field)
@@ -298,33 +302,36 @@ class blends_prospective_gatherer(gatherer):
                 break
 
     cur.execute("""PREPARE package_insert AS INSERT INTO %s
-        (package, source,
+        (blend, package, source,
          maintainer, maintainer_name, maintainer_email,
          changed_by, changed_by_name, changed_by_email,
          uploaders,
          description, long_description,
          homepage, section, priority,
          vcs_type, vcs_url, vcs_browser,
-         wnpp, wnpp_type, license, chlog_date, chlog_version)
+         wnpp, wnpp_type, wnpp_desc,
+         license, chlog_date, chlog_version)
         VALUES
-        ( $1, $2,
-          $3, $4, $5,
-          $6, $7, $8,
-          $9,
-          $10, $11,
-          $12, $13, $14,
-          $15, $16, $17,
-          $18, $19, $20, $21, $22)
+        ( $1, $2, $3,
+          $4, $5, $6,
+          $7, $8, $9,
+          $10,
+          $11, $12,
+          $13, $14, $15,
+          $16, $17, $18,
+          $19, $20, $21,
+          $22, $23, $24)
         """ %  (my_config['table']))
     pkgquery = """EXECUTE package_insert
-      (%(package)s, %(source)s,
+      (%(blend)s, %(package)s, %(source)s,
        %(maintainer)s, %(maintainer_name)s, %(maintainer_email)s,
        %(changed_by)s, %(changed_by_name)s, %(changed_by_email)s,
        %(uploaders)s,
        %(description)s, %(long_description)s,
        %(homepage)s, %(section)s, %(priority)s,
        %(vcs_type)s, %(vcs_url)s, %(vcs_browser)s,
-       %(wnpp)s, %(wnpp_type)s, %(license)s, %(chlog_date)s, %(chlog_version)s)"""
+       %(wnpp)s, %(wnpp_type)s, %(wnpp_desc)s,
+       %(license)s, %(chlog_date)s, %(chlog_version)s)"""
     try:
       cur.executemany(pkgquery, pkgs)
     except ProgrammingError:
