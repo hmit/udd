@@ -75,6 +75,7 @@ class blends_prospective_gatherer(gatherer):
     find_itp_re = re.compile('\s+\*\s+.*(initial\s+release|ITP).+closes:\s+(Bug|)#(\d+)', flags=re.IGNORECASE|re.MULTILINE)
     # might need enhancement (see http://www.debian.org/doc/manuals/developers-reference/pkgs.html#upload-bugfix)
     # --> /closes:\s*(?:bug)?\#\s*\d+(?:,\s*(?:bug)?\#\s*\d+)*/ig
+    parse_itp_re = re.compile('^([A-Z]+): ([^\s]+) -- (.+)$')
     vcs_type_re = re.compile('Vcs-(Svn|Git|Bzr|Darcs|Hg|Cvs|Arch|Mtn)')
     
     cur.execute('TRUNCATE %s' % my_config['table'])
@@ -152,7 +153,11 @@ class blends_prospective_gatherer(gatherer):
               cur.execute("EXECUTE check_itp (%s)", (iwnpp,))
               if cur.rowcount > 0:
                 wnppbug = RowDictionaries(cur)[0]
-		self.log.info("ITP bug %i for package %s found: `%s`" % (iwnpp, source, wnppbug['title']))
+                itpmatch = parse_itp_re.search(wnppbug['title'])
+                if itpmatch:
+                  self.log.info("Source %s: WNPP-type=%s, package name = %s, short description = %s" % (source, itpmatch.groups()[0], itpmatch.groups()[1], itpmatch.groups()[2]))
+                else:
+                  self.log.warning("Cannot parse ITP bug %i for package %s: `%s`" % (iwnpp, source, wnppbug['title']))
               else:
 		self.log.warning("ITP bug %i for package %s is not open any more or can otherwise not be found" % (iwnpp, source))
               sprosp['wnpp'] = iwnpp
