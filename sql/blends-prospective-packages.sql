@@ -20,6 +20,7 @@ CREATE TABLE blends_prospectivepackages
    vcs_url text,
    vcs_browser text,
    wnpp int,
+   wnpp_type text,
    license text,
    chlog_date text, -- time,
    chlog_version debversion
