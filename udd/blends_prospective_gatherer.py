@@ -232,7 +232,13 @@ class blends_prospective_gatherer(gatherer):
     	      self.log.warning("Control file for source '%s' is lacking source field" % (source))
     	    if src.has_key('vcs-browser'):
     	      if sprosp['vcs_browser'] != src['vcs-browser']:
-                self.log.warning("%s - Differing Vcs-Browser:  Obtained from Vcs-Browser='%s' <-> control has '%s'." % (source, sprosp['vcs_browser'], src['Vcs-Browser']))
+    	        abc = re.sub('/$', '', sprosp['vcs_browser']) # ignore forgotten '/' at end of Vcs-Browser
+    	        if abc != src['vcs-browser']:
+    	          abc = re.sub('^git:', 'http:', src['vcs-browser']) # check for usual error in specifying Vcs-Browser by just leaving 'git:' as protocol
+    	          if abc == sprosp['vcs_browser']:
+    	            self.log.error("%s - Wrong Vcs-Browser: Use 'http:' instead of 'git:' in '%s'." % (source, src['Vcs-Browser']))
+    	          else:
+                    self.log.warning("%s - Differing Vcs-Browser:  Obtained from Vcs-Browser='%s' <-> control has '%s'." % (source, sprosp['vcs_browser'], src['Vcs-Browser']))
             else:
     	      self.log.info("Control file for source '%s' is lacking Vcs-Browser field" % (source))
 
