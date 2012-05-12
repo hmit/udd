@@ -150,7 +150,7 @@ class blends_prospective_gatherer(gatherer):
               iwnpp = 0
               self.log.warning("WNPP is not integer in changelog of '%s': wnpp=%s" % (source, wnpp))
             if iwnpp == 12345: # that seems to be a fake ITP
-              self.log.warning("Fake WNPP no. 12345 in changelog of '%s'" % (source))
+              self.log.debug("Fake WNPP no. 12345 in changelog of '%s'" % (source))
             elif iwnpp > 0:
               cur.execute("EXECUTE check_itp (%s)", (iwnpp,))
               if cur.rowcount > 0:
@@ -248,6 +248,7 @@ class blends_prospective_gatherer(gatherer):
                 tmp_src = re.sub('/$', '', src['vcs-browser'])     # same with string in debian/control to enable comparison after further changes below
                 tmp_src = re.sub('\.git;a=summary$', '.git', tmp_src)
                 tmp_src = re.sub('/viewsvn/', '/wsvn/', tmp_src) # machine-readable gatherer implies /wsvn/ but specifying /viewsvn/ does no harm
+                tmp_src = re.sub('/anonscm.debian.org/gitweb', '/git.debian.org', tmp_src)
                 tmp_src = re.sub('/anonscm.debian.org/viewvc', '/svn.debian.org/wsvn', tmp_src) # FIXME: is it correct to assume SVN here??? - probably not
     	        if tmp_prosp != tmp_src:
     	          tmp_src = re.sub('^git:', 'http:', tmp_src) # check for usual error in specifying Vcs-Browser by just leaving 'git:' as protocol
@@ -256,7 +257,7 @@ class blends_prospective_gatherer(gatherer):
     	          else:
                     self.log.warning("%s - Differing Vcs-Browser:  Obtained from Vcs-Browser='%s' <-> control has '%s'." % (source, sprosp['vcs_browser'], src['Vcs-Browser']))
             else:
-    	      self.log.info("Control file for source '%s' is lacking Vcs-Browser field" % (source))
+    	      self.log.debug("Control file for source '%s' is lacking Vcs-Browser field" % (source))
 
     	    if src.has_key('Maintainer'):
               sprosp['maintainer']       = src['maintainer']
