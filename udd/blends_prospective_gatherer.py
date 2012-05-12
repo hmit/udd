@@ -72,7 +72,9 @@ class blends_prospective_gatherer(gatherer):
     my_config = self.my_config
     cur = self.cursor()
 
-    find_itp_re = re.compile('\s+\*\s+.*(initial\s+release|ITP).+closes:\s+(Bug|)#(\d+)', flags=re.IGNORECASE|re.MULTILINE)
+    # find_itp_re = re.compile('\s+\*\s+.*(initial|ITP).+closes:\s+(Bug|)#(\d+)', flags=re.IGNORECASE|re.MULTILINE)
+    # just check for the term "initial|ITP"
+    find_itp_re = re.compile('(initial|ITP)', flags=re.IGNORECASE|re.MULTILINE)
     # might need enhancement (see http://www.debian.org/doc/manuals/developers-reference/pkgs.html#upload-bugfix)
     # --> /closes:\s*(?:bug)?\#\s*\d+(?:,\s*(?:bug)?\#\s*\d+)*/ig
     parse_itp_re = re.compile('^([A-Z]+): ([^\s]+) -- (.+)$')
@@ -133,25 +135,21 @@ class blends_prospective_gatherer(gatherer):
           else:
             sprosp['chlog_date']       = ''
             self.log.warning("Can not obtain changed data from changelog of '%s'" % (source))
+          sprosp['closes'] = []
           if stanza.has_key('closes'):
-            sprosp['closes']           = stanza['closes'].split(' ')
+            for bug in stanza['closes'].split(' '):
+              sprosp['closes'].append(int(bug))
           changes                      = stanza['changes']
-          match = find_itp_re.search(changes)
           sprosp['wnpp'] = 0
           sprosp['wnpp_type'] = ''
           sprosp['wnpp_desc'] = ''
-          if match:
-            wnpp = match.groups()[2]
-            if wnpp not in sprosp['closes']:
-              self.log.warning("Strange WNPP in changelog of '%s': wnpp=%s - closed bugs=%s" % (source, wnpp, str(sprosp['closes'])))
-            try:
-              iwnpp = int(wnpp)
-            except:
-              iwnpp = 0
-              self.log.warning("WNPP is not integer in changelog of '%s': wnpp=%s" % (source, wnpp))
+#          if match: # try to make sure we are really dealing with ITPs
+          for iwnpp in sprosp['closes']:
             if iwnpp == 12345: # that seems to be a fake ITP
               self.log.debug("Fake WNPP no. 12345 in changelog of '%s'" % (source))
+              continue
             elif iwnpp > 0:
+              sprosp['wnpp'] = iwnpp
               cur.execute("EXECUTE check_itp (%s)", (iwnpp,))
               if cur.rowcount > 0:
                 wnppbug = RowDictionaries(cur)[0]
@@ -164,8 +162,13 @@ class blends_prospective_gatherer(gatherer):
                 else:
                   self.log.warning("Cannot parse ITP bug %i for package %s: `%s`" % (iwnpp, source, wnppbug['title']))
               else:
-		self.log.debug("ITP bug %i for package %s is not open any more or can otherwise not be found" % (iwnpp, source))
-              sprosp['wnpp'] = iwnpp
+                self.log.debug("ITP bug %i for package %s is not open any more or can otherwise not be found" % (iwnpp, source))
+                continue # Try other bug number if exists
+              break
+          match = find_itp_re.search(changes)
+          if not match and sprosp['wnpp_type'] == '' and len(sprosp['closes']) > 0 and sprosp['wnpp'] > 0:
+            sprosp['wnpp'] = 0
+            self.log.warning("Bug %s closed in changelog of package %s does not seem to be an ITP" % (str(sprosp['closes']), source))
     	
     	# Read Vcs fields
         vcsfile = upath+'/'+source+'.vcs'
