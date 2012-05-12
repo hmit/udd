@@ -255,7 +255,9 @@ class blends_prospective_gatherer(gatherer):
     	          if tmp_src == sprosp['vcs_browser']:
     	            self.log.error("%s - Wrong Vcs-Browser: Use 'http:' instead of 'git:' in '%s' ('%s')." % (source, src['Vcs-Browser'], sprosp['vcs_browser']))
     	          else:
-                    self.log.warning("%s - Differing Vcs-Browser:  Obtained from Vcs-Browser='%s' <-> control has '%s'." % (source, sprosp['vcs_browser'], src['Vcs-Browser']))
+                    tmp_prosp = re.sub('/trunk$', '', tmp_prosp) # sometimes the trailing trunk/ is forgotten which is no real problem
+    	            if tmp_prosp != tmp_src:
+                      self.log.warning("%s - Differing Vcs-Browser:  Obtained from Vcs-Browser='%s' <-> control has '%s'." % (source, sprosp['vcs_browser'], src['Vcs-Browser']))
             else:
     	      self.log.debug("Control file for source '%s' is lacking Vcs-Browser field" % (source))
 
