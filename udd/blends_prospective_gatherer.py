@@ -251,7 +251,8 @@ class blends_prospective_gatherer(gatherer):
                 tmp_src = re.sub('/$', '', src['vcs-browser'])     # same with string in debian/control to enable comparison after further changes below
                 tmp_src = re.sub('\.git;a=summary$', '.git', tmp_src)
                 tmp_src = re.sub('/viewsvn/', '/wsvn/', tmp_src) # machine-readable gatherer implies /wsvn/ but specifying /viewsvn/ does no harm
-                tmp_src = re.sub('/anonscm.debian.org/gitweb', '/git.debian.org', tmp_src)
+                tmp_src = re.sub('/anonscm.debian.org/gitweb/\?p=', '/git.debian.org/?p=', tmp_src)
+                tmp_src = re.sub('/anonscm.debian.org/git/([^?])', '/git.debian.org/?p=\\1', tmp_src) # Add missing '?p='
                 tmp_src = re.sub('/anonscm.debian.org/viewvc', '/svn.debian.org/wsvn', tmp_src) # FIXME: is it correct to assume SVN here??? - probably not
     	        if tmp_prosp != tmp_src:
     	          tmp_src = re.sub('^git:', 'http:', tmp_src) # check for usual error in specifying Vcs-Browser by just leaving 'git:' as protocol
