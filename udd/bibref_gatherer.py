@@ -316,6 +316,9 @@ class bibref_gatherer(gatherer):
     cur.execute("DEALLOCATE bibref_insert")
     cur.execute("ANALYZE %s" % my_config['table'])
 
+    # commit before check to make sure the table is not locked in case LaTeX run will fail for whatever reason
+    self.connection.commit()
+
     # if there is a working LaTeX installation try to build a BibTeX database and test it by creating a debian.pdf file
     if isfile('/usr/bin/pdflatex') and access('/usr/bin/pdflatex', X_OK) and \
        isfile('/usr/bin/bibtex')   and access('/usr/bin/bibtex', X_OK) and \
