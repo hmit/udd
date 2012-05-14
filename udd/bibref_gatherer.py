@@ -133,10 +133,14 @@ class bibref_gatherer(gatherer):
       ref['source']  = source
       ref['key']     = key
       ref['package'] = package
-      if isinstance(references[r], int):
+      if isinstance(references[r], int) or isinstance(references[r], float):
         ref['value']   = str(references[r])
       else:
-        ref['value']   = references[r].strip()
+        try:
+          ref['value']   = references[r].strip()
+        except AttributeError, err:
+          self.log.error("Cannot parse value for source %s: r = %s -> value = %s" % (source, r, str(references[r])))
+          ref['value']   = '???'
         if key == 'author':
           # Try to catch broken author formating
           new_author = re.sub(',\s* and\s*' , ' and ', ref['value'])
