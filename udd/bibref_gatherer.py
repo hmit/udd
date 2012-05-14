@@ -40,7 +40,7 @@ seek_broken_authors_re = re.compile('^[^\s^,]+\s+[^\s^,]+\s*,\s*[^\s^,]+\s+[^\s^
 
 def open_tex_process(texexe, basetexfile):
   if texexe == 'pdflatex':
-    ptex = Popen(['pdflatex', '-interaction=nonstopmode', basetexfile], shell=False, stdout=PIPE)
+    ptex = Popen(['pdflatex', '-interaction=batchmode', basetexfile], shell=False, stdout=PIPE)
   elif texexe == 'bibtex':
     ptex = Popen(['bibtex', basetexfile], shell=False, stdout=PIPE)
   else:
@@ -367,7 +367,6 @@ class bibref_gatherer(gatherer):
         rename(basetexfile+'.pdf', basetexfile+'.pdf~')
       except OSError:
         pass
-
 
       (retcode,errstring) = open_tex_process('pdflatex', basetexfile)
       if not retcode:
