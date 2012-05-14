@@ -196,7 +196,7 @@ class blends_prospective_gatherer(gatherer):
     	try:
     	  cpr = open(cprfile,'r')
     	except:
-    	  self.log.warning("Unable to open Copyright file for source '%s' (%s)" % (source, cprfile))
+    	  self.log.warning("Unable to open Copyright file for source '%s' of %s (%s)" % (source, sprosp['blend'], cprfile))
     	linenr = 0
     	found_files = False
     	sprosp['license'] = ''
@@ -214,7 +214,7 @@ class blends_prospective_gatherer(gatherer):
     	    continue
     	  if linenr == 0:
     	    if field != 'Format':
-    	      self.log.debug("Copyright file for source '%s' does not seem to regard DEP5.  Found line `%s`" % (source, line.strip()))
+    	      self.log.debug("Copyright file for source '%s' of %s does not seem to regard DEP5.  Found line `%s`" % (source, sprosp['blend'], line.strip()))
     	      found_files = True # one flag is enough to control this - we do not need another warning in the logs
     	      break
     	  linenr += 1
@@ -226,7 +226,7 @@ class blends_prospective_gatherer(gatherer):
     	    sprosp['license'] = value
     	    break
     	if not found_files:
-          self.log.debug("No 'Files: *' specification found in copyright file for source '%s'" % (source, ))
+          self.log.debug("No 'Files: *' specification found in copyright file for source '%s' of %s" % (source, sprosp['blend']))
 
     	# Try to read debian/control
     	ctrl = None
@@ -234,7 +234,7 @@ class blends_prospective_gatherer(gatherer):
     	try:
     	  ctrl = open(ctrlfile,'r')
     	except:
-    	  self.log.warning("Unable to open control file for source '%s' (%s)" % (source, ctrlfile))
+    	  self.log.warning("Unable to open control file for source '%s' of %s (%s)" % (source, sprosp['blend'], ctrlfile))
     	# FIXME: This part is deactivated via 1==0 due to the fact that iter_paragraphs does not seem to work for debian/control files
     	if ctrl:
 	    ictrl = deb822.Deb822.iter_paragraphs(ctrl)
@@ -242,9 +242,9 @@ class blends_prospective_gatherer(gatherer):
 	    # print 'SOURCE:', src      # print Source stanza
             if src.has_key('source'):
               if source != src['source']:
-                self.log.error("Something is wrong with control data of package '%s'.  Changelog says source = '%s'." % (source, src['Source']))
+                self.log.error("Something is wrong with control data of package '%s' of %s.  Changelog says source = '%s'." % (source, sprosp['blend'], src['Source']))
             else:
-    	      self.log.warning("Control file for source '%s' is lacking source field" % (source))
+    	      self.log.warning("Control file for source '%s' of %s is lacking source field" % (source, sprosp['blend']))
     	    if src.has_key('vcs-browser'):
     	      if sprosp['vcs_browser'] != src['vcs-browser']:
                 tmp_prosp = re.sub('/$', '', sprosp['vcs_browser']) # ignore forgotten '/' at end of Vcs-Browser
@@ -257,13 +257,13 @@ class blends_prospective_gatherer(gatherer):
     	        if tmp_prosp != tmp_src:
     	          tmp_src = re.sub('^git:', 'http:', tmp_src) # check for usual error in specifying Vcs-Browser by just leaving 'git:' as protocol
     	          if tmp_src == sprosp['vcs_browser']:
-    	            self.log.error("%s - Wrong Vcs-Browser: Use 'http:' instead of 'git:' in '%s' ('%s')." % (source, src['Vcs-Browser'], sprosp['vcs_browser']))
+    	            self.log.error("%s of %s - Wrong Vcs-Browser: Use 'http:' instead of 'git:' in '%s' ('%s')." % (source, sprosp['blend'], src['Vcs-Browser'], sprosp['vcs_browser']))
     	          else:
                     tmp_prosp = re.sub('/trunk$', '', tmp_prosp) # sometimes the trailing trunk/ is forgotten which is no real problem
     	            if tmp_prosp != tmp_src:
-                      self.log.warning("%s - Differing Vcs-Browser:  Obtained from Vcs-Browser='%s' <-> control has '%s'." % (source, sprosp['vcs_browser'], src['Vcs-Browser']))
+                      self.log.warning("%s of %s - Differing Vcs-Browser:  Obtained from Vcs-Browser='%s' <-> control has '%s'." % (source, sprosp['blend'], sprosp['vcs_browser'], src['Vcs-Browser']))
             else:
-    	      self.log.debug("Control file for source '%s' is lacking Vcs-Browser field" % (source))
+    	      self.log.debug("Control file for source '%s' of %s is lacking Vcs-Browser field" % (source, sprosp['blend']))
 
     	    if src.has_key('Maintainer'):
               sprosp['maintainer']       = src['maintainer']
@@ -271,7 +271,7 @@ class blends_prospective_gatherer(gatherer):
               sprosp['maintainer_name']  = name
               sprosp['maintainer_email'] = email
             else:
-    	      self.log.info("Control file for source '%s' is lacking Maintainer field" % (source))
+    	      self.log.info("Control file for source '%s' of %s is lacking Maintainer field" % (source, sprosp['blend']))
 
             for prop in ('homepage', 'priority', 'section', 'uploaders', ):
               if src.has_key(prop):
@@ -279,9 +279,9 @@ class blends_prospective_gatherer(gatherer):
               else:
                 sprosp[prop] = ''
                 if prop != 'uploaders':
-                  self.log.warning("Control file for source '%s' is lacking %s field" % (source,prop))
+                  self.log.warning("Control file for source '%s' of %s is lacking %s field" % (source, sprosp['blend'], prop))
                 else:
-                  self.log.debug("Control file for source '%s' is lacking %s field" % (source,prop))
+                  self.log.debug("Control file for source '%s' of %s is lacking %s field" % (source, sprosp['blend'], prop))
 
             pkg = ictrl.next()
             while pkg:
@@ -292,7 +292,7 @@ class blends_prospective_gatherer(gatherer):
               if pkg.has_key('package'):
                   pprosp['package'] = pkg['package']
               else:
-                  self.log.warning("Control file for source '%s' is lacking Package field" % (source))
+                  self.log.warning("Control file for source '%s' od %s is lacking Package field" % (source, sprosp['blend']))
               if pkg.has_key('description'):
                   if len(pkg['description'].split("\n",1)) > 1:
                     pprosp['long_description'] = pkg['description'].split("\n",1)[1]
@@ -300,7 +300,7 @@ class blends_prospective_gatherer(gatherer):
                     pprosp['long_description'] = ''
                   pprosp['description'] = pkg['description'].split("\n",1)[0].strip()
               else:
-                  self.log.warning("Control file for source '%s' has no desription for Package %s" % (source, pprosp['package']))
+                  self.log.warning("Control file for source '%s' of %s has no desription for Package %s" % (source, sprosp['blend'], pprosp['package']))
               # print pprosp
               pkgs.append(pprosp)
               try:
