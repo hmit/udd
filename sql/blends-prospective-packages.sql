@@ -29,3 +29,4 @@ CREATE TABLE blends_prospectivepackages
    chlog_version debversion
 );
 
+GRANT SELECT ON blends_prospectivepackages TO PUBLIC;
