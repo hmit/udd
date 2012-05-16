@@ -15,6 +15,7 @@ CREATE TABLE blends_prospectivepackages
    long_description text,
    description_md5 text,
    homepage text,
+   component text,
    section text,
    priority text,
    vcs_type text,

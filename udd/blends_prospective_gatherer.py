@@ -295,7 +295,18 @@ class blends_prospective_gatherer(gatherer):
 
             for prop in ('homepage', 'priority', 'section', 'uploaders', ):
               if src.has_key(prop):
-                sprosp[prop] = src[prop]
+                if prop == 'section':
+                  if src['section'].startswith('non-free'):
+                    sprosp['component'] = 'non-free'
+                    (dummy,sprosp['section']) = src['section'].split('/')
+                  elif src['section'].startswith('contrib'):
+                    sprosp['component'] = 'contrib'
+                    (dummy,sprosp['section']) = src['section'].split('/')
+                  else:
+                    sprosp['component'] = 'main'
+                    sprosp['section']   = src['section']
+                else:
+                  sprosp[prop] = src[prop]
               else:
                 sprosp[prop] = ''
                 if prop != 'uploaders':
@@ -345,7 +356,7 @@ class blends_prospective_gatherer(gatherer):
          changed_by, changed_by_name, changed_by_email,
          uploaders,
          description, long_description,
-         homepage, section, priority,
+         homepage, component, section, priority,
          vcs_type, vcs_url, vcs_browser,
          wnpp, wnpp_type, wnpp_desc,
          license, chlog_date, chlog_version)
@@ -355,10 +366,10 @@ class blends_prospective_gatherer(gatherer):
           $7, $8, $9,
           $10,
           $11, $12,
-          $13, $14, $15,
-          $16, $17, $18,
-          $19, $20, $21,
-          $22, $23, $24)
+          $13, $14, $15, $16,
+          $17, $18, $19,
+          $20, $21, $22,
+          $23, $24, $25)
         """ %  (my_config['table']))
     pkgquery = """EXECUTE package_insert
       (%(blend)s, %(package)s, %(source)s,
@@ -366,7 +377,7 @@ class blends_prospective_gatherer(gatherer):
        %(changed_by)s, %(changed_by_name)s, %(changed_by_email)s,
        %(uploaders)s,
        %(description)s, %(long_description)s,
-       %(homepage)s, %(section)s, %(priority)s,
+       %(homepage)s, %(component)s, %(section)s, %(priority)s,
        %(vcs_type)s, %(vcs_url)s, %(vcs_browser)s,
        %(wnpp)s, %(wnpp_type)s, %(wnpp_desc)s,
        %(license)s, %(chlog_date)s, %(chlog_version)s)"""
