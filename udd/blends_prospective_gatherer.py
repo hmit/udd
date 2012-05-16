@@ -18,6 +18,8 @@ from subprocess import Popen, PIPE
 from debian import deb822
 import email.Utils
 
+from bibref_gatherer import upstream_reader
+
 debug=0
 
 def get_gatherer(connection, config, source):
@@ -104,13 +106,16 @@ class blends_prospective_gatherer(gatherer):
         cur.execute("EXECUTE check_source (%s)", (source,))
         if cur.fetchone()[0] > 0:
     	  # print "Source %s is in DB.  Ignore for prospective packages" % source
-    	  upstream=upath+'/'+source+'.upstream'
-    	  if not exists(upstream):
+    	  ufile=upath+'/'+source+'.upstream'
+    	  if not exists(ufile):
             continue
           cur.execute("EXECUTE check_reference (%s)", (source,))
           if cur.fetchone()[0] > 0:
             # UDD seems to contain the references specified in source.upstream file
-            print "DEBUG: I know about the references in", upstream
+            continue
+          upstream = upstream_reader(ufile, source, self.log)
+          if not upstream.references:
+            # There are no valid references found in this upstream file or it is no valid YAML
             continue
           self.log.warning("%s has upstream file but no references in UDD" % (source, ))
           continue

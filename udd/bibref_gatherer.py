@@ -62,32 +62,116 @@ def open_tex_process(texexe, basetexfile):
 
 other_known_keys = ('Archive', 'Contact', 'CRAN', 'Donation', 'Download', 'Help', 'Homepage', 'Name', 'Watch', 'Webservice')
 
-class bibref_gatherer(gatherer):
+class upstream_reader():
   """
-  Bibliographic references from debian/upstream files
+  Read references from single debian/upstream file
   """
 
-  def __init__(self, connection, config, source):
-    gatherer.__init__(self, connection, config, source)
-    self.assert_my_config('table')
+  def __init__(self, ufile, source, log):
+    uf = open(ufile)
+    self.source     = source
+    self.references = None
+    self.fields     = None
+    self.log        = log
+    self.ubibrefs = []
+    self.ubibrefsinglelist = []
 
-    self.log = logging.getLogger(self.__class__.__name__)
-    if debug==1:
-        self.log.setLevel(logging.DEBUG)
+    try:
+      self.fields = yaml.load(uf.read())
+    except yaml.scanner.ScannerError, err:
+      self.log.error("Scanner error in file %s: %s" % (ufile, str(err)))
+      return
+    except yaml.parser.ParserError, err:
+      self.log.error("Parser error in file %s: %s" % (ufile, str(err)))
+      return
+    except yaml.reader.ReaderError, err:
+      self.log.error("Encoding problem in file %s: %s" % (ufile, str(err)))
+    try:
+      self.references=self.fields['Reference']
+    except KeyError:
+      warn_keys = []
+      for key in self.fields.keys():
+        if key not in other_known_keys:
+          warn_keys.append(key)
+        if len(warn_keys) > 0:
+          log.warning("No references found for source package %s (Keys: %s)" % (self.source, str(warn_keys)))
+          return
+      return
+    except TypeError:
+      self.log.info("debian/upstream file of source package %s does not seem to be a YAML file" % (self.source))
+    return
+
+  def parse(self):
+    if isinstance(self.references, list):
+      # upstream file contains more than one reference
+      rank={}      # record different ranks per binary package
+      rank[''] = 0 # default is to have no specific Debian package which is marked by '' in the package column
+      refid = 0
+      for singleref in self.references:
+        singleref['refid'] = refid # refid is not used currently but might make sense to identify references internally
+        singleref['package'] = ''
+        package_found = False
+        for r in singleref.keys():
+          key = r.lower()
+          if key != 'debian-package':
+            continue
+          # self.log.warning("Source package '%s' has key 'debian-package'", self.source)
+          pkg = singleref['package'] = singleref[r]
+          package_found = True
+          if rank.has_key(pkg):
+            rank[pkg] += 1
+          else:
+            rank[pkg]  = 0
+          singleref['rank'] = rank[pkg]
+        if not package_found:
+          singleref['rank'] = rank['']
+          rank[''] += 1
+      for singleref in self.references:
+        self.setref(singleref, singleref['package'], singleref['rank'])
+    elif isinstance(self.references, str):
+      # upstream file has wrongly formatted reference
+      self.log.error("File %s has following references: %s" % (ufile, self.references))
     else:
-        self.log.setLevel(logging.INFO)
-    handler = logging.handlers.RotatingFileHandler(filename=self.__class__.__name__+'.log',mode='w')
-    formatter = logging.Formatter("%(asctime)s - %(levelname)s - (%(lineno)d): %(message)s")
-    handler.setFormatter(formatter)
-    self.log.addHandler(handler)
+      # upstream file has exactly one reference
+      package = ''
+      for r in self.references.keys():
+        key = r.lower()
+        if key != 'debian-package':
+          continue
+        self.log.warning("Source package '%s' has key 'debian-package'", self.source)
+        package = self.references[r]
+      self.setref(self.references, package, 0)
 
-    self.bibrefs = []
-    self.bibrefsinglelist = []
+    for key in self.fields.keys():
+      keyl=key.lower()
+      if keyl.startswith('reference-'):
+        # sometimes DOI and PMID are stored separately:
+        if keyl.endswith('doi'):
+          if self.references.has_key('doi') or self.references.has_key('DOI'):
+            self.log.warning("Extra key in source package '%s': %s - please remove from upstream file!", self.source, key)
+            continue
+          rdoi={}
+          rdoi['rank']    = 0
+          rdoi['source']  = self.source
+          rdoi['key']     = 'doi'
+          rdoi['value']   = self.fields[key]
+          rdoi['package'] = ''          ### Hack!!! we should get rid of Reference-DOI soon to enable specifying 'debian-package' relieable
+          self.ubibrefs.append(rdoi)
+        elif keyl.endswith('pmid'):
+          if self.references.has_key('pmid') or self.references.has_key('PMID'):
+            self.log.warning("Extra key in source package '%s': %s - please remove from upstream file!", self.source, key)
+            continue
+          rpmid={}
+          rpmid['rank']    = 0
+          rpmid['source']  = self.source
+          rpmid['key']     = 'pmid'
+          rpmid['value']   = self.fields[key]
+          rpmid['package'] = ''          ### Hack!!! we should get rid of Reference-PMID soon to enable specifying 'debian-package' relieable
+          self.ubibrefs.append(rpmid)
+        else:
+          print "Source package %s has %s : %s" % (self.source, key, self.fields[key])
 
-    self.bibtexfile = 'debian.bib'
-    self.bibtex_example_tex = 'debian.tex'
-
-  def setref(self, references, source, package, rank):
+  def setref(self, references, package, rank):
     year=''
     defined_fields = { 'address'   : 0,
                        'article'   : 0,
@@ -120,17 +204,17 @@ class bibref_gatherer(gatherer):
         continue
       if defined_fields.has_key(key):
         if defined_fields[key] > 0:
-          self.log.error("Duplicated key in source package '%s': %s", source, key)
+          self.log.error("Duplicated key in source package '%s': %s", self.source, key)
           continue
         else:
           defined_fields[key] = 1
       else:
           if key not in ('rank', 'package', 'refid'): # ignore internal maintenance fields
-            self.log.warning("Unexpected key in source package '%s': %s", source, key)
+            self.log.warning("Unexpected key in source package '%s': %s", self.source, key)
           defined_fields[key] = 1
       ref={}
       ref['rank']    = rank
-      ref['source']  = source
+      ref['source']  = self.source
       ref['key']     = key
       ref['package'] = package
       if isinstance(references[r], int) or isinstance(references[r], float):
@@ -139,39 +223,65 @@ class bibref_gatherer(gatherer):
         try:
           ref['value']   = references[r].strip()
         except AttributeError, err:
-          self.log.error("Cannot parse value for source %s: r = %s -> value = %s" % (source, r, str(references[r])))
+          self.log.error("Cannot parse value for source %s: r = %s -> value = %s" % (self.source, r, str(references[r])))
           ref['value']   = '???'
         if key == 'author':
           # Try to catch broken author formating
           new_author = re.sub(',\s* and\s*' , ' and ', ref['value'])
           if new_author != ref['value']:
-            self.log.warning("Author of source package %s does contain invalid BibTeX format: %s will be turned into %s", source, ref['value'], new_author)
+            self.log.warning("Author of source package %s does contain invalid BibTeX format: %s will be turned into %s", self.source, ref['value'], new_author)
             ref['value'] = new_author
           if ref['value'].count(',') > ref['value'].lower().count(' and ') + 1:
-            self.log.warning("Suspicious authors field in source package %s with way more ',' than ' and ' strings: %s", source, ref['value'])
+            self.log.warning("Suspicious authors field in source package %s with way more ',' than ' and ' strings: %s", self.source, ref['value'])
           match = seek_broken_authors_re.search(ref['value'])
           if match:
-            self.log.warning("Suspicious authors field in source package %s - seems to have comma separated authors: %s", source, ref['value'])
-      self.bibrefs.append(ref)
+            self.log.warning("Suspicious authors field in source package %s - seems to have comma separated authors: %s", self.source, ref['value'])
+      self.ubibrefs.append(ref)
       if r.lower() == 'year':
         year = ref['value']
     # Create unique BibTeX key
-    bibtexkey = source
-    if bibtexkey in self.bibrefsinglelist and year != '':
-      bibtexkey = source+year
-    if bibtexkey in self.bibrefsinglelist:
+    bibtexkey = self.source
+    if bibtexkey in self.ubibrefsinglelist and year != '':
+      bibtexkey = self.source+year
+    if bibtexkey in self.ubibrefsinglelist:
       # if there are more than one reference per source package and even in
       # the same year append the rank as letter
       bibtexkey += 'abcdefghijklmnopqrstuvwxyz'[rank]
     ref={}
     ref['rank']    = rank
-    ref['source']  = source
+    ref['source']  = self.source
     ref['key']     = 'bibtex'
     ref['value']   = re.sub('\+', '-', re.sub('\.', '-', bibtexkey)) # avoid '.' and '+' in BibTeX keys
     ref['package'] = package
-    self.bibrefsinglelist.append(bibtexkey)
-    self.bibrefs.append(ref)
+    self.ubibrefsinglelist.append(bibtexkey)
+    self.ubibrefs.append(ref)
     return ref
+
+  def get_bibrefs(self):
+    return self.ubibrefs
+
+class bibref_gatherer(gatherer):
+  """
+  Bibliographic references from debian/upstream files
+  """
+
+  def __init__(self, connection, config, source):
+    gatherer.__init__(self, connection, config, source)
+    self.assert_my_config('table')
+
+    self.log = logging.getLogger(self.__class__.__name__)
+    if debug==1:
+        self.log.setLevel(logging.DEBUG)
+    else:
+        self.log.setLevel(logging.INFO)
+    handler = logging.handlers.RotatingFileHandler(filename=self.__class__.__name__+'.log',mode='w')
+    formatter = logging.Formatter("%(asctime)s - %(levelname)s - (%(lineno)d): %(message)s")
+    handler.setFormatter(formatter)
+    self.log.addHandler(handler)
+
+
+    self.bibtexfile = 'debian.bib'
+    self.bibtex_example_tex = 'debian.tex'
 
   def run(self):
     my_config = self.my_config
@@ -180,6 +290,8 @@ class bibref_gatherer(gatherer):
     cur = self.cursor()
 
     u_dirs = listdir(my_config['path'])
+
+    bibrefs = []
 
     for u in u_dirs:
       upath=my_config['path']+'/'+u
@@ -190,106 +302,21 @@ class bibref_gatherer(gatherer):
       for source in sources:
         # print source
         ufile = upath+'/'+source+'.upstream'
-        uf = open(ufile)
-        try:
-          fields = yaml.load(uf.read())
-        except yaml.scanner.ScannerError, err:
-          self.log.error("Scanner error in file %s: %s" % (ufile, str(err)))
-          continue
-        except yaml.parser.ParserError, err:
-          self.log.error("Parser error in file %s: %s" % (ufile, str(err)))
-          continue
-        except yaml.reader.ReaderError, err:
-          self.log.error("Encoding problem in file %s: %s" % (ufile, str(err)))
-          continue
-        try:
-          references=fields['Reference']
-        except KeyError:
-          warn_keys = []
-          for key in fields.keys():
-            if key not in other_known_keys:
-              warn_keys.append(key)
-          if len(warn_keys) > 0:
-            self.log.warning("No references found for source package %s (Keys: %s)" % (source, str(warn_keys)))
-          continue
-        except TypeError:
-          self.log.info("debian/upstream file of source package %s does not seem to be a YAML file" % (source))
+
+        upstream = upstream_reader(ufile, source, self.log)
+        if not upstream.references:
           continue
 
-        if isinstance(references, list):
-          # upstream file contains more than one reference
-          rank={}      # record different ranks per binary package
-          rank[''] = 0 # default is to have no specific Debian package which is marked by '' in the package column
-          refid = 0
-          for singleref in references:
-            singleref['refid'] = refid # refid is not used currently but might make sense to identify references internally
-            singleref['package'] = ''
-            package_found = False
-            for r in singleref.keys():
-              key = r.lower()
-              if key != 'debian-package':
-                continue
-              # self.log.warning("Source package '%s' has key 'debian-package'", source)
-              pkg = singleref['package'] = singleref[r]
-              package_found = True
-              if rank.has_key(pkg):
-                rank[pkg] += 1
-              else:
-                rank[pkg]  = 0
-              singleref['rank'] = rank[pkg]
-            if not package_found:
-              singleref['rank'] = rank['']
-              rank[''] += 1
-          for singleref in references:
-            self.setref(singleref, source, singleref['package'], singleref['rank'])
-        elif isinstance(references, str):
-          # upstream file has wrongly formatted reference
-          self.log.error("File %s has following references: %s" % (ufile, references))
-        else:
-          # upstream file has exactly one reference
-          package = ''
-          for r in references.keys():
-            key = r.lower()
-            if key != 'debian-package':
-              continue
-            self.log.warning("Source package '%s' has key 'debian-package'", source)
-            package = references[r]
-          self.setref(references, source, package, 0)
+        upstream.parse()
+        
+        for ref in upstream.get_bibrefs():
+          bibrefs.append(ref)
 
-        for key in fields.keys():
-          keyl=key.lower()
-    	  if keyl.startswith('reference-'):
-    	    # sometimes DOI and PMID are stored separately:
-    	    if keyl.endswith('doi'):
-    	      if references.has_key('doi') or references.has_key('DOI'):
-                self.log.warning("Extra key in source package '%s': %s - please remove from upstream file!", source, key)
-    	        continue
-              rdoi={}
-              rdoi['rank']    = 0
-              rdoi['source']  = source
-              rdoi['key']     = 'doi'
-              rdoi['value']   = fields[key]
-              rdoi['package'] = ''          ### Hack!!! we should get rid of Reference-DOI soon to enable specifying 'debian-package' relieable
-              self.bibrefs.append(rdoi)
-    	    elif keyl.endswith('pmid'):
-    	      if references.has_key('pmid') or references.has_key('PMID'):
-                self.log.warning("Extra key in source package '%s': %s - please remove from upstream file!", source, key)
-    	        continue
-              rpmid={}
-              rpmid['rank']    = 0
-              rpmid['source']  = source
-              rpmid['key']     = 'pmid'
-              rpmid['value']   = fields[key]
-              rpmid['package'] = ''          ### Hack!!! we should get rid of Reference-PMID soon to enable specifying 'debian-package' relieable
-              self.bibrefs.append(rpmid)
-    	    else:
-    	      print "Source package %s has %s : %s" % (source, key, fields[key])
     # only truncate table if there are really some references found
-    if len(self.bibrefs) == 0:
+    if len(bibrefs) == 0:
       self.log.error("No references found in any upstream file.")
       exit(1)
 
-    # print self.bibrefsinglelist
     cur.execute("TRUNCATE %s" % (my_config['table']))
     query = """PREPARE bibref_insert (text, text, text, text, int) AS
                    INSERT INTO %s
@@ -298,7 +325,7 @@ class bibref_gatherer(gatherer):
     cur.execute(query)
 
     query = "EXECUTE bibref_insert (%(source)s, %(key)s, %(value)s, %(package)s, %(rank)s)"
-    for ref in self.bibrefs:
+    for ref in bibrefs:
       try:
         cur.execute(query, ref)
       except UnicodeEncodeError, err:
