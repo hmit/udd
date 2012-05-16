@@ -124,72 +124,7 @@ class blends_prospective_gatherer(gatherer):
             bibrefs.append(ref)
           continue
 
-        # Read output of dpkg-parsechangelog
-        p = Popen("LC_ALL=C dpkg-parsechangelog -l"+upath+'/'+source+'.changelog', shell=True, bufsize=4096,
-          stdin=PIPE, stdout=PIPE, stderr=PIPE, close_fds=True)
-        errstring = p.stderr.read()
-        if errstring != '':
-          self.log.warning("Error parsing changelog of '%s'\n %s:" % (source, errstring))
         sprosp = {}
-        for stanza in deb822.Sources.iter_paragraphs(p.stdout):
-          if source != stanza['source']:
-            print >>stderr, "Something is wrong with changelog data of package '%s'.  Changelog says source = '%s'." % (source, stanza['source'])
-          for prop in ('source', 'distribution'):
-            if stanza.has_key(prop):
-              sprosp[prop] = stanza[prop]
-            else:
-             self.log.warning("Missing property %s in changelog of '%s'" % (prop, source))
-          sprosp['chlog_version']    = stanza['version']
-          if stanza.has_key('maintainer'):
-            sprosp['changed_by']       = stanza['maintainer']
-            (name, email) = parse_email(stanza['maintainer'])
-            sprosp['changed_by_name']  = name
-            sprosp['changed_by_email'] = email
-          else:
-            sprosp['changed_by']       = ''
-            sprosp['changed_by_name']  = ''
-            sprosp['changed_by_email'] = ''
-            self.log.warning("Can not obtain maintainer e-mail from changelog of '%s'" % (source))
-          if stanza.has_key('date'):
-            sprosp['chlog_date']       = stanza['date']
-          else:
-            sprosp['chlog_date']       = ''
-            self.log.warning("Can not obtain changed data from changelog of '%s'" % (source))
-          sprosp['closes'] = []
-          if stanza.has_key('closes'):
-            for bug in stanza['closes'].split(' '):
-              sprosp['closes'].append(int(bug))
-          changes                      = stanza['changes']
-          sprosp['wnpp'] = 0
-          sprosp['wnpp_type'] = ''
-          sprosp['wnpp_desc'] = ''
-#          if match: # try to make sure we are really dealing with ITPs
-          for iwnpp in sprosp['closes']:
-            if iwnpp == 12345: # that seems to be a fake ITP
-              self.log.debug("Fake WNPP no. 12345 in changelog of '%s'" % (source))
-              continue
-            elif iwnpp > 0:
-              sprosp['wnpp'] = iwnpp
-              cur.execute("EXECUTE check_itp (%s)", (iwnpp,))
-              if cur.rowcount > 0:
-                wnppbug = RowDictionaries(cur)[0]
-                itpmatch = parse_itp_re.search(wnppbug['title'])
-                if itpmatch:
-                  sprosp['wnpp_type'] = itpmatch.groups()[0]
-                  sprosp['wnpp_desc'] = itpmatch.groups()[2]
-                  if source != itpmatch.groups()[1]:
-                    self.log.info("Source name of %s differs from name in %s bug: package name = %s, short description = %s" % (source, itpmatch.groups()[0], itpmatch.groups()[1], itpmatch.groups()[2]))
-                else:
-                  self.log.warning("Cannot parse ITP bug %i for package %s: `%s`" % (iwnpp, source, wnppbug['title']))
-              else:
-                self.log.debug("ITP bug %i for package %s is not open any more or can otherwise not be found" % (iwnpp, source))
-                continue # Try other bug number if exists
-              break
-          match = find_itp_re.search(changes)
-          if not match and sprosp['wnpp_type'] == '' and len(sprosp['closes']) > 0 and sprosp['wnpp'] > 0:
-            sprosp['wnpp'] = 0
-            self.log.warning("Bug %s closed in changelog of package %s does not seem to be an ITP" % (str(sprosp['closes']), source))
-    	
     	# Read Vcs fields
         vcsfile = upath+'/'+source+'.vcs'
     	try:
@@ -211,12 +146,77 @@ class blends_prospective_gatherer(gatherer):
     	      sprosp['vcs_url'] = value
     	vcs.close()
 
+        # Read output of dpkg-parsechangelog
+        p = Popen("LC_ALL=C dpkg-parsechangelog -l"+upath+'/'+source+'.changelog', shell=True, bufsize=4096,
+          stdin=PIPE, stdout=PIPE, stderr=PIPE, close_fds=True)
+        errstring = p.stderr.read()
+        if errstring != '':
+          self.log.warning("Error parsing changelog of '%s' of %s\n %s:" % (source, sprosp['blend'], errstring))
+        for stanza in deb822.Sources.iter_paragraphs(p.stdout):
+          if source != stanza['source']:
+            print >>stderr, "Something is wrong with changelog data of package '%s' of %s.  Changelog says source = '%s'." % (source, sprosp['blend'], stanza['source'])
+          for prop in ('source', 'distribution'):
+            if stanza.has_key(prop):
+              sprosp[prop] = stanza[prop]
+            else:
+             self.log.warning("Missing property %s in changelog of '%s' of %s" % (prop, source, sprosp['blend']))
+          sprosp['chlog_version']    = stanza['version']
+          if stanza.has_key('maintainer'):
+            sprosp['changed_by']       = stanza['maintainer']
+            (name, email) = parse_email(stanza['maintainer'])
+            sprosp['changed_by_name']  = name
+            sprosp['changed_by_email'] = email
+          else:
+            sprosp['changed_by']       = ''
+            sprosp['changed_by_name']  = ''
+            sprosp['changed_by_email'] = ''
+            self.log.warning("Can not obtain maintainer e-mail from changelog of '%s' of %s" % (source, sprosp['blend']))
+          if stanza.has_key('date'):
+            sprosp['chlog_date']       = stanza['date']
+          else:
+            sprosp['chlog_date']       = ''
+            self.log.warning("Can not obtain changed data from changelog of '%s' of %s" % (source, sprosp['blend']))
+          sprosp['closes'] = []
+          if stanza.has_key('closes'):
+            for bug in stanza['closes'].split(' '):
+              sprosp['closes'].append(int(bug))
+          changes                      = stanza['changes']
+          sprosp['wnpp'] = 0
+          sprosp['wnpp_type'] = ''
+          sprosp['wnpp_desc'] = ''
+#          if match: # try to make sure we are really dealing with ITPs
+          for iwnpp in sprosp['closes']:
+            if iwnpp == 12345: # that seems to be a fake ITP
+              self.log.debug("Fake WNPP no. 12345 in changelog of '%s' of %s" % (source, sprosp['blend']))
+              continue
+            elif iwnpp > 0:
+              sprosp['wnpp'] = iwnpp
+              cur.execute("EXECUTE check_itp (%s)", (iwnpp,))
+              if cur.rowcount > 0:
+                wnppbug = RowDictionaries(cur)[0]
+                itpmatch = parse_itp_re.search(wnppbug['title'])
+                if itpmatch:
+                  sprosp['wnpp_type'] = itpmatch.groups()[0]
+                  sprosp['wnpp_desc'] = itpmatch.groups()[2]
+                  if source != itpmatch.groups()[1]:
+                    self.log.info("Source name of '%s' of %s differs from name in %s bug: package name = %s, short description = %s" % (source, sprosp['blend'], itpmatch.groups()[0], itpmatch.groups()[1], itpmatch.groups()[2]))
+                else:
+                  self.log.warning("Cannot parse ITP bug %i for package '%s' of %s: `%s`" % (iwnpp, source, sprosp['blend'], wnppbug['title']))
+              else:
+                self.log.debug("ITP bug %i for package '%s' of %s is not open any more or can otherwise not be found" % (iwnpp, source, sprosp['blend']))
+                continue # Try other bug number if exists
+              break
+          match = find_itp_re.search(changes)
+          if not match and sprosp['wnpp_type'] == '' and len(sprosp['closes']) > 0 and sprosp['wnpp'] > 0:
+            sprosp['wnpp'] = 0
+            self.log.warning("Bug %s closed in changelog of package '%s' of %s does not seem to be an ITP" % (str(sprosp['closes']), source, sprosp['blend']))
+    	
     	# Read Copyright file if specifying Format in the first line
         cprfile = upath+'/'+source+'.copyright'
     	try:
     	  cpr = open(cprfile,'r')
     	except:
-    	  self.log.warning("Unable to open Copyright file for source '%s' of %s (%s)" % (source, sprosp['blend'], cprfile))
+    	  self.log.debug("Unable to open Copyright file for source '%s' of %s (%s)" % (source, sprosp['blend'], cprfile))
     	linenr = 0
     	found_files = False
     	sprosp['license'] = ''
