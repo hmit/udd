@@ -299,12 +299,18 @@ class blends_prospective_gatherer(gatherer):
                   if src['section'].startswith('non-free'):
                     sprosp['component'] = 'non-free'
                     (dummy,sprosp['section']) = src['section'].split('/')
+                    if sprosp['license'] == '':
+                      sprosp['license'] = 'non-free'
                   elif src['section'].startswith('contrib'):
                     sprosp['component'] = 'contrib'
                     (dummy,sprosp['section']) = src['section'].split('/')
+                    if sprosp['license'] == '':
+                      sprosp['license'] = 'free'
                   else:
                     sprosp['component'] = 'main'
                     sprosp['section']   = src['section']
+                    if sprosp['license'] == '':
+                      sprosp['license'] = 'free'
                 else:
                   sprosp[prop] = src[prop]
               else:
