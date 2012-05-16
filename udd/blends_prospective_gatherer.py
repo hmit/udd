@@ -95,6 +95,7 @@ class blends_prospective_gatherer(gatherer):
     u_dirs = listdir(my_config['path'])
 
     pkgs = []
+    bibrefs = []
 
     for u in u_dirs:
       upath=my_config['path']+'/'+u
@@ -118,6 +119,9 @@ class blends_prospective_gatherer(gatherer):
             # There are no valid references found in this upstream file or it is no valid YAML
             continue
           self.log.warning("%s has upstream file but no references in UDD" % (source, ))
+          upstream.parse()
+          for ref in upstream.get_bibrefs():
+            bibrefs.append(ref)
           continue
 
         # Read output of dpkg-parsechangelog
@@ -323,6 +327,17 @@ class blends_prospective_gatherer(gatherer):
                 pkg = ictrl.next()
               except:
                 break
+    	# Try to read debian/control
+    	upstream = None
+    	ufile = upath+'/'+source+'.upstream'
+    	if exists(ufile):
+          cur.execute("EXECUTE check_reference (%s)", (source,))
+          if cur.fetchone()[0] == 0:
+             upstream = upstream_reader(ufile, source, self.log)
+             if upstream.references:
+               upstream.parse()
+               for ref in upstream.get_bibrefs():
+                 bibrefs.append(ref)
 
     cur.execute("""PREPARE package_insert AS INSERT INTO %s
         (blend, package, source,
@@ -362,6 +377,20 @@ class blends_prospective_gatherer(gatherer):
       raise
 
     cur.execute("DEALLOCATE package_insert")
+    
+    # Inserting references should be save because above we are testing for existant table entries
+    query = """PREPARE bibref_insert (text, text, text, text, int) AS INSERT INTO bibref
+                   (source, key, value, package, rank)
+                    VALUES ($1, $2, $3, $4, $5)"""
+    cur.execute(query)
+    bibquery = "EXECUTE bibref_insert (%(source)s, %(key)s, %(value)s, %(package)s, %(rank)s)"
+    try:
+      cur.executemany(bibquery, bibrefs)
+    except ProgrammingError:
+      print "Error while inserting references"
+      raise
+    cur.execute("DEALLOCATE bibref_insert")
+
     cur.execute("ANALYZE %s" % my_config['table'])
 
 if __name__ == '__main__':
