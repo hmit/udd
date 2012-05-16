@@ -8,6 +8,7 @@ from aux import parse_email
 from gatherer import gatherer
 from sys import stderr, exit
 from os import listdir
+from os.path import exists
 from fnmatch import fnmatch
 from psycopg2 import IntegrityError, InternalError, ProgrammingError
 import re
@@ -82,6 +83,7 @@ class blends_prospective_gatherer(gatherer):
     
     cur.execute('TRUNCATE %s' % my_config['table'])
     cur.execute("PREPARE check_source (text) AS SELECT COUNT(*) FROM sources WHERE source = $1")
+    cur.execute("PREPARE check_reference (text) AS SELECT COUNT(*) FROM bibref WHERE source = $1")
 
     cur.execute("""PREPARE check_itp (int) AS
                   SELECT id, arrival, submitter, owner, title, last_modified, submitter_name, submitter_email, owner_name, owner_email
@@ -102,7 +104,16 @@ class blends_prospective_gatherer(gatherer):
         cur.execute("EXECUTE check_source (%s)", (source,))
         if cur.fetchone()[0] > 0:
     	  # print "Source %s is in DB.  Ignore for prospective packages" % source
-    	  continue
+    	  upstream=upath+'/'+source+'.upstream'
+    	  if not exists(upstream):
+            continue
+          cur.execute("EXECUTE check_reference (%s)", (source,))
+          if cur.fetchone()[0] > 0:
+            # UDD seems to contain the references specified in source.upstream file
+            print "DEBUG: I know about the references in", upstream
+            continue
+          self.log.warning("%s has upstream file but no references in UDD" % (source, ))
+          continue
 
         # Read output of dpkg-parsechangelog
         p = Popen("LC_ALL=C dpkg-parsechangelog -l"+upath+'/'+source+'.changelog', shell=True, bufsize=4096,
