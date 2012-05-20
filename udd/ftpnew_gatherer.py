@@ -246,7 +246,6 @@ class ftpnew_gatherer(gatherer):
           if has_warned_about_missing_section_key == 0:
             has_warned_about_missing_section_key = 1
             print >>stderr, "Warning: Because of a bug in DAK code the Section field is currently missing."
-
         # Check UDD for existing source packages of this name
         query = "SELECT count(*) FROM sources WHERE source = '%s'" % (srcpkg.s['Source'])
         cur.execute(query)
@@ -414,8 +413,15 @@ class ftpnew_gatherer(gatherer):
                   print >>stderr, "This should not happen", srcpkg, field, value
                   exit(-1)
                 else:
-                  binpkg.b[field] = value
-                  binpkg.b['Component'] = srcpkg.s['Component']
+                  if value.startswith('non-free'):
+                    binpkg.b['Component'] = 'non-free'
+                    (dummy,binpkg.b[field]) = value.split('/')
+                  elif value.startswith('contrib'):
+                    binpkg.b['Component'] = 'contrib'
+                    (dummy,binpkg.b[field]) = value.split('/')
+                  else:
+                    binpkg.b['Component'] = 'main'
+                    binpkg.b[field]   = value
             elif field == 'Vcs-Browser':
               srcpkg.s[field] = value
             elif binpkg != None and field in dependencies_to_accept:
