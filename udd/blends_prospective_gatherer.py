@@ -321,6 +321,7 @@ class blends_prospective_gatherer(gatherer):
                   self.log.debug("Control file for source '%s' of %s is lacking %s field" % (source, sprosp['blend'], prop))
 
             pkg = ictrl.next()
+            valid_pkg_info = True
             while pkg:
               pprosp = {}
               for sprop in sprosp.keys():
@@ -340,11 +341,14 @@ class blends_prospective_gatherer(gatherer):
                   if pprosp.has_key('package'):
                     self.log.warning("Control file for source '%s' of %s has no desription for Package %s" % (source, sprosp['blend'], pprosp['package']))
                   else:
-                    self.log.error("Control file for source '%s' of %s seems to miss package information" % (source, sprosp['blend']))
-              # print pprosp
-              pkgs.append(pprosp)
+                    # self.log.error("Control file for source '%s' of %s seems to miss package information" % (source, sprosp['blend']))
+                    self.log.info("Control file for source '%s' of %s seems to contain some comments which can not be parsed/ignored with this python-debian version" % (source, sprosp['blend']))
+                    valid_pkg_info = False
+              if valid_pkg_info:
+                pkgs.append(pprosp)
               try:
                 pkg = ictrl.next()
+                valid_pkg_info = True
               except:
                 break
     	# Try to read debian/control
