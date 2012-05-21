@@ -20,6 +20,7 @@ general:
     ftpnew: module udd.ftpnew_gatherer
     screenshots: module udd.screenshot_gatherer
     bibref: module udd.bibref_gatherer
+    blends-prospective: module udd.blends_prospective_gatherer
     dehs: module udd.dehs_gatherer
     ldap: module udd.ldap_gatherer
     wannabuild: module udd.wannabuild_gatherer
@@ -1100,6 +1101,12 @@ bibref:
   cache: /org/udd.debian.org/mirrors/cache
   table: bibref
   bibref_yaml: /org/udd.debian.org/mirrors/bibref/bibref.yaml
+
+blends-prospective:
+  type: blends-prospective
+  update-command: /org/udd.debian.org/udd/scripts/fetch_machine-readable.sh
+  path: /org/udd.debian.org/mirrors/machine-readable
+  table: blends_prospectivepackages
 
 wannabuild:
   type: wannabuild
