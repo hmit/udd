@@ -337,7 +337,10 @@ class blends_prospective_gatherer(gatherer):
                     pprosp['long_description'] = ''
                   pprosp['description'] = pkg['description'].split("\n",1)[0].strip()
               else:
-                  self.log.warning("Control file for source '%s' of %s has no desription for Package %s" % (source, sprosp['blend'], pprosp['package']))
+                  if pprosp.has_key('package'):
+                    self.log.warning("Control file for source '%s' of %s has no desription for Package %s" % (source, sprosp['blend'], pprosp['package']))
+                  else:
+                    self.log.error("Control file for source '%s' of %s seems to miss package information" % (source, sprosp['blend']))
               # print pprosp
               pkgs.append(pprosp)
               try:
