@@ -60,7 +60,21 @@ def open_tex_process(texexe, basetexfile):
       return(True, errstring)
   return(True, errstring)
 
-other_known_keys = ('Archive', 'Contact', 'CRAN', 'Donation', 'Download', 'Help', 'Homepage', 'Name', 'Watch', 'Webservice')
+other_known_keys = ('Archive',
+                    'Bug-Database',
+                    'Cite-As',
+                    'Contact',
+                    'CRAN',
+                    'Donation',
+                    'Download',
+                    'Help',
+                    'Homepage',
+                    'Name',
+                    'Repository',
+                    'Repository-Browse',
+                    'Screenshots',
+                    'Watch',
+                    'Webservice')
 
 class upstream_reader():
   """
