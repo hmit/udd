@@ -11,22 +11,26 @@ and co-mentors being Stefano Zacchiroli and Marc Brockschmidt.
 Installation
 ------------
 - Download the code (from SVN)
-- install postgresql-8.3 python-yaml python-psycopg2 libdbi-perl
-  libparams-validate-perl libdbd-pg-perl postgresql-autodoc
-  libdbi-ruby libdbd-pg-ruby curl
+- install postgresql-8.3 python-yaml python-psycopg2 libdbi-perl \
+  libparams-validate-perl libdbd-pg-perl postgresql-autodoc \
+  libdbi-ruby libdbd-pg-ruby curl python-debian
 - If you want to import bugs, you also need:
-  libyaml-syck-perl libio-stringy-perl libmime-tools-perl
-  liblist-moreutils-perl libparams-validate-perl libsafe-hole-perl
+  libyaml-syck-perl libio-stringy-perl libmime-tools-perl \
+  liblist-moreutils-perl libparams-validate-perl libsafe-hole-perl \
   libtext-template-perl libcgi-simple-perl libmldbm-perl
-- install python-debian (if running etch, from backports)
 - setup postgresql-8.3 (see /usr/share/doc/postgresql-common/README.Debian.gz)
   and create a database:
      createdb -U user -E SQL_ASCII udd
   ASCII encoding is necessary because some of the data we will import might
   contain invalid UTF-8 characters
+  You might need to do something such as:
+     createdb -E SQL_ASCII -l C udd -T template0
 - install postgresql-8.3-debversion to get the debversion type
+  To add the debversion type to the DB:
+    CREATE EXTENSION debversion
 - edit config.yaml (see README.config for details)
-- setup the DB: psql udd < sql/setup.sql
+- setup the DB:
+    psql udd < sql/setup.sql
 
 Usage
 -----

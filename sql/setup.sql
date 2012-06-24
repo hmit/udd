@@ -59,7 +59,7 @@ component text, architecture text);
 
 CREATE TABLE packages
   (package text, version debversion, architecture text, maintainer text, maintainer_name text, maintainer_email text, description
-    text, long_description text, description_md5 text, source text, source_version debversion, essential text, depends text,
+    text, description_md5 text, source text, source_version debversion, essential text, depends text,
     recommends text, suggests text, enhances text, pre_depends text, breaks text,
     installed_size int, homepage text, size int,
     build_essential text, origin text, sha1 text, replaces text, section text,
@@ -76,6 +76,7 @@ GRANT SELECT ON packages_distrelcomparch TO PUBLIC;
 
 CREATE INDEX packages_source_idx on packages(source);
 CREATE INDEX packages_distrelcomp_idx on packages(distribution, release, component);
+CREATE INDEX packages_pkgverdescr_idx ON packages USING btree (package, version, description);
 
 -- Ubuntu sources and packages
 CREATE TABLE ubuntu_sources
@@ -113,7 +114,7 @@ component text, architecture text);
 
 CREATE TABLE ubuntu_packages
   (package text, version debversion, architecture text, maintainer text, maintainer_name text, maintainer_email text, description
-    text, long_description text, description_md5 text, source text, source_version debversion, essential text, depends text,
+    text, description_md5 text, source text, source_version debversion, essential text, depends text,
     recommends text, suggests text, enhances text, pre_depends text, breaks text,
     installed_size int, homepage text, size int,
     build_essential text, origin text, sha1 text, replaces text, section text,
@@ -168,7 +169,7 @@ component text, architecture text);
 
 CREATE TABLE derivatives_packages
   (package text, version debversion, architecture text, maintainer text, maintainer_name text, maintainer_email text, description
-    text, long_description text, description_md5 text, source text, source_version debversion, essential text, depends text,
+    text, description_md5 text, source text, source_version debversion, essential text, depends text,
     recommends text, suggests text, enhances text, pre_depends text, breaks text,
     installed_size int, homepage text, size int,
     build_essential text, origin text, sha1 text, replaces text, section text,
@@ -209,6 +210,7 @@ CREATE INDEX bugs_packages_source_idx ON bugs_packages (source);
 CREATE INDEX bugs_packages_package_idx ON bugs_packages (package);
 CREATE INDEX bugs_source_idx ON bugs (source);
 CREATE INDEX bugs_package_idx ON bugs (package);
+CREATE INDEX bugs_severity_idx ON bugs USING btree (severity);
 
 CREATE INDEX sources_release_idx ON sources(release);
 
@@ -781,7 +783,6 @@ group by source) b2 ON (b1.source = b2.source));
 
 grant select on bugs_count to public;
 -- bapase
-drop view bapase;
 create view bapase as
 select s.source, s.version, type, bug, description,
 orphaned_time, (current_date - orphaned_time::date) as orphaned_age,
@@ -835,7 +836,6 @@ CREATE TABLE hints
 CREATE INDEX hints_idx on hints(source, version);
 GRANT SELECT ON hints TO public;
 
-DROP VIEW relevant_hints;
 CREATE VIEW relevant_hints AS 
   SELECT source, version, architecture, type, argument, file, comment FROM hints
   WHERE version is NULL
