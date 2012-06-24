@@ -39,13 +39,13 @@ end
 
 dbh = DBI::connect('DBI:Pg:dbname=udd;port=5441;host=localhost', 'guest')
 sth = dbh.prepare("select source, version, architecture
-from sources_uniq where distribution='debian' and release='sid' and component='main' and (architecture = 'all' or architecture = 'any' or architecture ~ 'amd64') order by source")
+from sources_uniq where distribution='debian' and release='sid' and component='main' and (architecture ~ 'all' or architecture ~ 'any' or architecture ~ 'amd64') order by source")
 sth.execute
 while row = sth.fetch do
-  if row['architecture'] =~ /amd64/
+  if row['architecture'] =~ /amd64/ or row['architecture'] =~ /any/
     arch = 'any'
   else
-    arch = row['architecture']
+    arch = 'all'
   end
   pkg = row['source']
   if $archs[pkg].nil? or $archs[pkg].include?(CURARCH)
