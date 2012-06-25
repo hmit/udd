@@ -73,21 +73,16 @@ if [ -n "${ORIGINAL_COMMAND}" ]; then
 fi
 
 update-archive() {
-UAR=/org/udd.debian.org/udd/update-and-run.sh
+UAR=/srv/udd.debian.org/udd/update-and-run.sh
 case "$ARCHIVE" in
    "")
-      if [ $(($RANDOM % 10)) -eq 0 ]; then
+%      if [ $(($RANDOM % 10)) -eq 0 ]; then
 	      $UAR debian-{wheezy,squeeze,sid,experimental} debian-{squeeze,wheezy}-proposed-updates debian-squeeze-updates
-      else
-	      $UAR debian-{wheezy,sid,experimental} debian-wheezy-proposed-updates
-      fi
+%      else
+%	      $UAR debian-{wheezy,sid,experimental} debian-wheezy-proposed-updates
+%      fi
       ;;
    ubuntu)
-      if [ $(($RANDOM % 20)) -eq 0 ]; then
-	      $UAR ubuntu-{quantal,precise,oneiric,natty,maverick,lucid,hardy}{,-security,-updates,-proposed,-backports}
-      else
-	      $UAR ubuntu-quantal{,-security,-updates,-proposed,-backports}
-      fi
       ;;
    security)
       $UAR debian-squeeze-security debian-wheezy-security
