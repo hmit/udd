@@ -6,7 +6,7 @@ require 'thread'
 require 'dbi'
 Thread::abort_on_exception = true
 
-$dbh = DBI::connect('DBI:Pg:dbname=udd;port=5441;host=localhost', 'guest')
+$dbh = DBI::connect('DBI:Pg:dbname=udd;port=5452', 'udd')
 
 class PkgTestingStatus
   @@datezero = Date::parse('0000-01-01')
@@ -146,7 +146,7 @@ class PkgTestingStatus
   end
 end
 
-Dir::chdir('/org/udd.debian.org/testing-status/')
+Dir::chdir('/srv/udd.debian.org/testing-status/')
 oldfile = Dir::glob('data.*').sort[-1]
 d = Date::today
 newfile = "data.#{d}"

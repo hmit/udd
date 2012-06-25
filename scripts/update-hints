@@ -2,8 +2,8 @@
 
 set -e
 
-mkdir -p /org/udd.debian.org/tmp/hints
-cd /org/udd.debian.org/tmp/hints
+mkdir -p /srv/udd.debian.org/tmp/hints
+cd /srv/udd.debian.org/tmp/hints
 rm * || true
 wget -q -r -np -nH -nd -nc http://release.debian.org/britney/hints/
 rm index.html README robots.txt
