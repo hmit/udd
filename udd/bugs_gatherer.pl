@@ -7,7 +7,7 @@ use warnings;
 use FindBin '$Bin';
 
 # We need our own copy of Debbugs::Status for now
-use lib $Bin, qw{/org/udd.debian.org/mirrors/bugs.debian.org/perl};
+use lib $Bin, qw{/srv/bugs.debian.org/perl /org/udd.debian.org/mirrors/bugs.debian.org/perl};
 
 use DBI;
 use DBI qw{:sql_types};

@@ -1,0 +1,185 @@
+# This is the bugs.debian.org debbugs configuration file.
+# $Id: config.debian,v 1.21 2003/08/06 10:57:23 cjwatson Exp $
+
+# Domains
+$gEmailDomain = "bugs.debian.org";
+$gListDomain = "lists.debian.org";
+$gWebDomain = "www.debian.org/Bugs";
+$gWebHostBugDir = "";
+$gHTMLSuffix = "";
+$gPackagePages = "packages.debian.org";
+$gCGIDomain = "bugs.debian.org/cgi-bin";
+$gMirrors = "";						# comma separated list
+$gSubscriptionDomain = "packages.qa.debian.org";
+
+# Project identification
+$gProject = "Debian";
+$gProjectTitle = "Debian GNU/Linux";
+# Person(s) responsible for this installation
+$gMaintainer = "Debian bug tracking system administrator"; # should be plural but that would require changes to other scripts
+$gMaintainerEmail = "owner\@bugs.debian.org";
+
+# BTS mailing lists, at $gListDomain
+$gSubmitList = "debian-bugs-dist";
+$gMaintList = "debian-bugs-dist";
+$gQuietList = "debian-bugs-dist";
+$gForwardList = "debian-bugs-forwarded";
+$gDoneList = "debian-bugs-closed";
+$gRequestList = "debian-bugs-dist";
+$gSubmitterList = "debian-bugs-dist";
+$gControlList = "debian-bugs-dist";
+$gSummaryList = "debian-bugs-reports";
+$gMirrorList = "debian-bugs-mirror";			# sends to all mirrors
+$gStrongList = "debian-bugs-rc";
+
+# Various configurable options
+$gMailer = "exim";				# valid: exim, qmail and sendmail
+$gBug = "Bug";					# how to spell `bug'
+$gBugs = "Bugs";				# how to spell `bugs'
+$gRemoveAge = 28;				# days after closed bugs are cleaned out,
+						# 0 disables
+$gSaveOldBugs = 1;				# whether to archive such bugs
+$gDefaultSeverity = "normal";
+$gShowSeverities = "critical, grave, serious, important, normal, minor, wishlist, fixed";
+@gStrongSeverities = ( "critical", "grave", "serious" );
+@gSeverityList = ( "critical", "grave", "serious", "important", "normal",
+                   "minor", "wishlist", "fixed"
+                 );
+%gObsoleteSeverities = ( fixed => 'Use the fixed tag instead.' );
+%gSeverityDisplay = ( "critical", "Critical bugs",
+                      "grave", "Grave functionality bugs",
+                      "serious", "Serious (policy violations or makes package unfit for release)",
+                      "important", "Important bugs",
+                      "normal", "Normal bugs",
+                      "minor", "Minor bugs",
+                      "fixed", "NMU Fixed bugs",
+                      "wishlist", "Wishlist items"
+                    );
+@gTags = ( "patch", "wontfix", "moreinfo", "unreproducible", "fixed",
+           "potato", "woody", "sid", "help", "security", "upstream",
+           "pending", "sarge", "sarge-ignore", "experimental", "d-i",
+           "confirmed", "ipv6", "lfs", "fixed-in-experimental",
+           "fixed-upstream", "l10n", "etch", "etch-ignore",
+	   "lenny", "lenny-ignore", "squeeze", "squeeze-ignore",
+	   "wheezy", "wheezy-ignore",
+         );
+
+%gTagsSingleLetter = (patch => '+',
+                      wontfix => '☹',
+		      moreinfo => 'M',
+	              unreproducible => 'R',
+	              security => 'S',
+	              pending => 'P',
+	              fixed   => 'F',
+	              help    => 'H',
+	              'fixed-upstream' => 'U',
+	              upstream        => 'u',
+	             );
+
+
+# better don't change this
+$gBounceFroms = "^mailer|^da?emon|^post.*mast|^root|^wpuser|^mmdf|^smt.*|^mrgate|^vmmail|^mail.*system|^uucp|-maiser-|^mal\@|^mail.*agent|^tcpmail|^bitmail|^mailman";
+
+# Directories -- do _not_ change their locations.
+# They are currently hardcoded, variables are here for future expansion.
+$gConfigDir = "/srv/bugs.debian.org/etc";		# directory where this file is
+$gSpoolDir = "/srv/bugs.debian.org/spool";		# working directory
+$gIndicesDir = "/srv/bugs.debian.org/indices";		# directory where the indices are
+$gIncomingDir = "incoming";				# unprocessed e-mails
+$gWebDir = "/srv/bugs.debian.org/www";			# base location of web pages
+$gDocDir = "/srv/ftp.debian.org/ftp/doc";		# location of text doc files
+#$gDocDir = "/srv/bugs.debian.org/etc/doc";		# location of text doc files
+$gTemplateDir = "/srv/bugs.debian.org/templates";	# location of templates
+
+
+# temporary additions for version tracking testing (cjwatson); please don't
+# add to CVS just yet
+$gVersionPackagesDir = "/srv/bugs.debian.org/versions/pkg";
+$gVersionIndex = "/srv/bugs.debian.org/versions/indices/versions.idx";
+$gBinarySourceMap = "/srv/bugs.debian.org/versions/indices/binsrc.idx";
+$gSourceBinaryMap = "/srv/bugs.debian.org/versions/indices/srcbin.idx";
+
+# Required data files
+$gMaintainerFile = "$gConfigDir/Maintainers";
+$gMaintainerFileOverride = "$gConfigDir/Maintainers.override";
+$gUnknownMaintainerEmail = "unknown-package\@qa.debian.org";
+
+$gPseudoDescFile = "$gConfigDir/pseudo-packages.description";
+$gPackageSource = "$gConfigDir/indices/sources";
+
+# Spam-scanning configuration
+$gSpamScan = 1;
+#$gSpamRulesDir = '/srv/bugs.debian.org/spamassassin/rules-system';
+# dla 2008-09-04 -- revert to /etc/spamassassin
+$gSpamRulesDir = '/etc/spamassassin/';
+# blarson 2004-03-20 turn on DNSBL tests
+$gSpamLocalTestsOnly = 0;
+$gSpamMailbox =
+    '/srv/bugs.debian.org/mail/spam/assassinated.%Y-%m-%d';
+$gSpamCrossassassinMailbox = $gCrossMailbox =
+    '/srv/bugs.debian.org/mail/spam/crossassassinated.%Y-%m-%d';
+# CrossAssasin paramiter
+$gSpamMaxCross = 6;
+# Number of SpamAssassin threads to use
+#$gSpamMaxThreads = $gSaThreads = 8;
+# How long to keep running if we keep getting spam (sec)
+$gSpamKeepRunning = $gKeepRunning = 3600;
+# Start new threads when more than this queued
+$gSpamSpamsPerThread = $gSpamsPerThread = 100;
+# Maximum number of threads
+$gSpamMaxThreads = $gMaxThreads = 40;
+
+@gPostProcessall = qw(run-parts --report /srv/bugs.debian.org/postpa);
+
+$gPackageVersionRe = q([A-Za-z0-9:+\.~-]+);
+
+@gDefaultArchitectures = qw(i386 powerpc mips mipsel sparc amd64 alpha m68k arm armel s390 ia64 kfreebsd-i386 kfreebsd-amd64 hppa);
+
+@gDistributions = qw(oldstable stable testing unstable experimental);
+
+%gDistributionAliases = (experimental => 'experimental',
+	     		 unstable     => 'unstable',
+	     	     	 testing      => 'testing',
+		     	 stable       => 'stable',
+			 oldstable    => 'oldstable',
+			 sid          => 'unstable',
+			 wheezy       => 'testing',
+			 squeeze      => 'stable',
+			 lenny        => 'oldstable',
+			 #etch         => 'oldstable',
+			 #sarge        => 'oldstable',
+			);
+
+# This should probably all move to /srv/bugs.debian.org/mail/.procmailrc.
+@gExcludeFromControl = @gFuckheads = (
+	# Banned by ajt 'til 2004-01-26 for repeated reopens on Bug#224742
+		#'Enrico Zini', 'zinie@cs.unibo.it',
+	# Banned by ajt 'til 2004-01-26 for repeated reopens on Bug#210879
+		#'Alfie Costa', 'agcosta@gis.net',
+	# Banned by blarson (requested by vorlon) for repeated bumping priority on 384922 done on 2006-08-31
+		'Paul Szabo', 'psz@maths.usyd.edu.au',
+	# blarson 2006-09-26 for bug 386363
+# don taken off 2007-02-07
+# don back on 2007-02-18 for 401862
+# don taken off 2007-08-22
+# don back on 2007-09-20 for 440720
+# don -- not going to revisit this ban for another year; someone else can if they want.
+		'Filipus Klutiero', 'ido@vif.ca',
+                'Philippe Cloutier', 'philippe.cloutier.2@ulaval.ca',
+                'Filipus Klutiero', 'cheal@hotpop.com', 
+		'Philippe Cloutier', 'chealer@gmail.com',
+#		'Laurence J. Lane', 'ljlane@debian.org',
+		);
+# blocks people from using control@
+                  # eg ("John.*Doe", "\Qjohndoe@example.com\E");
+# does *not* block other @bugs addresses; use .procmailrc or spamassassin
+# user_prefs for that
+
+
+%gSearchEstraier = (url  => 'http://localhost:1978/node/bts',
+                    user => 'btsreadonly',
+                    pass => 'gai3saiK',
+                   );
+
+
+1;
