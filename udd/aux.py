@@ -93,6 +93,7 @@ def print_debug(*args):
   if debug:
     sys.stdout.write(*args)
     sys.stdout.write("\n")
+    sys.stdout.flush()
 
 def parse_email(str):
   """Use email.Utils to parse name and email.  Afterwards check whether it was successful and try harder to get a reasonable address"""

@@ -174,6 +174,7 @@ class packages_gatherer(gatherer):
     src_cfg = self.my_config
 
     aux.debug = self.config['general']['debug']
+#    aux.debug = src_cfg['debug']
     table = src_cfg['packages-table']
 
     # Get distribution ID
@@ -225,7 +226,7 @@ class packages_gatherer(gatherer):
 
             """ % (src_cfg['descriptions-table'], self._distr, src_cfg['release'], comp,
                     src_cfg['descriptions-table'], src_cfg['release'], comp))
-#	  aux.print_debug("Reading file " + path)
+	  aux.print_debug("Reading file " + path)
 	  # Copy content from gzipped file to temporary file, so that apt_pkg is
 	  # used by debian
 	  tmp = tempfile.NamedTemporaryFile()
@@ -233,7 +234,7 @@ class packages_gatherer(gatherer):
 	  tmp.write(file.read())
 	  file.close()
 	  tmp.seek(0)
-#	  aux.print_debug("Importing from " + path)
+	  aux.print_debug("Importing from " + path)
 	  self.import_packages(open(tmp.name), cur)
 	  tmp.close()
 	except IOError, (e, message):
@@ -243,7 +244,9 @@ class packages_gatherer(gatherer):
         if self.add_descriptions:
           cur.execute("DEALLOCATE description_insert")
     # Fill the summary tables
+    aux.print_debug("Delete summary")
     cur.execute("DELETE FROM %s" % (table + '_summary'));
+    aux.print_debug("Import summary")
     cur.execute("""INSERT INTO %s (package, version, source, source_version,
         maintainer, maintainer_name, maintainer_email, distribution, release, component)
       SELECT DISTINCT ON (package, version, distribution, release, component)
@@ -255,6 +258,7 @@ class packages_gatherer(gatherer):
       SELECT DISTINCT distribution, release, component, architecture
       FROM %s""" % (table + '_distrelcomparch', table))
 
+    aux.print_debug("Analyze table")
     cur.execute("ANALYZE %s" % table)
     cur.execute("ANALYZE %s" % table + '_summary')
     cur.execute("ANALYZE %s" % table + '_distrelcomparch')

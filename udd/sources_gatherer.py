@@ -136,6 +136,7 @@ class sources_gatherer(gatherer):
     utable = src_cfg['uploaders-table']
 
     aux.debug = self.config['general']['debug']
+#    aux.debug = src_cfg['debug']
 
     cur = self.cursor()
 
@@ -143,6 +144,8 @@ class sources_gatherer(gatherer):
       if re.search("debian-installer", comp):
         continue # debian-installer components don't have source
       path = os.path.join(src_cfg['directory'], comp, 'source', 'Sources.gz')
+
+      aux.print_debug("Purging data")
       cur.execute("DELETE from %s WHERE Distribution = '%s' AND\
         release = '%s' AND component = '%s'"\
         % (table, src_cfg['distribution'], src_cfg['release'], comp))
@@ -168,7 +171,7 @@ class sources_gatherer(gatherer):
         (utable, src_cfg['distribution'], src_cfg['release'], comp)
         cur.execute(query)
 
-#        aux.print_debug("Reading file " + path)
+        aux.print_debug("Reading file " + path)
         # Copy content from gzipped file to temporary file, so that apt_pkg is
         # used by debian
         tmp = tempfile.NamedTemporaryFile()
@@ -176,7 +179,7 @@ class sources_gatherer(gatherer):
         tmp.write(file.read())
         file.close()
         tmp.seek(0)
-#        aux.print_debug("Importing from " + path)
+        aux.print_debug("Importing from " + path)
         self.import_sources(open(tmp.name))
         tmp.close()
       except IOError, (e, message):
@@ -185,6 +188,7 @@ class sources_gatherer(gatherer):
       cur.execute("DEALLOCATE source_insert")
       cur.execute("DEALLOCATE uploader_insert")
 
+    aux.print_debug("Analyze")
     cur.execute('ANALYZE %s' % table)
     cur.execute('ANALYZE %s' % utable)
 
