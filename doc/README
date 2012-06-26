@@ -13,7 +13,7 @@ Installation
 - Download the code (from SVN)
 - install postgresql-8.3 python-yaml python-psycopg2 libdbi-perl \
   libparams-validate-perl libdbd-pg-perl postgresql-autodoc \
-  libdbi-ruby libdbd-pg-ruby curl python-debian
+  libdbi-ruby libdbd-pg-ruby curl python-debian python-dateutil
 - If you want to import bugs, you also need:
   libyaml-syck-perl libio-stringy-perl libmime-tools-perl \
   liblist-moreutils-perl libparams-validate-perl libsafe-hole-perl \
