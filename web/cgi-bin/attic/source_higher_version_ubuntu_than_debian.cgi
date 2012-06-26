@@ -12,7 +12,7 @@
 import psycopg2
 
 # connect to UDD database
-conn = psycopg2.connect(database="udd", port=5441, host="localhost", user="guest")
+conn = psycopg2.connect(database="udd", port=5452, host="localhost", user="guest")
 
 # prepare a cursor                     
 cur = conn.cursor()                    

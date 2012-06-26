@@ -38,7 +38,7 @@ puts "Ubuntu release: #{UREL}<br>"
 puts "Bugs data refreshed once a day. Packages data refreshed twice a day.<br>"
 puts "<a href=\"http://svn.debian.org/wsvn/collab-qa/udd/web/cgi-bin/merges.cgi\">Source code</a>"
 
-dbh = DBI::connect('DBI:Pg:dbname=udd;port=5441;host=localhost', 'guest')
+dbh = DBI::connect('DBI:Pg:dbname=udd;port=5452;host=localhost', 'guest')
 
 # Fetching blacklist
 blacklist = Net::HTTP.get(URI::parse('http://people.canonical.com/~ubuntu-archive/sync-blacklist.txt')).split(/\n/)

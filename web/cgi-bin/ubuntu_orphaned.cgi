@@ -37,7 +37,7 @@ query = '''SELECT s.source, s.version, u.version
            AND u.version LIKE '%ubuntu%'
            ORDER BY s.source'''
 
-conn = connect(database='udd', port=5441, host='localhost', user='guest')
+conn = connect(database='udd', port=5452, host='localhost', user='guest')
 cur = conn.cursor()
 cur.execute(query)
 rows = cur.fetchall()

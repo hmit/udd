@@ -29,7 +29,7 @@ puts <<-EOF
 <h1>Possibly easy targets for RC bug squashing</h1>
 EOF
 
-dbh = DBI::connect('DBI:Pg:dbname=udd;port=5441;host=localhost', 'guest')
+dbh = DBI::connect('DBI:Pg:dbname=udd;port=5452;host=localhost', 'guest')
 
 sth = dbh.prepare("select id, bugs.package, bugs.source, insts, title from bugs, popcon_src where bugs.source = popcon_src.source and id in (select id from bugs_rt_affects_testing_and_unstable) and id in (select id from bugs_tags where tag='patch') and id not in (select id from bugs_tags where tag='pending') and severity >= 'serious' order by id")
 sth.execute ; rows = sth.fetch_all

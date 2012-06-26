@@ -45,7 +45,7 @@ STDOUT.flush
 res32 = Net::HTTP.get(URI::parse('http://people.ubuntuwire.com/~lucas/ubuntu-nbs/res.ubuntu.32')).split(/\n/)
 res64 = Net::HTTP.get(URI::parse('http://people.ubuntuwire.com/~lucas/ubuntu-nbs/res.ubuntu.64')).split(/\n/)
 
-dbh = DBI::connect('DBI:Pg:dbname=udd;port=5441;host=localhost', 'guest')
+dbh = DBI::connect('DBI:Pg:dbname=udd;port=5452;host=localhost', 'guest')
 
 sth = dbh.prepare("select u.source, u.version, u.component, d.version as dversion, d.version > u.version as vercmp from ubuntu_sources u LEFT JOIN (SELECT source, version from sources_uniq where distribution='debian' and release='sid') d on (u.source = d.source) where u.distribution='ubuntu' and u.release='#{URELEASE}' order by u.component, u.source")
 sth.execute ; rows_u = sth.fetch_all

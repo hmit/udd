@@ -28,7 +28,7 @@ puts <<-EOF
 <h1>Possibly easy targets for RC bug squashing</h1>
 EOF
 
-dbh = DBI::connect('DBI:Pg:dbname=udd;port=5441;host=localhost', 'guest')
+dbh = DBI::connect('DBI:Pg:dbname=udd;port=5452;host=localhost', 'guest')
 
 pkgs = Net::HTTP.get(URI::parse('http://blop.info/pub/pkgs')).split(/\n/)
 pkgss= pkgs.join("','")

@@ -65,7 +65,7 @@ OR uploaders LIKE '%python-apps-team%'
 OR uploaders LIKE '%python-modules-team%')
 ORDER BY all_bugs.source;"""
 
-conn = connect(database="udd", port=5441, host="localhost", user="guest")
+conn = connect(database="udd", port=5452, host="localhost", user="guest")
 cur = conn.cursor()
 cur.execute(query_rc)
 rc = cur.fetchall()

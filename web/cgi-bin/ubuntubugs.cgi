@@ -5,7 +5,7 @@ require 'dbi'
 
 puts "Content-type: text/plain\n\n"
 
-dbh = DBI::connect('DBI:Pg:dbname=udd;port=5441;host=localhost', 'guest')
+dbh = DBI::connect('DBI:Pg:dbname=udd;port=5452;host=localhost', 'guest')
 sth = dbh.prepare("SELECT tbugs.package, bugs, patches
 from (select package, count(distinct bugs.bug) as bugs
 from ubuntu_bugs_tasks tasks,ubuntu_bugs bugs

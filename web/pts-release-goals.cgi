@@ -26,7 +26,7 @@ rgs.each do |rg|
   end
 end
 ut_text = usertags.map { |e| "('#{e[0]}', '#{e[1]}')"}.join(',')
-dbh = DBI::connect('DBI:Pg:dbname=udd;port=5441;host=localhost', 'guest')
+dbh = DBI::connect('DBI:Pg:dbname=udd;port=5452;host=localhost', 'guest')
 dbh.execute("SET statement_timeout TO 90000")
 q = "select distinct bugs.id, bugs.source, bugs.package, bu.email, bu.tag from bugs, bugs_usertags bu where bugs.id = bu.id and status = 'pending' and (bu.email, bu.tag) in (#{ut_text})"
 sth = dbh.prepare(q)

@@ -16,7 +16,7 @@ cgi = CGI::new
 if cgi.has_key?('email')
 allpkgs = cgi.has_key?('allpkgs')
 pw = IO::read('/org/udd.debian.org/guestdd-password').chomp
-dbh = DBI::connect('DBI:Pg:dbname=udd;port=5441;host=localhost', 'guestdd', pw)
+dbh = DBI::connect('DBI:Pg:dbname=udd;port=5452;host=localhost', 'guestdd', pw)
 maint = dbh.select_all("select source from sources where distribution='debian' and release='sid' and maintainer_email=#{dbh.quote(cgi['email'])}").map { |e| e[0] }.uniq
 upload = dbh.select_all("select source from uploaders where distribution='debian' and release='sid' and email=#{dbh.quote(cgi['email'])}").map { |e| e[0] }.uniq
 pts = dbh.select_all("select source from pts where #{dbh.quote(cgi['email'])}=email").map { |e| e[0] }

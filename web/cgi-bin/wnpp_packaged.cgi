@@ -54,7 +54,7 @@ print '''Content-Type: text/html\n\n
 <th>Title</th>
 </tr>'''
 
-conn = connect(database='udd', port=5441, host='localhost', user='guest')
+conn = connect(database='udd', port=5452, host='localhost', user='guest')
 cur = conn.cursor()
 cur.execute(query)
 rows = cur.fetchall()

@@ -7,7 +7,7 @@ RELEASE='quantal'
 
 puts "Content-type: text/html\n\n"
 
-dbh = DBI::connect('DBI:Pg:dbname=udd;port=5441;host=localhost', 'guest')
+dbh = DBI::connect('DBI:Pg:dbname=udd;port=5452;host=localhost', 'guest')
 sth = dbh.prepare("select insts from ubuntu_popcon_src where source='coreutils'")
 sth.execute
 popcon = sth.fetch_all[0][0]

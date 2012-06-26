@@ -13,7 +13,7 @@ puts "Content-type: application/json\n\n"
 DREL='sid'
 UREL='quantal'
 
-dbh = DBI::connect('DBI:Pg:dbname=udd;port=5441;host=localhost', 'guest')
+dbh = DBI::connect('DBI:Pg:dbname=udd;port=5452;host=localhost', 'guest')
 
 # Fetching blacklist
 blacklist = Net::HTTP.get(URI::parse('http://people.canonical.com/~ubuntu-archive/sync-blacklist.txt')).split(/\n/)

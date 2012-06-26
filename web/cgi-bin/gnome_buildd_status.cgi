@@ -23,7 +23,7 @@ from urllib import urlopen
 
 groups = {}
 group_list = ('pkg-gnome', 'pkg-evolution', 'pkg-gstreamer', 'pkg-telepathy', 'pkg-utopia')
-conn = connect(database='udd', port=5441, host='localhost', user='guest')
+conn = connect(database='udd', port=5452, host='localhost', user='guest')
 cur = conn.cursor()
 
 groups['pkg-gnome'] = ('pkg-gnome-maintainers@lists.alioth.debian.org',

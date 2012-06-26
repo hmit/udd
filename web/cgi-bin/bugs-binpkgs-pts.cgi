@@ -6,7 +6,7 @@ require 'dbi'
 
 puts "Content-type: text/plain\n\n"
 
-dbh = DBI::connect('DBI:Pg:dbname=udd;port=5441;host=localhost', 'guest')
+dbh = DBI::connect('DBI:Pg:dbname=udd;port=5452;host=localhost', 'guest')
 
 COMQ = "select bugs_packages.package, count(*) as cnt from bugs, bugs_packages where bugs.id = bugs_packages.id and status != 'done'"
 NOPEND = "and bugs.id not in (select id from bugs_tags where tag in ('pending','fixed'))"

@@ -20,7 +20,7 @@ def getnums(rows)
   return [ m, u, m + u ]
 end
 
-dbh = DBI::connect('DBI:Pg:dbname=udd;port=5441;host=localhost', 'guest')
+dbh = DBI::connect('DBI:Pg:dbname=udd;port=5452;host=localhost', 'guest')
 sth = dbh.prepare("select count(*) from ubuntu_sources where distribution = 'ubuntu' and release = '#{RELEASE}'")
 sth.execute ; rows = sth.fetch_all
 allpkgs = rows[0][0]

@@ -3,7 +3,7 @@ require 'dbi'
 
 puts "Content-type: text/html\n\n"
 
-dbh = DBI::connect('DBI:Pg:dbname=udd;port=5441;host=localhost', 'guest')
+dbh = DBI::connect('DBI:Pg:dbname=udd;port=5452;host=localhost', 'guest')
 
 puts "<html><body>"
 

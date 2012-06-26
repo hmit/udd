@@ -27,7 +27,7 @@ puts <<-EOF
 <body>
 EOF
 
-dbh = DBI::connect('DBI:Pg:dbname=udd;port=5441;host=localhost', 'guest')
+dbh = DBI::connect('DBI:Pg:dbname=udd;port=5452;host=localhost', 'guest')
 
 q = "
 select changed_by_email, changed_by_name, date, source, version, login from

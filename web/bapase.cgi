@@ -142,7 +142,7 @@ WAIT_ORM_RM = 50
 DATEZERO = Date::parse('0000-01-01')
 CURDATE = Date::today
 
-dbh = DBI::connect('DBI:Pg:dbname=udd;port=5441;host=localhost', 'guest')
+dbh = DBI::connect('DBI:Pg:dbname=udd;port=5452;host=localhost', 'guest')
 cgi = CGI.new
 
 type = cgi.params['t']

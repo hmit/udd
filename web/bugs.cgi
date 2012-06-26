@@ -277,7 +277,7 @@ if cgi.params != {}
 
 # Generate and execute query
 tstart = Time::now
-dbh = DBI::connect('DBI:Pg:dbname=udd;port=5441;host=localhost', 'guest')
+dbh = DBI::connect('DBI:Pg:dbname=udd;port=5452;host=localhost', 'guest')
 dbh.execute("SET statement_timeout TO 90000")
 if cols['cpopcon']
   q = "select id, bugs.package, bugs.source, severity, title, last_modified, affects_stable, affects_testing, affects_unstable, affects_experimental, coalesce(popcon_src.insts, 0) as popcon\nfrom bugs left join popcon_src on (bugs.source = popcon_src.source) \n"

@@ -17,7 +17,7 @@ pkgs.uniq!
 
 pp pkgs
 
-dbh = DBI::connect('DBI:Pg:dbname=udd;port=5441;host=localhost', 'guest')
+dbh = DBI::connect('DBI:Pg:dbname=udd;port=5452;host=localhost', 'guest')
 
 spkgs = pkgs.join('\',\'')
 sth = dbh.prepare("select distinct source, package, version from packages

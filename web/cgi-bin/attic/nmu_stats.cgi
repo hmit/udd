@@ -5,7 +5,7 @@ require 'pp'
 
 puts "Content-type: text/html\n\n"
 
-dbh = DBI::connect('DBI:Pg:dbname=udd;port=5441;host=localhost', 'guest')
+dbh = DBI::connect('DBI:Pg:dbname=udd;port=5452;host=localhost', 'guest')
 sth = dbh.prepare("select changed_by, count(*) cnt from
 upload_history uh, sources s
 where s.distribution='debian' and s.release='sid'

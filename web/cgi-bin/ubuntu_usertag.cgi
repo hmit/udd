@@ -26,7 +26,7 @@ puts <<-EOF
 <body>
 EOF
 
-dbh = DBI::connect('DBI:Pg:dbname=udd;port=5441;host=localhost', 'guest')
+dbh = DBI::connect('DBI:Pg:dbname=udd;port=5452;host=localhost', 'guest')
 
 sth = dbh.prepare("select email, tag, count(*) from bugs_usertags group by email, tag order by count desc limit 100")
 sth.execute ; rows = sth.fetch_all

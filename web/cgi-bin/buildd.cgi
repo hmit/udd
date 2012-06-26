@@ -102,7 +102,7 @@ alt="Debian Logo" height="60" /></td>
 <hr/>''')
 
 if name:
-    conn = connect(database='udd', port=5441, host='localhost', user='guest')
+    conn = connect(database='udd', port=5452, host='localhost', user='guest')
     cur = conn.cursor()
     cur.execute(query)
     rows = cur.fetchall()

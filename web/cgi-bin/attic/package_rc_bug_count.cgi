@@ -6,7 +6,7 @@ use warnings;
 use DBI;
 use CGI;
 
-my $dbh = DBI->connect("dbi:Pg:dbname=udd;port=5441;host=localhost", "guest") or die $!;
+my $dbh = DBI->connect("dbi:Pg:dbname=udd;port=5452;host=localhost", "guest") or die $!;
 my $sth = $dbh->prepare(<<EOF
 SELECT b.package, COUNT(b.id)
 FROM bugs b

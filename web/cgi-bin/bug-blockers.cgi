@@ -20,7 +20,7 @@ import sys
 import psycopg2
 
 DATABASE = {'database': 'udd',
-            'port': 5441,
+            'port': 5452,
             'host': 'localhost',
             'user': 'guest',
            }

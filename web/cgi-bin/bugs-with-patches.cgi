@@ -5,7 +5,7 @@ require 'dbi'
 
 puts "Content-type: text/plain\n\n"
 
-dbh = DBI::connect('DBI:Pg:dbname=udd;port=5441;host=localhost', 'guest')
+dbh = DBI::connect('DBI:Pg:dbname=udd;port=5452;host=localhost', 'guest')
 sth = dbh.prepare("
 select distinct bugs.id, bugs.package, bugs.source from bugs
  where id in (select id from bugs_tags where tag='patch')
