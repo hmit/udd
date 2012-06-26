@@ -6,7 +6,7 @@ require 'thread'
 require 'dbi'
 Thread::abort_on_exception = true
 
-dbh = DBI::connect('DBI:Pg:dbname=udd;port=5441', 'udd')
+dbh = DBI::connect('DBI:Pg:dbname=udd;port=5452', 'udd')
 sth = dbh.prepare("select relname from pg_class where relkind='r' and relowner='16386' and relnamespace='2200'")
 sth.execute
 sth.fetch_all[0].each do |rel|

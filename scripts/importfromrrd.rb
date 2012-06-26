@@ -3,7 +3,7 @@
 
 require 'dbi'
 
-dbh = DBI::connect('DBI:Pg:dbname=udd;port=5441', 'udd')
+dbh = DBI::connect('DBI:Pg:dbname=udd;port=5452', 'udd')
 fields = [ 'vcstype_arch',
   'vcstype_bzr' ,
   'vcstype_cvs' ,
