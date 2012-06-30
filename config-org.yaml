@@ -1032,7 +1032,7 @@ lintian:
 
 ubuntu-lintian:
   type: lintian
-  update-command: rm -f /org/udd.debian.org/mirrors/ubuntu.lintian.log && wget -q http://lintian.ubuntuwire.org/lintian.log -O /org/udd.debian.org/mirrors/ubuntu.lintian.log
+  update-command: rm -f /org/udd.debian.org/mirrors/ubuntu.lintian.log && wget -q http://lintian.ubuntuwire.org/quantal/lintian.log -O /org/udd.debian.org/mirrors/ubuntu.lintian.log
   path: /org/udd.debian.org/mirrors/ubuntu.lintian.log
   table: ubuntu_lintian
   schema: lintian
