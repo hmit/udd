@@ -464,7 +464,13 @@ if cgi.params != {}
   end
   puts "</table>"
 
+  puts "<p><b>Generated in #{Time::now - tstart} seconds.</b></p>"
+
 end
 
-puts "<p><b>Generated in #{Time::now - tstart} seconds.</b></p>"
+
+<div class="footer">
+<small>Suggestions / comments / patches to lucas@debian.org. <a href="http://anonscm.debian.org/gitweb/?p=collab-qa/udd.git;a=history;f=web/dmd.cgi">source code</a>.</small>
+</div>
+
 puts "</body></html>"
