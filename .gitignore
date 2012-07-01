@@ -1,3 +1,4 @@
 udd/*.pyc
 web/crontabs.txt
 web/schema
+web/*.sql.gz
