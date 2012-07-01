@@ -500,7 +500,7 @@ lintian:
 
 ubuntu-lintian:
   type: lintian
-  update-command: rm -f /srv/udd.debian.org/mirrors/ubuntu.lintian.log && wget -q http://lintian.ubuntuwire.org/quantal/lintian.log -O /srv/udd.debian.org/mirrors/ubuntu.lintian.log
+  update-command: rm -f /srv/udd.debian.org/mirrors/ubuntu.lintian.log && wget -q http://lintian.ubuntuwire.org/lintian.log -O /srv/udd.debian.org/mirrors/ubuntu.lintian.log
   path: /srv/udd.debian.org/mirrors/ubuntu.lintian.log
   table: ubuntu_lintian
   schema: lintian
