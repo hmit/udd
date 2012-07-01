@@ -1,0 +1,206 @@
+#!/usr/bin/ruby -w
+
+DEB_MIRROR='/srv/mirrors/debian'
+
+##### PEACH
+module Peach
+  def peach(pool = nil, &b)
+    pool ||= $peach_default_threads || size
+    raise "Thread pool size less than one?" unless pool >= 1
+    div = (size/pool).to_i      # should already be integer
+    div = 1 unless div >= 1     # each thread better do something!
+
+    threads = (0...size).step(div).map do |chunk|
+      Thread.new(chunk, [chunk+div,size].min) do |lower, upper|
+        (lower...upper).each{|j| yield(slice(j))}
+      end
+    end
+    threads.each { |t| t.join }
+    self
+  end
+
+  def pmap(pool = nil, &b)
+    pool ||= $peach_default_threads || size
+    raise "Thread pool size less than one?" unless pool >= 1
+    div = (size/pool).to_i      # should already be integer
+    div = 1 unless div >= 1     # each thread better do something!
+
+    result = Array.new(size)
+
+    threads = (0...size).step(div).map do |chunk|
+      Thread.new(chunk, [chunk+div,size].min) do |lower, upper|
+        (lower...upper).each{|j| result[j] = yield(slice(j))}
+      end
+    end
+    threads.each { |t| t.join }
+    result
+  end
+
+  def pselect(n = nil, &b)
+    peach_run(:select, b, n)
+  end
+
+
+
+  protected
+  def peach_run(meth, b, n = nil)
+    threads, results, result = [],[],[]
+    peach_divvy(n).each_with_index do |x,i|
+      threads << Thread.new { results[i] = x.send(meth, &b)}
+    end
+    threads.each {|t| t.join }
+    results.each {|x| result += x if x}
+    result
+  end
+  
+  def peach_divvy(n = nil)
+    return [] if size == 0
+
+    n ||= $peach_default_threads || size
+    n = size if n > size
+
+    lists = []
+
+    div = (size/n).floor
+    offset = 0
+    for i in (0...n-1)
+      lists << slice(offset, div)
+      offset += div
+    end
+    lists << slice(offset...size)
+    lists
+  end
+end
+
+Array.send(:include, Peach)
+####### END OF PEACH
+
+require 'dbi'
+require 'pp'
+require 'fileutils'
+require 'rexml/document'
+
+def poolpath(source)
+  if source =~ /^lib/
+    return source[0..3]+'/'+source
+  else
+    return source[0..0]+'/'+source
+  end
+end
+
+$m = Mutex::new
+def get_watch(source, version, component)
+  d = `mktemp -d /dev/shm/getwatch.#{source}.XXXXXX`.chomp
+  raise unless $?.exitstatus == 0
+  version = version.gsub(/^[\d]+:/,'')
+  path = "#{DEB_MIRROR}/pool/#{component}/#{poolpath(source)}/#{source}_#{version}.dsc"
+  system("cd #{d} && dpkg-source --no-check -x #{path} >/dev/null 2>&1")
+  raise "Failed dpkg-source with #{source} #{path}" unless $?.exitstatus == 0
+  f = Dir::glob("#{d}/#{source}-*/debian/watch")
+  watch = nil
+  if f.length != 0
+    watch = IO::read(f[0])
+  else
+    watch = nil
+  end
+  FileUtils::rm_rf(d)
+  return watch
+end
+
+def get_status(source, version, watch_file)
+  # strip debian revision
+  version = version.gsub(/-[\d.]+/,'')
+  # strip epoch
+  version = version.gsub(/^[\d]+:/,'')
+  f = `mktemp /dev/shm/watch.#{source}.XXXXXX`.chomp
+  File::open(f, 'w') do |fd|
+    fd.print watch_file
+  end
+#  p "uscan --dehs --no-download --watchfile #{f} --package #{source} --upstream-version #{version}"
+  r = `uscan --dehs --no-download --watchfile #{f} --package #{source} --upstream-version #{version}`
+  FileUtils::rm(f)
+  d = REXML::Document::new(r)
+#  puts watch_file
+#  puts d
+  if d.root.elements.count == 0
+    return {
+      :debian_uversion => nil,
+      :debian_mangled_uversion => nil,
+      :upstream_version => nil,
+      :upstream_url => nil,
+      :status => 'error',
+      :errors => nil,
+      :warnings => nil
+    }
+  elsif d.root.elements['errors']
+    return {
+      :debian_uversion => nil,
+      :debian_mangled_uversion => nil,
+      :upstream_version => nil,
+      :upstream_url => nil,
+      :status => 'error',
+      :errors => d.root.elements['errors'].text,
+      :warnings => nil
+    }
+  elsif d.root.elements['warnings']
+    return {
+      :debian_uversion => nil,
+      :debian_mangled_uversion => nil,
+      :upstream_version => nil,
+      :upstream_url => nil,
+      :status => 'error',
+      :errors => nil,
+      :warnings => d.root.elements['warnings'].text
+    }
+  else
+    return {
+      :debian_uversion => d.root.elements['debian-uversion'].text,
+      :debian_mangled_uversion => d.root.elements['debian-mangled-uversion'].text,
+      :upstream_version => d.root.elements['upstream-version'].text,
+      :upstream_url => d.root.elements['upstream-url'].text,
+      :status => d.root.elements['status'].text,
+      :errors => nil,
+      :warnings => nil
+    }
+  end
+end
+
+dbh = DBI::connect('DBI:Pg:dbname=udd;port=5452', 'udd')
+
+# Cleanup
+dbh.do <<EOF
+DELETE FROM upstream where (source, version, distribution, release, component) IN (SELECT source, version, distribution, release, component from upstream except select source, version, distribution, release, component from sources_uniq where release='sid')
+EOF
+#sth.execute
+
+# Get watch file for new packages
+sth = dbh.prepare <<EOF
+select source, version, distribution, release, component from sources_uniq
+where release='sid' except select source, version, distribution, release, component from upstream
+EOF
+sth.execute
+res = sth.fetch_all
+mutex = Mutex::new
+sth = dbh.prepare("INSERT INTO upstream (source, version, distribution, release, component, watch_file, last_check) VALUES (?,?,?,?,?,?,?)")
+res.peach(20) do |e|
+  watch = get_watch(e['source'], e['version'], e['component'])
+  mutex.synchronize do
+    sth.execute(e['source'], e['version'], e['distribution'], e['release'], e['component'], watch, nil)
+  end
+end
+
+# Check packages
+sth = dbh.prepare <<EOF
+select source, version, distribution, release, component, watch_file
+from upstream
+where watch_file is not null and (last_check is null or age(last_check) > '72 hours')
+EOF
+sth.execute
+res = sth.fetch_all
+sth = dbh.prepare("UPDATE upstream SET debian_uversion=?, debian_mangled_uversion=?, upstream_version=?, upstream_url=?, errors=?, warnings=?, status=?,last_check=NOW() where source=? and version=? and distribution=? and release=? and component=?")
+res.peach(20) do |e|
+  st = get_status(e['source'], e['version'], e['watch_file'])
+  mutex.synchronize do
+    sth.execute(st[:debian_uversion], st[:debian_mangled_uversion], st[:upstream_version], st[:upstream_url], st[:errors], st[:warnings], st[:status], e['source'], e['version'], e['distribution'], e['release'], e['component'])
+  end
+end

@@ -9,6 +9,7 @@ general:
     src-pkg: module udd.src_and_pkg_gatherer
     popcon: module udd.popcon_gatherer
     testing-migrations: module udd.testing_migrations_gatherer
+    upstream: exec /srv/udd.debian.org/udd/scripts/update-upstream-status
     upload-history: module udd.upload_history_gatherer
     orphaned-packages: module udd.orphaned_packages_gatherer
     bugs: exec DEBBUGS_CONFIG_FILE=/srv/udd.debian.org/udd/bugs-config perl /srv/udd.debian.org/udd/udd/bugs_gatherer.pl 
@@ -420,6 +421,11 @@ testing-migrations:
   update-command: /srv/udd.debian.org/udd/scripts/testing-status-update
   schema: testing_migrations
   table: migrations
+
+upstream:
+  type: upstream
+  schema: upstream
+  table: upstream
 
 upload-history:
   type: upload-history
