@@ -10,6 +10,7 @@ general:
     popcon: module udd.popcon_gatherer
     testing-migrations: module udd.testing_migrations_gatherer
     upstream: exec /srv/udd.debian.org/udd/scripts/update-upstream-status
+    vcs: exec /srv/udd.debian.org/udd/scripts/update-vcs-status
     upload-history: module udd.upload_history_gatherer
     orphaned-packages: module udd.orphaned_packages_gatherer
     bugs: exec DEBBUGS_CONFIG_FILE=/srv/udd.debian.org/udd/bugs-config perl /srv/udd.debian.org/udd/udd/bugs_gatherer.pl 
@@ -426,6 +427,11 @@ upstream:
   type: upstream
   schema: upstream
   table: upstream
+
+vcs:
+  type: vcs
+  schema: vcs
+  table: vcs
 
 upload-history:
   type: upload-history

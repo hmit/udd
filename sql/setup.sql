@@ -888,3 +888,13 @@ CREATE TABLE upstream (
 );
 
 GRANT SELECT ON upstream TO PUBLIC;
+
+CREATE TABLE vcs (
+source text,
+team text,
+version debversion,
+distribution text,
+primary key(source)
+);
+
+GRANT SELECT ON vcs TO PUBLIC;

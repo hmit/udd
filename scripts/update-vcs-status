@@ -1,0 +1,37 @@
+#!/usr/bin/ruby -w
+
+require 'dbi'
+require 'pp'
+
+=begin
+CREATE TABLE vcs (
+source text,
+team text,
+version debversion,
+distribution text,
+primary key(source)
+)
+=end
+
+dbh = DBI::connect('DBI:Pg:dbname=udd;port=5452', 'udd')
+petdbh = DBI::connect('DBI:Pg:dbname=pet;host=pet.debian.net;port=5432', 'guest')
+
+sth = petdbh.prepare <<-EOF
+select team.name as team, package.name as source, version, distribution
+from team, repository, package, named_tree
+where team.id = repository.team_id
+and repository.id = package.repository_id
+and named_tree.package_id = package.id
+and named_tree.type='branch' and named_tree.name is null and repository_id != 4
+EOF
+# we exclude repository_id = 4 (old SVN repo of games team)
+sth.execute
+rows = sth.fetch_all
+
+
+dbh.do("DELETE FROM vcs")
+
+sth = dbh.prepare("insert into vcs values(?,?,?,?)")
+rows.each do |r|
+  sth.execute(r['source'], r['team'], r['version'], r['distribution'])
+end
