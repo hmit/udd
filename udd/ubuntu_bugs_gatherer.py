@@ -118,14 +118,14 @@ class ubuntu_bugs_gatherer(gatherer):
               ok = False
               hq.put(b)
           else:
-            print "[", currentThread().getName(), "] Bug ", b, ": Wrong status: ", r.status, " ", r.reason
+            #print "[", currentThread().getName(), "] Bug ", b, ": Wrong status: ", r.status, " ", r.reason
             ok = False
             if r.status != 302:
               hq.put(b)
         except httplib.BadStatusLine, line:
-          print "[", currentThread().getName(), "] Bug ", b, ": BadStatusLine: ", line
-          print str(r.getheaders())
-          print r.read()
+          #print "[", currentThread().getName(), "] Bug ", b, ": BadStatusLine: ", line
+          #print str(r.getheaders())
+          #print r.read()
           ok = False
           hq.put(b)
         except:
