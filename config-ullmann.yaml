@@ -525,7 +525,7 @@ ubuntu-bugs:
 
 ddtp:
    type: ddtp
-   update-command: /srv/udd.debian.org/udd/scripts/fetch_ddtp_translations.sh /srv/udd.debian.org/mirrors/ddtp /org/mirrors/ftp.debian.org/ftp/dists
+   update-command: /srv/udd.debian.org/udd/scripts/fetch_ddtp_translations.sh /srv/udd.debian.org/mirrors/ddtp /srv/mirrors/debian/dists
    path: /srv/udd.debian.org/mirrors/ddtp
    files: Translation-.*\.gz
    mirrorpath: /srv/mirrors/debian/dists
