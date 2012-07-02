@@ -546,9 +546,9 @@ ubuntu-ddtp:
 
 ftpnew:
   type: ftpnew
-  update-command: /org/udd.debian.org/udd/scripts/fetch_ftpnew.sh
-  path: /org/udd.debian.org/mirrors/ftpnew
-  cache: /org/udd.debian.org/mirrors/cache
+  update-command: /srv/udd.debian.org/udd/scripts/fetch_ftpnew.sh
+  path: /srv/udd.debian.org/mirrors/ftpnew
+  cache: /srv/udd.debian.org/mirrors/cache
   ftpmasterURL: http://ftp-master.debian.org/new/
   table_sources:  new_sources
   table_packages: new_packages
@@ -556,24 +556,24 @@ ftpnew:
 
 screenshots:
   type: screenshots
-  update-command: /org/udd.debian.org/udd/scripts/fetch_screenshots.sh
-  path: /org/udd.debian.org/mirrors/screenshots
-  cache: /org/udd.debian.org/mirrors/cache
+  update-command: /srv/udd.debian.org/udd/scripts/fetch_screenshots.sh
+  path: /srv/udd.debian.org/mirrors/screenshots
+  cache: /srv/udd.debian.org/mirrors/cache
   table:  screenshots
-  screenshots_json: /org/udd.debian.org/mirrors/screenshots/screenshots.json
+  screenshots_json: /srv/udd.debian.org/mirrors/screenshots/screenshots.json
 
 bibref:
   type: bibref
-  update-command: /org/udd.debian.org/udd/scripts/fetch_bibref.sh /org/udd.debian.org/mirrors/bibref svn://svn.debian.org/svn/collab-qa/packages-metadata
-  path: /org/udd.debian.org/mirrors/bibref/packages-metadata
-  cache: /org/udd.debian.org/mirrors/cache
+  update-command: /srv/udd.debian.org/udd/scripts/fetch_bibref.sh /srv/udd.debian.org/mirrors/bibref svn://svn.debian.org/svn/collab-qa/packages-metadata
+  path: /srv/udd.debian.org/mirrors/bibref/packages-metadata
+  cache: /srv/udd.debian.org/mirrors/cache
   table: bibref
-  bibref_yaml: /org/udd.debian.org/mirrors/bibref/bibref.yaml
+  bibref_yaml: /srv/udd.debian.org/mirrors/bibref/bibref.yaml
 
 blends-prospective:
   type: blends-prospective
-  update-command: /org/udd.debian.org/udd/scripts/fetch_machine-readable.sh
-  path: /org/udd.debian.org/mirrors/machine-readable
+  update-command: /srv/udd.debian.org/udd/scripts/fetch_machine-readable.sh
+  path: /srv/udd.debian.org/mirrors/machine-readable
   table: blends_prospectivepackages
 
 wannabuild:
@@ -600,8 +600,8 @@ history-daily:
 
 i18n-apps:
    type: i18n-apps
-   update-command: /org/udd.debian.org/udd/scripts/fetch_i18n-apps.sh
-   path: /org/udd.debian.org/mirrors/i18n-apps
+   update-command: /srv/udd.debian.org/udd/scripts/fetch_i18n-apps.sh
+   path: /srv/udd.debian.org/mirrors/i18n-apps
    mirror: http://i18n.debian.net/material/data
    files: .*\.gz
    releases: sid wheezy
