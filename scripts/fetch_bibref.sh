@@ -2,7 +2,7 @@
 
 set -e
 
-TARGETDIR=/org/udd.debian.org/mirrors/bibref
+TARGETDIR=/srv/udd.debian.org/mirrors/bibref
 FETCHURL=http://blends.debian.net/packages-metadata/packages-metadata.tar.bz2
 ARCHIVE=`basename $FETCHURL`
 CURDIR=`pwd`

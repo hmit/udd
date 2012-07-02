@@ -1,5 +1,5 @@
 #!/bin/sh
-TARGETDIR=/org/udd.debian.org/mirrors/ftpnew
+TARGETDIR=/srv/udd.debian.org/mirrors/ftpnew
 mkdir -p $TARGETDIR
 rm -rf $TARGETDIR/*
 wget -q http://ftp-master.debian.org/new.822 -O ${TARGETDIR}/new.822

@@ -1,5 +1,5 @@
 #!/bin/sh -e
-TARGETDIR=/org/udd.debian.org/mirrors/
+TARGETDIR=/srv/udd.debian.org/mirrors/
 SUBDIR=machine-readable
 rm -rf $TARGETDIR/${SUBDIR}
 cd ${TARGETDIR}

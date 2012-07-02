@@ -1,5 +1,5 @@
 #!/bin/sh
-TARGETDIR=/org/udd.debian.org/mirrors/screenshots
+TARGETDIR=/srv/udd.debian.org/mirrors/screenshots
 mkdir -p $TARGETDIR
 rm -rf $TARGETDIR/*
 wget -q http://screenshots.debian.net/json/screenshots -O ${TARGETDIR}/screenshots.json
