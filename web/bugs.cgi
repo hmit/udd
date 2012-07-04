@@ -146,6 +146,8 @@ end
 puts <<-EOF
 <html>
 <head>
+<script type="text/javascript" src="js/jquery.min.js"></script> 
+<script type="text/javascript" src="js/jquery.tablesorter.min.js"></script> 
 <style type="text/css">
 
   body {
@@ -191,6 +193,24 @@ div.footer {
   div.footer :visited {
     color: #707;
   }
+
+  /* tablesorter */
+table.tablesorter thead tr .header {
+	text-align: left;
+	background-image: url(images/tablesorter/bg.gif);
+	background-repeat: no-repeat;
+	background-position: center right;
+	cursor: pointer;
+}
+table.tablesorter thead tr .headerSortUp {
+	background-image: url(images/tablesorter/asc.gif);
+}
+table.tablesorter thead tr .headerSortDown {
+	background-image: url(images/tablesorter/desc.gif);
+}
+table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSortUp {
+    background-color: #ddd;
+}
 </style>
 <title>Debian Bugs Search @ UDD</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
@@ -384,7 +404,8 @@ if cols['cdeferred']
 end
 
 puts "<p><b>#{rows.length} bugs found.</b></p>"
-puts '<table class="buglist">'
+puts '<table class="buglist tablesorter">'
+puts '<thead>'
 puts '<tr><th>bug#</th><th>package</th><th>title</th>'
 puts '<th>popcon</th>' if cols['cpopcon']
 puts '<th>severity</th>' if cols['cseverity']
@@ -393,6 +414,8 @@ puts '<th>claimed by</th>' if cols['cclaimed']
 puts '<th>deferred</th>' if cols['cdeferred']
 puts '<th>RT tag</th>' if cols['crttags']
 puts '<th>last&nbsp;modified</th></tr>'
+puts '</thead>'
+puts '<tbody>'
 
 def genhints(source, hints)
   return '' if hints.nil?
@@ -481,7 +504,7 @@ rows.each do |r|
   puts "<td style='text-align: center;'>#{d}</td></tr>"
 end
 
-puts "</table>"
+puts "</tbody></table>"
 sth2 = dbh.prepare("select max(start_time) from timestamps where source = 'bugs' and command = 'run'")
 sth2.execute ; r2 = sth2.fetch_all
 puts "<p><b>Generated in #{Time::now - tstart} seconds. Last data update: #{r2[0][0]}"
@@ -495,4 +518,9 @@ puts <<-EOF
 </div>
 </body>
 </html>
+<script type="text/javascript">
+$(document).ready(function() {
+$("table.tablesorter").tablesorter();
+});
+</script>
 EOF
