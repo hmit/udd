@@ -146,12 +146,12 @@ end
 puts <<-EOF
 <html>
 <head>
-<script type="text/javascript" src="js/jquery.min.js"></script> 
-<script type="text/javascript" src="js/jquery.tablesorter.min.js"></script> 
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/jquery.tablesorter.min.js"></script>
 <style type="text/css">
 
   body {
-    font-family : "DejaVu Sans", "Bitstream Vera Sans", sans-serif;"
+    font-family : "DejaVu Sans", "Bitstream Vera Sans", "sans-serif;"
   }
 
   table.buglist td, table.buglist th {
