@@ -88,10 +88,10 @@ class UDDData
     rows = dbget(q)
     rows.each do |r|
       st = case r['status']
-        when 'up to date': :up_to_date
-        when 'Debian version newer than remote site': :newer_in_debian
-        when 'Newer version available': :out_of_date
-        when 'error': :error
+        when 'up to date' then :up_to_date
+        when 'Debian version newer than remote site' then :newer_in_debian
+        when 'Newer version available' then :out_of_date
+        when 'error' then :error
         else nil
       end
       @versions[r['source']]['upstream'] = { :status => st, :version => r['upstream_version'] }
