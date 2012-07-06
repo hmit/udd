@@ -3,8 +3,6 @@ require 'dbi'
 require 'pp'
 require 'time'
 
-tstart = Time::now
-
 # testing migration checks
 MIN_AGE_IN_DEBIAN = 11
 MIN_SYNC_INTERVAL = 11

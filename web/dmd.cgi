@@ -23,6 +23,11 @@ puts <<-EOF
 <script type="text/javascript" src="js/jquery.min.js"></script>
 <script type="text/javascript" src="js/jquery.tablesorter.min.js"></script>
 <script type="text/javascript" src="js/jquery-ui.custom.min.js"></script>
+<script>
+$(function() {
+  $( "#tabs" ).tabs();
+});
+</script>
 </head>
 <body>
 <h1 style="margin-bottom : 5px"><img src="http://qa.debian.org/debian.png" alt="Debian logo" width="188" height="52" style="vertical-align : -13px; ">Maintainer Dashboard <span style="color :#c70036">@</span> UDD</h1>
@@ -42,7 +47,13 @@ if cgi.params != {}
   uddd.get_dmd_todos
 
   puts <<-EOF
-<h1>TODO items</h1>
+<div id="tabs">
+	<ul>
+		<li><a href="#tabs-todo">TODO list</a></li>
+		<li><a href="#tabs-versions">Versions</a></li>
+		<li><a href="#tabs-bugs">Bugs</a></li>
+	</ul>
+	<div id="tabs-todo">
 <table class="buglist">
 <tr>
 <th>type</th><th>source</th><th>description</th>
@@ -52,8 +63,9 @@ if cgi.params != {}
     puts "<tr><td>#{t[:type]}</td><td>#{t[:source]}</td><td>#{t[:description]}</td></tr>"
   end
   puts "</table>"
+  puts "</div>" # tabs-todo
 
-  puts "<h1>Versions</h1>"
+	puts '<div id="tabs-versions">'
 
   puts <<-EOF
 <table class="buglist">
@@ -119,7 +131,8 @@ if cgi.params != {}
 
   puts <<-EOF
 </table>
-<h1>Bugs</h1>
+</div>
+<div id="tabs-bugs">
 <table class="buglist">
 <tr>
 <th>source</th><th>all</th><th>RC</th><th>with patch</th><th>pending</th>
@@ -132,7 +145,8 @@ if cgi.params != {}
     puts "<tr><td>#{src}</td><td>#{b[:all]}</td><td>#{b[:rc]}</td><td>#{b[:patch]}</td><td>#{b[:pending]}</td></tr>"
   end
   puts "</table>"
-
+  puts "</div>"
+  puts "</div>" # div#tabs
   puts "<p><b>Generated in #{Time::now - tstart} seconds.</b></p>"
 
 end # cgi.params
