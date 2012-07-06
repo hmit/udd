@@ -25,7 +25,15 @@ class UDDData
       pw = IO::read('/srv/udd.debian.org/guestdd-password').chomp
       @dbh = DBI::connect('DBI:Pg:dbname=udd;port=5452;host=localhost', 'guestdd', pw)
     else
-      @dbh = DBI::connect('DBI:Pg:dbname=udd;port=5452;host=udd.debian.org', 'guest')
+      @dbh = nil
+      begin
+        @dbh = DBI::connect('DBI:Pg:dbname=udd;port=5432;host=localhost', 'guest')
+      rescue DBI::OperationalError
+        puts "Could not connect to database:<pre>"
+        puts $!
+        puts "</pre>"
+        exit(0)
+      end
     end
     @dbh.execute("SET statement_timeout TO 5000")
   end
