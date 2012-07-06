@@ -153,7 +153,8 @@ end # cgi.params
 
 puts <<-EOF
 <div class="footer">
-<small>Suggestions / comments / patches to lucas@debian.org. <a href="http://anonscm.debian.org/gitweb/?p=collab-qa/udd.git;a=history;f=web/dmd.cgi">source code</a>.</small>
+<small>Suggestions / comments / patches to lucas@debian.org. <a href="hacking.html">
+source code</a>.</small>
 </div>
 </body></html>
 EOF
