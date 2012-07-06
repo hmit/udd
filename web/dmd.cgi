@@ -9,6 +9,8 @@ require File.expand_path(File.dirname(__FILE__))+'/inc/dmd-data'
 
 cgi = CGI::new
 
+tstart = Time::now
+
 puts <<-EOF
 <html>
 <head>
@@ -33,7 +35,7 @@ email: <input type='text' size='100' name='email' value='pkg-ruby-extras-maintai
 EOF
 
 if cgi.params != {}
-  emails = { cgi.params['email'][0] => [:maintainer, :uploader, :pts]}
+  emails = { cgi.params['email'][0] => [:maintainer, :uploader]}
   uddd = UDDData::new(emails)
   uddd.get_sources
   uddd.get_sources_status
