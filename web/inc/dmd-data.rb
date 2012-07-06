@@ -1,4 +1,4 @@
-#!/usr/bin/ruby -w
+#!/usr/bin/ruby
 require 'dbi'
 require 'pp'
 require 'time'
