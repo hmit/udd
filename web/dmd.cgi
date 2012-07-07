@@ -26,6 +26,9 @@ puts <<-EOF
 <script>
 $(function() {
   $( "#tabs" ).tabs();
+  $( "#email" ).autocomplete({
+    source: "cgi-bin/maintainers.cgi"
+  });
 });
 </script>
 </head>
@@ -34,7 +37,7 @@ $(function() {
 <div id="body">
 <br/>
 <form action="dmd.cgi" method="get">
-email: <input type='text' size='100' name='email' value='pkg-ruby-extras-maintainers@lists.alioth.debian.org'/>
+email: <input id="email" type='text' size='100' name='email' value='pkg-ruby-extras-maintainers@lists.alioth.debian.org'/>
 <input type='submit' value='Go'/>
 </form>
 EOF
