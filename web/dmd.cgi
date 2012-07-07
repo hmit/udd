@@ -11,6 +11,13 @@ cgi = CGI::new
 
 tstart = Time::now
 
+default_email = 'pkg-ruby-extras-maintainers@lists.alioth.debian.org'
+if cgi.params['email'][0]
+  default_email = cgi.params['email'][0]
+end
+
+default_email = CGI.escapeHTML(default_email)
+
 puts <<-EOF
 <html>
 <head>
@@ -41,7 +48,7 @@ $(function() {
 <div id="body">
 <br/>
 <form id="searchForm" action="dmd.cgi" method="get">
-email: <input id="email" type='text' size='100' name='email' value='pkg-ruby-extras-maintainers@lists.alioth.debian.org'/>
+email: <input id="email" type='text' size='100' name='email' value='#{default_email}'/>
 <input type='submit' value='Go'/>
 </form>
 EOF
