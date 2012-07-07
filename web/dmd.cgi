@@ -27,7 +27,11 @@ puts <<-EOF
 $(function() {
   $( "#tabs" ).tabs();
   $( "#email" ).autocomplete({
-    source: "cgi-bin/maintainers.cgi"
+    source: "cgi-bin/maintainers.cgi",
+    select: function(event, ui) {
+        $("#email").val(ui.item.value);
+        $("#searchForm").submit();
+    }
   });
 });
 </script>
@@ -36,7 +40,7 @@ $(function() {
 <h1 style="margin-bottom : 5px"><img src="http://qa.debian.org/debian.png" alt="Debian logo" width="188" height="52" style="vertical-align : -13px; ">Maintainer Dashboard <span style="color :#c70036">@</span> UDD</h1>
 <div id="body">
 <br/>
-<form action="dmd.cgi" method="get">
+<form id="searchForm" action="dmd.cgi" method="get">
 email: <input id="email" type='text' size='100' name='email' value='pkg-ruby-extras-maintainers@lists.alioth.debian.org'/>
 <input type='submit' value='Go'/>
 </form>
