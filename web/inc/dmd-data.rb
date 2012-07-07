@@ -161,7 +161,7 @@ group by package) tpatches on tbugs.package = tpatches.package order by package 
       @bugs_tags[r['id']] << r['tag']
     end
     # get release team status for bugs
-    ['testing', 'unstable'].each do |rel|
+    ['stable', 'testing', 'unstable'].each do |rel|
       dbget("select id from bugs_rt_affects_#{rel} where id in (#{ids.join(',')})").each do |r|
         @bugs_tags[r['id']] << "rt_affects_#{rel}"
       end
@@ -214,6 +214,7 @@ group by package) tpatches on tbugs.package = tpatches.package order by package 
   def get_dmd_todos
     @dmd_todos = []
     rc_bugs = @all_bugs.select { |b| ['serious', 'grave', 'critical'].include?(b['severity']) }
+    stable_rc_bugs = []
     rc_bugs.each do |bug|
       id = bug['id']
       if bug['status'] == 'done' and @bugs_tags[id].include?('rt_affects_unstable')
@@ -225,8 +226,12 @@ group by package) tpatches on tbugs.package = tpatches.package order by package 
       elsif @bugs_tags[id].include?('rt_affects_unstable') or @bugs_tags[id].include?('rt_affects_testing')
         @dmd_todos << { :type => 'RC bug', :source => bug['source'],
                         :description => "RC bug needs fixing: ##{id}: #{bug['title']}" }
+      elsif @bugs_tags[id].include?('rt_affects_stable')
+        stable_rc_bugs << { :type => 'RC bug (stable)', :source => bug['source'],
+                            :description => "RC bug affecting stable: ##{id}: #{bug['title']}" }
       end
     end
+    @dmd_todos.concat(stable_rc_bugs)
 
     @buildd.each_pair do |src, archs|
       archs.each do |arch|
