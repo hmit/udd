@@ -167,7 +167,7 @@ if cgi.params != {}
 <table class="buglist tablesorter">
 <thead>
 <tr>
-<th>source</th><th>precise (stable)</th><th>quantal (devel)</th><th>sid</th><th>bugs</th><th>patches</th>
+<th>source</th><th>precise (stable)</th><th>quantal (devel)</th><th>sid</th><th>&nbsp;&nbsp;&nbsp;&nbsp;bugs&nbsp;&nbsp;&nbsp;&nbsp;</th><th>&nbsp;&nbsp;&nbsp;&nbsp;patches&nbsp;&nbsp;&nbsp;&nbsp;</th>
 </tr>
 </thead>
 <tbody>
@@ -204,7 +204,7 @@ if cgi.params != {}
       patches = ub[:patches]
     end
     puts "<td>#{bugs}</td>"
-    puts "<td>#{patches})</td>"
+    puts "<td>#{patches}</td>"
     puts "</tr>"
   end
 
