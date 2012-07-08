@@ -313,6 +313,18 @@ WHERE label LIKE ?
     end
   end
 
+  def UDDData.group_values(*values)
+    agg = []
+    values.each do |v|
+      if agg.empty? or v != agg.last[:value]
+        agg << { :value => v, :count => 1 }
+      else
+        agg.last[:count] += 1
+      end
+    end
+    return agg
+  end
+
   private
   def dbget(q, *args)
     if @debug

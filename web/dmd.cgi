@@ -167,33 +167,51 @@ if cgi.params != {}
 <table class="buglist tablesorter">
 <thead>
 <tr>
-<th>source</th><th>precise (stable)</th><th>quantal (devel)</th><th>sid</th><th>&nbsp;&nbsp;&nbsp;&nbsp;bugs&nbsp;&nbsp;&nbsp;&nbsp;</th><th>&nbsp;&nbsp;&nbsp;&nbsp;patches&nbsp;&nbsp;&nbsp;&nbsp;</th>
+<th>source</th><th>&nbsp;&nbsp;&nbsp;&nbsp;precise (stable)&nbsp;&nbsp;&nbsp;&nbsp;</th><th>&nbsp;&nbsp;&nbsp;&nbsp;quantal (devel)&nbsp;&nbsp;&nbsp;&nbsp;</th><th>&nbsp;&nbsp;&nbsp;&nbsp;sid&nbsp;&nbsp;&nbsp;&nbsp;</th><th>&nbsp;&nbsp;&nbsp;&nbsp;bugs&nbsp;&nbsp;&nbsp;&nbsp;</th><th>&nbsp;&nbsp;&nbsp;&nbsp;patches&nbsp;&nbsp;&nbsp;&nbsp;</th>
 </tr>
 </thead>
 <tbody>
   EOF
+  USTB='precise'
+  UDEV='quantal'
   uddd.sources.keys.sort.each do |src|
     next if not uddd.versions.include?(src)
     next if (not uddd.versions[src].include?('debian') or not uddd.versions[src].include?('ubuntu'))
     puts "<tr><td class=\"left\">#{src}</td>"
 
-    du = uddd.versions[src]['ubuntu']
-    if du.nil?
-      puts "<td></td><td></td>"
+    dv = uddd.versions[src]['debian']
+    if dv['sid']
+      sid = dv['sid'][:version]
     else
-      puts "<td>"
-      puts du['precise'][:version] if du['precise']
-      puts "</td>"
-
-      puts "<td>"
-      puts du['quantal'][:version] if du['quantal']
-      puts "</td>"
+      dv = ''
     end
 
-    dv = uddd.versions[src]['debian']
-    puts "<td>"
-    puts dv['sid'][:version] if dv['sid']
-    puts "</td>"
+    du = uddd.versions[src]['ubuntu']
+    ustb = ''
+    udev = ''
+    if not du.nil?
+      ustb = du[USTB][:version] if du[USTB]
+      ustb += "<br>sec:&nbsp;#{du["#{USTB}-security"][:version]}" if du["#{USTB}-security"]
+      ustb += "<br>upd:&nbsp;#{du["#{USTB}-updates"][:version]}" if du["#{USTB}-updates"]
+      ustb += "<br>prop:&nbsp;#{du["#{USTB}-proposed"][:version]}" if du["#{USTB}-proposed"]
+      ustb += "<br>bpo:&nbsp;#{du["#{USTB}-backports"][:version]}" if du["#{USTB}-backports"]
+
+      udev = du[UDEV][:version] if du[UDEV]
+      udev += "<br>sec:&nbsp;#{du["#{UDEV}-security"][:version]}" if du["#{UDEV}-security"]
+      udev += "<br>upd:&nbsp;#{du["#{UDEV}-updates"][:version]}" if du["#{UDEV}-updates"]
+      udev += "<br>prop:&nbsp;#{du["#{UDEV}-proposed"][:version]}" if du["#{UDEV}-proposed"]
+      udev += "<br>bpo:&nbsp;#{du["#{UDEV}-backports"][:version]}" if du["#{UDEV}-backports"]
+    end
+
+    UDDData.group_values(ustb, udev, sid).each do |v|
+      if v[:count] == 1
+        puts "<td>"
+      else
+        puts "<td colspan=#{v[:count]}>"
+      end
+      puts v[:value]
+      puts "</td>"
+    end
 
     ub = uddd.ubuntu_bugs[src]
     if ub.nil?
