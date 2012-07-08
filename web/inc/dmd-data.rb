@@ -35,6 +35,8 @@ class UDDData
   end
 
   def get_sources
+    dbget("create temporary table mysources(source text)")
+
     maint_emails = @emails.reject { |k, v| not v.include?(:maintainer) }.keys
     if not maint_emails.empty?
       q = <<-EOF
@@ -55,20 +57,12 @@ class UDDData
       upload_rows = []
     end
 
-    pts_emails = @emails.reject { |k, v| not v.include?(:pts) }.keys
-    if not pts_emails.empty?
-      q = <<-EOF
-    select distinct source, email from pts where email in (#{pts_emails.map { |e| quote(e) }.join(',')})
-      EOF
-      pts_rows = dbget(q)
-    else
-      pts_rows = []
-    end
-
     srcs = {}
-    pts_rows.each { |p| srcs[p[0]] = [:pts, p[1]] }
     upload_rows.each { |p| srcs[p[0]] = [:uploader, p[1]] }
     maint_rows.each { |p| srcs[p[0]] = [:maintainer, p[1]] }
+
+    dbget("insert into mysources values (#{srcs.keys.map { |e| quote(e) }.join('),(')})")
+
     @sources = srcs
   end
 
@@ -76,11 +70,10 @@ class UDDData
     @versions = {}
     @ready_for_upload = {}
     return @versions if @sources.empty?
-    srcs = @sources.keys
     # versions in archives
-    q = "select source, version, distribution, release, component from sources_uniq where source in (#{srcs.map { |e| quote(e) }.join(',')})"
+    q = "select source, version, distribution, release, component from sources_uniq where source in (select source from mysources)"
     rows = dbget(q)
-    q = "select source, version, distribution, release, component from ubuntu_sources where source in (#{srcs.map { |e| quote(e) }.join(',')})"
+    q = "select source, version, distribution, release, component from ubuntu_sources where source in (select source from mysources)"
     rows += dbget(q)
 
     rows.each do |r|
@@ -90,7 +83,7 @@ class UDDData
     end
 
     # upstream versions
-    q = "select source, upstream_version, status from upstream where source in (#{srcs.map { |e| quote(e) }.join(',')}) and status is not null"
+    q = "select source, upstream_version, status from upstream where source in (select source from mysources) and status is not null"
     rows = dbget(q)
     rows.each do |r|
       st = case r['status']
@@ -104,7 +97,7 @@ class UDDData
     end
     
     # vcs versions
-    q = "select source, team, version, distribution from vcs where source in (#{srcs.map { |e| quote(e) }.join(',')})"
+    q = "select source, team, version, distribution from vcs where source in (select source from mysources)"
     rows = dbget(q)
     rows.each do |r|
       @versions[r['source']]['vcs'] = { :team => r['team'], :version => r['version'], :distribution => r['distribution'] }
@@ -112,7 +105,7 @@ class UDDData
 
     q = <<-EOF
 select source, team, version from vcs
-where source in (#{srcs.map { |e| quote(e) }.join(',')})
+where source in (select source from mysources)
 and distribution!='UNRELEASED' and version > coalesce((select version from sources_uniq where release='sid' and sources_uniq.source = vcs.source), 0::debversion)
 EOF
     dbget(q).each do |r|
@@ -131,7 +124,7 @@ from ubuntu_bugs_tasks tasks,ubuntu_bugs bugs
 where tasks.bug = bugs.bug
 and distro in ('Ubuntu')
 and status not in ('Invalid', 'Fix Released', 'Won''t Fix', 'Opinion')
-and package in (#{srcs})
+and package in (select source from mysources)
 group by package) tbugs
 full join
 (select package, count(distinct bugs.bug) as patches
@@ -140,7 +133,7 @@ where tasks.bug = bugs.bug
 and distro in ('', 'Ubuntu')
 and status not in ('Invalid', 'Fix Released', 'Won''t Fix', 'Opinion')
 and bugs.patches is true
-and package in (#{srcs})
+and package in (select source from mysources)
 group by package) tpatches on tbugs.package = tpatches.package order by package asc
     EOF
     rows = dbget(q)
@@ -155,7 +148,7 @@ group by package) tpatches on tbugs.package = tpatches.package order by package 
     @bugs_count = {}
     return if @sources.empty?
     srcs = @sources.keys
-    q = "select id, package, source, severity, title, last_modified, affects_stable, affects_testing, affects_unstable, affects_experimental, status from bugs where source in (#{srcs.map { |e| quote(e) }.join(',')})"
+    q = "select id, package, source, severity, title, last_modified, affects_stable, affects_testing, affects_unstable, affects_experimental, status from bugs where source in (select source from mysources)"
     allbugs = dbget(q)
     @all_bugs = allbugs.map { |r| r.to_h }
     ids = @all_bugs.map { |e| e['id'] }
@@ -188,12 +181,11 @@ group by package) tpatches on tbugs.package = tpatches.package order by package 
   def get_migration
     @migration = {}
     return if @sources.empty?
-    srcs = @sources.keys.map { |e| quote(e) }.join(',')
     q =<<-EOF
 select source, in_testing, current_date - in_testing as in_testing_age, sync, current_date - sync as sync_age,
 current_date - first_seen as debian_age
 from migrations where current_date - in_unstable < 2 and (sync is null or current_date - sync > 1)
-and source in (#{srcs})
+and source in (select source from mysources)
 and source not in (select source from upload_history where date > (current_date - interval '10 days') and distribution='unstable')
     EOF
     rows = dbget(q)
@@ -210,8 +202,7 @@ and source not in (select source from upload_history where date > (current_date 
   def get_buildd
     @buildd = {}
     return if @sources.empty?
-    srcs = @sources.keys.map { |e| quote(e) }.join(',')
-    q = "select source, architecture, state, state_change from wannabuild where distribution='sid' and state not in ('Installed', 'Needs-Build', 'Dep-Wait', 'Not-For-Us', 'Auto-Not-For-Us') and (state not in ('Built', 'Uploaded') or now() - state_change > interval '2 days') and architecture not in ('hurd-i386') and notes <> 'uncompiled' and source in (#{srcs})"
+    q = "select source, architecture, state, state_change from wannabuild where distribution='sid' and state not in ('Installed', 'Needs-Build', 'Dep-Wait', 'Not-For-Us', 'Auto-Not-For-Us') and (state not in ('Built', 'Uploaded') or now() - state_change > interval '2 days') and architecture not in ('hurd-i386') and notes <> 'uncompiled' and source in (select source from mysources)"
     rows = dbget(q)
     rows.each do |r|
       @buildd[r['source']] ||= []
