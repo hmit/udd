@@ -17,7 +17,7 @@ class UDDData
   attr_accessor :debug
   attr_reader :sources, :versions, :all_bugs, :bugs_tags, :bugs_count, :migration, :buildd, :dmd_todos, :ubuntu_bugs
 
-  def initialize(emails)
+  def initialize(emails = {})
     @debug = false
     @emails = emails
 
@@ -268,6 +268,22 @@ group by package) tpatches on tbugs.package = tpatches.package order by package 
 
 
     @dmd_todos
+  end
+
+  def complete_email(email)
+    q = <<-EOF
+SELECT DISTINCT value, label
+FROM 
+(SELECT maintainer_email AS value, maintainer AS label
+from sources
+union
+select email as value, uploader as label
+from uploaders
+) emails
+WHERE label LIKE ?
+    EOF
+    r = dbget(q, "%#{email}%")
+    return r.map { |r| r.to_h }
   end
 
   private

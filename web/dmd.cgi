@@ -34,7 +34,7 @@ puts <<-EOF
 $(function() {
   $( "#tabs" ).tabs();
   $( "#email" ).autocomplete({
-    source: "cgi-bin/maintainers.cgi",
+    source: "dmd-emails.cgi",
     select: function(event, ui) {
         $("#email").val(ui.item.value);
         $("#searchForm").submit();
