@@ -223,7 +223,7 @@ end # cgi.params
 
 puts <<-EOF
 <div class="footer">
-<small>Suggestions / comments / patches to lucas@debian.org. <a href="hacking.html">
+<small>Suggestions / comments / patches to debian-qa@lists.debian.org or lucas@debian.org. <a href="hacking.html">
 source code</a>.</small>
 </div>
 </body></html>
