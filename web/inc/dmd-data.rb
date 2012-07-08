@@ -72,6 +72,9 @@ class UDDData
   end
 
   def get_sources_versions
+    @versions = {}
+    @ready_for_upload = {}
+    return @versions if @sources.empty?
     srcs = @sources.keys
     # versions in archives
     q = "select source, version, distribution, release, component from sources_uniq where source in (#{srcs.map { |e| quote(e) }.join(',')})"
@@ -79,7 +82,6 @@ class UDDData
     q = "select source, version, distribution, release, component from ubuntu_sources where source in (#{srcs.map { |e| quote(e) }.join(',')})"
     rows += dbget(q)
 
-    @versions = {}
     rows.each do |r|
       @versions[r['source']] ||= {}
       @versions[r['source']][r['distribution']] ||= {}
@@ -112,13 +114,14 @@ select source, team, version from vcs
 where source in (#{srcs.map { |e| quote(e) }.join(',')})
 and distribution!='UNRELEASED' and version > coalesce((select version from sources_uniq where release='sid' and sources_uniq.source = vcs.source), 0::debversion)
 EOF
-    @ready_for_upload = {}
     dbget(q).each do |r|
       @ready_for_upload[r['source']] = r.to_h
     end
   end
 
   def get_ubuntu_bugs
+    @ubuntu_bugs = {}
+    return @ubuntu_bugs if @sources.empty?
     srcs = @sources.keys.map { |e| quote(e) }.join(',')
     q=<<-EOF
 SELECT tbugs.package, bugs, patches
@@ -140,13 +143,16 @@ and package in (#{srcs})
 group by package) tpatches on tbugs.package = tpatches.package order by package asc
     EOF
     rows = dbget(q)
-    @ubuntu_bugs = {}
     rows.each do |r|
       @ubuntu_bugs[r['package']] = { :bugs => r['bugs'], :patches => r['patches'] || 0 }
     end
   end
 
   def get_sources_bugs
+    @all_bugs = []
+    @bugs_tags = {}
+    @bugs_count = {}
+    return if @sources.empty?
     srcs = @sources.keys
     q = "select id, package, source, severity, title, last_modified, affects_stable, affects_testing, affects_unstable, affects_experimental, status from bugs where source in (#{srcs.map { |e| quote(e) }.join(',')})"
     allbugs = dbget(q)
@@ -169,7 +175,6 @@ group by package) tpatches on tbugs.package = tpatches.package order by package 
       end
     end
 
-    @bugs_count = {}
     @all_bugs.group_by { |b| b['source'] }.each_pair do |src, bugs|
       openbugs = bugs.select { |b| b['status'] != 'done' }
       rc_bugs = openbugs.select { |b| ['serious', 'grave', 'critical'].include?(b['severity']) }.count
@@ -180,10 +185,11 @@ group by package) tpatches on tbugs.package = tpatches.package order by package 
   end
   
   def get_migration
+    @migration = {}
+    return if @sources.empty?
     srcs = @sources.keys.map { |e| quote(e) }.join(',')
     q = "select source, in_testing, current_date - in_testing as in_testing_age, sync, current_date - sync as sync_age, current_date - first_seen as debian_age from migrations where current_date - in_unstable < 2 and (sync is null or current_date - sync > 1) and source in (#{srcs})"
     rows = dbget(q)
-    @migration = {}
     rows.each do |r|
       @migration[r['source']] = {}
       @migration[r['source']]['in_testing_age'] = r['in_testing_age']
@@ -195,10 +201,11 @@ group by package) tpatches on tbugs.package = tpatches.package order by package 
   end
 
   def get_buildd
+    @buildd = {}
+    return if @sources.empty?
     srcs = @sources.keys.map { |e| quote(e) }.join(',')
     q = "select source, architecture, state, state_change from wannabuild where distribution='sid' and state not in ('Installed', 'Needs-Build', 'Dep-Wait', 'Not-For-Us', 'Auto-Not-For-Us') and (state not in ('Built', 'Uploaded') or now() - state_change > interval '2 days') and architecture not in ('hurd-i386') and notes <> 'uncompiled' and source in (#{srcs})"
     rows = dbget(q)
-    @buildd = {}
     rows.each do |r|
       @buildd[r['source']] ||= []
       @buildd[r['source']] << r.to_h
