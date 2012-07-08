@@ -81,7 +81,9 @@ if cgi.params != {}
 </thead><tbody>
   EOF
   uddd.dmd_todos.each do |t|
-    puts "<tr><td>#{t[:type]}</td><td class=\"left\">#{t[:source]}</td><td class=\"left\">#{t[:description]}</td></tr>"
+    puts "<tr><td>#{t[:type]}</td>"
+    puts "<td class=\"left\"><a href=\"http://packages.qa.debian.org/#{t[:source]}\">#{t[:source]}</a></td>"
+    puts "<td class=\"left\">#{t[:description]}</td></tr>"
   end
   puts "</tbody></table>"
   puts "</div>" # tabs-todo
@@ -107,7 +109,7 @@ if cgi.params != {}
     next if not uddd.versions.include?(src)
     next if not uddd.versions[src].include?('debian')
     dv = uddd.versions[src]['debian']
-    puts "<tr><td class=\"left\">#{src}</td>"
+    puts "<tr><td class=\"left\"><a href=\"http://packages.qa.debian.org/#{src}\">#{src}</a></td>"
 
     puts "<td>"
     puts dv['squeeze'][:version] if dv['squeeze']
@@ -170,7 +172,11 @@ if cgi.params != {}
   bc.keys.sort.each do |src|
     b = bc[src]
     next if b[:all] == 0
-    puts "<tr><td class=\"left\">#{src}</td><td>#{b[:all] > 0 ? b[:all] : ''}</td><td>#{b[:rc] > 0 ? b[:rc] : ''}</td><td>#{b[:patch] > 0 ? b[:patch] : ''}</td><td>#{b[:pending] > 0 ? b[:pending] : ''}</td></tr>"
+    puts "<tr><td class=\"left\"><a href=\"http://packages.qa.debian.org/#{src}\">#{src}</a></td>"
+    puts "<td><a href=\"http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=mongrel\">#{b[:all] > 0 ? b[:all] : ''}</a></td>"
+    puts "<td><a href=\"http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=mongrel&sev-inc=critical&sev-inc=grave&sev-inc=serious\">#{b[:rc] > 0 ? b[:rc] : ''}</a></td>"
+    puts "<td><a href=\"http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=mongrel&include=tags:patch\">#{b[:patch] > 0 ? b[:patch] : ''}</a></td>"
+    puts "<td><a href=\"http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=mongrel&pend-inc=pending-fixed&pend-inc=fixed\">#{b[:pending] > 0 ? b[:pending] : ''}</a></td></tr>"
   end
   puts "</tbody></table>"
   puts "</div>"

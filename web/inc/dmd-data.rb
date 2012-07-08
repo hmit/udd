@@ -235,16 +235,16 @@ and source not in (select source from upload_history where date > (current_date 
       id = bug['id']
       if bug['status'] == 'done' and @bugs_tags[id].include?('rt_affects_unstable')
         @dmd_todos << { :type => 'RC bug', :source => bug['source'],
-          :description => "RC bug marked as done but still affects unstable: ##{id}: #{bug['title']}" }
+          :description => "RC bug marked as done but still affects unstable: <a href=\"http://bugs.debian.org/#{id}\">##{id}</a>: #{bug['title']}" }
       elsif (not @bugs_tags[id].include?('rt_affects_unstable')) and @bugs_tags[id].include?('rt_affects_testing')
         @dmd_todos << { :type => 'RC bug', :source => bug['source'],
-                        :description => "RC bug affecting testing only (ensure the package migrates): ##{id}: #{bug['title']}" }
+                        :description => "RC bug affecting testing only (ensure the package migrates): <a href=\"http://bugs.debian.org/#{id}\">##{id}</a>: #{bug['title']}" }
       elsif @bugs_tags[id].include?('rt_affects_unstable') or @bugs_tags[id].include?('rt_affects_testing')
         @dmd_todos << { :type => 'RC bug', :source => bug['source'],
-                        :description => "RC bug needs fixing: ##{id}: #{bug['title']}" }
+                        :description => "RC bug needs fixing: <a href=\"http://bugs.debian.org/#{id}\">##{id}</a>: #{bug['title']}" }
       elsif @bugs_tags[id].include?('rt_affects_stable')
         stable_rc_bugs << { :type => 'RC bug (stable)', :source => bug['source'],
-                            :description => "RC bug affecting stable: ##{id}: #{bug['title']}" }
+                            :description => "RC bug affecting stable: <a href=\"http://bugs.debian.org/#{id}\">##{id}</a>: #{bug['title']}" }
       end
     end
     @dmd_todos.concat(stable_rc_bugs)
@@ -252,7 +252,7 @@ and source not in (select source from upload_history where date > (current_date 
     @buildd.each_pair do |src, archs|
       archs.each do |arch|
         @dmd_todos << { :type => 'missing build', :source => src,
-                        :description => "Missing build on #{arch['architecture']}. state <i>#{arch['state']}</i> since #{arch['state_change'].to_date.to_s}" }
+                        :description => "Missing build on #{arch['architecture']}. state <i>#{arch['state']}</i> since #{arch['state_change'].to_date.to_s} (see <a href=\"https://buildd.debian.org/status/package.php?p=#{src}\">buildd.d.o</a>)" }
       end
     end
 
@@ -260,24 +260,24 @@ and source not in (select source from upload_history where date > (current_date 
       if v['in_testing_age'].nil?
         if v['debian_age'] > MIN_AGE_IN_DEBIAN
         @dmd_todos << { :type => 'testing migration', :source => src,
-                        :description => "Has been in Debian for #{v['debian_age']}, but never migrated to testing" }
+                        :description => "Has been in Debian for #{v['debian_age']}, but never migrated to testing (see <a href=\"http://qa.debian.org/excuses.php?package=#{src}\">excuses</a>)" }
         end
       elsif v['in_testing_age'] > 1 # in case there's some incoherency in udd
         @dmd_todos << { :type => 'testing migration', :source => src,
-                        :description => "Not in testing for #{v['in_testing_age']} days" }
+                        :description => "Not in testing for #{v['in_testing_age']} days (see <a href=\"http://qa.debian.org/excuses.php?package=#{src}\">excuses</a>)" }
       else
         if v['sync_age'].nil?
           #        puts "Interesting buggy case with #{pkg}. Ignore."
         elsif v['sync_age'] > MIN_SYNC_INTERVAL
         @dmd_todos << { :type => 'testing migration', :source => src,
-                        :description => "Has been trying to migrate for #{v['sync_age']} days" }
+                        :description => "Has been trying to migrate for #{v['sync_age']} days (see <a href=\"http://qa.debian.org/excuses.php?package=#{src}\">excuses</a>)" }
         end
       end
     end
 
     @ready_for_upload.each_pair do |src, v|
         @dmd_todos << { :type => 'vcs', :source => src,
-                        :description => "new version #{v['version']} ready for upload in the #{v['team']} repository" }
+                        :description => "new version #{v['version']} ready for upload in the <a href=\"http://pet.debian.net/#{v['team']}/pet.cgi\">#{v['team']} repository</a>" }
     end
 
     @versions.each_pair do |src, v|
