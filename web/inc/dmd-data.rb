@@ -281,9 +281,11 @@ SELECT DISTINCT value, label
 FROM 
 (SELECT maintainer_email AS value, maintainer AS label
 from sources
+where release in ('sid', 'experimental', 'wheezy', 'squeeze')
 union
 select email as value, uploader as label
 from uploaders
+where release in ('sid', 'experimental', 'wheezy', 'squeeze')
 ) emails
 WHERE label LIKE ?
     EOF
