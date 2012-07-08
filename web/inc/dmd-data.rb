@@ -153,17 +153,19 @@ group by package) tpatches on tbugs.package = tpatches.package order by package 
     @all_bugs = allbugs.map { |r| r.to_h }
     ids = @all_bugs.map { |e| e['id'] }
     @bugs_tags = {}
-    ids.each do |id|
-      @bugs_tags[id] = []
-    end
-    tags = dbget("select id, tag from bugs_tags where id in (#{ids.join(',')})")
-    tags.each do |r|
-      @bugs_tags[r['id']] << r['tag']
-    end
-    # get release team status for bugs
-    ['stable', 'testing', 'unstable'].each do |rel|
-      dbget("select id from bugs_rt_affects_#{rel} where id in (#{ids.join(',')})").each do |r|
-        @bugs_tags[r['id']] << "rt_affects_#{rel}"
+    if not ids.empty?
+      ids.each do |id|
+        @bugs_tags[id] = []
+      end
+      tags = dbget("select id, tag from bugs_tags where id in (#{ids.join(',')})")
+      tags.each do |r|
+        @bugs_tags[r['id']] << r['tag']
+      end
+      # get release team status for bugs
+      ['stable', 'testing', 'unstable'].each do |rel|
+        dbget("select id from bugs_rt_affects_#{rel} where id in (#{ids.join(',')})").each do |r|
+          @bugs_tags[r['id']] << "rt_affects_#{rel}"
+        end
       end
     end
 
