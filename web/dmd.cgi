@@ -125,7 +125,12 @@ if cgi.params != {}
     puts "</td>"
 
     puts "<td>"
-    puts dv['sid'][:version] if dv['sid']
+    if dv['sid']
+      puts dv['sid'][:version]
+      sid = dv['sid'][:version]
+    else
+      sid = ''
+    end
     puts "</td>"
 
     puts "<td>"
@@ -148,8 +153,18 @@ if cgi.params != {}
 
     vcs = uddd.versions[src]['vcs']
     puts "<td>"
-    # FIXME show status
-    puts "#{vcs[:version]}" if vcs
+    if vcs
+      t = UDDData.compare_versions(sid, vcs[:version])
+      if t == -1 and vcs[:distribution] == 'unstable'
+          puts "<a href=\"http://pet.debian.net/#{vcs[:team]}/pet.cgi\"><span class=\"prio_high\" title=\"Ready for upload\">#{vcs[:version]}</span></a>"
+      elsif t == -1
+          puts "<a href=\"http://pet.debian.net/#{vcs[:team]}/pet.cgi\"><span class=\"prio_med\" title=\"Work in progress\">#{vcs[:version]}</span></a>"
+      elsif t == 0
+        puts "#{vcs[:version]}"
+      else
+          puts "<a href=\"http://pet.debian.net/#{vcs[:team]}/pet.cgi\"><span class=\"prio_high\" title=\"Version in archive newer than version in VCS\">#{vcs[:version]}</span></a>"
+      end
+    end
     puts "</td>"
 
     puts "</tr>"
