@@ -41,6 +41,9 @@ $(function() {
     }
   });
 });
+$(document).ready(function() {
+$("table.tablesorter").each(function(index) { $(this).tablesorter() });
+});
 </script>
 </head>
 <body>
@@ -70,25 +73,30 @@ if cgi.params != {}
 		<li><a href="#tabs-ubuntu">Ubuntu</a></li>
 	</ul>
 	<div id="tabs-todo">
-<table class="buglist">
+<table class="buglist tablesorter">
+<thead>
 <tr>
 <th>type</th><th>source</th><th>description</th>
 </tr>
+</thead><tbody>
   EOF
   uddd.dmd_todos.each do |t|
     puts "<tr><td>#{t[:type]}</td><td>#{t[:source]}</td><td>#{t[:description]}</td></tr>"
   end
-  puts "</table>"
+  puts "</tbody></table>"
   puts "</div>" # tabs-todo
 
 	puts '<div id="tabs-versions">'
 
   puts <<-EOF
-<table class="buglist">
+<table class="buglist tablesorter">
+<thead>
 <tr>
 <th>source</th><th>squeeze</th><th>wheezy</th><th>sid</th><th>experimental</th>
 <th>upstream</th><th>vcs</th>
 </tr>
+</thead>
+<tbody>
   EOF
   uddd.sources.keys.sort.each do |src|
     next if not uddd.versions.include?(src)
@@ -132,13 +140,17 @@ if cgi.params != {}
   end
 
   puts <<-EOF
+</tbody>
 </table>
 </div>
 <div id="tabs-bugs">
-<table class="buglist">
+<table class="buglist tablesorter">
+<thead>
 <tr>
 <th>source</th><th>all</th><th>RC</th><th>with patch</th><th>pending</th>
 </tr>
+</thead>
+<tbody>
   EOF
   bc = uddd.bugs_count
   bc.keys.sort.each do |src|
@@ -146,16 +158,19 @@ if cgi.params != {}
     next if b[:all] == 0
     puts "<tr><td>#{src}</td><td>#{b[:all]}</td><td>#{b[:rc]}</td><td>#{b[:patch]}</td><td>#{b[:pending]}</td></tr>"
   end
-  puts "</table>"
+  puts "</tbody></table>"
   puts "</div>"
 
   puts '<div id="tabs-ubuntu">'
 
   puts <<-EOF
-<table class="buglist">
+<table class="buglist tablesorter">
+<thead>
 <tr>
 <th>source</th><th>sid</th><th>precise (stable)</th><th>quantal (devel)</th><th>bugs (patches)</th>
 </tr>
+</thead>
+<tbody>
   EOF
   uddd.sources.keys.sort.each do |src|
     next if not uddd.versions.include?(src)
@@ -196,6 +211,7 @@ if cgi.params != {}
   end
 
   puts <<-EOF
+</tbody>
 </table>
 </div>
   EOF
