@@ -44,10 +44,10 @@ that file is udd/web/hacking.html (hint: don't hesitate to improve the doc)
 
 
 <pre>
-ssh -NL 5432:udd.debian.org:5452 aliothlogin@wagner.debian.org
+ssh -NL 5452:udd.debian.org:5452 aliothlogin@wagner.debian.org
 
 Or directly on ullmann:
-ssh -NL 5432:localhost:5452 debianlogin@ullmann.debian.org
+ssh -NL 5452:localhost:5452 debianlogin@ullmann.debian.org
 </pre>
 
     <h4>Solution 2: Setup postgresql locally (needed if you do not have an alioth or DD account)</h4>
@@ -65,8 +65,12 @@ host    all             all             127.0.0.1/32            trust
 # IPv6 local connections:
 host    all             all             ::1/128                 trust
 
-# reload postgresql
-pg_ctlcluster 9.1 main reload
+# Modify /etc/postgresql/9.1/main/postgresql.conf to listen on port 5452 (same as the real UDD
+# instance on ullmann.debian.org):
+port = 5452
+
+# restart postgresql
+/etc/init.d/postgresql restart
 
 # create DB
 createdb -E SQL_ASCII -l C udd -T template0 -U /yourlogin/
