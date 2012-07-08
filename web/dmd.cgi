@@ -189,8 +189,6 @@ if cgi.params != {}
       bugs = ub[:bugs]
       patches = ub[:patches]
     end
-    puts "<td>#{bugs}</td>"
-    puts "<td>#{patches}</td>"
 
     dv = uddd.versions[src]['debian']
     if dv['sid']
@@ -210,11 +208,28 @@ if cgi.params != {}
       ustb += "<br>bpo:&nbsp;#{du["#{USTB}-backports"][:version]}" if du["#{USTB}-backports"]
 
       udev = du[UDEV][:version] if du[UDEV]
+      if udev != sid and sid != ''
+        if UDDData.compare_versions(udev, sid) == -1
+          if udev =~ /ubuntu/
+            udev = "<span class=\"prio_high\" title=\"Outdated version in Ubuntu, with an Ubuntu patch\">#{udev}</span>"
+          else
+            udev = "<span class=\"prio_med\" title=\"Outdated version in Ubuntu\">#{udev}</span>"
+          end
+        elsif UDDData.compare_versions(udev, sid) == 1
+          udevnb = udev.gsub(/build\d+$/,'')
+          if UDDData.compare_versions(udevnb, sid) == 1
+            udev = "<span class=\"prio_high\" title=\"Newer version in Ubuntu\">#{udev}</span>"
+          end
+        end
+      end
       udev += "<br>sec:&nbsp;#{du["#{UDEV}-security"][:version]}" if du["#{UDEV}-security"]
       udev += "<br>upd:&nbsp;#{du["#{UDEV}-updates"][:version]}" if du["#{UDEV}-updates"]
       udev += "<br>prop:&nbsp;#{du["#{UDEV}-proposed"][:version]}" if du["#{UDEV}-proposed"]
       udev += "<br>bpo:&nbsp;#{du["#{UDEV}-backports"][:version]}" if du["#{UDEV}-backports"]
     end
+
+    puts "<td>#{bugs > 0 ? bugs : ''}</td>"
+    puts "<td>#{patches > 0 ? patches : ''}</td>"
 
     UDDData.group_values(ustb, udev, sid).each do |v|
       if v[:count] == 1

@@ -48,6 +48,16 @@ div.footer {
     color: #707;
   }
 
+  span.prio_high {
+    color: #ff0000;
+    font-weight: bold;
+  }
+
+  span.prio_med {
+    color: #ccaa00;
+    font-weight: bold;
+  }
+
   /* tablesorter */
 table.tablesorter thead tr .header {
 	background-image: url(../images/tablesorter/bg.gif);
