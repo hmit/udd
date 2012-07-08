@@ -167,7 +167,7 @@ if cgi.params != {}
 <table class="buglist tablesorter">
 <thead>
 <tr>
-<th>source</th><th>sid</th><th>precise (stable)</th><th>quantal (devel)</th><th>bugs (patches)</th>
+<th>source</th><th>precise (stable)</th><th>quantal (devel)</th><th>sid</th><th>bugs</th><th>patches</th>
 </tr>
 </thead>
 <tbody>
@@ -175,12 +175,7 @@ if cgi.params != {}
   uddd.sources.keys.sort.each do |src|
     next if not uddd.versions.include?(src)
     next if (not uddd.versions[src].include?('debian') or not uddd.versions[src].include?('ubuntu'))
-    dv = uddd.versions[src]['debian']
     puts "<tr><td>#{src}</td>"
-
-    puts "<td>"
-    puts dv['sid'][:version] if dv['sid']
-    puts "</td>"
 
     du = uddd.versions[src]['ubuntu']
     if du.nil?
@@ -195,6 +190,11 @@ if cgi.params != {}
       puts "</td>"
     end
 
+    dv = uddd.versions[src]['debian']
+    puts "<td>"
+    puts dv['sid'][:version] if dv['sid']
+    puts "</td>"
+
     ub = uddd.ubuntu_bugs[src]
     if ub.nil?
       bugs = 0
@@ -203,10 +203,8 @@ if cgi.params != {}
       bugs = ub[:bugs]
       patches = ub[:patches]
     end
-    puts "<td>"
-    puts "#{bugs} (#{patches})"
-    puts "</td>"
-
+    puts "<td>#{bugs}</td>"
+    puts "<td>#{patches})</td>"
     puts "</tr>"
   end
 
