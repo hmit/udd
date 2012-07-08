@@ -111,47 +111,49 @@ if cgi.params != {}
     dv = uddd.versions[src]['debian']
     puts "<tr><td class=\"left\"><a href=\"http://packages.qa.debian.org/#{src}\">#{src}</a></td>"
 
-    puts "<td>"
-    puts dv['squeeze'][:version] if dv['squeeze']
-    puts "<br>sec: #{dv['squeeze-security'][:version]}" if dv['squeeze-security']
-    puts "<br>pu: #{dv['squeeze-proposed-updates'][:version]}" if dv['squeeze-proposed-updates']
-    puts "<br>bpo: #{dv['squeeze-backports'][:version]}" if dv['squeeze-backports']
-    puts "</td>"
+    t_stable = t_testing = t_unstable = t_experimental = t_vcs = ''
 
-    puts "<td>"
-    puts dv['wheezy'][:version] if dv['wheezy']
-    puts "<br>sec: #{dv['wheezy-security'][:version]}" if dv['wheezy-security']
-    puts "<br>pu: #{dv['wheezy-proposed-updates'][:version]}" if dv['wheezy-proposed-updates']
-    puts "</td>"
+    t_stable += dv['squeeze'][:version] if dv['squeeze']
+    t_stable += "<br>sec: #{dv['squeeze-security'][:version]}" if dv['squeeze-security']
+    t_stable += "<br>pu: #{dv['squeeze-proposed-updates'][:version]}" if dv['squeeze-proposed-updates']
+    t_stable += "<br>bpo: #{dv['squeeze-backports'][:version]}" if dv['squeeze-backports']
 
-    puts "<td>"
+    t_testing += dv['wheezy'][:version] if dv['wheezy']
+    t_testing += "<br>sec: #{dv['wheezy-security'][:version]}" if dv['wheezy-security']
+    t_testing += "<br>pu: #{dv['wheezy-proposed-updates'][:version]}" if dv['wheezy-proposed-updates']
+
     if dv['sid']
-      puts dv['sid'][:version]
+      t_unstable += dv['sid'][:version]
       sid = dv['sid'][:version]
     else
       sid = ''
     end
-    puts "</td>"
 
-    puts "<td>"
-    puts dv['experimental'][:version] if dv['experimental']
-    puts "</td>"
+    t_experimental += dv['experimental'][:version] if dv['experimental']
 
     vcs = uddd.versions[src]['vcs']
-    puts "<td>"
     if vcs
       t = UDDData.compare_versions(sid, vcs[:version])
       if t == -1 and vcs[:distribution] == 'unstable'
-          puts "<a href=\"http://pet.debian.net/#{vcs[:team]}/pet.cgi\"><span class=\"prio_high\" title=\"Ready for upload\">#{vcs[:version]}</span></a>"
+        t_vcs += "<a href=\"http://pet.debian.net/#{vcs[:team]}/pet.cgi\"><span class=\"prio_high\" title=\"Ready for upload\">#{vcs[:version]}</span></a>"
       elsif t == -1
-          puts "<a href=\"http://pet.debian.net/#{vcs[:team]}/pet.cgi\"><span class=\"prio_med\" title=\"Work in progress\">#{vcs[:version]}</span></a>"
+        t_vcs += "<a href=\"http://pet.debian.net/#{vcs[:team]}/pet.cgi\"><span class=\"prio_med\" title=\"Work in progress\">#{vcs[:version]}</span></a>"
       elsif t == 0
-        puts "#{vcs[:version]}"
+        t_vcs += "#{vcs[:version]}"
       else
-          puts "<a href=\"http://pet.debian.net/#{vcs[:team]}/pet.cgi\"><span class=\"prio_high\" title=\"Version in archive newer than version in VCS\">#{vcs[:version]}</span></a>"
+        t_vcs += "<a href=\"http://pet.debian.net/#{vcs[:team]}/pet.cgi\"><span class=\"prio_high\" title=\"Version in archive newer than version in VCS\">#{vcs[:version]}</span></a>"
       end
     end
-    puts "</td>"
+
+    UDDData.group_values(t_stable, t_testing, t_unstable, t_experimental, t_vcs).each do |v|
+      if v[:count] == 1
+        puts "<td>"
+      else
+        puts "<td colspan=#{v[:count]}>"
+      end
+      puts v[:value]
+      puts "</td>"
+    end
 
     up = uddd.versions[src]['upstream']
     puts "<td>"
