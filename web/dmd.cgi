@@ -167,7 +167,9 @@ if cgi.params != {}
 <table class="buglist tablesorter">
 <thead>
 <tr>
-<th>source</th><th>&nbsp;&nbsp;&nbsp;&nbsp;precise (stable)&nbsp;&nbsp;&nbsp;&nbsp;</th><th>&nbsp;&nbsp;&nbsp;&nbsp;quantal (devel)&nbsp;&nbsp;&nbsp;&nbsp;</th><th>&nbsp;&nbsp;&nbsp;&nbsp;sid&nbsp;&nbsp;&nbsp;&nbsp;</th><th>&nbsp;&nbsp;&nbsp;&nbsp;bugs&nbsp;&nbsp;&nbsp;&nbsp;</th><th>&nbsp;&nbsp;&nbsp;&nbsp;patches&nbsp;&nbsp;&nbsp;&nbsp;</th>
+<th>source</th>
+<th>&nbsp;&nbsp;&nbsp;&nbsp;bugs&nbsp;&nbsp;&nbsp;&nbsp;</th><th>&nbsp;&nbsp;&nbsp;&nbsp;patches&nbsp;&nbsp;&nbsp;&nbsp;</th>
+<th>&nbsp;&nbsp;&nbsp;&nbsp;precise (stable)&nbsp;&nbsp;&nbsp;&nbsp;</th><th>&nbsp;&nbsp;&nbsp;&nbsp;quantal (devel)&nbsp;&nbsp;&nbsp;&nbsp;</th><th>&nbsp;&nbsp;&nbsp;&nbsp;sid&nbsp;&nbsp;&nbsp;&nbsp;</th>
 </tr>
 </thead>
 <tbody>
@@ -178,6 +180,17 @@ if cgi.params != {}
     next if not uddd.versions.include?(src)
     next if (not uddd.versions[src].include?('debian') or not uddd.versions[src].include?('ubuntu'))
     puts "<tr><td class=\"left\">#{src}</td>"
+
+    ub = uddd.ubuntu_bugs[src]
+    if ub.nil?
+      bugs = 0
+      patches = 0
+    else
+      bugs = ub[:bugs]
+      patches = ub[:patches]
+    end
+    puts "<td>#{bugs}</td>"
+    puts "<td>#{patches}</td>"
 
     dv = uddd.versions[src]['debian']
     if dv['sid']
@@ -213,16 +226,6 @@ if cgi.params != {}
       puts "</td>"
     end
 
-    ub = uddd.ubuntu_bugs[src]
-    if ub.nil?
-      bugs = 0
-      patches = 0
-    else
-      bugs = ub[:bugs]
-      patches = ub[:patches]
-    end
-    puts "<td>#{bugs}</td>"
-    puts "<td>#{patches}</td>"
     puts "</tr>"
   end
 
