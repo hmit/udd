@@ -189,7 +189,13 @@ group by package) tpatches on tbugs.package = tpatches.package order by package 
     @migration = {}
     return if @sources.empty?
     srcs = @sources.keys.map { |e| quote(e) }.join(',')
-    q = "select source, in_testing, current_date - in_testing as in_testing_age, sync, current_date - sync as sync_age, current_date - first_seen as debian_age from migrations where current_date - in_unstable < 2 and (sync is null or current_date - sync > 1) and source in (#{srcs})"
+    q =<<-EOF
+select source, in_testing, current_date - in_testing as in_testing_age, sync, current_date - sync as sync_age,
+current_date - first_seen as debian_age
+from migrations where current_date - in_unstable < 2 and (sync is null or current_date - sync > 1)
+and source in (#{srcs})
+and source not in (select source from upload_history where date > (current_date - interval '10 days') and distribution='unstable')
+    EOF
     rows = dbget(q)
     rows.each do |r|
       @migration[r['source']] = {}
