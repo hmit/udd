@@ -196,7 +196,7 @@ if cgi.params != {}
     if dv['sid']
       sid = dv['sid'][:version]
     else
-      dv = ''
+      sid = ''
     end
 
     du = uddd.versions[src]['ubuntu']
