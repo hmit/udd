@@ -92,8 +92,13 @@ if cgi.params != {}
 <table class="buglist tablesorter">
 <thead>
 <tr>
-<th>source</th><th>squeeze</th><th>wheezy</th><th>sid</th><th>experimental</th>
-<th>upstream</th><th>vcs</th>
+<th>&nbsp;&nbsp;&nbsp;&nbsp;source&nbsp;&nbsp;&nbsp;&nbsp;</th>
+<th>&nbsp;&nbsp;&nbsp;&nbsp;squeeze&nbsp;&nbsp;&nbsp;&nbsp;</th>
+<th>&nbsp;&nbsp;&nbsp;&nbsp;wheezy&nbsp;&nbsp;&nbsp;&nbsp;</th>
+<th>&nbsp;&nbsp;&nbsp;&nbsp;sid&nbsp;&nbsp;&nbsp;&nbsp;</th>
+<th>&nbsp;&nbsp;&nbsp;&nbsp;experimental&nbsp;&nbsp;&nbsp;&nbsp;</th>
+<th>&nbsp;&nbsp;&nbsp;&nbsp;upstream&nbsp;&nbsp;&nbsp;&nbsp;</th>
+<th>&nbsp;&nbsp;&nbsp;&nbsp;vcs&nbsp;&nbsp;&nbsp;&nbsp;</th>
 </tr>
 </thead>
 <tbody>
@@ -127,7 +132,16 @@ if cgi.params != {}
 
     up = uddd.versions[src]['upstream']
     puts "<td>"
-    puts "#{up[:version]} (#{up[:status]})" if up
+    if up
+      s = case up[:status]
+          when :error then "<span class=\"prio_high\" title=\"uscan returned an error\">error</a>"
+          when :up_to_date then up[:version]
+          when :newer_in_debian then "<span class=\"prio_high\" title=\"Debian version newer than upstream version. debian/watch bug?\">#{up[:version]}</a>"
+          when :out_of_date then "<span class=\"prio_high\" title=\"Newer upstream version available\">#{up[:version]}</a>"
+          else "Unhandled case!"
+          end
+      puts s
+    end
     puts "</td>"
 
     vcs = uddd.versions[src]['vcs']
