@@ -147,7 +147,7 @@ if cgi.params != {}
 <table class="buglist tablesorter">
 <thead>
 <tr>
-<th>source</th><th>all</th><th>RC</th><th>with patch</th><th>pending</th>
+<th>&nbsp;&nbsp;&nbsp;&nbsp;source&nbsp;&nbsp;&nbsp;&nbsp;</th><th>&nbsp;&nbsp;&nbsp;&nbsp;all&nbsp;&nbsp;&nbsp;&nbsp;</th><th>&nbsp;&nbsp;&nbsp;&nbsp;RC&nbsp;&nbsp;&nbsp;&nbsp;</th><th>&nbsp;&nbsp;&nbsp;&nbsp;with patch&nbsp;&nbsp;&nbsp;&nbsp;</th><th>&nbsp;&nbsp;&nbsp;&nbsp;pending&nbsp;&nbsp;&nbsp;&nbsp;</th>
 </tr>
 </thead>
 <tbody>
@@ -156,7 +156,7 @@ if cgi.params != {}
   bc.keys.sort.each do |src|
     b = bc[src]
     next if b[:all] == 0
-    puts "<tr><td class=\"left\">#{src}</td><td>#{b[:all]}</td><td>#{b[:rc]}</td><td>#{b[:patch]}</td><td>#{b[:pending]}</td></tr>"
+    puts "<tr><td class=\"left\">#{src}</td><td>#{b[:all] > 0 ? b[:all] : ''}</td><td>#{b[:rc] > 0 ? b[:rc] : ''}</td><td>#{b[:patch] > 0 ? b[:patch] : ''}</td><td>#{b[:pending] > 0 ? b[:pending] : ''}</td></tr>"
   end
   puts "</tbody></table>"
   puts "</div>"
