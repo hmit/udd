@@ -99,8 +99,8 @@ if cgi.params != {}
 <th>&nbsp;&nbsp;&nbsp;&nbsp;wheezy&nbsp;&nbsp;&nbsp;&nbsp;</th>
 <th>&nbsp;&nbsp;&nbsp;&nbsp;sid&nbsp;&nbsp;&nbsp;&nbsp;</th>
 <th>&nbsp;&nbsp;&nbsp;&nbsp;experimental&nbsp;&nbsp;&nbsp;&nbsp;</th>
-<th>&nbsp;&nbsp;&nbsp;&nbsp;upstream&nbsp;&nbsp;&nbsp;&nbsp;</th>
 <th>&nbsp;&nbsp;&nbsp;&nbsp;vcs&nbsp;&nbsp;&nbsp;&nbsp;</th>
+<th>&nbsp;&nbsp;&nbsp;&nbsp;upstream&nbsp;&nbsp;&nbsp;&nbsp;</th>
 </tr>
 </thead>
 <tbody>
@@ -137,20 +137,6 @@ if cgi.params != {}
     puts dv['experimental'][:version] if dv['experimental']
     puts "</td>"
 
-    up = uddd.versions[src]['upstream']
-    puts "<td>"
-    if up
-      s = case up[:status]
-          when :error then "<span class=\"prio_high\" title=\"uscan returned an error\">error</a>"
-          when :up_to_date then up[:version]
-          when :newer_in_debian then "<span class=\"prio_high\" title=\"Debian version newer than upstream version. debian/watch bug?\">#{up[:version]}</a>"
-          when :out_of_date then "<span class=\"prio_high\" title=\"Newer upstream version available\">#{up[:version]}</a>"
-          else "Unhandled case!"
-          end
-      puts s
-    end
-    puts "</td>"
-
     vcs = uddd.versions[src]['vcs']
     puts "<td>"
     if vcs
@@ -164,6 +150,20 @@ if cgi.params != {}
       else
           puts "<a href=\"http://pet.debian.net/#{vcs[:team]}/pet.cgi\"><span class=\"prio_high\" title=\"Version in archive newer than version in VCS\">#{vcs[:version]}</span></a>"
       end
+    end
+    puts "</td>"
+
+    up = uddd.versions[src]['upstream']
+    puts "<td>"
+    if up
+      s = case up[:status]
+          when :error then "<span class=\"prio_high\" title=\"uscan returned an error\">error</a>"
+          when :up_to_date then up[:version]
+          when :newer_in_debian then "<span class=\"prio_high\" title=\"Debian version newer than upstream version. debian/watch bug?\">#{up[:version]}</a>"
+          when :out_of_date then "<span class=\"prio_high\" title=\"Newer upstream version available\">#{up[:version]}</a>"
+          else "Unhandled case!"
+          end
+      puts s
     end
     puts "</td>"
 
