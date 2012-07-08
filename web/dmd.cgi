@@ -81,7 +81,7 @@ if cgi.params != {}
 </thead><tbody>
   EOF
   uddd.dmd_todos.each do |t|
-    puts "<tr><td>#{t[:type]}</td><td>#{t[:source]}</td><td>#{t[:description]}</td></tr>"
+    puts "<tr><td>#{t[:type]}</td><td class=\"left\">#{t[:source]}</td><td class=\"left\">#{t[:description]}</td></tr>"
   end
   puts "</tbody></table>"
   puts "</div>" # tabs-todo
@@ -102,7 +102,7 @@ if cgi.params != {}
     next if not uddd.versions.include?(src)
     next if not uddd.versions[src].include?('debian')
     dv = uddd.versions[src]['debian']
-    puts "<tr><td>#{src}</td>"
+    puts "<tr><td class=\"left\">#{src}</td>"
 
     puts "<td>"
     puts dv['squeeze'][:version] if dv['squeeze']
@@ -156,7 +156,7 @@ if cgi.params != {}
   bc.keys.sort.each do |src|
     b = bc[src]
     next if b[:all] == 0
-    puts "<tr><td>#{src}</td><td>#{b[:all]}</td><td>#{b[:rc]}</td><td>#{b[:patch]}</td><td>#{b[:pending]}</td></tr>"
+    puts "<tr><td class=\"left\">#{src}</td><td>#{b[:all]}</td><td>#{b[:rc]}</td><td>#{b[:patch]}</td><td>#{b[:pending]}</td></tr>"
   end
   puts "</tbody></table>"
   puts "</div>"
@@ -175,7 +175,7 @@ if cgi.params != {}
   uddd.sources.keys.sort.each do |src|
     next if not uddd.versions.include?(src)
     next if (not uddd.versions[src].include?('debian') or not uddd.versions[src].include?('ubuntu'))
-    puts "<tr><td>#{src}</td>"
+    puts "<tr><td class=\"left\">#{src}</td>"
 
     du = uddd.versions[src]['ubuntu']
     if du.nil?
