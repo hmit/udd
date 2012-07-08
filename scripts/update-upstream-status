@@ -169,14 +169,14 @@ dbh = DBI::connect('DBI:Pg:dbname=udd;port=5452', 'udd')
 
 # Cleanup
 dbh.do <<EOF
-DELETE FROM upstream where (source, version, distribution, release, component) IN (SELECT source, version, distribution, release, component from upstream except select source, version, distribution, release, component from sources_uniq where release='sid')
+DELETE FROM upstream where (source, version, distribution, release, component) IN (SELECT source, version, distribution, release, component from upstream except select source, version, distribution, release, component from sources_uniq where release in ('sid', 'experimental'))
 EOF
 #sth.execute
 
 # Get watch file for new packages
 sth = dbh.prepare <<EOF
 select source, version, distribution, release, component from sources_uniq
-where release='sid' except select source, version, distribution, release, component from upstream
+where release in ('sid', 'experimental') except select source, version, distribution, release, component from upstream
 EOF
 sth.execute
 res = sth.fetch_all
