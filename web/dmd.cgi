@@ -184,6 +184,7 @@ if cgi.params != {}
 <th>source</th>
 <th>&nbsp;&nbsp;&nbsp;&nbsp;bugs&nbsp;&nbsp;&nbsp;&nbsp;</th><th>&nbsp;&nbsp;&nbsp;&nbsp;patches&nbsp;&nbsp;&nbsp;&nbsp;</th>
 <th>&nbsp;&nbsp;&nbsp;&nbsp;precise (stable)&nbsp;&nbsp;&nbsp;&nbsp;</th><th>&nbsp;&nbsp;&nbsp;&nbsp;quantal (devel)&nbsp;&nbsp;&nbsp;&nbsp;</th><th>&nbsp;&nbsp;&nbsp;&nbsp;sid&nbsp;&nbsp;&nbsp;&nbsp;</th>
+<th>&nbsp;&nbsp;&nbsp;&nbsp;links&nbsp;&nbsp;&nbsp;&nbsp;</th>
 </tr>
 </thead>
 <tbody>
@@ -193,7 +194,7 @@ if cgi.params != {}
   uddd.sources.keys.sort.each do |src|
     next if not uddd.versions.include?(src)
     next if (not uddd.versions[src].include?('debian') or not uddd.versions[src].include?('ubuntu'))
-    puts "<tr><td class=\"left\">#{src}</td>"
+    puts "<tr><td class=\"left\">#{src}&nbsp;</td>"
 
     ub = uddd.ubuntu_bugs[src]
     if ub.nil?
@@ -225,14 +226,14 @@ if cgi.params != {}
       if udev != sid and sid != ''
         if UDDData.compare_versions(udev, sid) == -1
           if udev =~ /ubuntu/
-            udev = "<span class=\"prio_high\" title=\"Outdated version in Ubuntu, with an Ubuntu patch\">#{udev}</span>"
+            udev = "<a href=\"http://ubuntudiff.debian.net/?query=-FPackage+#{src}\"><span class=\"prio_high\" title=\"Outdated version in Ubuntu, with an Ubuntu patch\">#{udev}</span></a>"
           else
             udev = "<span class=\"prio_med\" title=\"Outdated version in Ubuntu\">#{udev}</span>"
           end
         elsif UDDData.compare_versions(udev, sid) == 1
           udevnb = udev.gsub(/build\d+$/,'')
           if UDDData.compare_versions(udevnb, sid) == 1
-            udev = "<span class=\"prio_high\" title=\"Newer version in Ubuntu\">#{udev}</span>"
+            udev = "<a href=\"http://ubuntudiff.debian.net/?query=-FPackage+#{src}\"><span class=\"prio_high\" title=\"Newer version in Ubuntu\">#{udev}</span></a>"
           end
         end
       end
@@ -242,8 +243,16 @@ if cgi.params != {}
       udev += "<br>bpo:&nbsp;#{du["#{UDEV}-backports"][:version]}" if du["#{UDEV}-backports"]
     end
 
-    puts "<td>#{bugs > 0 ? bugs : ''}</td>"
-    puts "<td>#{patches > 0 ? patches : ''}</td>"
+    if bugs > 0
+      puts "<td><a href=\"https://bugs.launchpad.net/ubuntu/+source/#{src}\">#{bugs}</a></td>"
+    else
+      puts "<td></td>"
+    end
+    if patches > 0
+      puts "<td><a href=\"https://bugs.launchpad.net/ubuntu/+source/#{src}/+patches\">#{patches}</a></td>"
+    else
+      puts "<td></td>"
+    end
 
     UDDData.group_values(ustb, udev, sid).each do |v|
       if v[:count] == 1
@@ -254,7 +263,7 @@ if cgi.params != {}
       puts v[:value]
       puts "</td>"
     end
-
+    puts "<td><a href=\"http://packages.qa.debian.org/#{src}\">PTS</a>&nbsp;<a href=\"https://launchpad.net/ubuntu/+source/#{src}\">LP</a></td>"
     puts "</tr>"
   end
 
