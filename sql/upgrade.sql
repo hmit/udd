@@ -682,3 +682,6 @@ CREATE OR REPLACE FUNCTION blends_metapackage_translations (text[]) RETURNS SETO
     LEFT OUTER JOIN (SELECT * FROM ddtp_unique('zh_TW', $1) AS (package text, description_zh_TW text, long_description_zh_TW text)) zh_TW ON zh_TW.package = p.package
     WHERE p.package = ANY ($1)
  $$ LANGUAGE 'SQL';
+
+-- 2012-07-06
+CREATE INDEX ubuntu_bugs_tasks_package_idx on ubuntu_bugs_tasks(package);
