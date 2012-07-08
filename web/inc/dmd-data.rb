@@ -15,7 +15,7 @@ end
 
 class UDDData
   attr_accessor :debug
-  attr_reader :sources, :versions, :all_bugs, :bugs_tags, :bugs_count, :migration, :buildd, :dmd_todos
+  attr_reader :sources, :versions, :all_bugs, :bugs_tags, :bugs_count, :migration, :buildd, :dmd_todos, :ubuntu_bugs
 
   def initialize(emails)
     @debug = false
@@ -120,6 +120,34 @@ EOF
     @ready_for_upload = {}
     dbget(q).each do |r|
       @ready_for_upload[r['source']] = r.to_h
+    end
+  end
+
+  def get_ubuntu_bugs
+    srcs = @sources.keys.map { |e| quote(e) }.join(',')
+    q=<<-EOF
+SELECT tbugs.package, bugs, patches
+from (select package, count(distinct bugs.bug) as bugs
+from ubuntu_bugs_tasks tasks,ubuntu_bugs bugs
+where tasks.bug = bugs.bug
+and distro in ('Ubuntu')
+and status not in ('Invalid', 'Fix Released', 'Won''t Fix', 'Opinion')
+and package in (#{srcs})
+group by package) tbugs
+full join
+(select package, count(distinct bugs.bug) as patches
+from ubuntu_bugs_tasks tasks,ubuntu_bugs bugs
+where tasks.bug = bugs.bug
+and distro in ('', 'Ubuntu')
+and status not in ('Invalid', 'Fix Released', 'Won''t Fix', 'Opinion')
+and bugs.patches is true
+and package in (#{srcs})
+group by package) tpatches on tbugs.package = tpatches.package order by package asc
+    EOF
+    rows = dbget(q)
+    @ubuntu_bugs = {}
+    rows.each do |r|
+      @ubuntu_bugs[r['package']] = { :bugs => r['bugs'], :patches => r['patches'] || 0 }
     end
   end
 

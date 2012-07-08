@@ -45,6 +45,7 @@ if cgi.params != {}
   uddd.get_sources
   uddd.get_sources_status
   uddd.get_dmd_todos
+  uddd.get_ubuntu_bugs
 
   puts <<-EOF
 <div id="tabs">
@@ -52,6 +53,7 @@ if cgi.params != {}
 		<li><a href="#tabs-todo">TODO list</a></li>
 		<li><a href="#tabs-versions">Versions</a></li>
 		<li><a href="#tabs-bugs">Bugs</a></li>
+		<li><a href="#tabs-ubuntu">Ubuntu</a></li>
 	</ul>
 	<div id="tabs-todo">
 <table class="buglist">
@@ -71,7 +73,6 @@ if cgi.params != {}
 <table class="buglist">
 <tr>
 <th>source</th><th>squeeze</th><th>wheezy</th><th>sid</th><th>experimental</th>
-<th>precise</th><th>quantal</th>
 <th>upstream</th><th>vcs</th>
 </tr>
   EOF
@@ -101,19 +102,6 @@ if cgi.params != {}
     puts "<td>"
     puts dv['experimental'][:version] if dv['experimental']
     puts "</td>"
-
-    du = uddd.versions[src]['ubuntu']
-    if du.nil?
-      puts "<td></td><td></td>"
-    else
-      puts "<td>"
-      puts du['precise'][:version] if du['precise']
-      puts "</td>"
-
-      puts "<td>"
-      puts du['quantal'][:version] if du['quantal']
-      puts "</td>"
-    end
 
     up = uddd.versions[src]['upstream']
     puts "<td>"
@@ -146,6 +134,58 @@ if cgi.params != {}
   end
   puts "</table>"
   puts "</div>"
+
+  puts '<div id="tabs-ubuntu">'
+
+  puts <<-EOF
+<table class="buglist">
+<tr>
+<th>source</th><th>sid</th><th>precise (stable)</th><th>quantal (devel)</th><th>bugs (patches)</th>
+</tr>
+  EOF
+  uddd.sources.keys.sort.each do |src|
+    next if not uddd.versions.include?(src)
+    next if (not uddd.versions[src].include?('debian') or not uddd.versions[src].include?('ubuntu'))
+    dv = uddd.versions[src]['debian']
+    puts "<tr><td>#{src}</td>"
+
+    puts "<td>"
+    puts dv['sid'][:version] if dv['sid']
+    puts "</td>"
+
+    du = uddd.versions[src]['ubuntu']
+    if du.nil?
+      puts "<td></td><td></td>"
+    else
+      puts "<td>"
+      puts du['precise'][:version] if du['precise']
+      puts "</td>"
+
+      puts "<td>"
+      puts du['quantal'][:version] if du['quantal']
+      puts "</td>"
+    end
+
+    ub = uddd.ubuntu_bugs[src]
+    if ub.nil?
+      bugs = 0
+      patches = 0
+    else
+      bugs = ub[:bugs]
+      patches = ub[:patches]
+    end
+    puts "<td>"
+    puts "#{bugs} (#{patches})"
+    puts "</td>"
+
+    puts "</tr>"
+  end
+
+  puts <<-EOF
+</table>
+</div>
+  EOF
+
   puts "</div>" # div#tabs
   puts "<p><b>Generated in #{Time::now - tstart} seconds.</b></p>"
 
