@@ -2,6 +2,7 @@
 require 'dbi'
 require 'pp'
 require 'time'
+require 'debian'
 
 # testing migration checks
 MIN_AGE_IN_DEBIAN = 11
@@ -300,6 +301,16 @@ WHERE label LIKE ?
     EOF
     r = dbget(q, "%#{email}%")
     return r.map { |r| r.to_h }
+  end
+
+  def UDDData.compare_versions(v1, v2)
+    if Debian::Dpkg::compare_versions(v1, 'lt', v2)
+      return -1
+    elsif Debian::Dpkg::compare_versions(v1, 'eq', v2)
+      return 0
+    else
+      return 1
+    end
   end
 
   private
