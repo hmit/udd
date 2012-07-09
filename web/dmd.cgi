@@ -190,10 +190,10 @@ if cgi.params != {}
     b = bc[src]
     next if b[:all] == 0
     puts "<tr><td class=\"left\"><a href=\"http://packages.qa.debian.org/#{src}\">#{src}</a></td>"
-    puts "<td><a href=\"http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=mongrel\">#{b[:all] > 0 ? b[:all] : ''}</a></td>"
-    puts "<td><a href=\"http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=mongrel&sev-inc=critical&sev-inc=grave&sev-inc=serious\">#{b[:rc] > 0 ? b[:rc] : ''}</a></td>"
-    puts "<td><a href=\"http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=mongrel&include=tags:patch\">#{b[:patch] > 0 ? b[:patch] : ''}</a></td>"
-    puts "<td><a href=\"http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=mongrel&pend-inc=pending-fixed&pend-inc=fixed\">#{b[:pending] > 0 ? b[:pending] : ''}</a></td></tr>"
+    puts "<td><a href=\"http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=#{src}\">#{b[:all] > 0 ? b[:all] : ''}</a></td>"
+    puts "<td><a href=\"http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=#{src}&sev-inc=critical&sev-inc=grave&sev-inc=serious\">#{b[:rc] > 0 ? b[:rc] : ''}</a></td>"
+    puts "<td><a href=\"http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=#{src}&include=tags:patch\">#{b[:patch] > 0 ? b[:patch] : ''}</a></td>"
+    puts "<td><a href=\"http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=#{src}&pend-inc=pending-fixed&pend-inc=fixed\">#{b[:pending] > 0 ? b[:pending] : ''}</a></td></tr>"
   end
   puts "</tbody></table>"
   puts "</div>"
