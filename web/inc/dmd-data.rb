@@ -221,6 +221,7 @@ and source not in (select source from upload_history where date > (current_date 
   def get_dmd_todos
     @dmd_todos = []
     rc_bugs = @all_bugs.select { |b| ['serious', 'grave', 'critical'].include?(b['severity']) }
+    testing_rc_bugs = []
     stable_rc_bugs = []
     rc_bugs.each do |bug|
       id = bug['id']
@@ -228,8 +229,8 @@ and source not in (select source from upload_history where date > (current_date 
         @dmd_todos << { :type => 'RC bug', :source => bug['source'],
           :description => "RC bug marked as done but still affects unstable: <a href=\"http://bugs.debian.org/#{id}\">##{id}</a>: #{bug['title']}" }
       elsif (not @bugs_tags[id].include?('rt_affects_unstable')) and @bugs_tags[id].include?('rt_affects_testing')
-        @dmd_todos << { :type => 'RC bug', :source => bug['source'],
-                        :description => "RC bug affecting testing only (ensure the package migrates): <a href=\"http://bugs.debian.org/#{id}\">##{id}</a>: #{bug['title']}" }
+        testing_rc_bugs << { :type => 'RC bug', :source => bug['source'],
+                             :description => "RC bug affecting testing only (ensure the package migrates): <a href=\"http://bugs.debian.org/#{id}\">##{id}</a>: #{bug['title']}" }
       elsif @bugs_tags[id].include?('rt_affects_unstable') or @bugs_tags[id].include?('rt_affects_testing')
         @dmd_todos << { :type => 'RC bug', :source => bug['source'],
                         :description => "RC bug needs fixing: <a href=\"http://bugs.debian.org/#{id}\">##{id}</a>: #{bug['title']}" }
@@ -238,6 +239,7 @@ and source not in (select source from upload_history where date > (current_date 
                             :description => "RC bug affecting stable: <a href=\"http://bugs.debian.org/#{id}\">##{id}</a>: #{bug['title']}" }
       end
     end
+    @dmd_todos.concat(testing_rc_bugs)
     @dmd_todos.concat(stable_rc_bugs)
 
     @buildd.each_pair do |src, archs|
