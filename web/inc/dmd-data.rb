@@ -251,7 +251,7 @@ and source not in (select source from upload_history where date > (current_date 
       if v['in_testing_age'].nil?
         if v['debian_age'] > MIN_AGE_IN_DEBIAN
         @dmd_todos << { :type => 'testing migration', :source => src,
-                        :description => "Has been in Debian for #{v['debian_age']}, but never migrated to testing (see <a href=\"http://qa.debian.org/excuses.php?package=#{src}\">excuses</a>)" }
+                        :description => "Has been in Debian for #{v['debian_age']} days, but never migrated to testing (see <a href=\"http://qa.debian.org/excuses.php?package=#{src}\">excuses</a>)" }
         end
       elsif v['in_testing_age'] > 1 # in case there's some incoherency in udd
         @dmd_todos << { :type => 'testing migration', :source => src,
