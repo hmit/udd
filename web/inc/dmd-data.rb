@@ -133,7 +133,7 @@ and s2.version > s1.version);
     q = <<-EOF
 select source, team, version from vcs
 where source in (select source from mysources)
-and distribution!='UNRELEASED' and version > coalesce((select version from sources_uniq where release='sid' and sources_uniq.source = vcs.source), 0::debversion)
+and distribution!='UNRELEASED' and version > coalesce((select max(version) from sources_uniq where release in ('sid','experimental') and sources_uniq.source = vcs.source), 0::debversion)
 EOF
     dbget(q).each do |r|
       @ready_for_upload[r['source']] = r.to_h
