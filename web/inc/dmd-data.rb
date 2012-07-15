@@ -37,20 +37,47 @@ class UDDData
   def get_sources
     dbget("create temporary table mysources(source text)")
 
+    dbget <<-EOF
+CREATE TEMPORARY VIEW sources_most_recent AS
+select distinct source, version, maintainer_email from sources s1
+where release in ('squeeze', 'wheezy', 'sid')
+and not exists (select * from sources s2
+where s1.source = s2.source
+and release in ('squeeze', 'wheezy', 'sid')
+and s2.version > s1.version);
+    EOF
+
     maint_emails = @emails.reject { |k, v| not v.include?(:maintainer) }.keys
     if not maint_emails.empty?
       q = <<-EOF
-    select distinct source, maintainer_email from sources_uniq where release in ('sid', 'experimental', 'wheezy', 'squeeze') and maintainer_email in (#{maint_emails.map { |e| quote(e) }.join(',')})
+    select distinct source, maintainer_email from sources_most_recent
+    where maintainer_email in (#{maint_emails.map { |e| quote(e) }.join(',')})
+    union
+    select distinct source, maintainer_email from sources_uniq where release='experimental'
+    and maintainer_email in (#{maint_emails.map { |e| quote(e) }.join(',')})
       EOF
       maint_rows = dbget(q)
     else
       maint_rows = []
     end
 
+    dbget <<-EOF
+CREATE TEMPORARY VIEW uploaders_most_recent AS
+select distinct source, version, email from uploaders s1
+where release in ('squeeze', 'wheezy', 'sid')
+and not exists (select * from uploaders s2
+where s1.source = s2.source
+and release in ('squeeze', 'wheezy', 'sid')
+and s2.version > s1.version);
+    EOF
+
     upload_emails = @emails.reject { |k, v| not v.include?(:uploader) }.keys
     if not upload_emails.empty?
       q = <<-EOF
-    select distinct source, email from uploaders where release in ('sid', 'experimental', 'wheezy', 'squeeze') and email in (#{upload_emails.map { |e| quote(e) }.join(',')})
+    select distinct source, email from uploaders_most_recent where email in (#{upload_emails.map { |e| quote(e) }.join(',')})
+    union
+    select distinct source, email from uploaders where release='experimental'
+    and email in (#{upload_emails.map { |e| quote(e) }.join(',')})
       EOF
       upload_rows = dbget(q)
     else
