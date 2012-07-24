@@ -30,6 +30,7 @@ puts <<-EOF
 <script type="text/javascript" src="js/jquery.min.js"></script>
 <script type="text/javascript" src="js/jquery.tablesorter.min.js"></script>
 <script type="text/javascript" src="js/jquery-ui.custom.min.js"></script>
+<script type="text/javascript" src="js/jquery.cookie.min.js"></script>
 <script>
 $(function() {
   $( "#tabs" ).tabs();
@@ -43,7 +44,19 @@ $(function() {
 });
 $(document).ready(function() {
 $("table.tablesorter").each(function(index) { $(this).tablesorter() });
+$("tbody.todos tr").each(function(index, elem) { if ($.cookie(elem.id) == '1') $(elem).hide(); });
 });
+function hide_todo(id) {
+  $.cookie(id, '1', { expires: 3650 });
+  $("tbody.todos tr#"+id).hide();
+}
+
+function reset_todos() {
+$("tbody.todos tr").each(function(index, elem) {
+ $.cookie(elem.id, null);
+ $(elem).show();
+});
+}
 </script>
 </head>
 <body>
@@ -76,16 +89,18 @@ if cgi.params != {}
 <table class="buglist tablesorter">
 <thead>
 <tr>
-<th>type</th><th>source</th><th>description</th>
+<th>type</th><th>source</th><th>description</th><th>&nbsp;&nbsp;&nbsp;&nbsp;hide&nbsp;&nbsp;&nbsp;&nbsp;</th>
 </tr>
-</thead><tbody>
+</thead><tbody class='todos'>
   EOF
   uddd.dmd_todos.each do |t|
-    puts "<tr><td>#{t[:type]}</td>"
+    puts "<tr id='#{t[:shortname]}'><td>#{t[:type]}</td>"
     puts "<td class=\"left\"><a href=\"http://packages.qa.debian.org/#{t[:source]}\">#{t[:source]}</a></td>"
-    puts "<td class=\"left\">#{t[:description]}</td></tr>"
+    puts "<td class=\"left\">#{t[:description]}</td>"
+    puts "<td><a href=\"#\" onclick=\"hide_todo('#{t[:shortname]}')\">hide</a></td>"
   end
   puts "</tbody></table>"
+  puts "<p align=\"center\"><a href=\"#\" onclick=\"reset_todos()\">show all hidden todos</a></p>"
   puts "</div>" # tabs-todo
 
 	puts '<div id="tabs-versions">'
