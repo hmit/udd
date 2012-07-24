@@ -129,19 +129,25 @@ if cgi.params != {}
       sid = ''
     end
 
-    t_experimental += dv['experimental'][:version] if dv['experimental']
+    if dv['experimental']
+      t_experimental += dv['experimental'][:version]
+      exp = dv['experimental'][:version]
+    else
+      exp = ''
+    end
 
     vcs = uddd.versions[src]['vcs']
     if vcs
       t = UDDData.compare_versions(sid, vcs[:version])
-      if t == -1 and vcs[:distribution] == 'unstable'
-        t_vcs += "<a href=\"http://pet.debian.net/#{vcs[:team]}/pet.cgi\"><span class=\"prio_high\" title=\"Ready for upload\">#{vcs[:version]}</span></a>"
-      elsif t == -1
+      te = UDDData.compare_versions(exp, vcs[:version])
+      if (t == -1 or te == -1) and t != 0 and te != 0 and ['unstable', 'experimental'].include?(vcs[:distribution])
+        t_vcs += "<a href=\"http://pet.debian.net/#{vcs[:team]}/pet.cgi\"><span class=\"prio_high\" title=\"Ready for upload to #{vcs[:distribution]}\">#{vcs[:version]}</span></a>"
+      elsif (t == -1 or te == -1) and t != 0 and te != 0
         t_vcs += "<a href=\"http://pet.debian.net/#{vcs[:team]}/pet.cgi\"><span class=\"prio_med\" title=\"Work in progress\">#{vcs[:version]}</span></a>"
-      elsif t == 0
-        t_vcs += "#{vcs[:version]}"
-      else
+      elsif t == 1 and te == 1
         t_vcs += "<a href=\"http://pet.debian.net/#{vcs[:team]}/pet.cgi\"><span class=\"prio_high\" title=\"Version in archive newer than version in VCS\">#{vcs[:version]}</span></a>"
+      else
+        t_vcs += "#{vcs[:version]}"
       end
     end
 
