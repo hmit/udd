@@ -274,7 +274,7 @@ and source not in (select source from upload_history where date > (current_date 
 
     @buildd.each_pair do |src, archs|
       archs.each do |arch|
-        h = Digest::MD5.hexdigest("#{src}_#{arch.to_s}")
+        h = Digest::MD5.hexdigest("#{src}_#{arch.sort.to_s}")
         @dmd_todos << { :shortname => "missingbuild_#{h}", :type => 'missing build', :source => src,
                         :description => "Missing build on #{arch['architecture']}. state <i>#{arch['state']}</i> since #{arch['state_change'].to_date.to_s} (see <a href=\"https://buildd.debian.org/status/package.php?p=#{src}\">buildd.d.o</a>)" }
       end
