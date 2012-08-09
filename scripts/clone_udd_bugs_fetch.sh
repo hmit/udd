@@ -2,8 +2,6 @@
 
 set -e
 
-set -x
-
 TARGETDIR=/srv/udd.debian.org/mirrors/clone-bugs
 FETCHURL=http://udd.debian.org/udd-bugs.sql.gz
 

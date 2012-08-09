@@ -1,7 +1,4 @@
 #!/bin/sh
-# echo "Hallo Welt"
-set -x
-
 BUGSDUMP=/srv/udd.debian.org/mirrors/clone-bugs/udd-bugs.sql.gz
 
 unset LANG
