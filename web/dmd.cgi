@@ -101,6 +101,12 @@ EOF
 
 if cgi.params != {}
   emails = {}
+
+  # for compatibility purposes
+  if cgi.params["email"][0] and cgi.params["email"][0] != ''
+    emails[cgi.params["email"][0]] = [ :maintainer, :uploader, :sponsor ]
+  end
+
   [1, 2, 3].each do |i|
     if cgi.params["email#{i}"][0] and cgi.params["email#{i}"][0] != ''
       em = cgi.params["email#{i}"][0]
