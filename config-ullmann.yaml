@@ -1,6 +1,6 @@
 general:
   dbname: udd
-  dbport: 5452
+  dbport: 5432
   types:
     sources: module udd.sources_gatherer
     packages: module udd.packages_gatherer

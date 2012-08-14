@@ -1,10 +1,13 @@
 #!/bin/sh
+
+set -e
+
 BUGSDUMP=/srv/udd.debian.org/mirrors/clone-bugs/udd-bugs.sql.gz
 
 unset LANG
 unset LC_ALL
 
-psql --quiet udd <<EOT
+psql --quiet udd 2>/dev/null <<EOT
 DROP TABLE IF EXISTS bugs CASCADE;
 DROP TABLE IF EXISTS bugs_merged_with;
 DROP TABLE IF EXISTS bugs_blockedby;
