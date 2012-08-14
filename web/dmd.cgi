@@ -59,6 +59,19 @@ $("tbody.todos tr").each(function(index, elem) {
  $(elem).show();
 });
 }
+
+function removeBlankFields(form) {
+	var inputs = form.getElementsByTagName("input");
+	var removeList = new Array();
+	for (var i=0; i<inputs.length; i++) {
+		if (inputs[i].value == "") {
+			removeList.push(inputs[i]);
+		}
+	}
+	for (x in removeList) {
+		removeList[x].parentNode.removeChild(removeList[x]);
+	}
+}
 </script>
 </head>
 <body>
@@ -82,7 +95,7 @@ email: <input id="email3" type='text' size='100' name='email3' value='#{default_
 <input id="nouploader3" name="nouploader3" type="checkbox"/> co-maintained &nbsp;&nbsp;
 <input id="nosponsor3" name="nosponsor3" type="checkbox"/> sponsored / NMUed
 
-&nbsp;&nbsp; <input type='submit' value='Go'/>
+&nbsp;&nbsp; <input type='submit' value='Go' onsubmit="removeBlankFields(this);"/>
 </form>
 EOF
 
