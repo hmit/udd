@@ -85,7 +85,24 @@ and s2.version > s1.version);
       upload_rows = []
     end
 
+    sponsor_emails = @emails.reject { |k, v| not v.include?(:sponsor) }.keys
+    if not sponsor_emails.empty?
+      q = <<-EOF
+      select distinct source, key_id from upload_history uh, carnivore_emails ce, carnivore_keys ck
+      where (source, version) in (
+         select source, version from sources
+      )
+      and ce.email in (#{sponsor_emails.map { |e| quote(e) }.join(',')})
+      and ce.id = ck.id
+      and uh.fingerprint = ck.key
+      EOF
+      sponsor_rows = dbget(q)
+    else
+      sponsor_rows = []
+    end
+
     srcs = {}
+    sponsor_rows.each { |p| srcs[p[0]] = [:sponsor, p[1]] }
     upload_rows.each { |p| srcs[p[0]] = [:uploader, p[1]] }
     maint_rows.each { |p| srcs[p[0]] = [:maintainer, p[1]] }
 
