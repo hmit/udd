@@ -11,12 +11,14 @@ cgi = CGI::new
 
 tstart = Time::now
 
-default_email = 'pkg-ruby-extras-maintainers@lists.alioth.debian.org'
-if cgi.params['email'][0]
-  default_email = cgi.params['email'][0]
-end
-
-default_email = CGI.escapeHTML(default_email)
+default_email1 = 'pkg-ruby-extras-maintainers@lists.alioth.debian.org'
+default_email2 = default_email3 = ''
+default_email1 = cgi.params['email1'][0] if cgi.params['email1'][0]
+default_email2 = cgi.params['email2'][0] if cgi.params['email2'][0]
+default_email3 = cgi.params['email3'][0] if cgi.params['email3'][0]
+default_email1 = CGI.escapeHTML(default_email1)
+default_email2 = CGI.escapeHTML(default_email2)
+default_email3 = CGI.escapeHTML(default_email3)
 
 puts <<-EOF
 <html>
@@ -64,18 +66,54 @@ $("tbody.todos tr").each(function(index, elem) {
 <div id="body">
 <br/>
 <form id="searchForm" action="dmd.cgi" method="get">
-email: <input id="email" type='text' size='100' name='email' value='#{default_email}'/>
-<input type='submit' value='Go'/>
+
+email: <input id="email1" type='text' size='100' name='email1' value='#{default_email1}'/>
+&nbsp;&nbsp;<input id="maintainer1" name="maintainer1" type="checkbox" checked="checked"/> maintainer
+&nbsp;&nbsp; <input id="uploader1" name="uploader1" type="checkbox" checked="checked"/> uploader
+&nbsp;&nbsp; <input id="sponsor1" name="sponsor1" type="checkbox" checked="checked"/> sponsor<br/>
+
+email: <input id="email2" type='text' size='100' name='email2' value='#{default_email2}'/>
+&nbsp;&nbsp;<input id="maintainer2" name="maintainer2" type="checkbox" checked="checked"/> maintainer
+&nbsp;&nbsp; <input id="uploader2" name="uploader2" type="checkbox" checked="checked"/> uploader
+&nbsp;&nbsp; <input id="sponsor2" name="sponsor2" type="checkbox" checked="checked"/> sponsor<br/>
+
+email: <input id="email3" type='text' size='100' name='email3' value='#{default_email3}'/>
+&nbsp;&nbsp;<input id="maintainer3" name="maintainer3" type="checkbox" checked="checked"/> maintainer
+&nbsp;&nbsp; <input id="uploader3" name="uploader3" type="checkbox" checked="checked"/> uploader
+&nbsp;&nbsp; <input id="sponsor3" name="sponsor3" type="checkbox" checked="checked"/> sponsor
+
+&nbsp;&nbsp; <input type='submit' value='Go'/>
 </form>
 EOF
 
 if cgi.params != {}
-  emails = { cgi.params['email'][0] => [:maintainer, :uploader]}
-  uddd = UDDData::new(emails)
-  uddd.get_sources
-  uddd.get_sources_status
-  uddd.get_dmd_todos
-  uddd.get_ubuntu_bugs
+  emails = {}
+  [1, 2, 3].each do |i|
+    if cgi.params["email#{i}"][0] and cgi.params["email#{i}"][0] != ''
+      em = cgi.params["email#{i}"][0]
+      types = []
+      types << :maintainer if cgi.params["maintainer#{i}"][0] == 'on'
+      types << :uploader if cgi.params["uploader#{i}"][0] == 'on'
+      types << :sponsor if cgi.params["sponsor#{i}"][0] == 'on'
+      emails[em] = types
+    end
+  end
+  $uddd = UDDData::new(emails)
+  $uddd.get_sources
+  $uddd.get_sources_status
+  $uddd.get_dmd_todos
+  $uddd.get_ubuntu_bugs
+
+  def src_reason(pkg)
+    s = $uddd.sources[pkg]
+    if s[0] == :maintainer
+      return "<span title=\"maintained by #{s[1]}\"><b>#{pkg}</b></span>"
+    elsif s[0] == :uploader
+      return "<span title=\"co-maintained by #{s[1]}\">#{pkg}</span>"
+    elsif s[0] == :sponsor
+      return "<span title=\"was uploaded by #{s[1]}\"><i>#{pkg}</i></span>"
+    end
+  end
 
   puts <<-EOF
 <div id="tabs">
@@ -93,9 +131,9 @@ if cgi.params != {}
 </tr>
 </thead><tbody class='todos'>
   EOF
-  uddd.dmd_todos.each do |t|
+  $uddd.dmd_todos.each do |t|
     puts "<tr id='#{t[:shortname]}'><td>#{t[:type]}</td>"
-    puts "<td class=\"left\"><a href=\"http://packages.qa.debian.org/#{t[:source]}\">#{t[:source]}</a></td>"
+    puts "<td class=\"left\"><a href=\"http://packages.qa.debian.org/#{t[:source]}\">#{src_reason(t[:source])}</a></td>"
     puts "<td class=\"left\">#{t[:description]}</td>"
     puts "<td><a href=\"#\" onclick=\"hide_todo('#{t[:shortname]}')\">hide</a></td>"
   end
@@ -120,11 +158,11 @@ if cgi.params != {}
 </thead>
 <tbody>
   EOF
-  uddd.sources.keys.sort.each do |src|
-    next if not uddd.versions.include?(src)
-    next if not uddd.versions[src].include?('debian')
-    dv = uddd.versions[src]['debian']
-    puts "<tr><td class=\"left\"><a href=\"http://packages.qa.debian.org/#{src}\">#{src}</a></td>"
+  $uddd.sources.keys.sort.each do |src|
+    next if not $uddd.versions.include?(src)
+    next if not $uddd.versions[src].include?('debian')
+    dv = $uddd.versions[src]['debian']
+    puts "<tr><td class=\"left\"><a href=\"http://packages.qa.debian.org/#{src}\">#{src_reason(src)}</a></td>"
 
     t_stable = t_testing = t_unstable = t_experimental = t_vcs = ''
 
@@ -151,7 +189,7 @@ if cgi.params != {}
       exp = ''
     end
 
-    vcs = uddd.versions[src]['vcs']
+    vcs = $uddd.versions[src]['vcs']
     if vcs
       t = UDDData.compare_versions(sid, vcs[:version])
       te = UDDData.compare_versions(exp, vcs[:version])
@@ -176,7 +214,7 @@ if cgi.params != {}
       puts "</td>"
     end
 
-    up = uddd.versions[src]['upstream']
+    up = $uddd.versions[src]['upstream']
     puts "<td>"
     if up
       s = case up[:status]
@@ -206,11 +244,11 @@ if cgi.params != {}
 </thead>
 <tbody>
   EOF
-  bc = uddd.bugs_count
+  bc = $uddd.bugs_count
   bc.keys.sort.each do |src|
     b = bc[src]
     next if b[:all] == 0
-    puts "<tr><td class=\"left\"><a href=\"http://packages.qa.debian.org/#{src}\">#{src}</a></td>"
+    puts "<tr><td class=\"left\"><a href=\"http://packages.qa.debian.org/#{src}\">#{src_reason(src)}</a></td>"
     puts "<td><a href=\"http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=#{src}\">#{b[:all] > 0 ? b[:all] : ''}</a></td>"
     puts "<td><a href=\"http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=#{src}&sev-inc=critical&sev-inc=grave&sev-inc=serious\">#{b[:rc] > 0 ? b[:rc] : ''}</a></td>"
     puts "<td><a href=\"http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=#{src}&include=tags:patch\">#{b[:patch] > 0 ? b[:patch] : ''}</a></td>"
@@ -235,12 +273,12 @@ if cgi.params != {}
   EOF
   USTB='precise'
   UDEV='quantal'
-  uddd.sources.keys.sort.each do |src|
-    next if not uddd.versions.include?(src)
-    next if (not uddd.versions[src].include?('debian') or not uddd.versions[src].include?('ubuntu'))
-    puts "<tr><td class=\"left\">#{src}&nbsp;</td>"
+  $uddd.sources.keys.sort.each do |src|
+    next if not $uddd.versions.include?(src)
+    next if (not $uddd.versions[src].include?('debian') or not $uddd.versions[src].include?('ubuntu'))
+    puts "<tr><td class=\"left\">#{src_reason(src)}&nbsp;</td>"
 
-    ub = uddd.ubuntu_bugs[src]
+    ub = $uddd.ubuntu_bugs[src]
     if ub.nil?
       bugs = 0
       patches = 0
@@ -249,14 +287,14 @@ if cgi.params != {}
       patches = ub[:patches]
     end
 
-    dv = uddd.versions[src]['debian']
+    dv = $uddd.versions[src]['debian']
     if dv['sid']
       sid = dv['sid'][:version]
     else
       sid = ''
     end
 
-    du = uddd.versions[src]['ubuntu']
+    du = $uddd.versions[src]['ubuntu']
     ustb = ''
     udev = ''
     if not du.nil?
