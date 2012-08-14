@@ -222,6 +222,7 @@ if cgi.params != {}
           when :up_to_date then up[:version]
           when :newer_in_debian then "<span class=\"prio_high\" title=\"Debian version newer than upstream version. debian/watch bug?\">#{up[:version]}</a>"
           when :out_of_date then "<span class=\"prio_high\" title=\"Newer upstream version available\">#{up[:version]}</a>"
+          when :out_of_date_in_unstable then "<span class=\"prio_med\" title=\"Newer upstream version available (already packaged in experimental)\">#{up[:version]}</a>"
           else "Unhandled case!"
           end
       puts s

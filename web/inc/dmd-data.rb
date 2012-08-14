@@ -130,17 +130,54 @@ and s2.version > s1.version);
     end
 
     # upstream versions
-    q = "select source, upstream_version, status from upstream where source in (select source from mysources) and status is not null"
+    q = "select source, distribution, release, upstream_version, status from upstream where source in (select source from mysources) and status is not null"
     rows = dbget(q)
-    rows.each do |r|
-      st = case r['status']
-        when 'up to date' then :up_to_date
-        when 'Debian version newer than remote site' then :newer_in_debian
-        when 'Newer version available' then :out_of_date
-        when 'error' then :error
-        else nil
+    rows.group_by { |r| r['source'] }.each_pair do |k, v|
+      unst = v.select { |l| l['release'] == 'sid' }.first
+      exp = v.select { |l| l['release'] == 'experimental' }.first
+      if unst != nil and exp != nil
+        us = unst['status']
+        es = exp['status']
+        if us == 'error' or es == 'error'
+          st = :error
+        elsif us == 'Debian version newer than remote site' or es == 'Debian version newer than remote site'
+          st = :newer_in_debian
+        elsif us == 'up to date'
+          st = :up_to_date
+        elsif es == 'up to date'
+          st = :out_of_date_in_unstable
+        else
+          st = :out_of_date
+        end
+        @versions[unst['source']]['upstream'] = { :status => st, :version => unst['upstream_version'] }
+      elsif unst.nil? and exp != nil
+        r = exp
+        st = case r['status']
+             when 'up to date' then :up_to_date
+             when 'Debian version newer than remote site' then :newer_in_debian
+             when 'Newer version available' then :out_of_date_in_unstable
+             when 'error' then :error
+             else nil
+             end
+        @versions[r['source']]['upstream'] = { :status => st, :version => r['upstream_version'] }
+      elsif unst != nil and exp == nil
+        r = unst
+        st = case r['status']
+             when 'up to date' then :up_to_date
+             when 'Debian version newer than remote site' then :newer_in_debian
+             when 'Newer version available' then :out_of_date
+             when 'error' then :error
+             else nil
+             end
+        @versions[r['source']]['upstream'] = { :status => st, :version => r['upstream_version'] }
+      else
+        puts "ERROR"
+        p v
+        exit(1)
       end
-      @versions[r['source']]['upstream'] = { :status => st, :version => r['upstream_version'] }
+    end
+
+    rows.each do |r|
     end
     
     # vcs versions
@@ -328,10 +365,15 @@ and source not in (select source from upload_history where date > (current_date 
 
     @versions.each_pair do |src, v|
       next if not v.has_key?('upstream')
-      next if v['upstream'][:status] != :out_of_date
-      h = Digest::MD5.hexdigest("#{src}_#{v['upstream'][:version]}")
-      @dmd_todos << { :shortname => "newupstream_#{h}", :type => 'new upstream', :source => src,
-                      :description => "new upstream version available: #{v['upstream'][:version]}" }
+      if v['upstream'][:status] == :out_of_date
+        h = Digest::MD5.hexdigest("#{src}_#{v['upstream'][:version]}")
+        @dmd_todos << { :shortname => "newupstream_#{h}", :type => 'new upstream', :source => src,
+                        :description => "new upstream version available: #{v['upstream'][:version]}" }
+      elsif v['upstream'][:status] == :out_of_date_in_unstable
+        h = Digest::MD5.hexdigest("#{src}_#{v['upstream'][:version]}")
+        @dmd_todos << { :shortname => "newupstreamunstable_#{h}", :type => 'new upstream', :source => src,
+                        :description => "new upstream version available: #{v['upstream'][:version]} (already in experimental, but not in unstable)" }
+      end
     end
 
     @dmd_todos
