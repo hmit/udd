@@ -68,19 +68,19 @@ $("tbody.todos tr").each(function(index, elem) {
 <form id="searchForm" action="dmd.cgi" method="get">
 
 email: <input id="email1" type='text' size='100' name='email1' value='#{default_email1}'/>
-&nbsp;&nbsp;<input id="maintainer1" name="maintainer1" type="checkbox" checked="checked"/> maintainer
-&nbsp;&nbsp; <input id="uploader1" name="uploader1" type="checkbox" checked="checked"/> uploader
-&nbsp;&nbsp; <input id="sponsor1" name="sponsor1" type="checkbox" checked="checked"/> sponsor<br/>
+&nbsp;&nbsp;ignore:
+<input id="nouploader1" name="nouploader1" type="checkbox"/> co-maintained &nbsp;&nbsp;
+<input id="nosponsor1" name="nosponsor1" type="checkbox"/> sponsored / NMUed <br/>
 
 email: <input id="email2" type='text' size='100' name='email2' value='#{default_email2}'/>
-&nbsp;&nbsp;<input id="maintainer2" name="maintainer2" type="checkbox" checked="checked"/> maintainer
-&nbsp;&nbsp; <input id="uploader2" name="uploader2" type="checkbox" checked="checked"/> uploader
-&nbsp;&nbsp; <input id="sponsor2" name="sponsor2" type="checkbox" checked="checked"/> sponsor<br/>
+&nbsp;&nbsp;ignore:
+<input id="nouploader2" name="nouploader2" type="checkbox"/> co-maintained &nbsp;&nbsp;
+<input id="nosponsor2" name="nosponsor2" type="checkbox"/> sponsored / NMUed <br/>
 
-email: <input id="email3" type='text' size='100' name='email3' value='#{default_email3}'/>
-&nbsp;&nbsp;<input id="maintainer3" name="maintainer3" type="checkbox" checked="checked"/> maintainer
-&nbsp;&nbsp; <input id="uploader3" name="uploader3" type="checkbox" checked="checked"/> uploader
-&nbsp;&nbsp; <input id="sponsor3" name="sponsor3" type="checkbox" checked="checked"/> sponsor
+email: <input id="email3" type='text' size='100' name='email3' value='#{default_email2}'/>
+&nbsp;&nbsp;ignore:
+<input id="nouploader3" name="nouploader3" type="checkbox"/> co-maintained &nbsp;&nbsp;
+<input id="nosponsor3" name="nosponsor3" type="checkbox"/> sponsored / NMUed
 
 &nbsp;&nbsp; <input type='submit' value='Go'/>
 </form>
@@ -91,10 +91,9 @@ if cgi.params != {}
   [1, 2, 3].each do |i|
     if cgi.params["email#{i}"][0] and cgi.params["email#{i}"][0] != ''
       em = cgi.params["email#{i}"][0]
-      types = []
-      types << :maintainer if cgi.params["maintainer#{i}"][0] == 'on'
-      types << :uploader if cgi.params["uploader#{i}"][0] == 'on'
-      types << :sponsor if cgi.params["sponsor#{i}"][0] == 'on'
+      types = [ :maintainer, :uploader, :sponsor ]
+      types.delete(:uploader) if cgi.params["nouploader#{i}"][0] == 'on'
+      types.delete(:sponsor) if cgi.params["nosponsor#{i}"][0] == 'on'
       emails[em] = types
     end
   end
