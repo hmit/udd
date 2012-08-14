@@ -90,7 +90,9 @@ and s2.version > s1.version);
       q = <<-EOF
       select distinct source, key_id from upload_history uh, carnivore_emails ce, carnivore_keys ck
       where (source, version) in (
-         select source, version from sources
+         select source, version from sources_most_recent
+         union
+         select source, version from sources_uniq where release='experimental'
       )
       and ce.email in (#{sponsor_emails.map { |e| quote(e) }.join(',')})
       and ce.id = ck.id
