@@ -349,6 +349,14 @@ sub run {
 	}
 	print "Inserting bugs: ",(time() - $t),"s\n" if $timing;
 
+	# Check for broken imports
+	my $sthc = $dbh->prepare("select count(*) from bugs where id in (select id from bugs_rt_affects_unstable) and id > 500000");
+	$sthc->execute();
+	my $rowsc = $sthc->fetchrow_array();
+	if ($rowsc < 1000) {
+		die("Broken bugs import: not enough bugs affecting unstable\n");
+	}
+
 	foreach my $postfix (qw{_packages _merged_with _found_in _fixed_in _tags}, '') {
 		my $sth = $dbh->prepare("ANALYZE $table$postfix");
 		$sth->execute() or die $!;
