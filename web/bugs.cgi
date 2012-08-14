@@ -516,10 +516,10 @@ puts <<-EOF
 </div>
 <p><b>Useful queries:</b>
 <ul>
-<li><a href="http://localhost/udd/bugs.cgi?release=wheezy_and_sid&patch=ign&merged=ign&done=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&ctags=1&ctags=1&cdeferred=1"><b>Bug squasher view:</b> Affecting sid and wheezy, not marked as done, not tagged patch; those need to be fixed, probably by a patch+upload</a></li>
-<li><a href="http://localhost/udd/bugs.cgi?release=wheezy_and_sid&patch=only&merged=ign&done=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&chints=1&ctags=1&cdeferred=1"><b>Sponsor view:</b> Affecting sid and wheezy, not marked as done, tagged 'patch'; those need a DD to sponsor an upload</a></li>
-<li><a href="http://localhost/udd/bugs.cgi?release=wheezy_and_sid&merged=ign&done=only&fnewerval=7&rc=1&sortby=id&sorto=asc&ctags=1&cdeferred=1"><b>Cleaner view:</b> Affecting sid and wheezy, but marked as done; why is it still affecting unstable? missing binaries? wrong changelog?</a></li>
-<li><a href="http://localhost/udd/bugs.cgi?release=wheezy_not_sid&merged=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&chints=1&ctags=1&cdeferred=1"><b>Release Team view:</b> Affecting wheezy, but not sid. Help the fix migrate to wheezy!</a></li>
+<li><a href="bugs.cgi?release=wheezy_and_sid&patch=ign&merged=ign&done=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&ctags=1&ctags=1&cdeferred=1"><b>Bug squasher view:</b> Affecting sid and wheezy, not marked as done, not tagged patch; those need to be fixed, probably by a patch+upload</a></li>
+<li><a href="bugs.cgi?release=wheezy_and_sid&patch=only&merged=ign&done=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&chints=1&ctags=1&cdeferred=1"><b>Sponsor view:</b> Affecting sid and wheezy, not marked as done, tagged 'patch'; those need a DD to sponsor an upload</a></li>
+<li><a href="bugs.cgi?release=wheezy_and_sid&merged=ign&done=only&fnewerval=7&rc=1&sortby=id&sorto=asc&ctags=1&cdeferred=1"><b>Cleaner view:</b> Affecting sid and wheezy, but marked as done; why is it still affecting unstable? missing binaries? wrong changelog?</a></li>
+<li><a href="bugs.cgi?release=wheezy_not_sid&merged=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&chints=1&ctags=1&cdeferred=1"><b>Release Team view:</b> Affecting wheezy, but not sid. Help the fix migrate to wheezy!</a></li>
 </ul>
 
 <div class="footer">
