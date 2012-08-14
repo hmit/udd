@@ -473,6 +473,7 @@ CREATE TABLE upload_history
  PRIMARY KEY (source, version));
 
 CREATE INDEX upload_history_distribution_date_idx on upload_history(distribution, date);
+CREATE INDEX upload_history_fingerprint_idx on upload_history(fingerprint);
 
 CREATE TABLE upload_history_architecture
  (source text, version debversion, architecture text, file text,

@@ -686,3 +686,6 @@ CREATE OR REPLACE FUNCTION blends_metapackage_translations (text[]) RETURNS SETO
 -- 2012-07-06
 CREATE INDEX ubuntu_bugs_tasks_package_idx on ubuntu_bugs_tasks(package);
 CREATE INDEX upload_history_distribution_date_idx on upload_history(distribution, date);
+
+-- 2012-08-14
+CREATE INDEX upload_history_fingerprint_idx on upload_history(fingerprint);
