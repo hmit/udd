@@ -90,7 +90,7 @@ email: <input id="email2" type='text' size='100' name='email2' value='#{default_
 <input id="nouploader2" name="nouploader2" type="checkbox"/> co-maintained &nbsp;&nbsp;
 <input id="nosponsor2" name="nosponsor2" type="checkbox"/> sponsored / NMUed <br/>
 
-email: <input id="email3" type='text' size='100' name='email3' value='#{default_email2}'/>
+email: <input id="email3" type='text' size='100' name='email3' value='#{default_email3}'/>
 &nbsp;&nbsp;ignore:
 <input id="nouploader3" name="nouploader3" type="checkbox"/> co-maintained &nbsp;&nbsp;
 <input id="nosponsor3" name="nosponsor3" type="checkbox"/> sponsored / NMUed
