@@ -108,7 +108,9 @@ and s2.version > s1.version);
     upload_rows.each { |p| srcs[p[0]] = [:uploader, p[1]] }
     maint_rows.each { |p| srcs[p[0]] = [:maintainer, p[1]] }
 
-    dbget("insert into mysources values (#{srcs.keys.map { |e| quote(e) }.join('),(')})")
+    if not srcs.empty?
+      dbget("insert into mysources values (#{srcs.keys.map { |e| quote(e) }.join('),(')})")
+    end
 
     @sources = srcs
   end
