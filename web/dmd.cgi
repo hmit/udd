@@ -12,13 +12,15 @@ cgi = CGI::new
 tstart = Time::now
 
 default_email1 = 'pkg-ruby-extras-maintainers@lists.alioth.debian.org'
-default_email2 = default_email3 = ''
+default_email2 = default_email3 = default_packages = ''
 default_email1 = cgi.params['email1'][0] if cgi.params['email1'][0]
 default_email2 = cgi.params['email2'][0] if cgi.params['email2'][0]
 default_email3 = cgi.params['email3'][0] if cgi.params['email3'][0]
+default_packages = cgi.params['packages'][0] if cgi.params['packages'][0]
 default_email1 = CGI.escapeHTML(default_email1)
 default_email2 = CGI.escapeHTML(default_email2)
 default_email3 = CGI.escapeHTML(default_email3)
+default_packages = CGI.escapeHTML(default_packages)
 
 puts <<-EOF
 <html>
@@ -93,7 +95,10 @@ email: <input id="email2" type='text' size='100' name='email2' value='#{default_
 email: <input id="email3" type='text' size='100' name='email3' value='#{default_email3}'/>
 &nbsp;&nbsp;ignore:
 <input id="nouploader3" name="nouploader3" type="checkbox"/> co-maintained &nbsp;&nbsp;
-<input id="nosponsor3" name="nosponsor3" type="checkbox"/> sponsored / NMUed
+<input id="nosponsor3" name="nosponsor3" type="checkbox"/> sponsored / NMUed <br/>
+<br/>
+additional (source) packages (one per line or space-separated):<br/>
+<textarea id="packages" name="packages" cols="80" rows="1" value="#{default_packages}"/></textarea>
 
 &nbsp;&nbsp; <input type='submit' value='Go' onsubmit="removeBlankFields(this);"/>
 </form>
@@ -116,7 +121,7 @@ if cgi.params != {}
       emails[em] = types
     end
   end
-  $uddd = UDDData::new(emails)
+  $uddd = UDDData::new(emails, cgi.params["packages"][0])
   $uddd.get_sources
   $uddd.get_sources_status
   $uddd.get_dmd_todos
@@ -124,7 +129,9 @@ if cgi.params != {}
 
   def src_reason(pkg)
     s = $uddd.sources[pkg]
-    if s[0] == :maintainer
+    if s[0] == :manually_listed
+      return "<span title=\"manually listed\"><b>#{pkg}</b></span>"
+    elsif s[0] == :maintainer
       return "<span title=\"maintained by #{s[1]}\"><b>#{pkg}</b></span>"
     elsif s[0] == :uploader
       return "<span title=\"co-maintained by #{s[1]}\">#{pkg}</span>"

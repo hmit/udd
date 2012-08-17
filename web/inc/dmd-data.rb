@@ -19,9 +19,10 @@ class UDDData
   attr_accessor :debug
   attr_reader :sources, :versions, :all_bugs, :bugs_tags, :bugs_count, :migration, :buildd, :dmd_todos, :ubuntu_bugs
 
-  def initialize(emails = {})
+  def initialize(emails = {}, addsources = "")
     @debug = false
     @emails = emails
+    @addsources = addsources
 
     @dbh = nil
     begin
@@ -107,6 +108,11 @@ and s2.version > s1.version);
     sponsor_rows.each { |p| srcs[p[0]] = [:sponsor, p[1]] }
     upload_rows.each { |p| srcs[p[0]] = [:uploader, p[1]] }
     maint_rows.each { |p| srcs[p[0]] = [:maintainer, p[1]] }
+
+    @addsources.split(/\s/).each do |p|
+      p.chomp!
+      srcs[p] = [:manually_listed]
+    end
 
     if not srcs.empty?
       dbget("insert into mysources values (#{srcs.keys.map { |e| quote(e) }.join('),(')})")
