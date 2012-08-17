@@ -98,7 +98,7 @@ email: <input id="email3" type='text' size='100' name='email3' value='#{default_
 <input id="nosponsor3" name="nosponsor3" type="checkbox"/> sponsored / NMUed <br/>
 <br/>
 additional (source) packages (one per line or space-separated):<br/>
-<textarea id="packages" name="packages" cols="80" rows="1" value="#{default_packages}"/></textarea>
+<textarea id="packages" name="packages" cols="80" rows="1"/>#{default_packages}</textarea>
 
 &nbsp;&nbsp; <input type='submit' value='Go' onsubmit="removeBlankFields(this);"/>
 </form>
