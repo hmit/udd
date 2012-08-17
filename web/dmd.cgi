@@ -38,7 +38,21 @@ puts <<-EOF
 <script>
 $(function() {
   $( "#tabs" ).tabs();
-  $( "#email" ).autocomplete({
+  $( "#email1" ).autocomplete({
+    source: "dmd-emails.cgi",
+    select: function(event, ui) {
+        $("#email").val(ui.item.value);
+        $("#searchForm").submit();
+    }
+  });
+  $( "#email2" ).autocomplete({
+    source: "dmd-emails.cgi",
+    select: function(event, ui) {
+        $("#email").val(ui.item.value);
+        $("#searchForm").submit();
+    }
+  });
+  $( "#email3" ).autocomplete({
     source: "dmd-emails.cgi",
     select: function(event, ui) {
         $("#email").val(ui.item.value);
