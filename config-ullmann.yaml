@@ -536,7 +536,7 @@ ddtp:
 
 ubuntu-ddtp:
    type: ddtp
-   update-command: /srv/udd.debian.org/udd/scripts/fetch_ddtp_translations.sh /srv/udd.debian.org/mirrors/ubuntu-ddtp /org/mirrors/ubuntu.com/ftp/dists
+   update-command: /srv/udd.debian.org/udd/scripts/fetch_ddtp_translations.sh /srv/udd.debian.org/mirrors/ubuntu-ddtp /srv/mirrors/ubuntu.com/ftp/dists
    path: /srv/udd.debian.org/mirrors/ubuntu-ddtp
    files: Translation-.*\.gz
    mirrorpath: /srv/mirrors/ubuntu.com/ftp/dists
