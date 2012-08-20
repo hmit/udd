@@ -135,7 +135,7 @@ if cgi.params != {}
       emails[em] = types
     end
   end
-  $uddd = UDDData::new(emails, cgi.params["packages"][0])
+  $uddd = UDDData::new(emails, cgi.params["packages"][0] || "")
   $uddd.get_sources
   $uddd.get_sources_status
   $uddd.get_dmd_todos
