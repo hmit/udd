@@ -12,13 +12,15 @@ cgi = CGI::new
 tstart = Time::now
 
 default_email1 = 'pkg-ruby-extras-maintainers@lists.alioth.debian.org'
-default_email2 = default_email3 = ''
+default_email2 = default_email3 = default_packages = ''
 default_email1 = cgi.params['email1'][0] if cgi.params['email1'][0]
 default_email2 = cgi.params['email2'][0] if cgi.params['email2'][0]
 default_email3 = cgi.params['email3'][0] if cgi.params['email3'][0]
+default_packages = cgi.params['packages'][0] if cgi.params['packages'][0]
 default_email1 = CGI.escapeHTML(default_email1)
 default_email2 = CGI.escapeHTML(default_email2)
 default_email3 = CGI.escapeHTML(default_email3)
+default_packages = CGI.escapeHTML(default_packages)
 
 puts <<-EOF
 <html>
@@ -36,7 +38,21 @@ puts <<-EOF
 <script>
 $(function() {
   $( "#tabs" ).tabs();
-  $( "#email" ).autocomplete({
+  $( "#email1" ).autocomplete({
+    source: "dmd-emails.cgi",
+    select: function(event, ui) {
+        $("#email").val(ui.item.value);
+        $("#searchForm").submit();
+    }
+  });
+  $( "#email2" ).autocomplete({
+    source: "dmd-emails.cgi",
+    select: function(event, ui) {
+        $("#email").val(ui.item.value);
+        $("#searchForm").submit();
+    }
+  });
+  $( "#email3" ).autocomplete({
     source: "dmd-emails.cgi",
     select: function(event, ui) {
         $("#email").val(ui.item.value);
@@ -59,6 +75,19 @@ $("tbody.todos tr").each(function(index, elem) {
  $(elem).show();
 });
 }
+
+function removeBlankFields(form) {
+	var inputs = form.getElementsByTagName("input");
+	var removeList = new Array();
+	for (var i=0; i<inputs.length; i++) {
+		if (inputs[i].value == "") {
+			removeList.push(inputs[i]);
+		}
+	}
+	for (x in removeList) {
+		removeList[x].parentNode.removeChild(removeList[x]);
+	}
+}
 </script>
 </head>
 <body>
@@ -68,37 +97,45 @@ $("tbody.todos tr").each(function(index, elem) {
 <form id="searchForm" action="dmd.cgi" method="get">
 
 email: <input id="email1" type='text' size='100' name='email1' value='#{default_email1}'/>
-&nbsp;&nbsp;<input id="maintainer1" name="maintainer1" type="checkbox" checked="checked"/> maintainer
-&nbsp;&nbsp; <input id="uploader1" name="uploader1" type="checkbox" checked="checked"/> uploader
-&nbsp;&nbsp; <input id="sponsor1" name="sponsor1" type="checkbox" checked="checked"/> sponsor<br/>
+&nbsp;&nbsp;ignore:
+<input id="nouploader1" name="nouploader1" type="checkbox"/> co-maintained &nbsp;&nbsp;
+<input id="nosponsor1" name="nosponsor1" type="checkbox"/> sponsored / NMUed <br/>
 
 email: <input id="email2" type='text' size='100' name='email2' value='#{default_email2}'/>
-&nbsp;&nbsp;<input id="maintainer2" name="maintainer2" type="checkbox" checked="checked"/> maintainer
-&nbsp;&nbsp; <input id="uploader2" name="uploader2" type="checkbox" checked="checked"/> uploader
-&nbsp;&nbsp; <input id="sponsor2" name="sponsor2" type="checkbox" checked="checked"/> sponsor<br/>
+&nbsp;&nbsp;ignore:
+<input id="nouploader2" name="nouploader2" type="checkbox"/> co-maintained &nbsp;&nbsp;
+<input id="nosponsor2" name="nosponsor2" type="checkbox"/> sponsored / NMUed <br/>
 
 email: <input id="email3" type='text' size='100' name='email3' value='#{default_email3}'/>
-&nbsp;&nbsp;<input id="maintainer3" name="maintainer3" type="checkbox" checked="checked"/> maintainer
-&nbsp;&nbsp; <input id="uploader3" name="uploader3" type="checkbox" checked="checked"/> uploader
-&nbsp;&nbsp; <input id="sponsor3" name="sponsor3" type="checkbox" checked="checked"/> sponsor
+&nbsp;&nbsp;ignore:
+<input id="nouploader3" name="nouploader3" type="checkbox"/> co-maintained &nbsp;&nbsp;
+<input id="nosponsor3" name="nosponsor3" type="checkbox"/> sponsored / NMUed <br/>
+<br/>
+additional (source) packages (one per line or space-separated):<br/>
+<textarea id="packages" name="packages" cols="80" rows="1"/>#{default_packages}</textarea>
 
-&nbsp;&nbsp; <input type='submit' value='Go'/>
+&nbsp;&nbsp; <input type='submit' value='Go' onsubmit="removeBlankFields(this);"/>
 </form>
 EOF
 
 if cgi.params != {}
   emails = {}
+
+  # for compatibility purposes
+  if cgi.params["email"][0] and cgi.params["email"][0] != ''
+    emails[cgi.params["email"][0]] = [ :maintainer, :uploader, :sponsor ]
+  end
+
   [1, 2, 3].each do |i|
     if cgi.params["email#{i}"][0] and cgi.params["email#{i}"][0] != ''
       em = cgi.params["email#{i}"][0]
-      types = []
-      types << :maintainer if cgi.params["maintainer#{i}"][0] == 'on'
-      types << :uploader if cgi.params["uploader#{i}"][0] == 'on'
-      types << :sponsor if cgi.params["sponsor#{i}"][0] == 'on'
+      types = [ :maintainer, :uploader, :sponsor ]
+      types.delete(:uploader) if cgi.params["nouploader#{i}"][0] == 'on'
+      types.delete(:sponsor) if cgi.params["nosponsor#{i}"][0] == 'on'
       emails[em] = types
     end
   end
-  $uddd = UDDData::new(emails)
+  $uddd = UDDData::new(emails, cgi.params["packages"][0] || "")
   $uddd.get_sources
   $uddd.get_sources_status
   $uddd.get_dmd_todos
@@ -106,7 +143,9 @@ if cgi.params != {}
 
   def src_reason(pkg)
     s = $uddd.sources[pkg]
-    if s[0] == :maintainer
+    if s[0] == :manually_listed
+      return "<span title=\"manually listed\"><b>#{pkg}</b></span>"
+    elsif s[0] == :maintainer
       return "<span title=\"maintained by #{s[1]}\"><b>#{pkg}</b></span>"
     elsif s[0] == :uploader
       return "<span title=\"co-maintained by #{s[1]}\">#{pkg}</span>"
@@ -222,6 +261,7 @@ if cgi.params != {}
           when :up_to_date then up[:version]
           when :newer_in_debian then "<span class=\"prio_high\" title=\"Debian version newer than upstream version. debian/watch bug?\">#{up[:version]}</a>"
           when :out_of_date then "<span class=\"prio_high\" title=\"Newer upstream version available\">#{up[:version]}</a>"
+          when :out_of_date_in_unstable then "<span class=\"prio_med\" title=\"Newer upstream version available (already packaged in experimental)\">#{up[:version]}</a>"
           else "Unhandled case!"
           end
       puts s

@@ -95,7 +95,10 @@ def get_watch(source, version, component)
   version = version.gsub(/^[\d]+:/,'')
   path = "#{DEB_MIRROR}/pool/#{component}/#{poolpath(source)}/#{source}_#{version}.dsc"
   system("cd #{d} && dpkg-source --no-check -x #{path} >/dev/null 2>&1")
-  raise "Failed dpkg-source with #{source} #{path}" unless $?.exitstatus == 0
+  if $?.exitstatus != 0
+    puts "Failed dpkg-source with #{source} #{path}"
+    return nil
+  end
   f = Dir::glob("#{d}/#{source}-*/debian/watch")
   watch = nil
   if f.length != 0
