@@ -98,6 +98,9 @@ class blends_prospective_gatherer(gatherer):
     bibrefs = []
 
     for u in u_dirs:
+      if u.startswith('.'): # it might happen that the machine readable gatherer did not read files correctly
+        self.log.error("Invalid file or directory in %s: %s" % (my_config['path'], u))
+        continue
       upath=my_config['path']+'/'+u
       sources = []
       for file in listdir(upath):
