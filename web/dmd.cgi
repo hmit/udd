@@ -119,7 +119,6 @@ additional (source) packages (one per line or space-separated):<br/>
 
 &nbsp;&nbsp; <input type='submit' value='Go' onsubmit="removeBlankFields(this);"/>
 </form>
-puts <<-EOF
 EOF
 
 if cgi.params != {}
