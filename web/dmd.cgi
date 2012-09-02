@@ -174,7 +174,7 @@ if cgi.params != {}
     puts "<tr id='#{t[:shortname]}'><td>#{t[:type]}</td>"
     puts "<td class=\"left\"><a href=\"http://packages.qa.debian.org/#{t[:source]}\">#{src_reason(t[:source])}</a></td>"
     puts "<td class=\"left\">#{t[:description]}</td>"
-    puts "<td><a href=\"#\" onclick=\"hide_todo('#{t[:shortname]}')\">hide</a></td>"
+    puts "<td><a href=\"#\" onclick=\"hide_todo('#{t[:shortname]}'); return false;\">hide</a></td>"
   end
   puts "</tbody></table>"
   puts "<p align=\"center\"><a href=\"#\" onclick=\"reset_todos()\">show all hidden todos</a></p>"
