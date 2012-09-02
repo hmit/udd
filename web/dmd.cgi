@@ -11,16 +11,23 @@ cgi = CGI::new
 
 tstart = Time::now
 
-default_email1 = 'pkg-ruby-extras-maintainers@lists.alioth.debian.org'
-default_email2 = default_email3 = default_packages = ''
-default_email1 = cgi.params['email1'][0] if cgi.params['email1'][0]
-default_email2 = cgi.params['email2'][0] if cgi.params['email2'][0]
-default_email3 = cgi.params['email3'][0] if cgi.params['email3'][0]
-default_packages = cgi.params['packages'][0] if cgi.params['packages'][0]
-default_email1 = CGI.escapeHTML(default_email1)
-default_email2 = CGI.escapeHTML(default_email2)
-default_email3 = CGI.escapeHTML(default_email3)
-default_packages = CGI.escapeHTML(default_packages)
+default_packages = ''
+default_packages = CGI.escapeHTML(cgi.params['packages'][0]) if cgi.params['packages'][0]
+
+defaults = {}
+defaults['nosponsor'] = {}
+defaults['nouploader'] = {}
+defaults['email'] = {}
+['1','2','3'].each do |i|
+  ['nosponsor', 'nouploader','email'].each do |s|
+    if cgi.params[s+i][0]
+      defaults[s][i] = CGI.escapeHTML(cgi.params[s+i][0])
+    else
+      defaults[s][i] = ''
+    end
+  end
+end
+
 
 puts <<-EOF
 <html>
@@ -95,27 +102,24 @@ function removeBlankFields(form) {
 <div id="body">
 <br/>
 <form id="searchForm" action="dmd.cgi" method="get">
+EOF
 
-email: <input id="email1" type='text' size='100' name='email1' value='#{default_email1}'/>
+['1','2','3'].each do |i|
+  puts <<-EOF
+email: <input id="email#{i}" type='text' size='100' name='email#{i}' value='#{defaults['email'][i]}'/>
 &nbsp;&nbsp;ignore:
-<input id="nouploader1" name="nouploader1" type="checkbox"/> co-maintained &nbsp;&nbsp;
-<input id="nosponsor1" name="nosponsor1" type="checkbox"/> sponsored / NMUed <br/>
-
-email: <input id="email2" type='text' size='100' name='email2' value='#{default_email2}'/>
-&nbsp;&nbsp;ignore:
-<input id="nouploader2" name="nouploader2" type="checkbox"/> co-maintained &nbsp;&nbsp;
-<input id="nosponsor2" name="nosponsor2" type="checkbox"/> sponsored / NMUed <br/>
-
-email: <input id="email3" type='text' size='100' name='email3' value='#{default_email3}'/>
-&nbsp;&nbsp;ignore:
-<input id="nouploader3" name="nouploader3" type="checkbox"/> co-maintained &nbsp;&nbsp;
-<input id="nosponsor3" name="nosponsor3" type="checkbox"/> sponsored / NMUed <br/>
+<input id="nouploader#{i}" name="nouploader#{i}" type="checkbox" #{defaults['nouploader'][i] != '' ? 'checked':''}/> co-maintained &nbsp;&nbsp;
+<input id="nosponsor#{i}" name="nosponsor#{i}" type="checkbox" #{defaults['nosponsor'][i] != '' ? 'checked' : ''}/> sponsored / NMUed <br/>
+  EOF
+end
+puts <<-EOF
 <br/>
 additional (source) packages (one per line or space-separated):<br/>
 <textarea id="packages" name="packages" cols="80" rows="1"/>#{default_packages}</textarea>
 
 &nbsp;&nbsp; <input type='submit' value='Go' onsubmit="removeBlankFields(this);"/>
 </form>
+puts <<-EOF
 EOF
 
 if cgi.params != {}
