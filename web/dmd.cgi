@@ -41,21 +41,21 @@ $(function() {
   $( "#email1" ).autocomplete({
     source: "dmd-emails.cgi",
     select: function(event, ui) {
-        $("#email").val(ui.item.value);
+        $("#email1").val(ui.item.value);
         $("#searchForm").submit();
     }
   });
   $( "#email2" ).autocomplete({
     source: "dmd-emails.cgi",
     select: function(event, ui) {
-        $("#email").val(ui.item.value);
+        $("#email2").val(ui.item.value);
         $("#searchForm").submit();
     }
   });
   $( "#email3" ).autocomplete({
     source: "dmd-emails.cgi",
     select: function(event, ui) {
-        $("#email").val(ui.item.value);
+        $("#email3").val(ui.item.value);
         $("#searchForm").submit();
     }
   });
