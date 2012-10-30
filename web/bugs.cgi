@@ -353,6 +353,26 @@ if cols['chints']
     hints[r['source']] ||= []
     hints[r['source']] << r
   end
+  sthh = dbh.prepare("select id, title from bugs where source='release.debian.org' and status='pending' and title ~ '^unblock'")
+  sthh.execute
+  rowsh = sthh.fetch_all
+  unblockreq = {}
+  ids = []
+  rowsh.each do |r|
+    src = r['title'].split(" ")[1].split('/')[0]
+    unblockreq[src] ||= []
+    unblockreq[src] << r['id']
+    ids << r['id']
+  end
+  ids = ids.join(',')
+  stht = dbh.prepare("select id, tag from bugs_tags where id in (#{ids})")
+  stht.execute
+  rowst = stht.fetch_all
+  unblockreqtags = {}
+  rowst.each do |r|
+    unblockreqtags[r['id']] ||= []
+    unblockreqtags[r['id']] << r['tag']
+  end
 end
 
 if cols['ctags']
@@ -418,13 +438,19 @@ puts '<th>last&nbsp;modified</th></tr>'
 puts '</thead>'
 puts '<tbody>'
 
-def genhints(source, hints)
-  return '' if hints.nil?
+def genhints(source, hints, unblockreq, tags)
   s = ''
-  hints.each do |h|
-    v = h['version'] ? h['version'] + ' ' : ''
-    t = h['type'] == 'age-days' ? "age/#{h['argument']}" : h['type']
-    s += "<a href=\"http://release.debian.org/britney/hints/#{h['file']}\" title=\"#{v}#{h['file']} #{h['comment']}\">#{t}</a> "
+  if not hints.nil?
+    hints.each do |h|
+      v = h['version'] ? h['version'] + ' ' : ''
+      t = h['type'] == 'age-days' ? "age/#{h['argument']}" : h['type']
+      s += "<a href=\"http://release.debian.org/britney/hints/#{h['file']}\" title=\"#{v}#{h['file']} #{h['comment']}\">#{t}</a> "
+    end
+  end
+  if not unblockreq.nil?
+    unblockreq.each do |u|
+      s += "req:<a href=\"http://bugs.debian.org/#{u}\">##{u}</a>#{gentags(tags[u])} "
+    end
   end
   s
 end
@@ -496,7 +522,7 @@ rows.each do |r|
   puts "<td>#{CGI::escapeHTML(r['title'])}</td>"
   puts "<td>#{r['popcon']}</td>" if cols['cpopcon']
   puts "<td>#{r['severity']}</td>" if cols['cseverity']
-  puts "<td>#{genhints(r['source'], hints[r['source']])}</td>" if cols['chints']
+  puts "<td>#{genhints(r['source'], hints[r['source']], unblockreq[r['source']], unblockreqtags)}</td>" if cols['chints']
   puts "<td>#{claimedbugs[r['id']]}</td>" if cols['cclaimed']
   puts "<td>#{deferredbugs[r['id']]}</td>" if cols['cdeferred']
   puts "<td>#{rttags[r['id']]}</td>" if cols['crttags']
