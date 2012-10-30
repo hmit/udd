@@ -5,7 +5,7 @@ require 'pp'
 require 'uri'
 require 'net/http'
 
-URELEASE='quantal'
+URELEASE='raring'
 
 puts "Content-type: text/html\n\n"
 
@@ -32,7 +32,7 @@ puts <<-EOF
 EOF
 
 DREL='sid'
-UREL='quantal'
+UREL='raring'
 puts "Debian release: #{DREL}<br>"
 puts "Ubuntu release: #{UREL}<br>"
 puts "Bugs data refreshed once a day. Packages data refreshed twice a day.<br>"

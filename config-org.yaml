@@ -320,6 +320,70 @@ debian-experimental:
   sources-schema: sources
   release: experimental
 
+ubuntu-raring:
+  type: src-pkg
+  archs: [amd64, i386]
+  directory: /org/mirrors/ubuntu.com/ftp/dists/raring/
+  components: [main, multiverse, universe, restricted]
+  distribution: ubuntu
+  release: raring
+  packages-table: ubuntu_packages
+  sources-table: ubuntu_sources
+  uploaders-table: ubuntu_uploaders
+  packages-schema: packages
+  sources-schema: sources
+
+ubuntu-raring-security:
+  type: src-pkg
+  archs: [amd64, i386]
+  directory: /org/mirrors/ubuntu.com/ftp/dists/raring-security/
+  components: [main, multiverse, universe, restricted]
+  distribution: ubuntu
+  release: raring-security
+  packages-table: ubuntu_packages
+  sources-table: ubuntu_sources
+  uploaders-table: ubuntu_uploaders
+  packages-schema: packages
+  sources-schema: sources
+
+ubuntu-raring-updates:
+  type: src-pkg
+  archs: [amd64, i386]
+  directory: /org/mirrors/ubuntu.com/ftp/dists/raring-updates/
+  components: [main, multiverse, universe, restricted]
+  distribution: ubuntu
+  release: raring-updates
+  packages-table: ubuntu_packages
+  sources-table: ubuntu_sources
+  uploaders-table: ubuntu_uploaders
+  packages-schema: packages
+  sources-schema: sources
+
+ubuntu-raring-proposed:
+  type: src-pkg
+  archs: [amd64, i386]
+  directory: /org/mirrors/ubuntu.com/ftp/dists/raring-proposed/
+  components: [main, multiverse, universe, restricted]
+  distribution: ubuntu
+  release: raring-proposed
+  packages-table: ubuntu_packages
+  sources-table: ubuntu_sources
+  uploaders-table: ubuntu_uploaders
+  packages-schema: packages
+  sources-schema: sources
+
+ubuntu-raring-backports:
+  type: src-pkg
+  archs: [amd64, i386]
+  directory: /org/mirrors/ubuntu.com/ftp/dists/raring-backports/
+  components: [main, multiverse, universe, restricted]
+  distribution: ubuntu
+  release: raring-backports
+  packages-table: ubuntu_packages
+  sources-table: ubuntu_sources
+  uploaders-table: ubuntu_uploaders
+  packages-schema: packages
+  sources-schema: sources
 
 ubuntu-quantal:
   type: src-pkg

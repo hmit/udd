@@ -33,7 +33,7 @@ query = '''SELECT s.source, s.version, u.version
              WHERE maintainer_name LIKE '%Debian QA%'
              AND release = 'sid' )
            AND s.release = 'sid'
-           AND u.release = 'quantal'
+           AND u.release = 'raring'
            AND u.version LIKE '%ubuntu%'
            ORDER BY s.source'''
 

@@ -3,7 +3,7 @@
 
 require 'dbi'
 
-RELEASE='quantal'
+RELEASE='raring'
 
 puts "Content-type: text/plain\n\n"
 

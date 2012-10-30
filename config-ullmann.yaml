@@ -195,6 +195,71 @@ debian-experimental:
 
 
 #### UBUNTU
+ubuntu-raring:
+  type: src-pkg
+  archs: [amd64, i386]
+  directory: /srv/udd.debian.org/mirrors/ubuntu/raring
+  update-command: /srv/udd.debian.org/udd/scripts/sync-dist.sh us.archive.ubuntu.com::ubuntu/dists/ /srv/udd.debian.org/mirrors/ubuntu
+  components: [main, multiverse, universe, restricted]
+  distribution: ubuntu
+  release: raring
+  packages-table: ubuntu_packages
+  sources-table: ubuntu_sources
+  uploaders-table: ubuntu_uploaders
+  packages-schema: packages
+  sources-schema: sources
+
+ubuntu-raring-security:
+  type: src-pkg
+  archs: [amd64, i386]
+  directory: /srv/udd.debian.org/mirrors/ubuntu/raring-security
+  components: [main, multiverse, universe, restricted]
+  distribution: ubuntu
+  release: raring-security
+  packages-table: ubuntu_packages
+  sources-table: ubuntu_sources
+  uploaders-table: ubuntu_uploaders
+  packages-schema: packages
+  sources-schema: sources
+
+ubuntu-raring-updates:
+  type: src-pkg
+  archs: [amd64, i386]
+  directory: /srv/udd.debian.org/mirrors/ubuntu/raring-updates
+  components: [main, multiverse, universe, restricted]
+  distribution: ubuntu
+  release: raring-updates
+  packages-table: ubuntu_packages
+  sources-table: ubuntu_sources
+  uploaders-table: ubuntu_uploaders
+  packages-schema: packages
+  sources-schema: sources
+
+ubuntu-raring-proposed:
+  type: src-pkg
+  archs: [amd64, i386]
+  directory: /srv/udd.debian.org/mirrors/ubuntu/raring-proposed
+  components: [main, multiverse, universe, restricted]
+  distribution: ubuntu
+  release: raring-proposed
+  packages-table: ubuntu_packages
+  sources-table: ubuntu_sources
+  uploaders-table: ubuntu_uploaders
+  packages-schema: packages
+  sources-schema: sources
+
+ubuntu-raring-backports:
+  type: src-pkg
+  archs: [amd64, i386]
+  directory: /srv/udd.debian.org/mirrors/ubuntu/raring-backports
+  components: [main, multiverse, universe, restricted]
+  distribution: ubuntu
+  release: raring-backports
+  packages-table: ubuntu_packages
+  sources-table: ubuntu_sources
+  uploaders-table: ubuntu_uploaders
+  packages-schema: packages
+  sources-schema: sources
 
 ubuntu-quantal:
   type: src-pkg

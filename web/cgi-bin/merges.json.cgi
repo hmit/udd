@@ -6,12 +6,12 @@ require 'uri'
 require 'net/http'
 require 'json/pure'
 
-URELEASE='quantal'
+URELEASE='raring'
 
 puts "Content-type: application/json\n\n"
 
 DREL='sid'
-UREL='quantal'
+UREL='raring'
 
 dbh = DBI::connect('DBI:Pg:dbname=udd;port=5452;host=localhost', 'guest')
 
