@@ -89,3 +89,24 @@ where s.distribution='debian' and s.release='sid';
 GRANT SELECT ON bapase TO PUBLIC;
 
 EOT
+
+# create import log
+LOGFILE=clone_bugs_`date "+%Y%m%d"`.log
+rm -rf $LOGFILE
+
+count_bug_table() {
+    echo "$1:" `psql udd -t -c "SELECT COUNT(*) FROM $1"` >> $LOGFILE
+}
+
+count_bug_table bugs_blockedby
+count_bug_table bugs_fixed_in
+count_bug_table bugs_found_in
+count_bug_table bugs_merged_with
+count_bug_table bugs_packages
+count_bug_table bugs_blocks
+count_bug_table bugs_tags
+count_bug_table bugs
+count_bug_table bugs_usertags
+
+echo "MAX(id):" `psql udd -t -c "SELECT max(id) from bugs;"` >> $LOGFILE
+
