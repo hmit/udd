@@ -230,7 +230,7 @@ AS $$
             CASE WHEN bibbooktitle.value IS NOT NULL THEN E',\n  Booktitle = "{' || bibbooktitle.value || '}"' ELSE '' END ||
             CASE WHEN bibyear.value    IS NOT NULL THEN E',\n  Year    = {' || bibyear.value    || '}' ELSE '' END ||
             CASE WHEN bibmonth.value   IS NOT NULL THEN E',\n  Month   = {' || bibmonth.value   || '}' ELSE '' END ||
-            CASE WHEN bibjournal.value IS NOT NULL THEN E',\n  Journal = {' || bibjournal.value || '}' ELSE '' END ||
+            CASE WHEN bibjournal.value IS NOT NULL THEN E',\n  Journal = {' || replace(bibjournal.value, '&', E'\\&') || '}' ELSE '' END ||
             CASE WHEN bibaddress.value IS NOT NULL THEN E',\n  Address = {' || bibaddress.value || '}' ELSE '' END ||
             CASE WHEN bibpublisher.value IS NOT NULL THEN E',\n  Publisher = {' || bibpublisher.value || '}' ELSE '' END ||
             CASE WHEN bibvolume.value  IS NOT NULL THEN E',\n  Volume  = {' || bibvolume.value  || '}' ELSE '' END ||
