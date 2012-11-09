@@ -237,8 +237,12 @@ class upstream_reader():
         try:
           ref['value']   = references[r].strip()
         except AttributeError, err:
-          self.log.error("Cannot parse value for source %s: r = %s -> value = %s" % (self.source, r, str(references[r])))
-          ref['value']   = '???'
+          if str(references[r]) == 'None':
+            self.log.warning("No value given for field '%s' in source package %s - the field is ignored." % (r, self.source))
+            continue
+          else:
+            self.log.error("Cannot parse value for source %s: r = %s -> value = %s" % (self.source, r, str(references[r])))
+            ref['value']   = '???'
         if key == 'author':
           # Try to catch broken author formating
           new_author = re.sub(',\s* and\s*' , ' and ', ref['value'])
