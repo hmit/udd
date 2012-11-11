@@ -1,6 +1,7 @@
 #!/usr/bin/ruby
 
 require 'cgi'
+require 'yaml'
 
 STDERR.reopen(STDOUT) # makes live debugging much easier
 puts "Content-type: text/html\n\n"
@@ -302,20 +303,21 @@ if cgi.params != {}
 
   puts '<div id="tabs-ubuntu">'
 
+  ur = YAML::load(IO::read('ubuntu-releases.yaml'))
+  USTB=ur['stable']
+  UDEV=ur['devel']
   puts <<-EOF
 <table class="buglist tablesorter">
 <thead>
 <tr>
 <th>source</th>
 <th>&nbsp;&nbsp;&nbsp;&nbsp;bugs&nbsp;&nbsp;&nbsp;&nbsp;</th><th>&nbsp;&nbsp;&nbsp;&nbsp;patches&nbsp;&nbsp;&nbsp;&nbsp;</th>
-<th>&nbsp;&nbsp;&nbsp;&nbsp;precise (stable)&nbsp;&nbsp;&nbsp;&nbsp;</th><th>&nbsp;&nbsp;&nbsp;&nbsp;raring (devel)&nbsp;&nbsp;&nbsp;&nbsp;</th><th>&nbsp;&nbsp;&nbsp;&nbsp;sid&nbsp;&nbsp;&nbsp;&nbsp;</th>
+<th>&nbsp;&nbsp;&nbsp;&nbsp;#{USTB} (stable)&nbsp;&nbsp;&nbsp;&nbsp;</th><th>&nbsp;&nbsp;&nbsp;&nbsp;#{UDEV} (devel)&nbsp;&nbsp;&nbsp;&nbsp;</th><th>&nbsp;&nbsp;&nbsp;&nbsp;sid&nbsp;&nbsp;&nbsp;&nbsp;</th>
 <th>&nbsp;&nbsp;&nbsp;&nbsp;links&nbsp;&nbsp;&nbsp;&nbsp;</th>
 </tr>
 </thead>
 <tbody>
   EOF
-  USTB='precise'
-  UDEV='raring'
   $uddd.sources.keys.sort.each do |src|
     next if not $uddd.versions.include?(src)
     next if (not $uddd.versions[src].include?('debian') or not $uddd.versions[src].include?('ubuntu'))
