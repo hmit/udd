@@ -407,8 +407,7 @@ end # cgi.params
 
 puts <<-EOF
 <div class="footer">
-<small>Suggestions / comments / patches to debian-qa@lists.debian.org or lucas@debian.org. <a href="hacking.html">
-source code</a>.</small>
+<small><a href="hacking.html">hacking / bug reporting / contact information</a> - <a href="http://anonscm.debian.org/gitweb/?p=collab-qa/udd.git;a=blob_plain;f=web/bugs.cgi">source code</a></small>
 </div>
 </body></html>
 EOF
