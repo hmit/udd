@@ -507,7 +507,7 @@ def genaffected(r)
   s += "<abbr title='affects stable'>S</abbr>" if r['affects_stable']
   s += "<abbr title='affects testing'>T</abbr>" if r['affects_testing']
   s += "<abbr title='affects unstable'>U</abbr>" if r['affects_unstable']
-  s += "<abbr title='affects unstable'>E</abbr>" if r['affects_experimental']
+  s += "<abbr title='affects experimental'>E</abbr>" if r['affects_experimental']
   return "" if s == ""
   return "&nbsp;("+s+")"
 end
@@ -547,7 +547,7 @@ puts <<-EOF
 <ul>
 <li><a href="bugs.cgi?release=wheezy_and_sid&patch=ign&merged=ign&done=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&ctags=1&ctags=1&cdeferred=1"><b>Bug squasher view:</b> Affecting sid and wheezy, not marked as done, not tagged patch; those need to be fixed, probably by a patch+upload</a></li>
 <li><a href="bugs.cgi?release=wheezy_and_sid&patch=only&merged=ign&done=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&chints=1&ctags=1&cdeferred=1"><b>Sponsor view:</b> Affecting sid and wheezy, not marked as done, tagged 'patch'; those need a DD to sponsor an upload</a></li>
-<li><a href="bugs.cgi?release=wheezy_and_sid&merged=ign&done=only&fnewerval=7&rc=1&sortby=id&sorto=asc&ctags=1&cdeferred=1"><b>Cleaner view:</b> Affecting sid and wheezy, but marked as done; why is it still affecting unstable? missing binaries? wrong changelog?</a></li>
+<li><a href="bugs.cgi?release=wheezy_and_sid&merged=ign&done=only&fnewerval=7&rc=1&sortby=id&sorto=asc&ctags=1&cdeferred=1&caffected=1"><b>Cleaner view:</b> Affecting sid and wheezy, but marked as done; why is it still affecting unstable? missing binaries? wrong changelog?</a></li>
 <li><a href="bugs.cgi?release=wheezy_not_sid&merged=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&chints=1&ctags=1&cdeferred=1&crttags=1"><b>Release Team view:</b> Affecting wheezy, but not sid. Help the fix migrate to wheezy!</a></li>
 </ul>
 
