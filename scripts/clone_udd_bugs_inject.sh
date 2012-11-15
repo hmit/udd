@@ -2,12 +2,13 @@
 
 set -e
 
-BUGSDUMP=/srv/udd.debian.org/mirrors/clone-bugs/udd-bugs.sql.gz
+BUGSDUMP=/srv/udd.debian.org/mirrors/clone-bugs/udd-bugs.sql.xz
 
 unset LANG
 unset LC_ALL
 
 psql --quiet udd 2>/dev/null <<EOT
+BEGIN;
 DROP TABLE IF EXISTS bugs_blockedby;
 DROP TABLE IF EXISTS bugs_fixed_in;
 DROP TABLE IF EXISTS bugs_found_in;
@@ -25,9 +26,18 @@ DROP TABLE IF EXISTS bugs_tags;
 DROP VIEW  IF EXISTS all_bugs ;
 DROP TABLE IF EXISTS bugs;
 DROP TABLE IF EXISTS bugs_usertags;
+DROP TABLE IF EXISTS archived_bugs_blockedby;
+DROP TABLE IF EXISTS archived_bugs_blocks;
+DROP TABLE IF EXISTS archived_bugs_fixed_in;
+DROP TABLE IF EXISTS archived_bugs_found_in;
+DROP TABLE IF EXISTS archived_bugs_merged_with;
+DROP TABLE IF EXISTS archived_bugs_packages;
+DROP TABLE IF EXISTS archived_bugs_tags;
+DROP TABLE IF EXISTS archived_bugs;
+COMMIT ;
 EOT
 
-zcat $BUGSDUMP | psql --quiet udd
+xzcat $BUGSDUMP | psql --quiet udd
 
 # recreate lost views
 psql --quiet udd <<EOT
@@ -107,6 +117,14 @@ count_bug_table bugs_blocks
 count_bug_table bugs_tags
 count_bug_table bugs
 count_bug_table bugs_usertags
+count_bug_table archived_bugs
+count_bug_table archived_bugs_blockedby
+count_bug_table archived_bugs_blocks
+count_bug_table archived_bugs_fixed_in
+count_bug_table archived_bugs_found_in
+count_bug_table archived_bugs_merged_with
+count_bug_table archived_bugs_packages
+count_bug_table archived_bugs_tags
 
 echo "MAX(id):" `psql udd -t -c "SELECT max(id) from bugs;"` >> $LOGFILE
 
