@@ -2,7 +2,8 @@
 
 require 'dbi'
 require 'pp'
-RELEASE='oneiric'
+require 'yaml'
+RELEASE=YAML::load(IO::read('../../ubuntu-releases.yaml'))['devel']
 
 puts "Content-type: text/plain\n\n"
 

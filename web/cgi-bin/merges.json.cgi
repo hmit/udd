@@ -6,12 +6,12 @@ require 'uri'
 require 'net/http'
 require 'json/pure'
 
-URELEASE='raring'
+URELEASE=YAML::load(IO::read('../ubuntu-releases.yaml'))['devel']
 
 puts "Content-type: application/json\n\n"
 
 DREL='sid'
-UREL='raring'
+UREL=URELEASE
 
 dbh = DBI::connect('DBI:Pg:dbname=udd;port=5452;host=localhost', 'guest')
 

@@ -2,8 +2,9 @@
 # Used by DDPO
 
 require 'dbi'
+require 'yaml'
 
-RELEASE='raring'
+RELEASE=YAML::load(IO::read('../ubuntu-releases.yaml'))['devel']
 
 puts "Content-type: text/plain\n\n"
 
