@@ -122,11 +122,11 @@ Those are already fixed in unstable, but the fix still needs to migrate to wheez
 <p>How do we compare to the squeeze cycle ?</p>
 <table border=1>
 <tr><th>Week</th><th>Squeeze</th><th>Wheezy</th><th>Diff</th></tr>
-<tr><td>43</td><td>284 (213+71)</td><td>468 (332+136)</td><td>+184 (+119 ; +65)</td></tr>
-<tr><td>44</td><td>261 (201+60)</td><td>408 (265+143)<td></td></tr>
-<tr><td>45</td><td>261 (205+56)</td><td><b>425 (291+134)</td><td></td></tr>
-<tr><td>46</td><td>271 (200+71)</td><td></td><td></td></tr>
-<tr><td>47</td><td>283 (209+74)</td><td></td><td></td></tr>
+<tr><td>43</td><td>284 (213+71)</td><td>468 (332+136)</td><td>+184 (+119/+65)</td></tr>
+<tr><td>44</td><td>261 (201+60)</td><td>408 (265+143)</td><td>+147 (+64/+83)</td></tr>
+<tr><td>45</td><td>261 (205+56)</td><td>425 (291+134)</td><td>+164 (+86/+78)</td></tr>
+<tr><td>46</td><td>271 (200+71)</td><td>401 (258+143)</td><td>+130 (+58/+72)</td></tr>
+<tr><td>47</td><td>283 (209+74)</td><td>366 (221+145)</td><td>+83 (+12/+71)</td></tr>
 <tr><td>48</td><td>256 (177+79)</td><td></td><td></td></tr>
 <tr><td>49</td><td>256 (180+76)</td><td></td><td></td></tr>
 <tr><td>50</td><td>204 (148+56)</td><td></td><td></td></tr>
