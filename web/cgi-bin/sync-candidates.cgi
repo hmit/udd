@@ -5,11 +5,12 @@ require 'pp'
 require 'uri'
 require 'net/http'
 require 'json/pure'
+require 'yaml'
 
 puts "Content-type: application/json\n\n"
 
 DREL='sid'
-UREL='raring'
+UREL=YAML::load(IO::read('../ubuntu-releases.yaml'))['devel']
 
 dbh = DBI::connect('DBI:Pg:dbname=udd;port=5452;host=localhost', 'guest')
 

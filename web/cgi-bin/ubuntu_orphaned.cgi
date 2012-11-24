@@ -20,22 +20,11 @@
 
 from psycopg2 import connect
 from re import split, sub
+import yaml
+f = open('../ubuntu-releases.yaml')
+urel = yaml.load(f)['devel']
 
-query = '''SELECT s.source, s.version, u.version
-           FROM sources_uniq s
-           JOIN ubuntu_sources u ON u.source = s.source
-           WHERE s.source IN (
-             SELECT source
-             FROM orphaned_packages
-             WHERE type = 'O'
-             UNION SELECT source
-             FROM sources_uniq
-             WHERE maintainer_name LIKE '%Debian QA%'
-             AND release = 'sid' )
-           AND s.release = 'sid'
-           AND u.release = 'raring'
-           AND u.version LIKE '%ubuntu%'
-           ORDER BY s.source'''
+query = 'SELECT s.source, s.version, u.version FROM sources_uniq s JOIN ubuntu_sources u ON u.source = s.source WHERE s.source IN ( SELECT source FROM orphaned_packages WHERE type = \'O\' UNION SELECT source FROM sources_uniq WHERE maintainer_name LIKE \'%Debian QA%\' AND release = \'sid\' ) AND s.release = \'sid\' AND u.release = \''+urel+'\' AND u.version LIKE \'%ubuntu%\' ORDER BY s.source'
 
 conn = connect(database='udd', port=5452, host='localhost', user='guest')
 cur = conn.cursor()

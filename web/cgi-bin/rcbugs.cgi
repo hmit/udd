@@ -2,8 +2,9 @@
 
 require 'dbi'
 require 'pp'
+require 'yaml'
 
-URELEASE='oneiric'
+URELEASE=YAML::load(IO::read('../ubuntu-releases.yaml'))['devel']
 
 puts "Content-type: text/html\n\n"
 

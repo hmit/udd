@@ -5,8 +5,9 @@ require 'pp'
 require 'uri'
 require 'net/http'
 require 'cgi'
+require 'yaml'
 
-URELEASE='raring'
+URELEASE=YAML::load(IO::read('../ubuntu-releases.yaml'))['devel']
 
 $cgi = CGI::new
 

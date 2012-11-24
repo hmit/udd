@@ -4,8 +4,11 @@ require 'dbi'
 require 'pp'
 require 'cgi'
 require 'time'
+require 'yaml'
 
 puts "Content-type: text/html\n\n"
+
+UREL=YAML::load(IO::read('ubuntu-releases.yaml'))
 
 RELEASE_RESTRICT = [
   ['wheezy', 'wheezy', 'id in (select id from bugs_rt_affects_testing)'],
@@ -39,7 +42,7 @@ FILTERS = [
  ['outdatedwheezy', 'outdated binaries in wheezy', "bugs.source in (select distinct p1.source from packages_summary p1, packages_summary p2 where p1.source = p2.source and p1.release='wheezy' and p2.release='wheezy' and p1.source_version != p2.source_version)"],
  ['outdatedsid', 'outdated binaries in sid', "bugs.source in (select distinct p1.source from packages_summary p1, packages_summary p2 where p1.source = p2.source and p1.release='sid' and p2.release='sid' and p1.source_version != p2.source_version)"],
  ['needmig', 'different versions in wheezy and sid', "bugs.source in (select s1.source from sources s1, sources s2 where s1.source = s2.source and s1.release = 'wheezy' and s2.release='sid' and s1.version != s2.version)"],
- ['newerubuntu', 'newer in Ubuntu than in sid', "bugs.source in (select s1.source from sources_uniq s1, ubuntu_sources s2 where s1.source = s2.source and s1.release = 'sid' and s2.release='precise' and s1.version < s2.version)"],
+ ['newerubuntu', 'newer in Ubuntu than in sid', "bugs.source in (select s1.source from sources_uniq s1, ubuntu_sources s2 where s1.source = s2.source and s1.release = 'sid' and s2.release='#{UREL['devel']}' and s1.version < s2.version)"],
  ['rtwheezy-will-remove', 'RT tag for wheezy: will-remove', "id in (select id from bugs_usertags where email='release.debian.org@packages.debian.org' and tag='wheezy-will-remove')"],
  ['rtwheezy-can-defer', 'RT tag for wheezy: can-defer', "id in (select id from bugs_usertags where email='release.debian.org@packages.debian.org' and tag='wheezy-can-defer')"],
  ['rtwheezy-is-blocker', 'RT tag for wheezy: is-blocker', "id in (select id from bugs_usertags where email='release.debian.org@packages.debian.org' and tag='wheezy-is-blocker')"],
@@ -504,7 +507,7 @@ def genaffected(r)
   s += "<abbr title='affects stable'>S</abbr>" if r['affects_stable']
   s += "<abbr title='affects testing'>T</abbr>" if r['affects_testing']
   s += "<abbr title='affects unstable'>U</abbr>" if r['affects_unstable']
-  s += "<abbr title='affects unstable'>E</abbr>" if r['affects_experimental']
+  s += "<abbr title='affects experimental'>E</abbr>" if r['affects_experimental']
   return "" if s == ""
   return "&nbsp;("+s+")"
 end
@@ -544,12 +547,12 @@ puts <<-EOF
 <ul>
 <li><a href="bugs.cgi?release=wheezy_and_sid&patch=ign&merged=ign&done=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&ctags=1&ctags=1&cdeferred=1"><b>Bug squasher view:</b> Affecting sid and wheezy, not marked as done, not tagged patch; those need to be fixed, probably by a patch+upload</a></li>
 <li><a href="bugs.cgi?release=wheezy_and_sid&patch=only&merged=ign&done=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&chints=1&ctags=1&cdeferred=1"><b>Sponsor view:</b> Affecting sid and wheezy, not marked as done, tagged 'patch'; those need a DD to sponsor an upload</a></li>
-<li><a href="bugs.cgi?release=wheezy_and_sid&merged=ign&done=only&fnewerval=7&rc=1&sortby=id&sorto=asc&ctags=1&cdeferred=1"><b>Cleaner view:</b> Affecting sid and wheezy, but marked as done; why is it still affecting unstable? missing binaries? wrong changelog?</a></li>
+<li><a href="bugs.cgi?release=wheezy_and_sid&merged=ign&done=only&fnewerval=7&rc=1&sortby=id&sorto=asc&ctags=1&cdeferred=1&caffected=1"><b>Cleaner view:</b> Affecting sid and wheezy, but marked as done; why is it still affecting unstable? missing binaries? wrong changelog?</a></li>
 <li><a href="bugs.cgi?release=wheezy_not_sid&merged=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&chints=1&ctags=1&cdeferred=1&crttags=1"><b>Release Team view:</b> Affecting wheezy, but not sid. Help the fix migrate to wheezy!</a></li>
 </ul>
 
 <div class="footer">
-<small>Suggestions / comments / patches to lucas@debian.org. <a href="http://anonscm.debian.org/gitweb/?p=collab-qa/udd.git;a=blob_plain;f=web/bugs.cgi">source code</a>.</small>
+<small><a href="hacking.html">hacking / bug reporting / contact information</a> - <a href="http://anonscm.debian.org/gitweb/?p=collab-qa/udd.git;a=blob_plain;f=web/bugs.cgi">source code</a></small>
 </div>
 </body>
 </html>

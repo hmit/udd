@@ -4,8 +4,9 @@ require 'dbi'
 require 'pp'
 require 'uri'
 require 'net/http'
+require 'yaml'
 
-URELEASE='raring'
+URELEASE=YAML::load(IO::read('../ubuntu-releases.yaml'))['devel']
 
 puts "Content-type: text/html\n\n"
 
@@ -32,7 +33,7 @@ puts <<-EOF
 EOF
 
 DREL='sid'
-UREL='raring'
+UREL=URELEASE
 puts "Debian release: #{DREL}<br>"
 puts "Ubuntu release: #{UREL}<br>"
 puts "Bugs data refreshed once a day. Packages data refreshed twice a day.<br>"
