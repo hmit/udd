@@ -14,6 +14,8 @@ tstart = Time::now
 
 default_packages = ''
 default_packages = CGI.escapeHTML(cgi.params['packages'][0]) if cgi.params['packages'][0]
+default_bin2src = ''
+default_bin2src = CGI.escapeHTML(cgi.params['bin2src'][0]) if cgi.params['bin2src'][0]
 
 defaults = {}
 defaults['nosponsor'] = {}
@@ -116,7 +118,8 @@ end
 puts <<-EOF
 <br/>
 additional (source) packages (one per line or space-separated):<br/>
-<textarea id="packages" name="packages" cols="80" rows="1"/>#{default_packages}</textarea>
+<textarea id="packages" name="packages" cols="80" rows="1"/>#{default_packages}</textarea><br/>
+<input id="bin2src" name="bin2src" type="checkbox" #{default_bin2src != '' ? 'checked' : ''}/> Packages are binary packages, convert to source packages<br/>
 
 &nbsp;&nbsp; <input type='submit' value='Go' onsubmit="removeBlankFields(this);"/>
 </form>
@@ -139,7 +142,7 @@ if cgi.params != {}
       emails[em] = types
     end
   end
-  $uddd = UDDData::new(emails, cgi.params["packages"][0] || "")
+  $uddd = UDDData::new(emails, cgi.params["packages"][0] || "", cgi.params["bin2src"][0] == 'on')
   $uddd.get_sources
   $uddd.get_sources_status
   $uddd.get_dmd_todos

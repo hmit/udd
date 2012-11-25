@@ -19,10 +19,11 @@ class UDDData
   attr_accessor :debug
   attr_reader :sources, :versions, :all_bugs, :bugs_tags, :bugs_count, :migration, :buildd, :dmd_todos, :ubuntu_bugs
 
-  def initialize(emails = {}, addsources = "")
+  def initialize(emails = {}, addsources = "", bin2src = false)
     @debug = false
     @emails = emails
     @addsources = addsources
+    @bin2src = bin2src
 
     @dbh = nil
     begin
@@ -109,7 +110,16 @@ and s2.version > s1.version);
     upload_rows.each { |p| srcs[p[0]] = [:uploader, p[1]] }
     maint_rows.each { |p| srcs[p[0]] = [:maintainer, p[1]] }
 
-    @addsources.split(/\s/).each do |p|
+    if @bin2src
+      q = <<-EOF
+      select distinct source from packages
+         where package in (#{@addsources.split(/\s/).map { |e| quote(e) }.join(',')})
+      EOF
+      @addsources = dbget(q).map { |e| e[0] }
+    else
+      @addsources = @addsources.split(/\s/)
+    end
+    @addsources.each do |p|
       p.chomp!
       srcs[p] = [:manually_listed]
     end
