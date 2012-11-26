@@ -96,10 +96,10 @@ href="https://buildd.debian.org/status/media/status.css" />
 <tr>
 <td><img src="http://www.debian.org/logos/openlogo.svg"
 alt="Debian Logo" height="60" /></td>
-<td><h1 class="header">Maintainer's buildd status</h1></td>
+<td><h1 class="header">%s buildd status</h1></td>
 </tr>
 </table>
-<hr/>''')
+<hr/>''' % (name if name else 'Maintainer\'s'))
 
 if name:
     conn = connect(database='udd', port=5452, host='localhost', user='guest')
