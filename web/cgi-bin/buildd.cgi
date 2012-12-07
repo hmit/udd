@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #-*- coding: utf8
 #
-# Copyright (C) 2011 Luca Falavigna <dktrkranz@debian.org>
+# Copyright (C) 2011-2012 Luca Falavigna <dktrkranz@debian.org>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -96,10 +96,10 @@ href="https://buildd.debian.org/status/media/status.css" />
 <tr>
 <td><img src="http://www.debian.org/logos/openlogo.svg"
 alt="Debian Logo" height="60" /></td>
-<td><h1 class="header">Maintainer's buildd status</h1></td>
+<td><h1 class="header">%s buildd status</h1></td>
 </tr>
 </table>
-<hr/>''')
+<hr/>''' % (name if name else 'Maintainer\'s'))
 
 if name:
     conn = connect(database='udd', port=5452, host='localhost', user='guest')
@@ -152,7 +152,7 @@ if name:
                 print('<tr>')
                 print('<td><a href="https://buildd.debian.org', sep='', end='')
                 print('/status/package.php?p=%s&amp;suite=%s">%s</a></td>' %
-                      (package, suite, package))
+                      (package.replace('+', '%2b'), suite, package))
                 for architecture in sorted(architectures):
                     if architecture in packages[suite][role][package]:
                         wbstate = packages[suite][role][package][architecture]
