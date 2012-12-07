@@ -127,7 +127,7 @@ Those are already fixed in unstable, but the fix still needs to migrate to wheez
 <tr><td>45</td><td>261 (205+56)</td><td>425 (291+134)</td><td>+164 (+86/+78)</td></tr>
 <tr><td>46</td><td>271 (200+71)</td><td>401 (258+143)</td><td>+130 (+58/+72)</td></tr>
 <tr><td>47</td><td>283 (209+74)</td><td>366 (221+145)</td><td>+83 (+12/+71)</td></tr>
-<tr><td>48</td><td>256 (177+79)</td><td></td><td></td></tr>
+<tr><td>48</td><td>256 (177+79)</td><td>378 (230+148)</td><td>+122 (+53/+69)</td></tr>
 <tr><td>49</td><td>256 (180+76)</td><td></td><td></td></tr>
 <tr><td>50</td><td>204 (148+56)</td><td></td><td></td></tr>
 <tr><td>51</td><td>124 (124+54)</td><td></td><td></td></tr>
