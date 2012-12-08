@@ -121,7 +121,7 @@ Help make a first step towards resolution!
  </li>
 </ul>
 
-<p>How do we compare to the squeeze cycle ?</p>
+<p>How do we compare to the Squeeze release cycle?</p>
 <table border=1>
 <tr><th>Week</th><th>Squeeze</th><th>Wheezy</th><th>Diff</th></tr>
 <tr><td>43</td><td>284 (213+71)</td><td>468 (332+136)</td><td>+184 (+119/+65)</td></tr>
