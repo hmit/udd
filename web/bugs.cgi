@@ -356,13 +356,16 @@ if cols['chints']
     hints[r['source']] ||= []
     hints[r['source']] << r
   end
-  sthh = dbh.prepare("select id, title from bugs where source='release.debian.org' and status='pending' and title ~ '^unblock'")
+  sthh = dbh.prepare("select distinct bugs_usertags.id as id, bugs_usertags.tag as tag, bugs.title as title from bugs_usertags, bugs where bugs.id = bugs_usertags.id and bugs_usertags.email='release.debian.org@packages.debian.org' and bugs_usertags.tag='unblock' and bugs.status = 'pending'")
   sthh.execute
   rowsh = sthh.fetch_all
   unblockreq = {}
   ids = []
   rowsh.each do |r|
-    src = r['title'].split(" ")[1].split('/')[0]
+    src = (/[^-a-zA-Z0-9.]([-a-zA-Z0-9.]+)\//.match(r['title']) || [] ) [1] || "";
+    if src == ""
+      src = r['title'].split(" ")[1].split('/')[0]
+    end
     unblockreq[src] ||= []
     unblockreq[src] << r['id']
     ids << r['id']
