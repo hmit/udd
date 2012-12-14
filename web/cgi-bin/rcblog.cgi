@@ -131,7 +131,7 @@ Help make a first step towards resolution!
 <tr><td>47</td><td>283 (209+74)</td><td>366 (221+145)</td><td>+83 (+12/+71)</td></tr>
 <tr><td>48</td><td>256 (177+79)</td><td>378 (230+148)</td><td>+122 (+53/+69)</td></tr>
 <tr><td>49</td><td>256 (180+76)</td><td>360 (216+155)</td><td>+104 (+36/+79)</td></tr>
-<tr><td>50</td><td>204 (148+56)</td><td></td><td></td></tr>
+<tr><td>50</td><td>204 (148+56)</td><td>339 (195+144)</td><td>+135 (+47/+90)</td></tr>
 <tr><td>51</td><td>124 (124+54)</td><td></td><td></td></tr>
 <tr><td>52</td><td>115 (78+37)</td><td></td><td></td></tr>
 <tr><td>1</td><td>93 (60+33)</td><td></td><td></td></tr>
