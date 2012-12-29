@@ -21,6 +21,8 @@ use Debbugs::Config qw{:globals %config};
 use Debbugs::User;
 use Mail::Address;
 #use Debbugs::User qw{read_usertags};
+use File::stat;
+use Time::localtime;
 
 $YAML::Syck::ImplicitTyping = 1;
 
@@ -159,6 +161,7 @@ sub run {
 		print "Running in debug mode with restricted bug list!!\n";
 		foreach my $b (@modified_bugs) {
 			push(@modified_bugs2, $b) if ($b =~ /58$/);
+			push(@modified_bugs2, $b) if ($b == '624507' or $b == '694352' or $b == '692948' or $b == '692979' or $b == '654491' or $b == '696552' or $b == '694748' or $b == '667995' or $b == '661018');
 		}
 		@modified_bugs = @modified_bugs2;
 	}
@@ -356,6 +359,18 @@ sub run {
 	if ($rowsc < 1000) {
 		die("Broken bugs import: not enough bugs affecting unstable\n");
 	}
+
+	if (stat($gSpoolDir."/../versions/indices/binsrc.idx")->mtime > $t) {
+		die("Broken bugs import: binsrc.idx changed during import\n");
+        }
+	if (stat($gSpoolDir."/../versions/indices/srcbin.idx")->mtime > $t) {
+		die("Broken bugs import: srcbin.idx changed during import\n");
+        }
+	if (stat($gSpoolDir."/../versions/indices/versions.idx")->mtime > $t) {
+		die("Broken bugs import: versions.idx changed during import\n");
+        }
+
+        print stat($gSpoolDir."/../versions/indices/versions.idx")->mtime ;
 
 	foreach my $postfix (qw{_packages _merged_with _found_in _fixed_in _tags}, '') {
 		my $sth = $dbh->prepare("ANALYZE $table$postfix");
