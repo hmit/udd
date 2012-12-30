@@ -370,8 +370,6 @@ sub run {
 		die("Broken bugs import: versions.idx changed during import\n");
         }
 
-        print stat($gSpoolDir."/../versions/indices/versions.idx")->mtime ;
-
 	foreach my $postfix (qw{_packages _merged_with _found_in _fixed_in _tags}, '') {
 		my $sth = $dbh->prepare("ANALYZE $table$postfix");
 		$sth->execute() or die $!;
