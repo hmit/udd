@@ -83,7 +83,7 @@ AND (severity >= 'serious')
 EOF
 wh_neither = getcount(q)
 
-week = Time.now.strftime('%U')
+week = Time.now.strftime('%V')
 puts <<-EOF
 <html><body>
 <h1>Release Critical Bug report for Week #{week}</h1>
