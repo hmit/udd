@@ -83,6 +83,24 @@ AND (severity >= 'serious')
 EOF
 wh_neither = getcount(q)
 
+q = <<-EOF
+select count(id) from bugs 
+where id in (select id from bugs_rt_affects_testing) and id not in (select id from bugs_rt_affects_unstable) 
+and not (id in (select id from bugs_merged_with where id > merged_with)) 
+and bugs.source in (select hints.source from hints where type in ('approve','unblock'))
+AND (severity >= 'serious')
+EOF
+wo_unblocked = getcount(q)
+
+q = <<-EOF
+select count(id) from bugs 
+where id in (select id from bugs_rt_affects_testing) and id not in (select id from bugs_rt_affects_unstable) 
+and not (id in (select id from bugs_merged_with where id > merged_with)) 
+and not (bugs.source in (select hints.source from hints where type in ('approve','unblock')))
+AND (severity >= 'serious')
+EOF
+wo_notunblocked = getcount(q)
+
 week = Time.now.strftime('%V')
 puts <<-EOF
 <html><body>
@@ -114,6 +132,11 @@ Help make a first step towards resolution!
 
      <li><strong>Affecting wheezy only: <a href="http://udd.debian.org/bugs.cgi?release=wheezy_not_sid&merged=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&chints=1&ctags=1&cdeferred=1&crttags=1">#{wheezy_only}</a></strong>
       Those are already fixed in unstable, but the fix still needs to migrate to wheezy.  You can help by submitting unblock requests for fixed packages, by investigating why packages do not migrate, or by reviewing submitted unblock requests.
+      <ul>
+       <li><strong><a href="http://udd.debian.org/bugs.cgi?release=wheezy_not_sid&merged=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&chints=1&ctags=1&cdeferred=1&crttags=1&unblock-hint=only">#{wo_unblocked}</a> bugs are in packages that are unblocked by the release team.</strong>
+       <li><strong><a href="http://udd.debian.org/bugs.cgi?release=wheezy_not_sid&merged=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&chints=1&ctags=1&cdeferred=1&crttags=1&unblock-hint=ign">#{wo_notunblocked}</a> bugs are in packages that are not unblocked.</strong>
+       </li>
+      </ul>
      </li>
     </ul>
    </li>
