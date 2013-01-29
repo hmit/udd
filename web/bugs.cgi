@@ -29,6 +29,7 @@ FILTERS = [
  ['wontfix', 'tagged wontfix', 'id in (select id from bugs_tags where tag=\'wontfix\')'],
  ['upstream', 'tagged upstream', 'id in (select id from bugs_tags where tag=\'upstream\')'],
  ['unreproducible', 'tagged unreproducible', 'id in (select id from bugs_tags where tag=\'unreproducible\')'],
+ ['help', 'tagged help', 'id in (select id from bugs_tags where tag=\'help\')'],
  ['forwarded', 'forwarded upstream', 'forwarded != \'\''],
  ['claimed', 'claimed bugs', "id in (select id from bugs_usertags where email='bugsquash@qa.debian.org')"],
  ['deferred', 'fixed in deferred/delayed', "id in (select id from deferred_closes)"],
