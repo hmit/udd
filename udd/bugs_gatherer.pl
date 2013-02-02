@@ -29,6 +29,7 @@ $YAML::Syck::ImplicitTyping = 1;
 #Used for measuring time
 our $t;
 our $timing = 0;
+my %pkgsrc = %{getpkgsrc()};
 our @archs = grep {  !/(^m68k$|^kfreebsd|^hurd)/ } @{$config{default_architectures}};
 
 # Return the list of usernames
@@ -96,6 +97,30 @@ sub without_duplicates {
 	return (grep { ($h{$_}++ == 0) || 0 } @_);
 }
 
+sub get_source {
+	my $pkg = shift;
+
+	if ($pkg =~ m/,/) {
+		my @pkgs = split(/\s*[, ]\s*/, $pkg);
+		my %srcs = ();
+		foreach my $p (@pkgs) {
+			my $src = get_source($p);
+			$srcs{$src} = 1;
+		}
+		return join(",",sort keys %srcs);
+
+	} else {
+		my $srcpkg;
+		if ($pkg =~ /^src:(.*)/)
+		{
+			$srcpkg = $1;
+		} else {
+			$srcpkg = exists($pkgsrc{$pkg}) ? $pkgsrc{$pkg} : $pkg;
+		}
+		return $srcpkg;
+	}
+}
+
 sub run_usertags {
 	my ($config, $source, $dbh) = @_;
 	my %src_config = %{$config->{$source}};
@@ -139,8 +164,6 @@ sub run {
 		$t = time();
 	}
 
-
-	my %pkgsrc = %{getpkgsrc()};
 
 	my @modified_bugs;
 
@@ -218,13 +241,7 @@ sub run {
 			}
 		} qw{date log_modified done_date};
 
-		my $srcpkg;
-		if ($bug{package} =~ /^src:(.*)/)
-		{
-			$srcpkg = $1;
-		} else {
-			$srcpkg = exists($pkgsrc{$bug{package}}) ? $pkgsrc{$bug{package}} : $bug{package};
-		}
+		my $srcpkg = get_source($bug{package});
 
 		# split emails
 		my (@addr, $submitter_name, $submitter_email, $owner_name, $owner_email, $done_name, $done_email);
@@ -321,12 +338,7 @@ sub run {
 
 		my $src;
 		foreach my $pkg (keys %{{ map { $_ => 1 } split(/\s*[, ]\s*/, $bug{package})}}) {
-			if ($pkg =~ /^src:(.*)/)
-			{
-				$src = $1;
-			} else {
-				$src = exists($pkgsrc{$pkg}) ? $pkgsrc{$pkg} : $pkg;
-			}
+			$src = get_source($pkg);
 			$insert_bugs_packages_handle->execute($bug_nr, $pkg, $src) or die $!;
 		}
 
