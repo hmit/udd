@@ -532,7 +532,15 @@ rows.each do |r|
   puts "<td style='text-align: center;'>"
   srcs = r['source'].split(/,\s*/)
   bins = r['package'].split(/,\s*/)
-  puts (0...bins.length).map { |i| "<a href=\"http://packages.qa.debian.org/#{srcs[i]}\">#{bins[i]}</a>" }.join(', ')
+  if bins.length == 1
+    # link to source package if there is only 1 package
+    puts "<a href=\"http://packages.qa.debian.org/#{srcs[0]}\">#{bins[0]}</a>"
+  else
+    # if there is more than 1, we don't know which package is from which
+    # source, so link the the package and let the PTS sort it out
+    # strip 'src:' from the package, as the PTS doesn't do this for us
+    puts bins.map { |b| "<a href=\"http://packages.qa.debian.org/#{b.sub('src:','')}\">#{b}</a>" }.join(', ')
+  end
   puts "</td>"
   puts "<td>#{CGI::escapeHTML(r['title'])}</td>"
   puts "<td>#{r['popcon']}</td>" if cols['cpopcon']
