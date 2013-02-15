@@ -163,6 +163,7 @@ Help make a first step towards resolution!
 <tr><td>4</td><td>14 (8+6)</td><td>244 (176+68)</td><td>+230 (+168/+62)</td></tr>
 <tr><td>5</td><td>2 (0+2)</td><td>224 (132+92)</td><td>+222 (+132/+90)</td></tr>
 <tr><td>6</td><td>release!</td><td>212 (129+83)</td><td>+212 (+129/+83)</td></tr>
+<tr><td>7</td><td>release+1</td><td>194 (128+66)</td><td>+194 (+128/+66)</td></tr>
 </table>
 
 </body></html>
