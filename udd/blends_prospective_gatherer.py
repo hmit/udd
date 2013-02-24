@@ -324,7 +324,8 @@ class blends_prospective_gatherer(gatherer):
               if pkg.has_key('package'):
                 pprosp['package'] = pkg['package']
               else:
-                self.log.warning("Control file for source '%s' od %s is lacking Package field" % (source, sprosp['blend']))
+                self.log.error("Control file for source '%s' of %s is lacking Package field" % (source, sprosp['blend']))
+                valid_pkg_info = False
               if pkg.has_key('description'):
                 if len(pkg['description'].split("\n",1)) > 1:
                   pprosp['long_description'] = pkg['description'].split("\n",1)[1]
@@ -333,7 +334,8 @@ class blends_prospective_gatherer(gatherer):
                 pprosp['description'] = pkg['description'].split("\n",1)[0].strip()
               else:
                 if pprosp.has_key('package'):
-                  self.log.warning("Control file for source '%s' of %s has no desription for Package %s" % (source, sprosp['blend'], pprosp['package']))
+                  self.log.error("Control file for source '%s' of %s has no desription for Package %s" % (source, sprosp['blend'], pprosp['package']))
+                  valid_pkg_info = False
                 else:
                   # self.log.error("Control file for source '%s' of %s seems to miss package information" % (source, sprosp['blend']))
                   self.log.info("Control file for source '%s' of %s seems to contain some comments which can not be parsed/ignored with this python-debian version" % (source, sprosp['blend']))
@@ -395,6 +397,9 @@ class blends_prospective_gatherer(gatherer):
       cur.executemany(pkgquery, pkgs)
     except ProgrammingError:
       print "Error while inserting packages"
+      raise
+    except KeyError, err:
+      print "Error while inserting packages", err
       raise
 
     cur.execute("DEALLOCATE package_insert")
