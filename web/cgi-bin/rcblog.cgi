@@ -165,6 +165,16 @@ Help make a first step towards resolution!
 <tr><td>6</td><td>release!</td><td>212 (129+83)</td><td>+212 (+129/+83)</td></tr>
 <tr><td>7</td><td>release+1</td><td>194 (128+66)</td><td>+194 (+128/+66)</td></tr>
 <tr><td>8</td><td>release+2</td><td>206 (144+62)</td><td>+206 (+144/+62)</td></tr>
+<tr><td>9</td><td>release+3</td><td>174 (105+69)<td><td>+174 (+105/+69)</td></tr>
+<tr><td>10</td><td>release+4</td><td><td><td></td></tr>
+<tr><td>11</td><td>release+5</td><td><td><td></td></tr>
+<tr><td>12</td><td>release+6</td><td><td><td></td></tr>
+<tr><td>13</td><td>release+7</td><td><td><td></td></tr>
+<tr><td>14</td><td>release+8</td><td><td><td></td></tr>
+<tr><td>15</td><td>release+9</td><td><td><td></td></tr>
+<tr><td>16</td><td>release+10</td><td><td><td></td></tr>
+<tr><td>17</td><td>release+11</td><td><td><td></td></tr>
+<tr><td>18</td><td>release+12</td><td><td><td></td></tr>
 </table>
 
 </body></html>
