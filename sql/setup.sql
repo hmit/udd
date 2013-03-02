@@ -908,3 +908,12 @@ primary key(source)
 );
 
 GRANT SELECT ON vcs TO PUBLIC;
+
+CREATE VIEW sponsorship_requests AS
+SELECT id,
+SUBSTRING(title from '^RFS: ([^/]*)/') as source,
+SUBSTRING(title from '/([^ ]*)( |$)') as version,
+title
+FROM bugs WHERE package='sponsorship-requests' AND status='pending';
+
+GRANT SELECT ON sponsorship_requests TO PUBLIC;
