@@ -559,7 +559,7 @@ carnivore:
 
 lintian:
   type: lintian
-  update-command: rm -f /srv/udd.debian.org/mirrors/lintian.log && wget -q http://lintian.debian.org/lintian.log -O /srv/udd.debian.org/mirrors/lintian.log
+  update-command: rm -f /srv/udd.debian.org/mirrors/lintian.log && wget -q http://lintian.debian.org/lintian.log.gz -O /srv/udd.debian.org/mirrors/lintian.log.gz && gunzip /srv/udd.debian.org/mirrors/lintian.log.gz
   path: /srv/udd.debian.org/mirrors/lintian.log
   table: lintian
   schema: lintian
