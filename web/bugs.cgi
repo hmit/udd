@@ -449,7 +449,11 @@ if rows.length > 0
     rowsh.each do |r|
       src = (/[^-a-zA-Z0-9.]([-a-zA-Z0-9.]+)\//.match(r['title']) || [] ) [1] || "";
       if src == ""
-        src = r['title'].split(" ")[1].split('/')[0]
+        if r['title'].split(" ")[1]
+          if r['title'].split(" ")[1].split('/')[0]
+            src = r['title'].split(" ")[1].split('/')[0]
+          end
+        end
       end
       unblockreq[src] ||= []
       unblockreq[src] << r['id']
