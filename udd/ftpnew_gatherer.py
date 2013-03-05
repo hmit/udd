@@ -486,6 +486,9 @@ class ftpnew_gatherer(gatherer):
             print "ProgrammingError", err, "\n", query, "\n", srcpkg.s
           except UnicodeEncodeError, err:
             print "UnicodeEncodeError probably in 'Maintainer' or 'Changed-By' field, but should be prevented by to_unicode()\n", err, "\n", srcpkg.s
+          except KeyError, err:
+            print >>stderr, "Broken information file file %s (source package %s): missing or broken field %s" % (src_info_html, srcpkg.s['Source'], err)
+            continue
           for binpkg in binpkgs:
             # print binpkg
             if not binpkg:
