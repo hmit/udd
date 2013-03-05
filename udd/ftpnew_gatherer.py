@@ -55,14 +55,14 @@ fields_to_pass   = ('Format',
 # Just suppress warnings about these
 if DEBUG == 0:
     IGNORED_UNKNOWN_FIELDS = ('Original-Maintainer',
-	                      'Multi-Arch',
-	                      'Python3-Version',
-        	              'Gstreamer-Elements',
-            	              'Gstreamer-Version',
-            	              'Built-Using',
-            	              'Package-Type',
-            	              'Ruby-Versions'
-                	     )
+                              'Multi-Arch',
+                              'Python3-Version',
+                              'Gstreamer-Elements',
+                              'Gstreamer-Version',
+                              'Built-Using',
+                              'Package-Type',
+                              'Ruby-Versions'
+                             )
 else:
     IGNORED_UNKNOWN_FIELDS = ()
 
@@ -169,9 +169,9 @@ class ftpnew_gatherer(gatherer):
       in_udd = cur.fetchone()[0]
       if in_udd:
         if DEBUG != 0:
-    	  print >>stderr, "Binary package %s is shipped in source %s %i times in UDD - no interest in just known binaries (queue = %s)" \
-      	             % (value, source, int(in_udd), queue)
-    	return 1
+          print >>stderr, "Binary package %s is shipped in source %s %i times in UDD - no interest in just known binaries (queue = %s)" \
+                   % (value, source, int(in_udd), queue)
+        return 1
     return 0
 
   def run(self):
