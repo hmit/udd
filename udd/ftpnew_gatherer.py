@@ -492,7 +492,7 @@ class ftpnew_gatherer(gatherer):
           for binpkg in binpkgs:
             # print binpkg
             if not binpkg:
-              print >>stderr, "Undefined binpkg.  This is the info from changes:", str(binpkg_changes)
+              print >>stderr, "Undefined binpkg in file " + src_info_html + ".  This is the info from changes:", str(binpkg_changes)
               continue
             binpkg.check_dict()
             query = """EXECUTE ftpnew_insert_package (%(Package)s, %(Version)s,
