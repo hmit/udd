@@ -61,7 +61,8 @@ if DEBUG == 0:
                               'Gstreamer-Version',
                               'Built-Using',
                               'Package-Type',
-                              'Ruby-Versions'
+                              'Ruby-Versions',
+                              'Testsuite'
                              )
 else:
     IGNORED_UNKNOWN_FIELDS = ()
