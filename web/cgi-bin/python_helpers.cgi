@@ -21,31 +21,29 @@
 from psycopg2 import connect
 
 helpers = {}
-pycentral = '''SELECT source, max(version) AS version,
-               maintainer_name AS maintainer, release
-               FROM sources_uniq
-               WHERE release IN ('sid', 'experimental')
-               AND (build_depends LIKE '%python-central%'
-                 OR build_depends_indep LIKE '%python-central%')
-               GROUP BY source, maintainer_name, release
-               ORDER BY source, version DESC'''
-
-pysupport = '''SELECT source, max(version) AS version,
-               maintainer_name AS maintainer, release
-               FROM sources_uniq
-               WHERE release IN ('sid', 'experimental')
-               AND (build_depends LIKE '%python-support%'
-                 OR build_depends_indep LIKE '%python-support%')
-               GROUP BY source, maintainer_name, release
-               ORDER BY source, version DESC'''
+helpers_list = ('central', 'support')
+query = '''WITH tagged_bugs AS (
+             SELECT b.source, b.id
+             FROM bugs b
+             JOIN bugs_usertags bt ON bt.id = b.id
+             WHERE bt.email = 'debian-python@lists.debian.org'
+             AND bt.tag = 'py%(helper)s-deprecation')
+           SELECT s.source, max(s.version) AS version,
+           s.maintainer_name AS maintainer, s.release, b.id AS bug
+           FROM sources_uniq s
+           LEFT OUTER JOIN tagged_bugs b ON (b.source = s.source
+             AND b.source = s.source)
+           WHERE s.release IN ('sid', 'experimental')
+           AND (s.build_depends LIKE '%%python-%(helper)s%%'
+             OR s.build_depends_indep LIKE '%%python-%(helper)s%%')
+           GROUP BY s.source, s.maintainer_name, s.release, b.id
+           ORDER BY s.source, version DESC'''
 
 conn = connect(database='udd', port=5452, host='localhost', user='guest')
 cur = conn.cursor()
-cur.execute(pycentral)
-helpers['python-central'] = cur.fetchall()
-cur.execute(pysupport)
-helpers['python-support'] = cur.fetchall()
-pysrows = cur.fetchall()
+for helper in helpers_list:
+    cur.execute(query % {'helper': helper})
+    helpers['python-%s' % helper] = cur.fetchall()
 cur.close()
 conn.close()
 
@@ -59,22 +57,28 @@ print('''Content-Type: text/html\n\n
 </head>
 <body>''')
 
-for helper in ('python-central', 'python-support'):
-    print('''<h1>Packages build-depending on %s</h1>
-<table border="1">
+for helper in helpers_list:
+    print('''<h1>Packages build-depending on python-%s</h1>
+<table border="1" cellpadding="3">
 <tr>
 <th>Package</th>
 <th>Version</th>
 <th>Maintainer</th>
 <th>Release</th>
+<th>Transition bug</th>
 </tr>''' % helper)
-    for row in helpers[helper]:
+    for row in helpers['python-%s' % helper]:
         print('<tr>')
         print('<td><a href="http://packages.qa.debian.org/%s">%s</a></td>' %
            (row[0], row[0]))
-        print('<td>%s</td>') % row[1]
-        print('<td>%s</td>') % row[2]
-        print('<td>%s</td>') % row[3]
+        print('<td>%s</td>' % row[1])
+        print('<td>%s</td>' % row[2])
+        print('<td>%s</td>' % row[3])
+        if row[4]:
+            print('<td><a href="http://bugs.debian.org/%s">%s</a></td>' %
+                  (row[4], row[4]))
+        else:
+            print('<td></td>')
         print('</tr>')
     print('</table>')
 

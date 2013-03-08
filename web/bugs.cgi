@@ -6,6 +6,8 @@ require 'cgi'
 require 'time'
 require 'yaml'
 
+#STDERR.reopen(STDOUT)
+
 puts "Content-type: text/html\n\n"
 
 UREL=YAML::load(IO::read('ubuntu-releases.yaml'))
@@ -349,105 +351,6 @@ rescue DBI::ProgrammingError => e
   exit(0)
 end
 
-if cols['chints']
-  sthh = dbh.prepare("select distinct source, type, argument, version, file, comment from relevant_hints order by type")
-  sthh.execute
-  rowsh = sthh.fetch_all
-  hints = {}
-  rowsh.each do |r|
-    hints[r['source']] ||= []
-    hints[r['source']] << r
-  end
-  sthh = dbh.prepare("select distinct bugs_usertags.id as id, bugs_usertags.tag as tag, bugs.title as title from bugs_usertags, bugs where bugs.id = bugs_usertags.id and bugs_usertags.email in ('release.debian.org@packages.debian.org','ftp.debian.org@packages.debian.org') and bugs_usertags.tag in ('unblock','rm','remove') and bugs.status = 'pending'")
-  sthh.execute
-  rowsh = sthh.fetch_all
-  unblockreq = {}
-  unblockreqtype = {}
-  ids = []
-  rowsh.each do |r|
-    src = (/[^-a-zA-Z0-9.]([-a-zA-Z0-9.]+)\//.match(r['title']) || [] ) [1] || "";
-    if src == ""
-      src = r['title'].split(" ")[1].split('/')[0]
-    end
-    unblockreq[src] ||= []
-    unblockreq[src] << r['id']
-    unblockreqtype[r['id']] = r['tag']
-    ids << r['id']
-  end
-  ids = ids.join(',')
-  stht = dbh.prepare("select id, tag from bugs_tags where id in (#{ids})")
-  stht.execute
-  rowst = stht.fetch_all
-  unblockreqtags = {}
-  rowst.each do |r|
-    unblockreqtags[r['id']] ||= []
-    unblockreqtags[r['id']] << r['tag']
-  end
-end
-
-if cols['ctags']
-  ids = rows.map { |r| r['id'] }.join(',')
-  stht = dbh.prepare("select id, tag from bugs_tags where id in (#{ids})")
-  stht.execute
-  rowst = stht.fetch_all
-  tags = {}
-  rowst.each do |r|
-    tags[r['id']] ||= []
-    tags[r['id']] << r['tag']
-  end
-end
-
-if cols['cclaimed']
-  ids = rows.map { |r| r['id'] }.join(',')
-  stht = dbh.prepare("select distinct id, tag from bugs_usertags where email='bugsquash@qa.debian.org' and id in (#{ids})")
-  stht.execute
-  rowst = stht.fetch_all
-  claimedbugs = {}
-  rowst.each do |r|
-    claimedbugs[r['id']] ||= []
-    claimedbugs[r['id']] << r['tag']
-  end
-end
-
-if cols['crttags']
-  ids = rows.map { |r| r['id'] }.join(',')
-  stht = dbh.prepare("select distinct id, tag from bugs_usertags where email='release.debian.org@packages.debian.org' and id in (#{ids})")
-  stht.execute
-  rowst = stht.fetch_all
-  rttags = {}
-  rowst.each do |r|
-    rttags[r['id']] ||= []
-    rttags[r['id']] << r['tag']
-  end
-end
-
-
-if cols['cdeferred']
-  ids = rows.map { |r| r['id'] }.join(',')
-  sthd = dbh.prepare("select id, deferred.source, deferred.version, extract (day from delay_remaining) as du from deferred, deferred_closes where deferred.source = deferred_closes.source and deferred.version = deferred_closes.version and deferred_closes.id in (#{ids})")
-  sthd.execute
-  rowsd = sthd.fetch_all
-  deferredbugs = {}
-  rowsd.each do |r|
-    d = r['du'].to_i
-    deferredbugs[r['id']] = "#{r['version']} (#{d}&nbsp;day#{d==1?'':'s'})"
-  end
-end
-
-puts "<p><b>#{rows.length} bugs found.</b></p>"
-puts '<table class="buglist tablesorter">'
-puts '<thead>'
-puts '<tr><th>bug#</th><th>package</th><th>title</th>'
-puts '<th>popcon</th>' if cols['cpopcon']
-puts '<th>severity</th>' if cols['cseverity']
-puts '<th>hints</th>' if cols['chints']
-puts '<th>claimed by</th>' if cols['cclaimed']
-puts '<th>deferred</th>' if cols['cdeferred']
-puts '<th>RT tag</th>' if cols['crttags']
-puts '<th>last&nbsp;modified</th></tr>'
-puts '</thead>'
-puts '<tbody>'
-
 def genhints(source, hints, unblockreq, tags, type)
   s = ''
   if not hints.nil?
@@ -524,37 +427,145 @@ def genaffected(r)
   return "&nbsp;("+s+")"
 end
 
-rows.each do |r|
-  print "<tr><td style='text-align: left;'><a href=\"http://bugs.debian.org/#{r['id']}\">##{r['id']}</a>"
-  puts "#{gentags(tags[r['id']])}" if cols['ctags']
-  puts "#{genaffected(r)}" if cols['caffected']
-  puts "</td>"
-  puts "<td style='text-align: center;'>"
-  srcs = r['source'].split(/,\s*/)
-  bins = r['package'].split(/,\s*/)
-  if bins.length == 1
-    # link to source package if there is only 1 package
-    puts "<a href=\"http://packages.qa.debian.org/#{srcs[0]}\">#{bins[0]}</a>"
-  else
-    # if there is more than 1, we don't know which package is from which
-    # source, so link the the package and let the PTS sort it out
-    # strip 'src:' from the package, as the PTS doesn't do this for us
-    puts bins.map { |b| "<a href=\"http://packages.qa.debian.org/#{b.sub('src:','')}\">#{b}</a>" }.join(', ')
+puts "<p><b>#{rows.length} bugs found.</b></p>"
+
+if rows.length > 0
+
+  if cols['chints']
+    sthh = dbh.prepare("select distinct source, type, argument, version, file, comment from relevant_hints order by type")
+    sthh.execute
+    rowsh = sthh.fetch_all
+    hints = {}
+    rowsh.each do |r|
+      hints[r['source']] ||= []
+      hints[r['source']] << r
+    end
+    sthh = dbh.prepare("select distinct bugs_usertags.id as id, bugs_usertags.tag as tag, bugs.title as title from bugs_usertags, bugs where bugs.id = bugs_usertags.id and bugs_usertags.email in ('release.debian.org@packages.debian.org','ftp.debian.org@packages.debian.org') and bugs_usertags.tag in ('unblock','rm','remove') and bugs.status = 'pending'")
+    sthh.execute
+    rowsh = sthh.fetch_all
+    unblockreq = {}
+    unblockreqtype = {}
+    ids = []
+    rowsh.each do |r|
+      src = (/[^-a-zA-Z0-9.]([-a-zA-Z0-9.]+)\//.match(r['title']) || [] ) [1] || "";
+      if src == ""
+        if r['title'].split(" ")[1]
+          if r['title'].split(" ")[1].split('/')[0]
+            src = r['title'].split(" ")[1].split('/')[0]
+          end
+        end
+      end
+      unblockreq[src] ||= []
+      unblockreq[src] << r['id']
+      unblockreqtype[r['id']] = r['tag']
+      ids << r['id']
+    end
+    ids = ids.join(',')
+    stht = dbh.prepare("select id, tag from bugs_tags where id in (#{ids})")
+    stht.execute
+    rowst = stht.fetch_all
+    unblockreqtags = {}
+    rowst.each do |r|
+      unblockreqtags[r['id']] ||= []
+      unblockreqtags[r['id']] << r['tag']
+    end
   end
-  puts "</td>"
-  puts "<td>#{CGI::escapeHTML(r['title'])}</td>"
-  puts "<td>#{r['popcon']}</td>" if cols['cpopcon']
-  puts "<td>#{r['severity']}</td>" if cols['cseverity']
-  puts "<td>#{genhints(r['source'], hints[r['source']], unblockreq[r['source']], unblockreqtags, unblockreqtype)}</td>" if cols['chints']
-  puts "<td>#{claimedbugs[r['id']]}</td>" if cols['cclaimed']
-  puts "<td>#{deferredbugs[r['id']]}</td>" if cols['cdeferred']
-  puts "<td>#{rttags[r['id']]}</td>" if cols['crttags']
-  d = r['last_modified']
-  d = Date::new(d.year, d.month, d.day)
-  puts "<td style='text-align: center;'>#{d}</td></tr>"
+
+  if cols['ctags']
+    ids = rows.map { |r| r['id'] }.join(',')
+    stht = dbh.prepare("select id, tag from bugs_tags where id in (#{ids})")
+    stht.execute
+    rowst = stht.fetch_all
+    tags = {}
+    rowst.each do |r|
+      tags[r['id']] ||= []
+      tags[r['id']] << r['tag']
+    end
+  end
+
+  if cols['cclaimed']
+    ids = rows.map { |r| r['id'] }.join(',')
+    stht = dbh.prepare("select distinct id, tag from bugs_usertags where email='bugsquash@qa.debian.org' and id in (#{ids})")
+    stht.execute
+    rowst = stht.fetch_all
+    claimedbugs = {}
+    rowst.each do |r|
+      claimedbugs[r['id']] ||= []
+      claimedbugs[r['id']] << r['tag']
+    end
+  end
+
+  if cols['crttags']
+    ids = rows.map { |r| r['id'] }.join(',')
+    stht = dbh.prepare("select distinct id, tag from bugs_usertags where email='release.debian.org@packages.debian.org' and id in (#{ids})")
+    stht.execute
+    rowst = stht.fetch_all
+    rttags = {}
+    rowst.each do |r|
+      rttags[r['id']] ||= []
+      rttags[r['id']] << r['tag']
+    end
+  end
+
+
+  if cols['cdeferred']
+    ids = rows.map { |r| r['id'] }.join(',')
+    sthd = dbh.prepare("select id, deferred.source, deferred.version, extract (day from delay_remaining) as du from deferred, deferred_closes where deferred.source = deferred_closes.source and deferred.version = deferred_closes.version and deferred_closes.id in (#{ids})")
+    sthd.execute
+    rowsd = sthd.fetch_all
+    deferredbugs = {}
+    rowsd.each do |r|
+      d = r['du'].to_i
+      deferredbugs[r['id']] = "#{r['version']} (#{d}&nbsp;day#{d==1?'':'s'})"
+    end
+  end
+
+  puts '<table class="buglist tablesorter">'
+  puts '<thead>'
+  puts '<tr><th>bug#</th><th>package</th><th>title</th>'
+  puts '<th>popcon</th>' if cols['cpopcon']
+  puts '<th>severity</th>' if cols['cseverity']
+  puts '<th>hints</th>' if cols['chints']
+  puts '<th>claimed by</th>' if cols['cclaimed']
+  puts '<th>deferred</th>' if cols['cdeferred']
+  puts '<th>RT tag</th>' if cols['crttags']
+  puts '<th>last&nbsp;modified</th></tr>'
+  puts '</thead>'
+  puts '<tbody>'
+
+  rows.each do |r|
+    print "<tr><td style='text-align: left;'><a href=\"http://bugs.debian.org/#{r['id']}\">##{r['id']}</a>"
+    puts "#{gentags(tags[r['id']])}" if cols['ctags']
+    puts "#{genaffected(r)}" if cols['caffected']
+    puts "</td>"
+    puts "<td style='text-align: center;'>"
+    srcs = r['source'].split(/,\s*/)
+    bins = r['package'].split(/,\s*/)
+    if bins.length == 1
+      # link to source package if there is only 1 package
+      puts "<a href=\"http://packages.qa.debian.org/#{srcs[0]}\">#{bins[0]}</a>"
+    else
+      # if there is more than 1, we don't know which package is from which
+      # source, so link the the package and let the PTS sort it out
+      # strip 'src:' from the package, as the PTS doesn't do this for us
+      puts bins.map { |b| "<a href=\"http://packages.qa.debian.org/#{b.sub('src:','')}\">#{b}</a>" }.join(', ')
+    end
+    puts "</td>"
+    puts "<td>#{CGI::escapeHTML(r['title'])}</td>"
+    puts "<td>#{r['popcon']}</td>" if cols['cpopcon']
+    puts "<td>#{r['severity']}</td>" if cols['cseverity']
+    puts "<td>#{genhints(r['source'], hints[r['source']], unblockreq[r['source']], unblockreqtags, unblockreqtype)}</td>" if cols['chints']
+    puts "<td>#{claimedbugs[r['id']]}</td>" if cols['cclaimed']
+    puts "<td>#{deferredbugs[r['id']]}</td>" if cols['cdeferred']
+    puts "<td>#{rttags[r['id']]}</td>" if cols['crttags']
+    d = r['last_modified']
+    d = Date::new(d.year, d.month, d.day)
+    puts "<td style='text-align: center;'>#{d}</td></tr>"
+  end
+
+  puts "</tbody></table>"
 end
 
-puts "</tbody></table>"
 sth2 = dbh.prepare("select max(start_time) from timestamps where source = 'bugs' and command = 'run'")
 sth2.execute ; r2 = sth2.fetch_all
 puts "<p><b>Generated in #{Time::now - tstart} seconds. Last data update: #{r2[0][0]}"
