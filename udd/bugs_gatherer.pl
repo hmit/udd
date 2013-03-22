@@ -365,11 +365,13 @@ sub run {
 	print "Inserting bugs: ",(time() - $t),"s\n" if $timing;
 
 	# Check for broken imports
-	my $sthc = $dbh->prepare("select count(*) from bugs where id in (select id from bugs_rt_affects_unstable) and id > 500000");
-	$sthc->execute();
-	my $rowsc = $sthc->fetchrow_array();
-	if ($rowsc < 1000) {
-		die("Broken bugs import: not enough bugs affecting unstable\n");
+	if (!$src_config{debug}) {
+		my $sthc = $dbh->prepare("select count(*) from bugs where id in (select id from bugs_rt_affects_unstable) and id > 500000");
+		$sthc->execute();
+		my $rowsc = $sthc->fetchrow_array();
+		if ($rowsc < 1000) {
+			die("Broken bugs import: not enough bugs affecting unstable\n");
+		}
 	}
 
 	if (stat($gSpoolDir."/../versions/indices/binsrc.idx")->mtime > $t) {
