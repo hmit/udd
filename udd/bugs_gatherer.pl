@@ -70,7 +70,7 @@ sub get_db_max_last_modified {
 }
 
 sub get_mtime {
-	return ((stat(shift))[9]);
+	return ((stat(shift))->mtime);
 }
 
 sub get_modified_bugs {
