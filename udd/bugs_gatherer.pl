@@ -365,9 +365,6 @@ sub run {
 	print "Fetching list of ",scalar(@modified_bugs), " bugs to insert: ",(time() - $t),"s\n" if $timing;
 
 	$t = time();
-
-
-	$t = time();
 	my $counter = 0;
 	foreach my $bug_nr (@modified_bugs) {
 		$counter++;
@@ -377,6 +374,12 @@ sub run {
 		}
 	}
 	print "Inserting bugs: ",(time() - $t),"s\n" if $timing;
+}
+
+sub check_commit {
+	my ($config, $source, $dbh) = @_;
+	my %src_config = %{$config->{$source}};
+	my $table = $src_config{table};
 
 	# Check for broken imports
 	if (!$src_config{debug}) {
@@ -441,6 +444,7 @@ sub main {
 	if($command eq 'run') {
 		run_usertags($config, $source, $dbh);
 		run($config, $source, $dbh);
+		check_commit($config, $source, $dbh);
 	} else {
 		print STDERR "<command> has to be one of run, drop and setup\n";
 		exit(1)
