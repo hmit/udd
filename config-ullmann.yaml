@@ -502,7 +502,12 @@ vcs:
 upload-history:
   type: upload-history
   path: /srv/udd.debian.org/tmp/upload-history
-  update-command: if [ ! -e /srv/udd.debian.org/tmp/upload-history/ ]; then mkdir /srv/udd.debian.org/tmp/upload-history/; fi; cd  /srv/udd.debian.org/tmp/upload-history ; lftp -c 'open http://master.debian.org/~lucas/ddc-parser/ ; mirror -e -P .'
+#  update-command: if [ ! -e /srv/udd.debian.org/tmp/upload-history/ ]; then mkdir /srv/udd.debian.org/tmp/upload-history/; fi; cd  /srv/udd.debian.org/tmp/upload-history ; lftp -c 'open http://master.debian.org/~lucas/ddc-parser/ ; mirror -e -P .'
+# do manually:
+# cd /srv/udd.debian.org/tmp/upload-history
+# rsync -avzP --delete lucas@master.debian.org:public_html/ddc-parser/ .
+# chmod -R g+w .
+# chgrp -R uddadm .
   schema: upload_history
   table: upload_history
   #only-recent: False
