@@ -78,9 +78,10 @@ sub get_modified_bugs {
 	die "Argument required" unless defined $prune_stamp;
 	my $top_dir = $gSpoolDir;
 	my @result = ();
-	foreach my $sub (qw(archive db-h)) {
+	foreach my $sub (qw(db-h)) {
 		my $spool = "$top_dir/$sub";
 		foreach my $subsub (glob "$spool/*") {
+			print "looking for modified bugs in $subsub\n" if $timing;
 			if( -d $subsub and get_mtime($subsub) > $prune_stamp ) {
 				push @result, 
 					map { s{.*/(.*)\.log}{$1}; $_ } 
@@ -369,7 +370,34 @@ sub run {
 	foreach my $bug_nr (@modified_bugs) {
 		$counter++;
 		update_bug($config,$source,$dbh,$bug_nr);
-		if (!$src_config{debug}) {
+		if ($src_config{debug}) {
+			print "$bug_nr $counter/".(scalar @modified_bugs)."\n";
+		}
+	}
+	print "Inserting bugs: ",(time() - $t),"s\n" if $timing;
+}
+
+sub run_modified {
+	my ($config, $source, $dbh) = @_;
+
+	our $t;
+	our $timing;
+	my %src_config = %{$config->{$source}};
+	my $table = $src_config{table};
+	my $archived_table = $src_config{'archived-table'};
+	my $interval = $src_config{interval};
+
+	print "start looking for modified bugs\n" if $timing;
+	my $modified_bugs = get_modified_bugs(time()-$interval);
+	my @modified_bugs = @$modified_bugs;
+	print "Fetching list of ",scalar(@modified_bugs), " bugs to insert: ",(time() - $t),"s\n" if $timing;
+
+	$t = time();
+	my $counter = 0;
+	foreach my $bug_nr (@modified_bugs) {
+		$counter++;
+		update_bug($config,$source,$dbh,$bug_nr);
+		if ($src_config{debug}) {
 			print "$bug_nr $counter/".(scalar @modified_bugs)."\n";
 		}
 	}
@@ -442,8 +470,12 @@ sub main {
 	$dbh->do('SET CONSTRAINTS ALL DEFERRED');
 
 	if($command eq 'run') {
-		run_usertags($config, $source, $dbh);
-		run($config, $source, $dbh);
+		if ($source eq "bugs-modified") {
+			run_modified($config, $source, $dbh);
+		} else {
+			run_usertags($config, $source, $dbh);
+			run($config, $source, $dbh);
+		}
 		check_commit($config, $source, $dbh);
 	} else {
 		print STDERR "<command> has to be one of run, drop and setup\n";
