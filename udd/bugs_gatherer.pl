@@ -124,6 +124,8 @@ sub get_source {
 sub run_usertags {
 	my ($config, $source, $dbh) = @_;
 	my %src_config = %{$config->{$source}};
+	return if ($src_config{debug});
+
 	my $table = $src_config{'usertags-table'} or die "usertags-table not specified for source $source";
 	our $timing;
 	our $t;
@@ -147,6 +149,7 @@ sub run_usertags {
 			map { $dbh->do("INSERT INTO $table (email, tag, id) VALUES ($user, $qtag, $_)") or die $! } @{$tags{$tag}};
 		}
 	}
+	print "Inserting usertags: ",(time() - $t),"s\n" if $timing;
 }
 
 sub update_bug {
@@ -335,13 +338,6 @@ sub run {
 	my $table = $src_config{table};
 	my $archived_table = $src_config{'archived-table'};
 
-	if (!$src_config{debug}) {
-		run_usertags($config, $source, $dbh);
-		print "Inserting usertags: ",(time() - $t),"s\n" if $timing;
-		$t = time();
-	}
-
-
 	my @modified_bugs;
 
 	if($src_config{archived}) {
@@ -443,6 +439,7 @@ sub main {
 	$dbh->do('SET CONSTRAINTS ALL DEFERRED');
 
 	if($command eq 'run') {
+		run_usertags($config, $source, $dbh);
 		run($config, $source, $dbh);
 	} else {
 		print STDERR "<command> has to be one of run, drop and setup\n";
