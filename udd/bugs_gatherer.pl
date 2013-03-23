@@ -213,7 +213,7 @@ sub update_bug {
 	# Fetch bug using Debbugs
 	# Bugs which were once archived and have been unarchived again will appear in get_bugs(archive => 1).
 	# However, those bugs are not to be found in location 'archive', so we detect them, and skip them
-	my $bug_ref = read_bug(bug => $bug_nr, location => $location) or (print STDERR "Could not read file for bug $bug_nr; skipping\n" and next);
+	my $bug_ref = read_bug(bug => $bug_nr, location => $location) or (print STDERR "Could not read file for bug $bug_nr; skipping\n" and return);
 	# Yeah, great, why does get_bug_status not accept a location?
 	my %bug = %{get_bug_status(bug => $bug_nr, status => $bug_ref)};
 	
