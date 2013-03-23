@@ -275,6 +275,27 @@ CREATE TABLE archived_bugs_blockedby
   (id int REFERENCES archived_bugs, blocker int,
 PRIMARY KEY(id, blocker));
 
+-- timestamps used to do incremental update for bugs
+
+CREATE TABLE bugs_stamps (
+    id integer NOT NULL,
+	update_requested bigint,
+	db_updated bigint
+);
+
+ALTER TABLE ONLY bugs_stamps
+    ADD CONSTRAINT bugs_stamps_pkey PRIMARY KEY (id);
+
+CREATE TABLE archived_bugs_stamps (
+    id integer NOT NULL,
+	update_requested bigint,
+	db_updated bigint
+);
+
+ALTER TABLE ONLY archived_bugs_stamps
+    ADD CONSTRAINT archived_bugs_stamps_pkey PRIMARY KEY (id);
+
+
 -- usertags are either for archived or unarchived bugs, so we can't add a
 -- foreign key here.
 CREATE TABLE bugs_usertags
