@@ -391,10 +391,17 @@ sub run {
 	our $t;
 	our $timing;
 	my %src_config = %{$config->{$source}};
-	my $table = $src_config{table};
+	my $unarchived_table = $src_config{table};
 	my $archived_table = $src_config{'archived-table'};
+	my $table = $src_config{archived} ? $archived_table : $unarchived_table;
+
+	my $limit = $src_config{'limit'} || 1000;
 
 	my @modified_bugs;
+
+	my $sth = $dbh->prepare("SELECT id,db_updated FROM ${table}_stamps");
+	$sth->execute;
+	my $bugs_db_updated = $sth->fetchall_hashref('id');
 
 	if($src_config{archived}) {
 		# some bugs (the unarchived ones) are in both list. exclude them.
@@ -418,7 +425,22 @@ sub run {
 		@modified_bugs = @modified_bugs2;
 	}
 
-	my $counter = update_bugs($config,$source,$dbh,\@modified_bugs);
+	# import new bugs
+	@modified_bugs = grep { ! defined $bugs_db_updated->{$_} } @modified_bugs;
+	my $counter = update_bugs($config,$source,$dbh,\@modified_bugs,$limit);
+	$limit -= $counter;
+
+	if ($limit > 0) {
+		# we updated less bugs than the limit in the config file
+		# update some of the olders bugs
+		$sth = $dbh->prepare("SELECT id FROM ${table}_stamps ORDER BY db_updated LIMIT $limit");
+		$sth->execute;
+		my $oldest_bugs = $sth->fetchall_hashref('id');
+
+		my @bug_ids = keys %$oldest_bugs;
+		$counter = update_bugs($config,$source,$dbh,\@bug_ids,$limit);
+		$limit -= $counter;
+	}
 }
 
 sub run_modified {
