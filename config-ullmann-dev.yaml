@@ -532,7 +532,6 @@ bugs:
   schema: bugs
   archived-table: archived_bugs
   packages-table: packages
-  usertags-table: bugs_usertags
   sources-table: sources
 
 bugs-modified:
@@ -544,7 +543,6 @@ bugs-modified:
   schema: bugs
   archived-table: archived_bugs
   packages-table: packages
-  usertags-table: bugs_usertags
   sources-table: sources
 
 bugs-archive:
@@ -554,8 +552,12 @@ bugs-archive:
   schema: bugs
   archived-table: archived_bugs
   packages-table: packages
-  usertags-table: bugs_usertags
   sources-table: sources
+
+bugs-usertags:
+  type: bugs
+  schema: bugs
+  usertags-table: bugs_usertags
 
 orphaned-packages:
   type: orphaned-packages

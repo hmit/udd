@@ -125,7 +125,6 @@ sub get_source {
 sub run_usertags {
 	my ($config, $source, $dbh) = @_;
 	my %src_config = %{$config->{$source}};
-	return if ($src_config{debug});
 
 	my $table = $src_config{'usertags-table'} or die "usertags-table not specified for source $source";
 	our $timing;
@@ -436,13 +435,17 @@ sub check_commit {
 		die("Broken bugs import: versions.idx changed during import\n");
         }
 
-	foreach my $postfix (qw{_packages _merged_with _found_in _fixed_in _tags}, '') {
-		my $sth = $dbh->prepare("ANALYZE $table$postfix");
-		$sth->execute() or die $!;
+	if (defined $table) {
+		foreach my $postfix (qw{_packages _merged_with _found_in _fixed_in _tags}, '') {
+			my $sth = $dbh->prepare("ANALYZE $table$postfix");
+			$sth->execute() or die $!;
+		}
 	}
 
-	my $sth = $dbh->prepare("ANALYZE ".$src_config{'usertags-table'});
-	$sth->execute() or die $!;
+	if ($source eq "bugs-usertags") {
+		my $sth = $dbh->prepare("ANALYZE ".$src_config{'usertags-table'});
+		$sth->execute() or die $!;
+	}
 
 	print "Analyzing bugs: ",(time() - $t),"s\n" if $timing;
 
@@ -477,10 +480,11 @@ sub main {
 	$dbh->do('SET CONSTRAINTS ALL DEFERRED');
 
 	if($command eq 'run') {
-		if ($source eq "bugs-modified") {
+		if ($source eq "bugs-usertags") {
+			run_usertags($config, $source, $dbh);
+		} elsif ($source eq "bugs-modified") {
 			run_modified($config, $source, $dbh);
 		} else {
-			run_usertags($config, $source, $dbh);
 			run($config, $source, $dbh);
 		}
 		check_commit($config, $source, $dbh);
