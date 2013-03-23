@@ -330,6 +330,28 @@ sub update_bug {
 
 }
 
+sub update_bugs {
+
+	my $config = shift;
+	my $source = shift;
+	my $dbh = shift;
+	my $bugs = shift;
+
+	print "Fetching list of ",scalar(@$bugs), " bugs to insert: ",(time() - $t),"s\n" if $timing;
+	$t = time();
+	my $counter = 0;
+	foreach my $bug_nr (@$bugs) {
+		$counter++;
+		update_bug($config,$source,$dbh,$bug_nr);
+		if ($timing) {
+			print "$bug_nr $counter/".(scalar @$bugs)."\n";
+		}
+	}
+	print "Inserting bugs: ",(time() - $t),"s\n" if $timing;
+
+	return $counter;
+}
+
 sub run {
 	my ($config, $source, $dbh) = @_;
 
@@ -363,18 +385,7 @@ sub run {
 		@modified_bugs = @modified_bugs2;
 	}
 
-	print "Fetching list of ",scalar(@modified_bugs), " bugs to insert: ",(time() - $t),"s\n" if $timing;
-
-	$t = time();
-	my $counter = 0;
-	foreach my $bug_nr (@modified_bugs) {
-		$counter++;
-		update_bug($config,$source,$dbh,$bug_nr);
-		if ($src_config{debug}) {
-			print "$bug_nr $counter/".(scalar @modified_bugs)."\n";
-		}
-	}
-	print "Inserting bugs: ",(time() - $t),"s\n" if $timing;
+	my $counter = update_bugs($config,$source,$dbh,\@modified_bugs);
 }
 
 sub run_modified {
@@ -389,19 +400,7 @@ sub run_modified {
 
 	print "start looking for modified bugs\n" if $timing;
 	my $modified_bugs = get_modified_bugs(time()-$interval);
-	my @modified_bugs = @$modified_bugs;
-	print "Fetching list of ",scalar(@modified_bugs), " bugs to insert: ",(time() - $t),"s\n" if $timing;
-
-	$t = time();
-	my $counter = 0;
-	foreach my $bug_nr (@modified_bugs) {
-		$counter++;
-		update_bug($config,$source,$dbh,$bug_nr);
-		if ($src_config{debug}) {
-			print "$bug_nr $counter/".(scalar @modified_bugs)."\n";
-		}
-	}
-	print "Inserting bugs: ",(time() - $t),"s\n" if $timing;
+	update_bugs($config,$source,$dbh,$modified_bugs);
 }
 
 sub check_commit {
