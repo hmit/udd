@@ -526,6 +526,7 @@ hints:
 
 bugs:
   debug: true
+  limit: 5000
   type: bugs
   archived: false
   table: bugs
@@ -535,7 +536,6 @@ bugs:
   sources-table: sources
 
 bugs-modified:
-  interval: 84000
   debug: true
   type: bugs
   archived: false
@@ -546,6 +546,7 @@ bugs-modified:
   sources-table: sources
 
 bugs-archive:
+  limit: 20000
   type: bugs
   archived: true
   table: bugs
