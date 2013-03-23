@@ -160,13 +160,13 @@ sub update_bug {
 	my $bug_nr = shift;
 
 	my %src_config = %{$config->{$source}};
-	my $table = $src_config{table};
+	my $unarchived_table = $src_config{table};
 	my $archived_table = $src_config{'archived-table'};
 
 	my $location = $src_config{archived} ? 'archive' : 'db_h';
-	$table = $src_config{archived} ? $archived_table : $table;
+	my $table = $src_config{archived} ? $archived_table : $unarchived_table;
 
-	foreach my $prefix ($table, $archived_table) {
+	foreach my $prefix ($unarchived_table, $archived_table) {
 		foreach my $postfix (qw{_packages _merged_with _found_in _fixed_in _tags _blocks _blockedby}, '') {
 			$dbh->do("DELETE FROM $prefix$postfix where id in ($bug_nr)") or die
 		}
