@@ -367,6 +367,7 @@ sub update_bugs {
 	my $source = shift;
 	my $dbh = shift;
 	my $bugs = shift;
+	my $limit = shift||1000;
 
 	print "Fetching list of ",scalar(@$bugs), " bugs to insert: ",(time() - $t),"s\n" if $timing;
 	$t = time();
@@ -377,6 +378,7 @@ sub update_bugs {
 		if ($timing) {
 			print "$bug_nr $counter/".(scalar @$bugs)."\n";
 		}
+		last if ($counter >= $limit);
 	}
 	print "Inserting bugs: ",(time() - $t),"s\n" if $timing;
 
