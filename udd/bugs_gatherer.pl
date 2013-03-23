@@ -166,6 +166,8 @@ sub update_bug {
 	my $location = $src_config{archived} ? 'archive' : 'db_h';
 	my $table = $src_config{archived} ? $archived_table : $unarchived_table;
 
+	my $start = time();
+
 	foreach my $prefix ($unarchived_table, $archived_table) {
 		foreach my $postfix (qw{_packages _merged_with _found_in _fixed_in _tags _blocks _blockedby}, '') {
 			$dbh->do("DELETE FROM $prefix$postfix where id in ($bug_nr)") or die
@@ -328,6 +330,12 @@ sub update_bug {
 		$insert_bugs_tags_handle->execute($bug_nr, $tag) or die $!;
 	}
 
+	my $update_stamp_handle = $dbh->prepare("UPDATE ${table}_stamps SET db_updated = \$1 WHERE id = \$2");
+	my $update_res = $update_stamp_handle->execute($start,$bug_nr) or die $!;
+	if ($update_res < 1) {
+		my $insert_stamp_handle = $dbh->prepare("INSERT INTO ${table}_stamps (id, db_updated) VALUES (\$1, \$2)");
+		$insert_stamp_handle->execute($bug_nr,$start) or die $!;
+	}
 }
 
 sub update_bugs {
