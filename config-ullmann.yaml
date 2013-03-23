@@ -525,24 +525,38 @@ hints:
   update-command: /srv/udd.debian.org/udd/scripts/update-hints
 
 bugs:
+  limit: 5000
   type: bugs
   archived: false
   table: bugs
   schema: bugs
   archived-table: archived_bugs
   packages-table: packages
-  usertags-table: bugs_usertags
+  sources-table: sources
+
+bugs-modified:
+  type: bugs
+  archived: false
+  table: bugs
+  schema: bugs
+  archived-table: archived_bugs
+  packages-table: packages
   sources-table: sources
 
 bugs-archive:
+  limit: 10000
   type: bugs
   archived: true
   table: bugs
   schema: bugs
   archived-table: archived_bugs
   packages-table: packages
-  usertags-table: bugs_usertags
   sources-table: sources
+
+bugs-usertags:
+  type: bugs
+  schema: bugs
+  usertags-table: bugs_usertags
 
 orphaned-packages:
   type: orphaned-packages
