@@ -93,6 +93,30 @@ sub get_modified_bugs {
 	return \@result;
 }
 
+sub get_bugs_modified {
+	my $subdir = shift;
+	my $top_dir = $gSpoolDir;
+	my $result = ();
+	my $spool = "$top_dir/$subdir";
+	foreach my $subsub (glob "$spool/*") {
+		if( -d $subsub ) {
+			print "looking for modified bugs in $subsub\n" if $timing;
+			foreach my $log (glob "$subsub/*.log") {
+				if ($log =~ m;^(.*)/([^/]*)\.log;) {
+					my $path = $1;
+					my $id = $2;
+					# skip bugs with only log file
+					# TODO should this be .status of .summary?
+					if (-e "$path/$id.status") {
+						$result->{$id} = get_mtime($log);
+					}
+				}
+			}
+		}
+	}
+	return $result;
+}
+
 sub without_duplicates {
 	my %h = ();
 	return (grep { ($h{$_}++ == 0) || 0 } @_);
