@@ -425,13 +425,31 @@ sub run_modified {
 	our $t;
 	our $timing;
 	my %src_config = %{$config->{$source}};
-	my $table = $src_config{table};
+	my $unarchived_table = $src_config{table};
 	my $archived_table = $src_config{'archived-table'};
-	my $interval = $src_config{interval};
+	my $table = $src_config{archived} ? $archived_table : $unarchived_table;
+
+	my @modified_bugs;
 
 	print "start looking for modified bugs\n" if $timing;
-	my $modified_bugs = get_modified_bugs(time()-$interval);
-	update_bugs($config,$source,$dbh,$modified_bugs);
+	my $sth = $dbh->prepare("SELECT id,db_updated FROM ${table}_stamps");
+	$sth->execute;
+	my $bugs_db_updated = $sth->fetchall_hashref('id');
+
+	my $location = $src_config{archived} ? "archive" : "db-h";
+	my $bugs_modified = get_bugs_modified($location);
+
+	foreach my $bugid (keys %$bugs_modified) {
+		if (
+			# no stamp for this bug: new bug
+			(!defined($bugs_db_updated->{$bugid})) ||
+			# log file was modified after last db update
+			($bugs_modified->{$bugid} > $bugs_db_updated->{$bugid}->{"db_updated"})
+		) {
+			push @modified_bugs,$bugid;
+		}
+	}
+	my $counter = update_bugs($config,$source,$dbh,\@modified_bugs);
 }
 
 sub check_commit {
