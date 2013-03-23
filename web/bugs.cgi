@@ -557,7 +557,7 @@ if rows.length > 0
     puts "<td>#{genhints(r['source'], hints[r['source']], unblockreq[r['source']], unblockreqtags, unblockreqtype)}</td>" if cols['chints']
     puts "<td>#{claimedbugs[r['id']]}</td>" if cols['cclaimed']
     puts "<td>#{deferredbugs[r['id']]}</td>" if cols['cdeferred']
-    puts "<td>#{rttags[r['id']]}</td>" if cols['crttags']
+    puts "<td>" + ((rttags[r['id']]||[]).join(" ")) + "</td>" if cols['crttags']
     d = r['last_modified']
     d = Date::new(d.year, d.month, d.day)
     puts "<td style='text-align: center;'>#{d}</td></tr>"
