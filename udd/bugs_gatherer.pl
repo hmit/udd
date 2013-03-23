@@ -491,15 +491,15 @@ sub check_commit {
 		}
 	}
 
-	if (stat($gSpoolDir."/../versions/indices/binsrc.idx")->mtime > $t) {
-		die("Broken bugs import: binsrc.idx changed during import\n");
-        }
-	if (stat($gSpoolDir."/../versions/indices/srcbin.idx")->mtime > $t) {
-		die("Broken bugs import: srcbin.idx changed during import\n");
-        }
-	if (stat($gSpoolDir."/../versions/indices/versions.idx")->mtime > $t) {
-		die("Broken bugs import: versions.idx changed during import\n");
-        }
+#	if (stat($gSpoolDir."/../versions/indices/binsrc.idx")->mtime > $t) {
+#		die("Broken bugs import: binsrc.idx changed during import\n");
+#	}
+#	if (stat($gSpoolDir."/../versions/indices/srcbin.idx")->mtime > $t) {
+#		die("Broken bugs import: srcbin.idx changed during import\n");
+#	}
+#	if (stat($gSpoolDir."/../versions/indices/versions.idx")->mtime > $t) {
+#		die("Broken bugs import: versions.idx changed during import\n");
+#	}
 
 	if (defined $table) {
 		foreach my $postfix (qw{_packages _merged_with _found_in _fixed_in _tags}, '') {
