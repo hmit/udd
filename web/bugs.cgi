@@ -432,7 +432,10 @@ puts "<p><b>#{rows.length} bugs found.</b></p>"
 if rows.length > 0
 
   if cols['chints']
-    sthh = dbh.prepare("select distinct source, type, argument, version, file, comment from relevant_hints order by type")
+    # this used to be 'relevant_hints' instead of hints (which checks the
+    # version in unstable) - changed because package info sync is down
+    # 2013-03-24 ivodd
+    sthh = dbh.prepare("select distinct source, type, argument, version, file, comment from hints order by type")
     sthh.execute
     rowsh = sthh.fetch_all
     hints = {}
