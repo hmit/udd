@@ -16,7 +16,7 @@ import logging.handlers
 from subprocess import Popen, PIPE
 from debian import deb822
 
-debug=0
+debug=1
 
 def get_gatherer(connection, config, source):
   return blends_metadata_gatherer(connection, config, source)
@@ -53,9 +53,13 @@ class blends_metadata_gatherer(gatherer):
     my_config = self.my_config
     cur = self.cursor()
 
+    cur.execute("DELETE FROM %s" % (my_config['table-tasks']))
     cur.execute("DELETE FROM %s" % (my_config['table-metadata']))
     query = """PREPARE blend_metadata_insert AS INSERT INTO %s (blend, blendname, projecturl, tasksprefix)
                VALUES ($1, $2, $3, $4)""" % (my_config['table-metadata'])
+    cur.execute(query)
+    query = """PREPARE blend_tasks_insert AS INSERT INTO %s (blend, task, metapackage)
+               VALUES ($1, $2, $3)""" % (my_config['table-tasks'])
     cur.execute(query)
 
     blendsdir = my_config['path']
@@ -100,6 +104,33 @@ class blends_metadata_gatherer(gatherer):
         cur.execute(query, meta)
       except IntegrityError, err:
         print >>stderr, err
+
+      for t in listdir(tasksdirtemplate % meta['blend']):
+        if t.startswith('.'):
+          continue
+        taskfile = tasksdirtemplate % meta['blend'] + '/' + t
+        try:
+          f = open(taskfile, 'r')
+        except:
+          print >>stderr, "error reading %s" % taskfile
+        if f:
+          ictrl = deb822.Deb822.iter_paragraphs(f)
+          taskmeta = ictrl.next()
+          if not taskmeta.has_key('task'):
+            if debug != 0:
+	      print "%s has no key 'Task'" % taskfile
+          task = { 'blend'       : meta['blend'],
+                   'task'        : t,
+                   'metapackage' : True,
+                 }
+          if taskmeta.has_key('metapackage'):
+            if taskmeta['metapackage'].lower() == 'false':
+              task['metapackage'] = False
+        query = "EXECUTE blend_tasks_insert (%(blend)s, %(task)s, %(metapackage)s)"
+        try:
+          cur.execute(query, task)
+        except IntegrityError, err:
+          print >>stderr, err
 
       self.meta[meta['blend']] = meta
 
