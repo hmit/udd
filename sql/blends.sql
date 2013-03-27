@@ -10,9 +10,10 @@ CREATE TABLE blends_metadata (
 GRANT SELECT ON blends_metadata TO PUBLIC;
 
 CREATE TABLE blends_tasks (
-  -- fieldname   type,   --  example value
+  -- fieldname   type,    --  example value
      blend       TEXT REFERENCES blends_metadata,
-     task        TEXT,   --  'bio'
+     task        TEXT,    --  'bio'
+     metapackage BOOLEAN, --  Some tasks should not end up in a metapackage
      PRIMARY KEY (blend, task)
 );
 
