@@ -2,37 +2,7 @@ general:
   dbname: udd
   dbport: 5452
   types:
-    sources: module udd.sources_gatherer
-    packages: module udd.packages_gatherer
-    setup: exec python db_manager.py
-    delete: exec python db_manager.py
-    src-pkg: module udd.src_and_pkg_gatherer
-    popcon: module udd.popcon_gatherer
-    testing-migrations: module udd.testing_migrations_gatherer
-    upstream: exec /srv/udd.debian.org/udd/scripts/update-upstream-status
-    vcs: exec /srv/udd.debian.org/udd/scripts/update-vcs-status
-    upload-history: module udd.upload_history_gatherer
-    orphaned-packages: module udd.orphaned_packages_gatherer
-    bugs: exec DEBBUGS_CONFIG_FILE=/srv/udd.debian.org/udd/bugs-config perl /srv/udd.debian.org/udd/udd/bugs_gatherer.pl 
-    carnivore: module udd.carnivore_gatherer
-    lintian: module udd.lintian_gatherer
-    debtags: module udd.debtags_gatherer
-    ubuntu-bugs: module udd.ubuntu_bugs_gatherer
-    ddtp: module udd.ddtp_gatherer
-    ftpnew: module udd.ftpnew_gatherer
-    screenshots: module udd.screenshot_gatherer
-    bibref: module udd.bibref_gatherer
-    blends-prospective: module udd.blends_prospective_gatherer
-    clone-udd-bugs: exec /srv/udd.debian.org/udd/scripts/clone_udd_bugs_inject.sh
-    dehs: module udd.dehs_gatherer
-    ldap: module udd.ldap_gatherer
-    wannabuild: module udd.wannabuild_gatherer
-    removals: module udd.removals_gatherer
-    pts: module udd.pts_gatherer
-    history-daily: module udd.history_daily_gatherer
-    i18n-apps: module udd.i18n_apps_gatherer
-    hints: module udd.hints_gatherer
-    deferred: module udd.deferred_gatherer
+    blends-metadata: module udd.blends_metadata_gatherer
   timestamp-dir: /srv/udd.debian.org/timestamps
   lock-dir: /srv/udd.debian.org/locks
   archs:
@@ -49,4 +19,5 @@ blends-metadata:
   path: /srv/udd.debian.org/mirrors/blends
   table-metadata: blends_metadata
   table-tasks: blends_tasks
+  table-dependencies: blends_dependencies
 
