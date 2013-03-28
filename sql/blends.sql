@@ -25,7 +25,7 @@ CREATE TABLE blends_dependencies (
      task         TEXT, -- CHECK (task IN (SELECT task from blends_tasks)),
      package      TEXT,
      dependency   CHARACTER(1) CHECK (dependency IN ('d', 's')), -- Depends / Suggests
-     distribution TEXT CHECK (distribution IN ('debian', 'prospective', 'ubuntu', 'other')),
+     distribution TEXT CHECK (distribution IN ('debian', 'new', 'prospective', 'ubuntu', 'other')),
      PRIMARY KEY (blend, task, package)
 );
 
