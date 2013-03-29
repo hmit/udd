@@ -24,8 +24,9 @@ CREATE TABLE blends_dependencies (
      blend        TEXT REFERENCES blends_metadata,
      task         TEXT, -- CHECK (task IN (SELECT task from blends_tasks)),
      package      TEXT,
-     dependency   CHARACTER(1) CHECK (dependency IN ('d', 's')), -- Depends / Suggests
+     dependency   CHARACTER(1) CHECK (dependency IN ('d', 'r', 's')), -- Depends / Recommends / Suggests
      distribution TEXT CHECK (distribution IN ('debian', 'new', 'prospective', 'ubuntu', 'other')),
+     component    TEXT CHECK (component IN ('main', 'contrib', 'non-free')),
      PRIMARY KEY (blend, task, package)
 );
 
