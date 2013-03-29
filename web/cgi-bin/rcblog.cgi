@@ -26,76 +26,76 @@ def getcount(q)
 end
 
 q = <<-EOF
-select count(*) from bugs 
+select count(*) from bugs
 where status != 'done'
-and not (id in (select id from bugs_merged_with where id > merged_with)) 
+and not (id in (select id from bugs_merged_with where id > merged_with))
 AND (severity >= 'serious')
 EOF
 tot = getcount(q)
 q = <<-EOF
-select count(id) from bugs 
+select count(id) from bugs
 where id in (select id from bugs_rt_affects_testing)
-and not (id in (select id from bugs_merged_with where id > merged_with)) 
+and not (id in (select id from bugs_merged_with where id > merged_with))
 AND (severity >= 'serious')
 EOF
 wheezy = getcount(q)
 
 q = <<-EOF
-select count(id) from bugs 
-where id in (select id from bugs_rt_affects_testing) and id in (select id from bugs_rt_affects_unstable) 
-and not (id in (select id from bugs_merged_with where id > merged_with)) 
+select count(id) from bugs
+where id in (select id from bugs_rt_affects_testing) and id in (select id from bugs_rt_affects_unstable)
+and not (id in (select id from bugs_merged_with where id > merged_with))
 AND (severity >= 'serious')
 EOF
 wheezy_sid = getcount(q)
 q = <<-EOF
-select count(id) from bugs 
-where id in (select id from bugs_rt_affects_testing) and id not in (select id from bugs_rt_affects_unstable) 
-and not (id in (select id from bugs_merged_with where id > merged_with)) 
+select count(id) from bugs
+where id in (select id from bugs_rt_affects_testing) and id not in (select id from bugs_rt_affects_unstable)
+and not (id in (select id from bugs_merged_with where id > merged_with))
 AND (severity >= 'serious')
 EOF
 wheezy_only = getcount(q)
 
 q = <<-EOF
-select count(id) from bugs 
-where id in (select id from bugs_rt_affects_testing) and id in (select id from bugs_rt_affects_unstable) 
-and id in (select id from bugs_tags where tag='patch') 
-and not (id in (select id from bugs_merged_with where id > merged_with)) 
+select count(id) from bugs
+where id in (select id from bugs_rt_affects_testing) and id in (select id from bugs_rt_affects_unstable)
+and id in (select id from bugs_tags where tag='patch')
+and not (id in (select id from bugs_merged_with where id > merged_with))
 AND (severity >= 'serious')
 EOF
 wh_patch = getcount(q)
 
 q = <<-EOF
-select count(id) from bugs 
-where id in (select id from bugs_rt_affects_testing) and id in (select id from bugs_rt_affects_unstable) 
+select count(id) from bugs
+where id in (select id from bugs_rt_affects_testing) and id in (select id from bugs_rt_affects_unstable)
 and status = 'done'
-and not (id in (select id from bugs_merged_with where id > merged_with)) 
+and not (id in (select id from bugs_merged_with where id > merged_with))
 AND (severity >= 'serious')
 EOF
 wh_done = getcount(q)
 
 q = <<-EOF
-select count(id) from bugs 
-where id in (select id from bugs_rt_affects_testing) and id in (select id from bugs_rt_affects_unstable) 
+select count(id) from bugs
+where id in (select id from bugs_rt_affects_testing) and id in (select id from bugs_rt_affects_unstable)
 and not (id in (select id from bugs_tags where tag='patch'))
 and status != 'done'
-and not (id in (select id from bugs_merged_with where id > merged_with)) 
+and not (id in (select id from bugs_merged_with where id > merged_with))
 AND (severity >= 'serious')
 EOF
 wh_neither = getcount(q)
 
 q = <<-EOF
-select count(id) from bugs 
-where id in (select id from bugs_rt_affects_testing) and id not in (select id from bugs_rt_affects_unstable) 
-and not (id in (select id from bugs_merged_with where id > merged_with)) 
+select count(id) from bugs
+where id in (select id from bugs_rt_affects_testing) and id not in (select id from bugs_rt_affects_unstable)
+and not (id in (select id from bugs_merged_with where id > merged_with))
 and bugs.source in (select hints.source from hints where type in ('approve','unblock'))
 AND (severity >= 'serious')
 EOF
 wo_unblocked = getcount(q)
 
 q = <<-EOF
-select count(id) from bugs 
-where id in (select id from bugs_rt_affects_testing) and id not in (select id from bugs_rt_affects_unstable) 
-and not (id in (select id from bugs_merged_with where id > merged_with)) 
+select count(id) from bugs
+where id in (select id from bugs_rt_affects_testing) and id not in (select id from bugs_rt_affects_unstable)
+and not (id in (select id from bugs_merged_with where id > merged_with))
 and not (bugs.source in (select hints.source from hints where type in ('approve','unblock')))
 AND (severity >= 'serious')
 EOF
