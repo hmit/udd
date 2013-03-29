@@ -50,6 +50,22 @@ class blends_metadata_gatherer(gatherer):
     self.tasks = []
     self.deps  = []
 
+
+  def inject_package(self, blend, task, strength, dist, component, dep):
+    if dep in self.list_of_deps_in_task:
+      print "Blend %s task %s: Packages %s is mentioned more than once" % (blend, task, dep)
+    else:
+      query = "EXECUTE blend_inject_package (%s, %s, %s, %s, %s, %s)" \
+               % (quote(blend), quote(task), quote(dep), quote(strength[0]), quote(dist), quote(component))
+      try:
+        self.cur.execute(query)
+        self.list_of_deps_in_task.append(dep)
+      except IntegrityError, err:
+        print query, err
+      except InternalError, err:
+        print "INTEGRITY", query, err
+
+
   def handle_dep_line(self, blend, task, strength, dependencies):
     # Hack: Debian Edu tasks files are using '\' at EOL which is broken
     #       in RFC 822 files, but blend-gen-control from blends-dev relies
@@ -74,29 +90,22 @@ class blends_metadata_gatherer(gatherer):
       self.cur.execute(query)
       in_udd = self.cur.fetchone()
       if in_udd:
-        if dep in self.list_of_deps_in_task:
-          print "Blend %s task %s: Packages %s is mentioned more than once" % (blend, task, dep)
-        else:
-          dist = in_udd[1]
-          component = in_udd[2]
-          # print blend, task, strength, dep, dist, component
-          query = "EXECUTE blend_inject_package (%s, %s, %s, %s, %s, %s)" \
-                  % (quote(blend), quote(task), quote(dep), quote(strength[0]), quote(dist), quote(component))
-          try:
-            self.cur.execute(query)
-            self.list_of_deps_in_task.append(dep)
-          except IntegrityError, err:
-            print query, err
-          except InternalError, err:
-            print "INTEGRITY", query, err
+        self.inject_package(blend, task, strength, in_udd[1], in_udd[2], dep)
       else:
-        if debug != 0:
-          print "Blend %s task %s: Package %s not found" % (blend, task, dep)
+        query = "EXECUTE blend_check_package_in_new ('%s')" % (dep)
+        self.cur.execute(query)
+        in_udd = self.cur.fetchone()
+        if in_udd:
+          self.inject_package(blend, task, strength, 'new', in_udd[1], dep)
+        else:
+          if debug != 0:
+            print "Blend %s task %s: Package %s not found" % (blend, task, dep)
 
   def run(self):
     my_config = self.my_config
     self.cur = self.cursor()
 
+    self.cur.execute("DELETE FROM %s" % (my_config['table-dependencies']))
     self.cur.execute("DELETE FROM %s" % (my_config['table-tasks']))
     self.cur.execute("DELETE FROM %s" % (my_config['table-metadata']))
     query = """PREPARE blend_metadata_insert AS INSERT INTO %s (blend, blendname, projecturl, tasksprefix)
@@ -112,6 +121,10 @@ class blends_metadata_gatherer(gatherer):
                  WHERE package = $1
                  ORDER BY r.sort DESC
                  LIMIT 1"""
+    self.cur.execute(query)
+
+    query = """PREPARE blend_check_package_in_new AS
+                 SELECT DISTINCT package, component FROM new_packages WHERE package = $1 LIMIT 1"""
     self.cur.execute(query)
 
     query = """PREPARE blend_inject_package AS
