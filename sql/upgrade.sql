@@ -689,3 +689,23 @@ CREATE INDEX upload_history_distribution_date_idx on upload_history(distribution
 
 -- 2012-08-14
 CREATE INDEX upload_history_fingerprint_idx on upload_history(fingerprint);
+
+-- 2013-03-23
+CREATE TABLE bugs_stamps (
+    id integer NOT NULL,
+	update_requested bigint,
+	db_updated bigint
+);
+
+ALTER TABLE ONLY bugs_stamps
+    ADD CONSTRAINT bugs_stamps_pkey PRIMARY KEY (id);
+
+CREATE TABLE archived_bugs_stamps (
+    id integer NOT NULL,
+	update_requested bigint,
+	db_updated bigint
+);
+
+ALTER TABLE ONLY archived_bugs_stamps
+    ADD CONSTRAINT archived_bugs_stamps_pkey PRIMARY KEY (id);
+

@@ -432,7 +432,10 @@ puts "<p><b>#{rows.length} bugs found.</b></p>"
 if rows.length > 0
 
   if cols['chints']
-    sthh = dbh.prepare("select distinct source, type, argument, version, file, comment from relevant_hints order by type")
+    # this used to be 'relevant_hints' instead of hints (which checks the
+    # version in unstable) - changed because package info sync is down
+    # 2013-03-24 ivodd
+    sthh = dbh.prepare("select distinct source, type, argument, version, file, comment from hints order by type")
     sthh.execute
     rowsh = sthh.fetch_all
     hints = {}
@@ -557,7 +560,7 @@ if rows.length > 0
     puts "<td>#{genhints(r['source'], hints[r['source']], unblockreq[r['source']], unblockreqtags, unblockreqtype)}</td>" if cols['chints']
     puts "<td>#{claimedbugs[r['id']]}</td>" if cols['cclaimed']
     puts "<td>#{deferredbugs[r['id']]}</td>" if cols['cdeferred']
-    puts "<td>#{rttags[r['id']]}</td>" if cols['crttags']
+    puts "<td>" + ((rttags[r['id']]||[]).join(" ")) + "</td>" if cols['crttags']
     d = r['last_modified']
     d = Date::new(d.year, d.month, d.day)
     puts "<td style='text-align: center;'>#{d}</td></tr>"

@@ -1,5 +1,5 @@
 general:
-  dbname: udd
+  dbname: udd-dev
   dbport: 5452
   types:
     sources: module udd.sources_gatherer
@@ -13,7 +13,7 @@ general:
     vcs: exec /srv/udd.debian.org/udd/scripts/update-vcs-status
     upload-history: module udd.upload_history_gatherer
     orphaned-packages: module udd.orphaned_packages_gatherer
-    bugs: exec DEBBUGS_CONFIG_FILE=/srv/udd.debian.org/udd/bugs-config perl /srv/udd.debian.org/udd/udd/bugs_gatherer.pl 
+    bugs: exec DEBBUGS_CONFIG_FILE=/srv/udd.debian.org/udd/bugs-config perl /srv/udd.debian.org/udd-dev/udd/bugs_gatherer.pl 
     carnivore: module udd.carnivore_gatherer
     lintian: module udd.lintian_gatherer
     debtags: module udd.debtags_gatherer
@@ -34,7 +34,7 @@ general:
     hints: module udd.hints_gatherer
     deferred: module udd.deferred_gatherer
   timestamp-dir: /srv/udd.debian.org/timestamps
-  lock-dir: /srv/udd.debian.org/locks
+  lock-dir: /srv/udd.debian.org/udd-dev/locks
   archs:
    [alpha, amd64, arm, armeb, armel, armhf, hppa, hurd-i386,
     i386, i486, ia64, kfreebsd-amd64, kfreebsd-i386, mips,
@@ -525,6 +525,7 @@ hints:
   update-command: /srv/udd.debian.org/udd/scripts/update-hints
 
 bugs:
+  debug: true
   limit: 5000
   type: bugs
   archived: false
@@ -535,6 +536,7 @@ bugs:
   sources-table: sources
 
 bugs-modified:
+  debug: true
   type: bugs
   archived: false
   table: bugs
@@ -544,7 +546,7 @@ bugs-modified:
   sources-table: sources
 
 bugs-archive:
-  limit: 10000
+  limit: 20000
   type: bugs
   archived: true
   table: bugs

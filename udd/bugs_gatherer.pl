@@ -70,7 +70,7 @@ sub get_db_max_last_modified {
 }
 
 sub get_mtime {
-	return ((stat(shift))[9]);
+	return ((stat(shift))->mtime);
 }
 
 sub get_modified_bugs {
@@ -78,9 +78,10 @@ sub get_modified_bugs {
 	die "Argument required" unless defined $prune_stamp;
 	my $top_dir = $gSpoolDir;
 	my @result = ();
-	foreach my $sub (qw(archive db-h)) {
+	foreach my $sub (qw(db-h)) {
 		my $spool = "$top_dir/$sub";
 		foreach my $subsub (glob "$spool/*") {
+			print "looking for modified bugs in $subsub\n" if $timing;
 			if( -d $subsub and get_mtime($subsub) > $prune_stamp ) {
 				push @result, 
 					map { s{.*/(.*)\.log}{$1}; $_ } 
@@ -90,6 +91,30 @@ sub get_modified_bugs {
 		}
 	}
 	return \@result;
+}
+
+sub get_bugs_modified {
+	my $subdir = shift;
+	my $top_dir = $gSpoolDir;
+	my $result = ();
+	my $spool = "$top_dir/$subdir";
+	foreach my $subsub (glob "$spool/*") {
+		if( -d $subsub ) {
+			print "looking for modified bugs in $subsub\n" if $timing;
+			foreach my $log (glob "$subsub/*.log") {
+				if ($log =~ m;^(.*)/([^/]*)\.log;) {
+					my $path = $1;
+					my $id = $2;
+					# skip bugs with only log file
+					# TODO should this be .status of .summary?
+					if (-e "$path/$id.status") {
+						$result->{$id} = get_mtime($log);
+					}
+				}
+			}
+		}
+	}
+	return $result;
 }
 
 sub without_duplicates {
@@ -124,6 +149,7 @@ sub get_source {
 sub run_usertags {
 	my ($config, $source, $dbh) = @_;
 	my %src_config = %{$config->{$source}};
+
 	my $table = $src_config{'usertags-table'} or die "usertags-table not specified for source $source";
 	our $timing;
 	our $t;
@@ -147,6 +173,216 @@ sub run_usertags {
 			map { $dbh->do("INSERT INTO $table (email, tag, id) VALUES ($user, $qtag, $_)") or die $! } @{$tags{$tag}};
 		}
 	}
+	print "Inserting usertags: ",(time() - $t),"s\n" if $timing;
+}
+
+sub update_bug {
+	my $config = shift;
+	my $source = shift;
+	my $dbh = shift;
+	my $bug_nr = shift;
+
+	my %src_config = %{$config->{$source}};
+	my $unarchived_table = $src_config{table};
+	my $archived_table = $src_config{'archived-table'};
+
+	my $location = $src_config{archived} ? 'archive' : 'db_h';
+	my $table = $src_config{archived} ? $archived_table : $unarchived_table;
+
+	my $start = time();
+
+	foreach my $prefix ($unarchived_table, $archived_table) {
+		foreach my $postfix (qw{_packages _merged_with _found_in _fixed_in _tags _blocks _blockedby}, '') {
+			$dbh->do("DELETE FROM $prefix$postfix where id in ($bug_nr)") or die
+		}
+	}
+
+	# Read all bugs
+	my $insert_bugs_handle = $dbh->prepare("INSERT INTO $table (id, package, source, arrival, status, severity, submitter, submitter_name, submitter_email, owner, owner_name, owner_email, done, done_name, done_email, done_date, title, forwarded, last_modified, affects_oldstable, affects_stable, affects_testing, affects_unstable, affects_experimental) VALUES (\$1, \$2, \$3, \$4::abstime, \$5, \$6, \$7, \$8, \$9, \$10, \$11, \$12, \$13, \$14, \$15, \$16::abstime, \$17, \$18, \$19::abstime, \$20, \$21, \$22, \$23, \$24)");
+	my $insert_bugs_packages_handle = $dbh->prepare("INSERT INTO ${table}_packages (id, package, source) VALUES (\$1, \$2, \$3)");
+	my $insert_bugs_found_handle = $dbh->prepare("INSERT INTO ${table}_found_in (id, version) VALUES (\$1, \$2)");
+	my $insert_bugs_fixed_handle = $dbh->prepare("INSERT INTO ${table}_fixed_in (id, version) VALUES (\$1, \$2)");
+	my $insert_bugs_merged_handle = $dbh->prepare("INSERT INTO ${table}_merged_with (id, merged_with) VALUES (\$1, \$2)");
+	my $insert_bugs_tags_handle = $dbh->prepare("INSERT INTO ${table}_tags (id, tag) VALUES (\$1, \$2)");
+	my $insert_bugs_blocks_handle = $dbh->prepare("INSERT INTO ${table}_blocks (id, blocked) VALUES (\$1, \$2)");
+	my $insert_bugs_blockedby_handle = $dbh->prepare("INSERT INTO ${table}_blockedby (id, blocker) VALUES (\$1, \$2)");
+	$insert_bugs_handle->bind_param(4, undef, SQL_INTEGER);
+	$insert_bugs_handle->bind_param(16, undef, SQL_INTEGER);
+	$insert_bugs_handle->bind_param(19, undef, SQL_INTEGER);
+
+	# Fetch bug using Debbugs
+	# Bugs which were once archived and have been unarchived again will appear in get_bugs(archive => 1).
+	# However, those bugs are not to be found in location 'archive', so we detect them, and skip them
+	my $bug_ref = read_bug(bug => $bug_nr, location => $location) or (print STDERR "Could not read file for bug $bug_nr; skipping\n" and return);
+	# Yeah, great, why does get_bug_status not accept a location?
+	my %bug = %{get_bug_status(bug => $bug_nr, status => $bug_ref)};
+	
+	# Convert data where necessary
+	my @found_versions = @{$bug{found_versions}};
+	my @fixed_versions = @{$bug{fixed_versions}};
+	my @tags = split / /, $bug{keywords};
+
+	# log_modified and date are not necessarily set. If they are not available, they
+	# are assumed to be epoch (i.e. bug #4170)
+	map {
+		if($bug{$_}) {
+			$bug{$_} = int($bug{$_});
+		} else {
+			$bug{$_} = 0;
+		}
+	} qw{date log_modified done_date};
+
+	my $srcpkg = get_source($bug{package});
+
+	# split emails
+	my (@addr, $submitter_name, $submitter_email, $owner_name, $owner_email, $done_name, $done_email);
+	if ($bug{originator}) {
+		@addr = Mail::Address->parse($bug{originator});
+		$submitter_name = $addr[0]->phrase;
+		$submitter_email = $addr[0]->address;
+	} else {
+		$submitter_name = '';
+		$submitter_email = '';
+	}
+
+	if ($bug{owner}) {
+		@addr = Mail::Address->parse($bug{owner});
+		$owner_name = $addr[0]->phrase;
+		$owner_email = $addr[0]->address;
+	} else {
+		$owner_name = '';
+		$owner_email = '';
+	}
+
+	if ($bug{done}) {
+		@addr = Mail::Address->parse($bug{done});
+		$done_name = $addr[0]->phrase;
+		$done_email = $addr[0]->address;
+	} else {
+		$done_name = '';
+		$done_email = '';
+	}
+
+	#Calculate bug presence in distributions
+	my ($present_in_oldstable, $present_in_stable, $present_in_testing, $present_in_unstable, $present_in_experimental);
+	if($src_config{archived}) {
+		$present_in_oldstable = $present_in_stable = $present_in_testing = $present_in_unstable = $present_in_experimental = 'FALSE';
+	} else {
+		$present_in_oldstable =
+			bug_presence(bug => $bug_nr, status => \%bug,
+						 dist => 'oldstable',
+						 arch => \@archs);
+		$present_in_stable =
+			bug_presence(bug => $bug_nr, status => \%bug,
+						 dist => 'stable',
+						 arch => \@archs);
+		$present_in_testing =
+			bug_presence(bug => $bug_nr, status => \%bug,
+						 dist => 'testing',
+						 arch => \@archs);
+		$present_in_unstable =
+			bug_presence(bug => $bug_nr, status => \%bug,
+						 dist => 'unstable',
+						 arch => \@archs);
+		$present_in_experimental =
+			bug_presence(bug => $bug_nr, status => \%bug,
+						 dist => 'experimental',
+						 arch => \@archs);
+
+		if(!defined($present_in_oldstable) or !defined($present_in_stable) or !defined($present_in_unstable) or !defined($present_in_testing) or !defined($present_in_experimental)) {
+			print "NUMBER: $bug_nr\n";
+		}
+	
+		if(defined($present_in_oldstable) and ($present_in_oldstable eq 'absent' or $present_in_oldstable eq 'fixed')) {
+			$present_in_oldstable = 'FALSE';
+		} else {
+			$present_in_oldstable = 'TRUE';
+		}
+		if(defined($present_in_stable) and ($present_in_stable eq 'absent' or $present_in_stable eq 'fixed')) {
+			$present_in_stable = 'FALSE';
+		} else {
+			$present_in_stable = 'TRUE';
+		}
+		if(defined($present_in_testing) and ($present_in_testing eq 'absent' or $present_in_testing eq 'fixed')) {
+			$present_in_testing = 'FALSE';
+		} else {
+			$present_in_testing = 'TRUE';
+		}
+		if(defined($present_in_unstable) and ($present_in_unstable eq 'absent' or $present_in_unstable eq 'fixed')) {
+			$present_in_unstable = 'FALSE';
+		} else {
+			$present_in_unstable = 'TRUE';
+		}
+		if(defined($present_in_experimental) and ($present_in_experimental eq 'absent' or $present_in_experimental eq 'fixed')) {
+			$present_in_experimental = 'FALSE';
+		} else {
+			$present_in_experimental = 'TRUE';
+		}
+	}
+
+	# Insert data into bugs table
+	$insert_bugs_handle->execute($bug_nr, $bug{package}, $srcpkg, $bug{date}, $bug{pending},
+		$bug{severity}, $bug{originator}, $submitter_name, $submitter_email, $bug{owner},
+		$owner_name, $owner_email, $bug{done}, $done_name, $done_email, $bug{done_date},
+		$bug{subject}, $bug{forwarded}, $bug{log_modified},
+		$present_in_oldstable, $present_in_stable, $present_in_testing, $present_in_unstable, $present_in_experimental) or die $!;
+
+	my $src;
+	foreach my $pkg (keys %{{ map { $_ => 1 } split(/\s*[, ]\s*/, $bug{package})}}) {
+		$src = get_source($pkg);
+		$insert_bugs_packages_handle->execute($bug_nr, $pkg, $src) or die $!;
+	}
+
+	# insert data into bug_fixed_in and bug_found_in tables
+	foreach my $version (without_duplicates(@found_versions)) {
+		$insert_bugs_found_handle->execute($bug_nr, $version) or die $!;
+	}
+	foreach my $version (without_duplicates(@fixed_versions)) {
+		$insert_bugs_fixed_handle->execute($bug_nr, $version) or die $!;
+	}
+	foreach my $mergee (without_duplicates(split / /, $bug{mergedwith})) {
+		$insert_bugs_merged_handle->execute($bug_nr, $mergee) or die $!;
+	}
+	foreach my $blocked (without_duplicates(split / /, $bug{blocks})) {
+		$insert_bugs_blocks_handle->execute($bug_nr, $blocked) or die $!;
+	}
+	foreach my $blocker (without_duplicates(split / /, $bug{blockedby})) {
+		$insert_bugs_blockedby_handle->execute($bug_nr, $blocker) or die $!;
+	}
+	foreach my $tag (without_duplicates(@tags)) {
+		$insert_bugs_tags_handle->execute($bug_nr, $tag) or die $!;
+	}
+
+	my $update_stamp_handle = $dbh->prepare("UPDATE ${table}_stamps SET db_updated = \$1 WHERE id = \$2");
+	my $update_res = $update_stamp_handle->execute($start,$bug_nr) or die $!;
+	if ($update_res < 1) {
+		my $insert_stamp_handle = $dbh->prepare("INSERT INTO ${table}_stamps (id, db_updated) VALUES (\$1, \$2)");
+		$insert_stamp_handle->execute($bug_nr,$start) or die $!;
+	}
+}
+
+sub update_bugs {
+
+	my $config = shift;
+	my $source = shift;
+	my $dbh = shift;
+	my $bugs = shift;
+	my $limit = shift||1000;
+
+	print "Fetching list of ",scalar(@$bugs), " bugs to insert: ",(time() - $t),"s\n" if $timing;
+	$t = time();
+	my $counter = 0;
+	foreach my $bug_nr (@$bugs) {
+		$counter++;
+		update_bug($config,$source,$dbh,$bug_nr);
+		if ($timing) {
+			print "$bug_nr $counter/".(scalar @$bugs)."\n";
+		}
+		last if ($counter >= $limit);
+	}
+	print "Inserting bugs: ",(time() - $t),"s\n" if $timing;
+
+	return $counter;
 }
 
 sub run {
@@ -155,17 +391,17 @@ sub run {
 	our $t;
 	our $timing;
 	my %src_config = %{$config->{$source}};
-	my $table = $src_config{table};
+	my $unarchived_table = $src_config{table};
 	my $archived_table = $src_config{'archived-table'};
+	my $table = $src_config{archived} ? $archived_table : $unarchived_table;
 
-	if (!$src_config{debug}) {
-		run_usertags($config, $source, $dbh);
-		print "Inserting usertags: ",(time() - $t),"s\n" if $timing;
-		$t = time();
-	}
-
+	my $limit = $src_config{'limit'} || 1000;
 
 	my @modified_bugs;
+
+	my $sth = $dbh->prepare("SELECT id,db_updated FROM ${table}_stamps");
+	$sth->execute;
+	my $bugs_db_updated = $sth->fetchall_hashref('id');
 
 	if($src_config{archived}) {
 		# some bugs (the unarchived ones) are in both list. exclude them.
@@ -189,206 +425,93 @@ sub run {
 		@modified_bugs = @modified_bugs2;
 	}
 
-	print "Fetching list of ",scalar(@modified_bugs), " bugs to insert: ",(time() - $t),"s\n" if $timing;
-	$t = time();
+	# import new bugs
+	@modified_bugs = grep { ! defined $bugs_db_updated->{$_} } @modified_bugs;
+	my $counter = update_bugs($config,$source,$dbh,\@modified_bugs,$limit);
+	$limit -= $counter;
 
-        my $modbugs = join ',', @modified_bugs;
+	if ($limit > 0) {
+		# we updated less bugs than the limit in the config file
+		# update some of the olders bugs
+		$sth = $dbh->prepare("SELECT id FROM ${table}_stamps ORDER BY db_updated LIMIT $limit");
+		$sth->execute;
+		my $oldest_bugs = $sth->fetchall_hashref('id');
 
-	foreach my $prefix ($table, $archived_table) {
-		foreach my $postfix (qw{_packages _merged_with _found_in _fixed_in _tags _blocks _blockedby}, '') {
-			$dbh->do("DELETE FROM $prefix$postfix where id in ($modbugs)") or die
+		my @bug_ids = keys %$oldest_bugs;
+		$counter = update_bugs($config,$source,$dbh,\@bug_ids,$limit);
+		$limit -= $counter;
+	}
+}
+
+sub run_modified {
+	my ($config, $source, $dbh) = @_;
+
+	our $t;
+	our $timing;
+	my %src_config = %{$config->{$source}};
+	my $unarchived_table = $src_config{table};
+	my $archived_table = $src_config{'archived-table'};
+	my $table = $src_config{archived} ? $archived_table : $unarchived_table;
+
+	my @modified_bugs;
+
+	print "start looking for modified bugs\n" if $timing;
+	my $sth = $dbh->prepare("SELECT id,db_updated FROM ${table}_stamps");
+	$sth->execute;
+	my $bugs_db_updated = $sth->fetchall_hashref('id');
+
+	my $location = $src_config{archived} ? "archive" : "db-h";
+	my $bugs_modified = get_bugs_modified($location);
+
+	foreach my $bugid (keys %$bugs_modified) {
+		if (
+			# no stamp for this bug: new bug
+			(!defined($bugs_db_updated->{$bugid})) ||
+			# log file was modified after last db update
+			($bugs_modified->{$bugid} > $bugs_db_updated->{$bugid}->{"db_updated"})
+		) {
+			push @modified_bugs,$bugid;
 		}
 	}
-	print "Deleting bugs: ",(time() - $t),"s\n" if $timing;
-	$t = time();
+	my $counter = update_bugs($config,$source,$dbh,\@modified_bugs);
+}
 
-	my $location = $src_config{archived} ? 'archive' : 'db_h';
-	$table = $src_config{archived} ? $archived_table : $table;
-	# Read all bugs
-	my $insert_bugs_handle = $dbh->prepare("INSERT INTO $table (id, package, source, arrival, status, severity, submitter, submitter_name, submitter_email, owner, owner_name, owner_email, done, done_name, done_email, done_date, title, forwarded, last_modified, affects_oldstable, affects_stable, affects_testing, affects_unstable, affects_experimental) VALUES (\$1, \$2, \$3, \$4::abstime, \$5, \$6, \$7, \$8, \$9, \$10, \$11, \$12, \$13, \$14, \$15, \$16::abstime, \$17, \$18, \$19::abstime, \$20, \$21, \$22, \$23, \$24)");
-	my $insert_bugs_packages_handle = $dbh->prepare("INSERT INTO ${table}_packages (id, package, source) VALUES (\$1, \$2, \$3)");
-	my $insert_bugs_found_handle = $dbh->prepare("INSERT INTO ${table}_found_in (id, version) VALUES (\$1, \$2)");
-	my $insert_bugs_fixed_handle = $dbh->prepare("INSERT INTO ${table}_fixed_in (id, version) VALUES (\$1, \$2)");
-	my $insert_bugs_merged_handle = $dbh->prepare("INSERT INTO ${table}_merged_with (id, merged_with) VALUES (\$1, \$2)");
-	my $insert_bugs_tags_handle = $dbh->prepare("INSERT INTO ${table}_tags (id, tag) VALUES (\$1, \$2)");
-	my $insert_bugs_blocks_handle = $dbh->prepare("INSERT INTO ${table}_blocks (id, blocked) VALUES (\$1, \$2)");
-	my $insert_bugs_blockedby_handle = $dbh->prepare("INSERT INTO ${table}_blockedby (id, blocker) VALUES (\$1, \$2)");
-	$insert_bugs_handle->bind_param(4, undef, SQL_INTEGER);
-	$insert_bugs_handle->bind_param(16, undef, SQL_INTEGER);
-	$insert_bugs_handle->bind_param(19, undef, SQL_INTEGER);
-
-	$t = time();
-	foreach my $bug_nr (@modified_bugs) {
-		# Fetch bug using Debbugs
-		# Bugs which were once archived and have been unarchived again will appear in get_bugs(archive => 1).
-		# However, those bugs are not to be found in location 'archive', so we detect them, and skip them
-		my $bug_ref = read_bug(bug => $bug_nr, location => $location) or (print STDERR "Could not read file for bug $bug_nr; skipping\n" and next);
-		# Yeah, great, why does get_bug_status not accept a location?
-		my %bug = %{get_bug_status(bug => $bug_nr, status => $bug_ref)};
-		
-		# Convert data where necessary
-		my @found_versions = @{$bug{found_versions}};
-		my @fixed_versions = @{$bug{fixed_versions}};
-		my @tags = split / /, $bug{keywords};
-
-		# log_modified and date are not necessarily set. If they are not available, they
-		# are assumed to be epoch (i.e. bug #4170)
-		map {
-			if($bug{$_}) {
-				$bug{$_} = int($bug{$_});
-			} else {
-				$bug{$_} = 0;
-			}
-		} qw{date log_modified done_date};
-
-		my $srcpkg = get_source($bug{package});
-
-		# split emails
-		my (@addr, $submitter_name, $submitter_email, $owner_name, $owner_email, $done_name, $done_email);
-		if ($bug{originator}) {
-			@addr = Mail::Address->parse($bug{originator});
-			$submitter_name = $addr[0]->phrase;
-			$submitter_email = $addr[0]->address;
-		} else {
-			$submitter_name = '';
-			$submitter_email = '';
-		}
-
-		if ($bug{owner}) {
-			@addr = Mail::Address->parse($bug{owner});
-			$owner_name = $addr[0]->phrase;
-			$owner_email = $addr[0]->address;
-		} else {
-			$owner_name = '';
-			$owner_email = '';
-		}
-
-		if ($bug{done}) {
-			@addr = Mail::Address->parse($bug{done});
-			$done_name = $addr[0]->phrase;
-			$done_email = $addr[0]->address;
-		} else {
-			$done_name = '';
-			$done_email = '';
-		}
-
-		#Calculate bug presence in distributions
-		my ($present_in_oldstable, $present_in_stable, $present_in_testing, $present_in_unstable, $present_in_experimental);
-		if($src_config{archived}) {
-			$present_in_oldstable = $present_in_stable = $present_in_testing = $present_in_unstable = $present_in_experimental = 'FALSE';
-		} else {
-			$present_in_oldstable =
-				bug_presence(bug => $bug_nr, status => \%bug,
-							 dist => 'oldstable',
-							 arch => \@archs);
-			$present_in_stable =
-				bug_presence(bug => $bug_nr, status => \%bug,
-							 dist => 'stable',
-							 arch => \@archs);
-			$present_in_testing =
-				bug_presence(bug => $bug_nr, status => \%bug,
-							 dist => 'testing',
-							 arch => \@archs);
-			$present_in_unstable =
-				bug_presence(bug => $bug_nr, status => \%bug,
-							 dist => 'unstable',
-							 arch => \@archs);
-			$present_in_experimental =
-				bug_presence(bug => $bug_nr, status => \%bug,
-							 dist => 'experimental',
-							 arch => \@archs);
-
-			if(!defined($present_in_oldstable) or !defined($present_in_stable) or !defined($present_in_unstable) or !defined($present_in_testing) or !defined($present_in_experimental)) {
-				print "NUMBER: $bug_nr\n";
-			}
-		
-			if(defined($present_in_oldstable) and ($present_in_oldstable eq 'absent' or $present_in_oldstable eq 'fixed')) {
-				$present_in_oldstable = 'FALSE';
-			} else {
-				$present_in_oldstable = 'TRUE';
-			}
-			if(defined($present_in_stable) and ($present_in_stable eq 'absent' or $present_in_stable eq 'fixed')) {
-				$present_in_stable = 'FALSE';
-			} else {
-				$present_in_stable = 'TRUE';
-			}
-			if(defined($present_in_testing) and ($present_in_testing eq 'absent' or $present_in_testing eq 'fixed')) {
-				$present_in_testing = 'FALSE';
-			} else {
-				$present_in_testing = 'TRUE';
-			}
-			if(defined($present_in_unstable) and ($present_in_unstable eq 'absent' or $present_in_unstable eq 'fixed')) {
-				$present_in_unstable = 'FALSE';
-			} else {
-				$present_in_unstable = 'TRUE';
-			}
-			if(defined($present_in_experimental) and ($present_in_experimental eq 'absent' or $present_in_experimental eq 'fixed')) {
-				$present_in_experimental = 'FALSE';
-			} else {
-				$present_in_experimental = 'TRUE';
-			}
-		}
-
-		# Insert data into bugs table
-		$insert_bugs_handle->execute($bug_nr, $bug{package}, $srcpkg, $bug{date}, $bug{pending},
-			$bug{severity}, $bug{originator}, $submitter_name, $submitter_email, $bug{owner},
-		       	$owner_name, $owner_email, $bug{done}, $done_name, $done_email, $bug{done_date},
-		       	$bug{subject}, $bug{forwarded}, $bug{log_modified},
-			$present_in_oldstable, $present_in_stable, $present_in_testing, $present_in_unstable, $present_in_experimental) or die $!;
-
-		my $src;
-		foreach my $pkg (keys %{{ map { $_ => 1 } split(/\s*[, ]\s*/, $bug{package})}}) {
-			$src = get_source($pkg);
-			$insert_bugs_packages_handle->execute($bug_nr, $pkg, $src) or die $!;
-		}
-
-		# insert data into bug_fixed_in and bug_found_in tables
-		foreach my $version (without_duplicates(@found_versions)) {
-			$insert_bugs_found_handle->execute($bug_nr, $version) or die $!;
-		}
-		foreach my $version (without_duplicates(@fixed_versions)) {
-			$insert_bugs_fixed_handle->execute($bug_nr, $version) or die $!;
-		}
-		foreach my $mergee (without_duplicates(split / /, $bug{mergedwith})) {
-			$insert_bugs_merged_handle->execute($bug_nr, $mergee) or die $!;
-		}
-		foreach my $blocked (without_duplicates(split / /, $bug{blocks})) {
-			$insert_bugs_blocks_handle->execute($bug_nr, $blocked) or die $!;
-		}
-		foreach my $blocker (without_duplicates(split / /, $bug{blockedby})) {
-			$insert_bugs_blockedby_handle->execute($bug_nr, $blocker) or die $!;
-		}
-		foreach my $tag (without_duplicates(@tags)) {
-			$insert_bugs_tags_handle->execute($bug_nr, $tag) or die $!;
-		}
-	}
-	print "Inserting bugs: ",(time() - $t),"s\n" if $timing;
+sub check_commit {
+	my ($config, $source, $dbh) = @_;
+	my %src_config = %{$config->{$source}};
+	my $table = $src_config{table};
 
 	# Check for broken imports
-	my $sthc = $dbh->prepare("select count(*) from bugs where id in (select id from bugs_rt_affects_unstable) and id > 500000");
-	$sthc->execute();
-	my $rowsc = $sthc->fetchrow_array();
-	if ($rowsc < 1000) {
-		die("Broken bugs import: not enough bugs affecting unstable\n");
+	if (!$src_config{debug}) {
+		my $sthc = $dbh->prepare("select count(*) from bugs where id in (select id from bugs_rt_affects_unstable) and id > 500000");
+		$sthc->execute();
+		my $rowsc = $sthc->fetchrow_array();
+		if ($rowsc < 1000) {
+			die("Broken bugs import: not enough bugs affecting unstable\n");
+		}
 	}
 
-	if (stat($gSpoolDir."/../versions/indices/binsrc.idx")->mtime > $t) {
-		die("Broken bugs import: binsrc.idx changed during import\n");
-        }
-	if (stat($gSpoolDir."/../versions/indices/srcbin.idx")->mtime > $t) {
-		die("Broken bugs import: srcbin.idx changed during import\n");
-        }
-	if (stat($gSpoolDir."/../versions/indices/versions.idx")->mtime > $t) {
-		die("Broken bugs import: versions.idx changed during import\n");
-        }
+#	if (stat($gSpoolDir."/../versions/indices/binsrc.idx")->mtime > $t) {
+#		die("Broken bugs import: binsrc.idx changed during import\n");
+#	}
+#	if (stat($gSpoolDir."/../versions/indices/srcbin.idx")->mtime > $t) {
+#		die("Broken bugs import: srcbin.idx changed during import\n");
+#	}
+#	if (stat($gSpoolDir."/../versions/indices/versions.idx")->mtime > $t) {
+#		die("Broken bugs import: versions.idx changed during import\n");
+#	}
 
-	foreach my $postfix (qw{_packages _merged_with _found_in _fixed_in _tags}, '') {
-		my $sth = $dbh->prepare("ANALYZE $table$postfix");
+	if (defined $table) {
+		foreach my $postfix (qw{_packages _merged_with _found_in _fixed_in _tags}, '') {
+			my $sth = $dbh->prepare("ANALYZE $table$postfix");
+			$sth->execute() or die $!;
+		}
+	}
+
+	if ($source eq "bugs-usertags") {
+		my $sth = $dbh->prepare("ANALYZE ".$src_config{'usertags-table'});
 		$sth->execute() or die $!;
 	}
-
-	my $sth = $dbh->prepare("ANALYZE ".$src_config{'usertags-table'});
-	$sth->execute() or die $!;
 
 	print "Analyzing bugs: ",(time() - $t),"s\n" if $timing;
 
@@ -423,7 +546,17 @@ sub main {
 	$dbh->do('SET CONSTRAINTS ALL DEFERRED');
 
 	if($command eq 'run') {
-		run($config, $source, $dbh);
+		if ($source eq "bugs-usertags") {
+			run_usertags($config, $source, $dbh);
+		} elsif ($source eq "bugs-modified") {
+			run_modified($config, $source, $dbh);
+		} elsif ($source eq "bugs") {
+			run_modified($config, $source, $dbh);
+			run($config, $source, $dbh);
+		} else {
+			run($config, $source, $dbh);
+		}
+		check_commit($config, $source, $dbh);
 	} else {
 		print STDERR "<command> has to be one of run, drop and setup\n";
 		exit(1)

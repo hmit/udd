@@ -1,6 +1,8 @@
 # This is the bugs.debian.org debbugs configuration file.
 # $Id: config.debian,v 1.21 2003/08/06 10:57:23 cjwatson Exp $
 
+use utf8;
+
 # Domains
 $gEmailDomain = "bugs.debian.org";
 $gListDomain = "lists.debian.org";
