@@ -170,7 +170,7 @@ Help make a first step towards resolution!
 <tr><td>10</td><td>release+4</td><td>120 (72+48)</td><td>+120 (+72/+48)</td></tr>
 <tr><td>11</td><td>release+5</td><td>115 (74+41)</td><td>+115 (+74/+41)</td></tr>
 <tr><td>12</td><td>release+6</td><td>93 (47+46)</td><td>+93 (+47/+46)</td></tr>
-<tr><td>13</td><td>release+7</td><td></td><td></td></tr>
+<tr><td>13</td><td>release+7</td><td>50 (24+26)</td><td>+50 (+24/+26)</td></tr>
 <tr><td>14</td><td>release+8</td><td></td><td></td></tr>
 <tr><td>15</td><td>release+9</td><td></td><td></td></tr>
 <tr><td>16</td><td>release+10</td><td></td><td></td></tr>
