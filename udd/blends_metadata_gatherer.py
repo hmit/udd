@@ -98,8 +98,14 @@ class blends_metadata_gatherer(gatherer):
         if in_udd:
           self.inject_package(blend, task, strength, 'new', in_udd[1], dep)
         else:
-          if debug != 0:
-            print "Blend %s task %s: Package %s not found" % (blend, task, dep)
+          query = "EXECUTE blend_check_package_in_prospective ('%s')" % (dep)
+          self.cur.execute(query)
+          in_udd = self.cur.fetchone()
+          if in_udd:
+            self.inject_package(blend, task, strength, 'prospective', in_udd[1], dep)
+          else:
+            if debug != 0:
+              print "Blend %s task %s: Package %s not found" % (blend, task, dep)
 
   def run(self):
     my_config = self.my_config
@@ -125,6 +131,10 @@ class blends_metadata_gatherer(gatherer):
 
     query = """PREPARE blend_check_package_in_new AS
                  SELECT DISTINCT package, component FROM new_packages WHERE package = $1 LIMIT 1"""
+    self.cur.execute(query)
+
+    query = """PREPARE blend_check_package_in_prospective AS
+                 SELECT DISTINCT package, component FROM blends_prospectivepackages WHERE package = $1 LIMIT 1"""
     self.cur.execute(query)
 
     query = """PREPARE blend_inject_package AS
