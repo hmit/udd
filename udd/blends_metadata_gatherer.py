@@ -104,8 +104,15 @@ class blends_metadata_gatherer(gatherer):
           if in_udd:
             self.inject_package(blend, task, strength, 'prospective', in_udd[1], dep)
           else:
-            if debug != 0:
-              print "Blend %s task %s: Package %s not found" % (blend, task, dep)
+            query = "EXECUTE blend_check_ubuntu_package ('%s')" % (dep)
+            self.cur.execute(query)
+            in_udd = self.cur.fetchone()
+            if in_udd:
+              print "UBUNTU", dep
+              self.inject_package(blend, task, strength, 'ubuntu', in_udd[1], dep)
+            else:
+              if debug != 0:
+                print "Blend %s task %s: Package %s not found" % (blend, task, dep)
 
   def run(self):
     my_config = self.my_config
@@ -140,6 +147,13 @@ class blends_metadata_gatherer(gatherer):
     query = """PREPARE blend_inject_package AS
                  INSERT INTO %s (blend, task, package, dependency, distribution, component)
                  VALUES ($1, $2, $3, $4, $5, $6)""" % (my_config['table-dependencies'])
+    self.cur.execute(query)
+
+    query = """PREPARE blend_check_ubuntu_package AS
+                 SELECT DISTINCT package, component, regexp_replace(release, '-.*$', '') as release FROM ubuntu_packages
+                 WHERE package = $1
+                 ORDER BY release DESC
+                 LIMIT 1"""
     self.cur.execute(query)
 
     blendsdir = my_config['path']
