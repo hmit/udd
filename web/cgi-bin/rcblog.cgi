@@ -59,6 +59,7 @@ q = <<-EOF
 select count(id) from bugs
 where id in (select id from bugs_rt_affects_testing) and id in (select id from bugs_rt_affects_unstable)
 and id in (select id from bugs_tags where tag='patch')
+and status != 'done'
 and not (id in (select id from bugs_merged_with where id > merged_with))
 AND (severity >= 'serious')
 EOF
@@ -118,7 +119,7 @@ puts <<-EOF
      <li><strong>Affecting wheezy and unstable: <a href="http://udd.debian.org/bugs.cgi?release=wheezy_and_sid&merged=ign&rc=1">#{wheezy_sid}</a></strong>
       Those need someone to find a fix, or to finish the work to upload a fix to unstable:
       <ul>
-       <li><strong><a href="http://udd.debian.org/bugs.cgi?release=wheezy_and_sid&patch=only&merged=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&ctags=1&cdeferred=1">#{wh_patch}</a> bugs are tagged 'patch'.</strong>
+       <li><strong><a href="http://udd.debian.org/bugs.cgi?release=wheezy_and_sid&patch=only&merged=ign&done=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&ctags=1&cdeferred=1">#{wh_patch}</a> bugs are tagged 'patch'.</strong>
         Please help by reviewing the patches, and (if you are a DD) by uploading them.
        </li>
        <li><strong><a href="http://udd.debian.org/bugs.cgi?release=wheezy_and_sid&merged=ign&done=only&fnewerval=7&rc=1&sortby=id&sorto=asc&ctags=1&cdeferred=1">#{wh_done}</a> bugs are marked as done, but still affect unstable.</strong>
