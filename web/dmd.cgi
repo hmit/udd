@@ -404,6 +404,7 @@ if cgi.params != {}
   puts <<-EOF
 </tbody>
 </table>
+<p>Packages with the same version in <i>#{UDEV}</i> and <i>Debian sid</i>, no bugs and no patches are not listed.</p>
 </div>
   EOF
 
