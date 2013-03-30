@@ -709,3 +709,10 @@ CREATE TABLE archived_bugs_stamps (
 ALTER TABLE ONLY archived_bugs_stamps
     ADD CONSTRAINT archived_bugs_stamps_pkey PRIMARY KEY (id);
 
+-- 2013-03-30
+ALTER TABLE bugs ADD COLUMN affected_packages text;
+ALTER TABLE bugs ADD COLUMN affected_sources text;
+ALTER TABLE archived_bugs ADD COLUMN affected_packages text;
+ALTER TABLE archived_bugs ADD COLUMN affected_sources text;
+
+

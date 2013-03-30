@@ -200,7 +200,9 @@ CREATE TABLE bugs
      last_modified timestamp, forwarded text, affects_oldstable boolean,
      affects_stable boolean,
     affects_testing boolean, affects_unstable boolean,
-    affects_experimental boolean);
+    affects_experimental boolean,
+	affected_packages text,
+	affected_sources text);
 
 CREATE TABLE bugs_packages
   (id int REFERENCES bugs, package text, source text,
@@ -246,7 +248,9 @@ CREATE TABLE archived_bugs
      last_modified timestamp, forwarded text, affects_oldstable boolean,
      affects_stable boolean,
     affects_testing boolean, affects_unstable boolean,
-    affects_experimental boolean);
+    affects_experimental boolean,
+	affected_packages text,
+	affected_sources text);
 
 CREATE TABLE archived_bugs_packages
   (id int REFERENCES archived_bugs, package text, source text,
