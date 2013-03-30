@@ -188,14 +188,16 @@ sub update_bug {
 
 	my $location = $src_config{archived} ? 'archive' : 'db_h';
 	my $table = $src_config{archived} ? $archived_table : $unarchived_table;
+	my $other_table = $src_config{archived} ? $unarchived_table : $archived_table;
 
 	my $start = time();
 
 	foreach my $prefix ($unarchived_table, $archived_table) {
 		foreach my $postfix (qw{_packages _merged_with _found_in _fixed_in _tags _blocks _blockedby}, '') {
-			$dbh->do("DELETE FROM $prefix$postfix where id in ($bug_nr)") or die
+			$dbh->do("DELETE FROM $prefix$postfix where id in ($bug_nr)") or die;
 		}
 	}
+	$dbh->do("DELETE FROM ${other_table}_stamps where id in ($bug_nr)") or die;
 
 	# Read all bugs
 	my $insert_bugs_handle = $dbh->prepare("INSERT INTO $table (id, package, source, arrival, status, severity, submitter, submitter_name, submitter_email, owner, owner_name, owner_email, done, done_name, done_email, done_date, title, forwarded, last_modified, affects_oldstable, affects_stable, affects_testing, affects_unstable, affects_experimental) VALUES (\$1, \$2, \$3, \$4::abstime, \$5, \$6, \$7, \$8, \$9, \$10, \$11, \$12, \$13, \$14, \$15, \$16::abstime, \$17, \$18, \$19::abstime, \$20, \$21, \$22, \$23, \$24)");
