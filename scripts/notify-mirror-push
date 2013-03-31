@@ -94,7 +94,7 @@ case "$ARCHIVE" in
       $UAR debian-backports-squeeze
       ;;
    debian-ports)
-      $UAR debian-ports-sid debian-ports-experimental debian-ports-unreleased
+      $UAR archive-debian-ports
       ;;
    *)
       echo "Unknown archive: $ARCHIVE"
