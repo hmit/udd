@@ -1028,3 +1028,16 @@ PRIMARY KEY(tag)
 
 GRANT SELECT ON ftp_autorejects TO PUBLIC;
 
+-- pseudo-packages
+
+CREATE TABLE pseudo_packages (
+package TEXT,
+maintainer TEXT,
+maintainer_name TEXT,
+maintainer_email TEXT,
+description TEXT,
+PRIMARY KEY(package)
+);
+
+GRANT SELECT ON pseudo_packages TO PUBLIC;
+

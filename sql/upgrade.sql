@@ -812,3 +812,17 @@ CREATE TABLE archived_descriptions (
     PRIMARY KEY (package, distribution, release, component, language, description, description_md5)
 );
 GRANT SELECT ON archived_descriptions TO PUBLIC;
+
+-- 2013-03-31
+
+CREATE TABLE pseudo_packages (
+package TEXT,
+maintainer TEXT,
+maintainer_name TEXT,
+maintainer_email TEXT,
+description TEXT,
+PRIMARY KEY(package)
+);
+
+GRANT SELECT ON pseudo_packages TO PUBLIC;
+

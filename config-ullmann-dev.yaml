@@ -14,6 +14,7 @@ general:
     vcs: exec /srv/udd.debian.org/udd/scripts/update-vcs-status
     upload-history: module udd.upload_history_gatherer
     orphaned-packages: module udd.orphaned_packages_gatherer
+    pseudo-packages: exec perl /srv/udd.debian.org/udd-dev/udd/pseudo_packages_gatherer.pl 
     bugs: exec DEBBUGS_CONFIG_FILE=/srv/udd.debian.org/udd/bugs-config perl /srv/udd.debian.org/udd-dev/udd/bugs_gatherer.pl 
     carnivore: module udd.carnivore_gatherer
     lintian: module udd.lintian_gatherer
@@ -207,6 +208,13 @@ orphaned-packages:
   unarchived-table: bugs
   schema: orphaned_packages
   bugs-path: /srv/bugs.debian.org
+
+pseudo-packages:
+  type: pseudo-packages
+  description-path: /srv/bugs.debian.org/pseudopackages/pseudo-packages.description
+  maintainers-path: /srv/bugs.debian.org/pseudopackages/pseudo-packages.maintainers
+  table: pseudo_packages
+  schema: pseudo_packages
 
 carnivore:
   type: carnivore
