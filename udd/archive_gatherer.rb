@@ -2,7 +2,6 @@
 # encoding: utf-8
 #
 # FIXME add detection of unknown fields
-# FIXME descriptions
 
 require 'yaml'
 require 'pp'
@@ -11,6 +10,7 @@ require './udd/deb822'
 require 'zlib'
 
 DEBUG = true
+TESTMODE = true
 VCS = [ 'Svn', 'Git', 'Arch', 'Bzr', 'Cvs', 'Darcs', 'Hg', 'Mtn']
 # PG doc: http://deveiate.org/code/pg/
 
@@ -77,6 +77,18 @@ class ArchiveGatherer
        'replaces', 'section', 'md5sum', 'bugs', 'priority',
        'tag', 'task', 'python-version', 'ruby-versions', 'provides',
        'conflicts', 'sha256', 'original-maintainer', 'release', 'component']
+
+    @db.prepare 'description_insert', <<-EOF
+      INSERT INTO #{@tabprefix}descriptions
+        (package, distribution, release, component, language, description, long_description, description_md5)
+        (SELECT $1 AS package, '#{@conf['distribution']}' AS distribution, $6 AS release, $7 AS component, $2 AS language,
+         $3 AS description, $4 AS long_description, $5 AS description_md5
+           WHERE NOT EXISTS
+           (SELECT 1 FROM #{@tabprefix}descriptions WHERE package=$1 AND release=$6 AND component=$7 AND language=$2 AND
+            description=$3 AND long_description=$4 AND description_md5=$5))
+    EOF
+    @description_fields = [ 'package', 'language', 'description', 'long_description',
+                            'description-md5', 'release', 'component' ]
   end
 
   def process_sources(f, release, component)
@@ -177,6 +189,22 @@ class ArchiveGatherer
    
       d['release'] = release
       d['component'] = component
+
+      # descriptions
+      if d['description']
+        if not d['description-md5']
+          d['description-md5'] = Digest::MD5.hexdigest(d['description']+"\n")
+        end
+        d['language'] = 'en'
+        sp = d['description'].split(/\n/, 2)
+        if sp.length > 1
+          d['long_description'] = sp[1]
+          d['description'] = sp[0]
+        else
+          d['long_description'] = ''
+        end
+        @db.exec_prepared('description_insert', @description_fields.map { |e| d[e] })
+      end
      
       @db.exec_prepared('package_insert', @package_fields.map { |e| d[e] })
     end
@@ -188,7 +216,7 @@ class ArchiveGatherer
 
     sources = Dir::glob("#{@conf['path']}/**/source/Sources.gz")
     sources.each do |source|
-#      next if not source =~ /sid/
+      next if TESTMODE and not source =~ /sid/
       source =~ /#{@conf['path']}\/dists\/(.*)\/(.*)\/source\/Sources.gz/
       component = $2
       release = $1.gsub('/', '-')
@@ -200,7 +228,7 @@ class ArchiveGatherer
     todelete = []
     packages = Dir::glob("#{@conf['path']}/**/binary-*/Packages.gz")
     packages.each do |package|
-#      next if not package =~ /sid.*binary-amd64/
+      next if TESTMODE and not package =~ /sid.*binary-amd64/
       next if package =~ /debian-installer/
       package =~ /#{@conf['path']}\/dists\/(.*)\/(.*)\/binary-(.*)\/Packages.gz/
       architecture = $3
@@ -212,7 +240,9 @@ class ArchiveGatherer
     end
     todelete.uniq.each do |td|
       @db.exec("DELETE FROM #{@tabprefix}packages WHERE distribution=$1 AND release=$2 AND component=$3",
-                    [ @conf['distribution'], td[:release], td[:component]])
+                    [ @conf['distribution'], td[:rel], td[:comp]])
+      @db.exec("DELETE FROM #{@tabprefix}descriptions WHERE distribution=$1 AND release=$2 AND component=$3",
+                    [ @conf['distribution'], td[:rel], td[:comp]])
     end
 
     todo.each do |td|
@@ -236,6 +266,7 @@ class ArchiveGatherer
     @db.exec("ANALYZE #{@tabprefix}sources")
     @db.exec("ANALYZE #{@tabprefix}uploaders")
     @db.exec("ANALYZE #{@tabprefix}packages")
+    @db.exec("ANALYZE #{@tabprefix}descriptions")
     @db.exec("ANALYZE #{@tabprefix}packages_summary")
     @db.exec("ANALYZE #{@tabprefix}packages_distrelcomparch")
   end
