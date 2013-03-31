@@ -36,11 +36,11 @@ class ArchiveGatherer
           Architecture, Standards_Version, Homepage, Build_Depends,
           Build_Depends_Indep, Build_Conflicts, Build_Conflicts_Indep, Priority,
           Section, Vcs_Type, Vcs_Url, Vcs_Browser, python_version, ruby_versions, checksums_sha1,
-          checksums_sha256, original_maintainer, testsuite, autobuild, dm_upload_allowed,
+          checksums_sha256, original_maintainer, testsuite, autobuild, dm_upload_allowed, extra_source_only,
           Distribution, Release, Component)
         VALUES
           ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
-          $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, '#{@conf['distribution']}', $30, $31)
+          $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, '#{@conf['distribution']}', $31, $32)
     EOF
     @source_fields =
       ['package', 'version', 'maintainer', 'maintainer_name', 'maintainer_email',
@@ -48,7 +48,7 @@ class ArchiveGatherer
       'homepage', 'build-depends', 'build-depends-indep', 'build-conflicts',
       'build-conflicts-indep', 'priority', 'section', 'vcs-type', 'vcs-url', 'vcs-browser',
       'python-version', 'ruby-versions', 'checksums-sha1', 'checksums-sha256',
-      'original-maintainer', 'testsuite', 'autobuild', 'dm-upload-allowed', 'release', 'component' ]
+      'original-maintainer', 'testsuite', 'autobuild', 'dm-upload-allowed', 'extra-source-only', 'release', 'component' ]
 
     @db.prepare 'uploader_insert', <<-EOF
        INSERT INTO #{@tabprefix}uploaders
@@ -162,6 +162,7 @@ class ArchiveGatherer
       d['release'] = release
       d['component'] = component
       d['dm-upload-allowed'] = ( (d['dm-upload-allowed'] || '').downcase == 'yes' ) ? true : nil
+      d['extra-source-only'] = ( (d['extra-source-only'] || '').downcase == 'yes' ) ? true : nil
      
       # uploaders
       if d['uploaders']
