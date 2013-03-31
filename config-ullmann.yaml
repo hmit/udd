@@ -2,6 +2,7 @@ general:
   dbname: udd
   dbport: 5452
   types:
+    archive: exec ruby /srv/udd.debian.org/udd/udd/archive_gatherer.rb
     sources: module udd.sources_gatherer
     packages: module udd.packages_gatherer
     setup: exec python db_manager.py
@@ -42,6 +43,14 @@ general:
     sh3eb, sh4, sh4eb, sh, knetbsd-i386, netbsd-alpha, sparc64,
     netbsd-i386, hurd-powerpc, kfreebsd-powerpc, netbsd-powerpc, hurd-sparc,
     kfreebsd-sparc, netbsd-sparc, darwin-i386, freebsd-i386, openbsd-i386, darwin-powerpc]
+
+#### NEW ARCHIVE GATHERER
+archive-ubuntu:
+  type: archive
+  path: /srv/udd.debian.org/mirrors/ubuntu/
+  distribution: ubuntu
+  tables-prefix: ubuntu_
+  update-command: /srv/udd.debian.org/udd/scripts/sync-dist.sh us.archive.ubuntu.com::ubuntu/dists/ /srv/udd.debian.org/mirrors/ubuntu/dists/
 
 #### SQUEEZE
 
