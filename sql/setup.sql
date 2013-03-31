@@ -9,7 +9,7 @@ CREATE TABLE sources
     vcs_url text, vcs_browser text,
     python_version text, ruby_versions text, checksums_sha1 text, checksums_sha256 text,
     original_maintainer text, dm_upload_allowed boolean,
-    testsuite text, autobuild text,
+    testsuite text, autobuild text, extra_source_only text,
     PRIMARY KEY (source, version, distribution, release, component));
 
 GRANT SELECT ON sources TO PUBLIC;
@@ -90,7 +90,7 @@ CREATE TABLE ubuntu_sources
     vcs_url text, vcs_browser text,
     python_version text, ruby_versions text, checksums_sha1 text, checksums_sha256 text,
     original_maintainer text, dm_upload_allowed boolean,
-    testsuite text, autobuild text,
+    testsuite text, autobuild text, extra_source_only text,
     PRIMARY KEY (source, version, distribution, release, component));
 
 CREATE INDEX ubuntu_sources_distrelcomp_idx on ubuntu_sources(distribution, release, component);
@@ -146,7 +146,7 @@ CREATE TABLE derivatives_sources
     vcs_url text, vcs_browser text,
     python_version text, ruby_versions text, checksums_sha1 text, checksums_sha256 text,
     original_maintainer text, dm_upload_allowed boolean,
-    testsuite text, autobuild text,
+    testsuite text, autobuild text, extra_source_only text,
     PRIMARY KEY (source, version, distribution, release, component));
 
 CREATE INDEX derivatives_sources_distrelcomp_idx on derivatives_sources(distribution, release, component);

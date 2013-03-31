@@ -731,12 +731,15 @@ GRANT SELECT ON ftp_autorejects TO PUBLIC;
 -- 2013-03-31
 ALTER TABLE sources ADD COLUMN testsuite text;
 ALTER TABLE sources ADD COLUMN autobuild text;
+ALTER TABLE sources ADD COLUMN extra_source_only boolean;
 ALTER TABLE packages ADD COLUMN multi_arch text;
 
 ALTER TABLE ubuntu_sources ADD COLUMN testsuite text;
 ALTER TABLE ubuntu_sources ADD COLUMN autobuild text;
+ALTER TABLE ubuntu_sources ADD COLUMN extra_source_only boolean;
 ALTER TABLE ubuntu_packages ADD COLUMN multi_arch text;
 
 ALTER TABLE derivatives_sources ADD COLUMN testsuite text;
 ALTER TABLE derivatives_sources ADD COLUMN autobuild text;
+ALTER TABLE derivatives_sources ADD COLUMN extra_source_only boolean;
 ALTER TABLE derivatives_packages ADD COLUMN multi_arch text;
