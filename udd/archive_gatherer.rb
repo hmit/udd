@@ -8,9 +8,10 @@ require 'pp'
 require 'pg'
 require './udd/deb822'
 require 'zlib'
+require 'digest'
 
-DEBUG = true
-TESTMODE = true
+DEBUG = false
+TESTMODE = false
 VCS = [ 'Svn', 'Git', 'Arch', 'Bzr', 'Cvs', 'Darcs', 'Hg', 'Mtn']
 SOURCES_IGNORE = VCS.map { |e| "vcs-#{e.downcase}" } + [ 'directory', 'package-list' ]
 PACKAGES_IGNORE = []
@@ -114,11 +115,11 @@ class ArchiveGatherer
   end
 
   def summarize_unknown
-    if @sources_unknown.empty?
+    if not @sources_unknown.empty?
       puts "Unknown fields in Sources:"
       pp @sources_unknown
     end
-    if @packages_unknown.empty?
+    if not @packages_unknown.empty?
       puts "Unknown fields in Packages:"
       pp @packages_unknown
     end
@@ -139,9 +140,10 @@ class ArchiveGatherer
       report_unknown_sources(d.keys)
 
       # split maintainer
-      d['maintainer'] =~ /^(.*) <(.*)>$/ or raise
-      d['maintainer_email'] = $2
-      d['maintainer_name'] = $1.gsub('"', '')
+      if d['maintainer'] =~ /^(.*) <(.*)>$/
+        d['maintainer_email'] = $2
+        d['maintainer_name'] = $1.gsub('"', '')
+      end
       # vcs
       VCS.each do |vcs|
         if d.has_key?("vcs-#{vcs.downcase}")
@@ -207,9 +209,10 @@ class ArchiveGatherer
       end
 
       # split maintainer
-      d['maintainer'] =~ /^(.*) <(.*)>$/ or raise
-      d['maintainer_email'] = $2
-      d['maintainer_name'] = $1.gsub('"', '')
+      if d['maintainer'] =~ /^(.*) <(.*)>$/
+        d['maintainer_email'] = $2
+        d['maintainer_name'] = $1.gsub('"', '')
+      end
 
       # Source is non-mandatory, but we don't want it to be NULL
       if d['source'].nil?
@@ -253,7 +256,7 @@ class ArchiveGatherer
 
     sources = Dir::glob("#{@conf['path']}/**/source/Sources.gz")
     sources.each do |source|
-      next if TESTMODE and not source =~ /sid/
+      next if TESTMODE and not source =~ /hardy\/universe/
       source =~ /#{@conf['path']}\/dists\/(.*)\/(.*)\/source\/Sources.gz/
       component = $2
       release = $1.gsub('/', '-')
