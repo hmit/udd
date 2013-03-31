@@ -21,6 +21,7 @@ general:
     ubuntu-bugs: module udd.ubuntu_bugs_gatherer
     ddtp: module udd.ddtp_gatherer
     ftpnew: module udd.ftpnew_gatherer
+    ftp-autorejects: exec perl /srv/udd.debian.org/udd/udd/ftp_autorejects_gatherer.pl
     screenshots: module udd.screenshot_gatherer
     bibref: module udd.bibref_gatherer
     blends-prospective: module udd.blends_prospective_gatherer
@@ -277,6 +278,13 @@ ftpnew:
   table_sources:  new_sources
   table_packages: new_packages
   releases_ignore: "'etch'"
+
+ftp-autorejects:
+  type: ftp-autorejects
+  update-command: rm -f /srv/udd.debian.org/mirrors/lintian.tags && wget -q http://ftp-master.debian.org/static/lintian.tags -O /srv/udd.debian.org/mirrors/lintian.tags
+  path: /srv/udd.debian.org/mirrors/lintian.tags
+  table: ftp_autorejects
+  schema: ftp_autorejects
 
 screenshots:
   type: screenshots
