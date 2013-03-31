@@ -13,8 +13,8 @@ require 'digest'
 DEBUG = false
 TESTMODE = false
 VCS = [ 'Svn', 'Git', 'Arch', 'Bzr', 'Cvs', 'Darcs', 'Hg', 'Mtn']
-SOURCES_IGNORE = VCS.map { |e| "vcs-#{e.downcase}" } + [ 'directory', 'package-list' ]
-PACKAGES_IGNORE = []
+SOURCES_IGNORE = VCS.map { |e| "vcs-#{e.downcase}" } + [ 'directory', 'package-list', 'apport', 'debian-vcs-browser', 'debian-vcs-bzr', 'debian-vcs-git', 'debian-vcs-hg', 'debian-vcs-svn', 'orginal-maintainer', 'origianl-maintainer'} 'origin', 'originalmaintainer', 'original-mainteiner', 'original-uploaders', 'original-vcs-browser', 'original-vcs-bzr', 'original-vcs-git', 'original-vcs-svn', 'orig-maintainer', 'orig-vcs-browser', 'orig-vcs-svn', 'python3-version', 'python-standards-version', 'upstream-depends', 'upstream-vcs-browser', 'upstream-vcs-bzr', 'url', 'vcs-browse', 'vcs-upstream-bzr', 'x-vcs-browser', 'x-vcs-bzr', 'x-vcs-darcs', 'x-vcs-svn' ]
+PACKAGES_IGNORE = [ 'apport', 'built-using', 'debian-vcs-browser', 'debian-vcs-svn', 'filename', 'gstreamer-decoders', 'gstreamer-elements', 'gstreamer-encoders', 'gstreamer-uri-sinks', 'gstreamer-uri-sources', 'gstreamer-version', 'lua-versions', 'modaliases', 'npp-applications', 'npp-description', 'npp-file', 'npp-filename', 'npp-mimetype', 'npp-name', 'orginal-maintainer', 'origianl-maintainer' 'originalmaintainer', 'original-mainteiner', 'original-uploaders', 'original-vcs-browser', 'original-vcs-git', 'original-vcs-svn', 'orig-maintainer', 'python3-version', 'python-runtime', 'ruby-version', 'screenshot-url', 'supported', 'thumbnail-url', 'ubuntu-webapps-domain', 'ubuntu-webapps-includes', 'ubuntu-webapps-name', 'url', 'vdr-patchlevel', 'x-original-maintainer', 'xul-appid' ]
 
 # PG doc: http://deveiate.org/code/pg/
 
@@ -256,7 +256,7 @@ class ArchiveGatherer
 
     sources = Dir::glob("#{@conf['path']}/**/source/Sources.gz")
     sources.each do |source|
-      next if TESTMODE and not source =~ /hardy\/universe/
+      next if TESTMODE
       source =~ /#{@conf['path']}\/dists\/(.*)\/(.*)\/source\/Sources.gz/
       component = $2
       release = $1.gsub('/', '-')
@@ -268,7 +268,7 @@ class ArchiveGatherer
     todelete = []
     packages = Dir::glob("#{@conf['path']}/**/binary-*/Packages.gz")
     packages.each do |package|
-      next if TESTMODE and not package =~ /sid.*binary-amd64/
+      next if TESTMODE and not package =~ /rdy-updates\/main\/binary-i386/
       next if package =~ /debian-installer/
       package =~ /#{@conf['path']}\/dists\/(.*)\/(.*)\/binary-(.*)\/Packages.gz/
       architecture = $3
