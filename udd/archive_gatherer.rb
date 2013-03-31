@@ -36,11 +36,11 @@ class ArchiveGatherer
           Architecture, Standards_Version, Homepage, Build_Depends,
           Build_Depends_Indep, Build_Conflicts, Build_Conflicts_Indep, Priority,
           Section, Vcs_Type, Vcs_Url, Vcs_Browser, python_version, ruby_versions, checksums_sha1,
-          checksums_sha256, original_maintainer, dm_upload_allowed,
+          checksums_sha256, original_maintainer, testsuite, autobuild, dm_upload_allowed,
           Distribution, Release, Component)
         VALUES
           ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
-          $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, '#{@conf['distribution']}', $28, $29)
+          $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, '#{@conf['distribution']}', $30, $31)
     EOF
     @source_fields =
       ['package', 'version', 'maintainer', 'maintainer_name', 'maintainer_email',
@@ -48,7 +48,7 @@ class ArchiveGatherer
       'homepage', 'build-depends', 'build-depends-indep', 'build-conflicts',
       'build-conflicts-indep', 'priority', 'section', 'vcs-type', 'vcs-url', 'vcs-browser',
       'python-version', 'ruby-versions', 'checksums-sha1', 'checksums-sha256',
-      'original-maintainer', 'dm-upload-allowed', 'release', 'component' ]
+      'original-maintainer', 'testsuite', 'autobuild', 'dm-upload-allowed', 'release', 'component' ]
 
     @db.prepare 'uploader_insert', <<-EOF
        INSERT INTO #{@tabprefix}uploaders
@@ -66,11 +66,11 @@ class ArchiveGatherer
        description_md5, Source, Source_Version, Essential, Depends, Recommends, Suggests, Enhances,
 	     Pre_Depends, Breaks, Installed_Size, Homepage, Size, build_essential, origin, sha1, replaces,
        section, md5sum, bugs, priority, tag, task, python_version, ruby_versions, provides, conflicts,
-       sha256, original_maintainer, Distribution, Release, Component)
+       sha256, original_maintainer, multi_arch, Distribution, Release, Component)
 	  VALUES
 	    ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15,
 	      $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28,
-	      $29, $30, $31, $32, $33, $34, $35, $36, '#{@conf['distribution']}', $37, $38)
+	      $29, $30, $31, $32, $33, $34, $35, $36, $37, '#{@conf['distribution']}', $38, $39)
     EOF
     @package_fields = 
       ['package', 'version', 'architecture', 'maintainer', 'maintainer_name', 'maintainer_email',
@@ -80,7 +80,7 @@ class ArchiveGatherer
        'build-essential', 'origin', 'sha1',
        'replaces', 'section', 'md5sum', 'bugs', 'priority',
        'tag', 'task', 'python-version', 'ruby-versions', 'provides',
-       'conflicts', 'sha256', 'original-maintainer', 'release', 'component']
+       'conflicts', 'sha256', 'original-maintainer', 'multi-arch', 'release', 'component']
 
     @db.prepare 'description_insert', <<-EOF
       INSERT INTO #{@tabprefix}descriptions
