@@ -31,6 +31,7 @@ class Deb822
     @result = []
     curh = nil
     str.each_line do |l|
+      l.encode!('UTF-8', 'UTF-8', :invalid => :replace)
       next if l =~ /^-----BEGIN PGP SIGNED MESSAGE-----$/
       next if l =~ /^Hash: /
       if l =~ /^$/
