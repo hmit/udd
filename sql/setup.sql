@@ -9,6 +9,7 @@ CREATE TABLE sources
     vcs_url text, vcs_browser text,
     python_version text, ruby_versions text, checksums_sha1 text, checksums_sha256 text,
     original_maintainer text, dm_upload_allowed boolean,
+    testsuite text, autobuild text,
     PRIMARY KEY (source, version, distribution, release, component));
 
 GRANT SELECT ON sources TO PUBLIC;
@@ -64,7 +65,7 @@ CREATE TABLE packages
     installed_size int, homepage text, size int,
     build_essential text, origin text, sha1 text, replaces text, section text,
     md5sum text, bugs text, priority text, tag text, task text, python_version text,
-    ruby_versions text,
+    ruby_versions text, multi_arch text,
     provides text, conflicts text, sha256 text, original_maintainer text,
     distribution text, release text, component text,
   PRIMARY KEY (package, version, architecture, distribution, release, component),
@@ -89,6 +90,7 @@ CREATE TABLE ubuntu_sources
     vcs_url text, vcs_browser text,
     python_version text, ruby_versions text, checksums_sha1 text, checksums_sha256 text,
     original_maintainer text, dm_upload_allowed boolean,
+    testsuite text, autobuild text,
     PRIMARY KEY (source, version, distribution, release, component));
 
 CREATE INDEX ubuntu_sources_distrelcomp_idx on ubuntu_sources(distribution, release, component);
@@ -119,7 +121,7 @@ CREATE TABLE ubuntu_packages
     installed_size int, homepage text, size int,
     build_essential text, origin text, sha1 text, replaces text, section text,
     md5sum text, bugs text, priority text, tag text, task text, python_version text,
-    ruby_versions text,
+    ruby_versions text, multi_arch text,
     provides text, conflicts text, sha256 text, original_maintainer text,
     distribution text, release text, component text,
   PRIMARY KEY (package, version, architecture, distribution, release, component),
@@ -144,6 +146,7 @@ CREATE TABLE derivatives_sources
     vcs_url text, vcs_browser text,
     python_version text, ruby_versions text, checksums_sha1 text, checksums_sha256 text,
     original_maintainer text, dm_upload_allowed boolean,
+    testsuite text, autobuild text,
     PRIMARY KEY (source, version, distribution, release, component));
 
 CREATE INDEX derivatives_sources_distrelcomp_idx on derivatives_sources(distribution, release, component);
@@ -174,7 +177,7 @@ CREATE TABLE derivatives_packages
     installed_size int, homepage text, size int,
     build_essential text, origin text, sha1 text, replaces text, section text,
     md5sum text, bugs text, priority text, tag text, task text, python_version text,
-    ruby_versions text,
+    ruby_versions text, multi_arch text,
     provides text, conflicts text, sha256 text, original_maintainer text,
     distribution text, release text, component text,
   PRIMARY KEY (package, version, architecture, distribution, release, component),

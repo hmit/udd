@@ -716,3 +716,15 @@ ALTER TABLE archived_bugs ADD COLUMN affected_packages text;
 ALTER TABLE archived_bugs ADD COLUMN affected_sources text;
 
 
+-- 2013-03-31
+ALTER TABLE sources ADD COLUMN testsuite text;
+ALTER TABLE sources ADD COLUMN autobuild text;
+ALTER TABLE packages ADD COLUMN multi_arch text;
+
+ALTER TABLE ubuntu_sources ADD COLUMN testsuite text;
+ALTER TABLE ubuntu_sources ADD COLUMN autobuild text;
+ALTER TABLE ubuntu_packages ADD COLUMN multi_arch text;
+
+ALTER TABLE derivatives_sources ADD COLUMN testsuite text;
+ALTER TABLE derivatives_sources ADD COLUMN autobuild text;
+ALTER TABLE derivatives_packages ADD COLUMN multi_arch text;
