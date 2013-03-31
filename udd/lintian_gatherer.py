@@ -62,11 +62,6 @@ class lintian_gatherer(gatherer):
       match = lintian_gatherer.output_re.match(line)
       if match:
         (code, pkg, pkg_type, vers, arch, tag, extra) = match.groups();
-        #this one is optional:
-        if pkg_type:
-          pkg_type = quote(pkg_type)
-        else:
-          pkg_type = 'NULL'
 
         if (pkg == 'manpages-ja' and tag == 'manpage-has-errors-from-man') or \
            (pkg == 'manpages-zh' and tag == 'manpage-has-errors-from-man') or \
