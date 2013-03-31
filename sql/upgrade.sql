@@ -715,4 +715,16 @@ ALTER TABLE bugs ADD COLUMN affected_sources text;
 ALTER TABLE archived_bugs ADD COLUMN affected_packages text;
 ALTER TABLE archived_bugs ADD COLUMN affected_sources text;
 
+-- 2013-03-31
+
+CREATE TYPE ftp_autoreject_type AS ENUM('lintian');
+CREATE TYPE ftp_autoreject_level AS ENUM('fatal','nonfatal');
+CREATE TABLE ftp_autorejects (
+tag TEXT,
+autoreject_type ftp_autoreject_type,
+autoreject_level ftp_autoreject_level,
+PRIMARY KEY(tag)
+);
+
+GRANT SELECT ON ftp_autorejects TO PUBLIC;
 
