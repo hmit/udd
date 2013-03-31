@@ -12,6 +12,9 @@ require 'zlib'
 DEBUG = true
 TESTMODE = true
 VCS = [ 'Svn', 'Git', 'Arch', 'Bzr', 'Cvs', 'Darcs', 'Hg', 'Mtn']
+SOURCES_IGNORE = VCS.map { |e| "vcs-#{e.downcase}" } + [ 'directory', 'package-list' ]
+PACKAGES_IGNORE = []
+
 # PG doc: http://deveiate.org/code/pg/
 
 class ArchiveGatherer
@@ -89,6 +92,36 @@ class ArchiveGatherer
     EOF
     @description_fields = [ 'package', 'language', 'description', 'long_description',
                             'description-md5', 'release', 'component' ]
+
+  @sources_unknown = {}
+  @packages_unknown = {}
+  end
+
+  def report_unknown_sources(l)
+    l2 = l - @source_fields - SOURCES_IGNORE
+    l2.each do |f|
+      @sources_unknown[f] ||= 0
+      @sources_unknown[f] += 1
+    end
+  end
+
+  def report_unknown_packages(l)
+    l2 = l - @package_fields - PACKAGES_IGNORE
+    l2.each do |f|
+      @packages_unknown[f] ||= 0
+      @packages_unknown[f] += 1
+    end
+  end
+
+  def summarize_unknown
+    if @sources_unknown.empty?
+      puts "Unknown fields in Sources:"
+      pp @sources_unknown
+    end
+    if @packages_unknown.empty?
+      puts "Unknown fields in Packages:"
+      pp @packages_unknown
+    end
   end
 
   def process_sources(f, release, component)
@@ -103,6 +136,8 @@ class ArchiveGatherer
     
     ds = Deb822::parse(s, {:downcase => true})
     ds.each do |d|
+      report_unknown_sources(d.keys)
+
       # split maintainer
       d['maintainer'] =~ /^(.*) <(.*)>$/ or raise
       d['maintainer_email'] = $2
@@ -162,6 +197,8 @@ class ArchiveGatherer
 
     ds = Deb822::parse(s, {:downcase => true})
     ds.each do |d|
+      report_unknown_packages(d.keys)
+
       # check if package has already been imported
       if d['architecture'] == 'all'
         n = [d['package'], d['version']]
@@ -269,6 +306,8 @@ class ArchiveGatherer
     @db.exec("ANALYZE #{@tabprefix}descriptions")
     @db.exec("ANALYZE #{@tabprefix}packages_summary")
     @db.exec("ANALYZE #{@tabprefix}packages_distrelcomparch")
+
+    summarize_unknown
   end
 end
 
