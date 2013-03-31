@@ -74,6 +74,18 @@ archive-debian-security:
   path: /srv/mirrors/debian-security/
   distribution: debian
 
+archive-debian-archive:
+  type: archive
+  path:
+   - /srv/mirrors/debian-archive/debian-backports/
+   - /srv/mirrors/debian-archive/debian-security/
+   - /srv/mirrors/debian-archive/debian-volatile/
+   - /srv/mirrors/debian-archive/debian-non-US/
+   - /srv/mirrors/debian-archive/debian-amd64/
+   - /srv/mirrors/debian-archive/debian/
+  distribution: debian
+  tables-prefix: archived_
+
 ### OTHER DERIVATIVES
 
 aptosid:

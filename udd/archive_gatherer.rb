@@ -182,10 +182,13 @@ class ArchiveGatherer
             @db.exec_prepared('uploader_insert', @uploader_fields.map { |e| u[e] })
           end
         else
-          d['uploaders'] =~ /^(.*) <(.*)>$/ or raise
-          u['uploader'] = d['uploaders']
-          u['email'] = $2
-          u['name'] = $1.gsub('"', '')
+          if d['uploaders'] =~ /^(.*) <(.*)>$/
+            u['uploader'] = d['uploaders']
+            u['email'] = $2
+            u['name'] = $1.gsub('"', '')
+          else
+            u['uploader'] = d['uploaders']
+          end
           @db.exec_prepared('uploader_insert', @uploader_fields.map { |e| u[e] })
         end
       end
@@ -255,40 +258,12 @@ class ArchiveGatherer
     @db.exec("BEGIN")
     @db.exec("SET CONSTRAINTS ALL DEFERRED")
 
-    sources = Dir::glob("#{@conf['path']}/**/source/Sources.gz")
-    sources.each do |source|
-      next if TESTMODE
-      source =~ /#{@conf['path']}\/dists\/(.*)\/(.*)\/source\/Sources.gz/
-      component = $2
-      release = $1.gsub('/', '-')
-      puts "Processing #{source} rel=#{release} comp=#{component}" if DEBUG
-      process_sources(source, release, component)
-    end
-
-    todo = []
-    todelete = []
-    packages = Dir::glob("#{@conf['path']}/**/binary-*/Packages.gz")
-    packages.each do |package|
-      next if TESTMODE and not package =~ /rdy-updates\/main\/binary-i386/
-      next if package =~ /debian-installer/
-      package =~ /#{@conf['path']}\/dists\/(.*)\/(.*)\/binary-(.*)\/Packages.gz/
-      architecture = $3
-      component = $2
-      release = $1.gsub('/', '-')
-
-      todo << { :package => package, :rel => release, :comp => component, :arch => architecture }
-      todelete << {:rel => release, :comp => component}
-    end
-    todelete.uniq.each do |td|
-      @db.exec("DELETE FROM #{@tabprefix}packages WHERE distribution=$1 AND release=$2 AND component=$3",
-                    [ @conf['distribution'], td[:rel], td[:comp]])
-      @db.exec("DELETE FROM #{@tabprefix}descriptions WHERE distribution=$1 AND release=$2 AND component=$3",
-                    [ @conf['distribution'], td[:rel], td[:comp]])
-    end
-
-    todo.each do |td|
-      puts "Processing #{td[:package]} rel=#{td[:rel]} comp=#{td[:comp]} arch=#{td[:arch]}" if DEBUG
-      process_packages(td[:package], td[:rel], td[:comp], td[:arch])
+    if @conf['path'].kind_of? String
+      run_path(@conf['path'])
+    else
+      @conf['path'].each do |path|
+        run_path(path)
+      end
     end
 
     @db.exec("DELETE FROM #{@tabprefix}packages_summary")
@@ -312,6 +287,46 @@ class ArchiveGatherer
     @db.exec("ANALYZE #{@tabprefix}packages_distrelcomparch")
 
     summarize_unknown
+  end
+
+  def run_path(path)
+    sources = Dir::glob("#{path}/dists/**/source/Sources.gz")
+    sources.each do |source|
+      next if TESTMODE
+      source =~ /#{path}\/dists\/(.*)\/(.*)\/source\/Sources.gz/
+      component = $2
+      release = $1.gsub('/', '-')
+      puts "Processing #{source} rel=#{release} comp=#{component}" if DEBUG
+      process_sources(source, release, component)
+    end
+
+    todo = []
+    todelete = []
+    packages = Dir::glob("#{path}/dists/**/binary-*/Packages.gz")
+    packages.each do |package|
+      next if TESTMODE and not package =~ /rdy-updates\/main\/binary-i386/
+      # those releases used a slightly different Packages format
+      next if package =~ /\/srv\/mirrors\/debian-archive\/debian\/\/dists\/(bo|buzz|rex)\//
+      next if package =~ /debian-installer/
+      package =~ /#{path}\/dists\/(.*)\/(.*)\/binary-(.*)\/Packages.gz/
+      architecture = $3
+      component = $2
+      release = $1.gsub('/', '-')
+
+      todo << { :package => package, :rel => release, :comp => component, :arch => architecture }
+      todelete << {:rel => release, :comp => component}
+    end
+    todelete.uniq.each do |td|
+      @db.exec("DELETE FROM #{@tabprefix}packages WHERE distribution=$1 AND release=$2 AND component=$3",
+                    [ @conf['distribution'], td[:rel], td[:comp]])
+      @db.exec("DELETE FROM #{@tabprefix}descriptions WHERE distribution=$1 AND release=$2 AND component=$3",
+                    [ @conf['distribution'], td[:rel], td[:comp]])
+    end
+
+    todo.each do |td|
+      puts "Processing #{td[:package]} rel=#{td[:rel]} comp=#{td[:comp]} arch=#{td[:arch]}" if DEBUG
+      process_packages(td[:package], td[:rel], td[:comp], td[:arch])
+    end
   end
 end
 
