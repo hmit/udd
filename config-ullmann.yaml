@@ -58,155 +58,20 @@ archive-debian-ports:
   distribution: debian-ports
   tables-prefix: derivatives_
 
-#### SQUEEZE
-
-debian-squeeze:
-  type: src-pkg
-  archs: [amd64, armel,
-          i386, ia64, mips,
-          mipsel, powerpc, s390, sparc, kfreebsd-amd64, kfreebsd-i386]       
-  directory: /srv/mirrors/debian/dists/squeeze/
-  components: [main, contrib, non-free, main/debian-installer, non-free/debian-installer]
+archive-debian:
+  type: archive
+  path: /srv/mirrors/debian/
   distribution: debian
-  packages-table: packages
-  sources-table: sources
-  uploaders-table: uploaders
-  packages-schema: packages
-  sources-schema: sources
-  release: squeeze
-  descriptions-table: descriptions
 
-debian-squeeze-security:
-  type: src-pkg
-  archs: [amd64, armel, 
-          i386, ia64, mips,
-          mipsel, powerpc, s390, sparc, kfreebsd-amd64, kfreebsd-i386]       
-  directory: /srv/mirrors/debian-security/dists/squeeze/updates/
-  components: [main, contrib, non-free]
+archive-debian-backports:
+  type: archive
+  path: /srv/mirrors/debian-backports/
   distribution: debian
-  packages-table: packages
-  sources-table: sources
-  uploaders-table: uploaders
-  packages-schema: packages
-  sources-schema: sources
-  release: squeeze-security
-  descriptions-table: descriptions
 
-debian-squeeze-proposed-updates:
-  type: src-pkg
-  archs: [amd64, armel, i386, ia64, mips, mipsel, powerpc, s390, sparc, kfreebsd-amd64, kfreebsd-i386]       
-  directory: /srv/mirrors/debian/dists/squeeze-proposed-updates/
-  components: [main, contrib, non-free]
+archive-debian-security:
+  type: archive
+  path: /srv/mirrors/debian-security/
   distribution: debian
-  packages-table: packages
-  sources-table: sources
-  uploaders-table: uploaders
-  packages-schema: packages
-  sources-schema: sources
-  release: squeeze-proposed-updates
-  descriptions-table: descriptions
-
-debian-squeeze-updates:
-  type: src-pkg
-  archs: [amd64, armel, i386, ia64, mips, mipsel, powerpc, s390, sparc, kfreebsd-amd64, kfreebsd-i386]       
-  directory: /srv/mirrors/debian/dists/squeeze-updates/
-  components: [main, contrib, non-free]
-  distribution: debian
-  packages-table: packages
-  sources-table: sources
-  uploaders-table: uploaders
-  packages-schema: packages
-  sources-schema: sources
-  release: squeeze-updates
-  descriptions-table: descriptions
-
-debian-backports-squeeze:
-  type: src-pkg
-  archs: [amd64, armel, i386, ia64, mips, mipsel, powerpc, s390, sparc, kfreebsd-amd64, kfreebsd-i386]       
-  directory: /srv/mirrors/debian-backports/dists/squeeze-backports/
-  components: [main, contrib, non-free, main/debian-installer]
-  distribution: debian
-  packages-table: packages
-  sources-table: sources
-  uploaders-table: uploaders
-  packages-schema: packages
-  sources-schema: sources
-  release: squeeze-backports
-  descriptions-table: descriptions
-
-#### WHEEZY
-
-
-debian-wheezy:
-  type: src-pkg
-  archs: [amd64, armel, armhf, i386, ia64, mips, mipsel, powerpc, s390, s390x, sparc, kfreebsd-amd64, kfreebsd-i386]
-  directory: /srv/mirrors/debian/dists/wheezy/
-  components: [main, contrib, non-free, main/debian-installer, non-free/debian-installer]
-  distribution: debian
-  packages-table: packages
-  sources-table: sources
-  uploaders-table: uploaders
-  packages-schema: packages
-  sources-schema: sources
-  release: wheezy
-
-debian-wheezy-security:
-  type: src-pkg
-  archs: [amd64, armel, i386, ia64, mips, mipsel, powerpc, s390, sparc, kfreebsd-amd64, kfreebsd-i386]       
-  directory: /srv/mirrors/debian-security/dists/wheezy/updates/
-  components: [main, contrib, non-free]
-  distribution: debian
-  packages-table: packages
-  sources-table: sources
-  uploaders-table: uploaders
-  packages-schema: packages
-  sources-schema: sources
-  release: wheezy-security
-
-debian-wheezy-proposed-updates:
-  type: src-pkg
-  archs: [amd64, armel, armhf, i386, ia64, mips, mipsel, powerpc, s390, s390x, sparc, kfreebsd-amd64, kfreebsd-i386]
-  directory: /srv/mirrors/debian/dists/wheezy-proposed-updates/
-  components: [main, contrib, non-free]
-  distribution: debian
-  packages-table: packages
-  sources-table: sources
-  uploaders-table: uploaders
-  packages-schema: packages
-  sources-schema: sources
-  release: wheezy-proposed-updates
-
-### SID / EXPERIMENTAL
-
-debian-sid:
-  type: src-pkg
-  archs: [amd64, armel, armhf, hurd-i386,
-          i386, ia64, mips,
-          mipsel, powerpc, s390, s390x, sparc, kfreebsd-amd64, kfreebsd-i386]
-  directory: /srv/mirrors/debian/dists/sid/
-  components: [main, contrib, non-free, main/debian-installer, non-free/debian-installer]
-  distribution: debian
-  packages-table: packages
-  sources-table: sources
-  uploaders-table: uploaders
-  packages-schema: packages
-  sources-schema: sources
-  release: sid
-
-debian-experimental:
-  type: src-pkg
-  archs: [amd64, armel, armhf, hurd-i386,
-          i386, ia64, mips,
-          mipsel, powerpc, s390, s390x, sparc, kfreebsd-amd64, kfreebsd-i386]
-  directory: /srv/mirrors/debian/dists/experimental/
-  components: [main, contrib, non-free, main/debian-installer, non-free/debian-installer]
-  distribution: debian
-  packages-table: packages
-  sources-table: sources
-  uploaders-table: uploaders
-  packages-schema: packages
-  sources-schema: sources
-  release: experimental
 
 ### OTHER DERIVATIVES
 
