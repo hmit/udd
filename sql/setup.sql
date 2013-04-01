@@ -471,6 +471,20 @@ GRANT SELECT on carnivore_names TO PUBLIC;
 GRANT SELECT on carnivore_keys TO PUBLIC;
 GRANT SELECT on carnivore_login TO PUBLIC;
 
+-- debian maintainers
+
+CREATE TABLE debian_maintainers (
+maintainer TEXT,
+maintainer_name TEXT,
+maintainer_email TEXT,
+fingerprint TEXT,
+package TEXT,
+granted_by_fingerprint TEXT
+);
+
+GRANT SELECT ON debian_maintainers TO PUBLIC;
+
+
 -- Popcon
 
 CREATE TABLE popcon (

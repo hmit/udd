@@ -826,3 +826,16 @@ PRIMARY KEY(package)
 
 GRANT SELECT ON pseudo_packages TO PUBLIC;
 
+-- 2013-04-01
+
+CREATE TABLE debian_maintainers (
+maintainer TEXT,
+maintainer_name TEXT,
+maintainer_email TEXT,
+fingerprint TEXT,
+package TEXT,
+granted_by_fingerprint TEXT
+);
+
+GRANT SELECT ON debian_maintainers TO PUBLIC;
+

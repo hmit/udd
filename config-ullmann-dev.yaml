@@ -17,6 +17,7 @@ general:
     pseudo-packages: exec perl /srv/udd.debian.org/udd-dev/udd/pseudo_packages_gatherer.pl 
     bugs: exec DEBBUGS_CONFIG_FILE=/srv/udd.debian.org/udd/bugs-config perl /srv/udd.debian.org/udd-dev/udd/bugs_gatherer.pl 
     carnivore: module udd.carnivore_gatherer
+    debian_maintainers: module udd.debian_maintainers_gatherer
     lintian: module udd.lintian_gatherer
     debtags: module udd.debtags_gatherer
     ubuntu-bugs: module udd.ubuntu_bugs_gatherer
@@ -225,6 +226,12 @@ carnivore:
   keys-table: carnivore_keys
   login-table: carnivore_login
   schema: carnivore
+
+debian_maintainers:
+  type: debian_maintainers
+  update-command: rm -f /srv/udd.debian.org/mirrors/dm.txt && wget -q http://ftp-master.debian.org/dm.txt -O /srv/udd.debian.org/mirrors/dm.txt
+  path: /srv/udd.debian.org/mirrors/dm.txt
+  table: debian_maintainers
 
 lintian:
   type: lintian
