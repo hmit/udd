@@ -3,12 +3,12 @@
 #
 # FIXME add detection of unknown fields
 
-$:.unshift  '/srv/udd.debian.org/udd'
+$:.unshift  '/srv/udd.debian.org/udd/udd'
 
 require 'yaml'
 require 'pp'
 require 'pg'
-require './udd/deb822'
+require 'deb822'
 require 'zlib'
 require 'digest'
 
