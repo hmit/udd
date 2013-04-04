@@ -1,4 +1,6 @@
-#!/usr/bin/ruby -w
+#!/usr/bin/ruby
+
+Encoding.default_internal='UTF-8'
 
 require 'dbi'
 require 'pp'

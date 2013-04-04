@@ -1,4 +1,4 @@
-#!/usr/bin/ruby -w
+#!/usr/bin/ruby
 # encoding: utf-8
 
 require 'dbi'

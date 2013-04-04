@@ -1,10 +1,11 @@
-#!/usr/bin/ruby -w
+#!/usr/bin/ruby
 
 require 'dbi'
 require 'pp'
 require 'uri'
 require 'net/http'
 require 'json/pure'
+require 'yaml'
 
 URELEASE=YAML::load(IO::read('../ubuntu-releases.yaml'))['devel']
 

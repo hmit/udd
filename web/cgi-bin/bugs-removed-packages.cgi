@@ -1,4 +1,4 @@
-#!/usr/bin/ruby -w
+#!/usr/bin/ruby
 # Used by Marco Rodrigues to track bugs in removed packages
 require 'dbi'
 
