@@ -2,6 +2,7 @@ general:
   dbname: udd
   dbport: 5452
   types:
+    archive: exec ruby /srv/udd.debian.org/udd/udd/archive_gatherer.rb
     sources: module udd.sources_gatherer
     packages: module udd.packages_gatherer
     setup: exec python db_manager.py
@@ -13,13 +14,16 @@ general:
     vcs: exec /srv/udd.debian.org/udd/scripts/update-vcs-status
     upload-history: module udd.upload_history_gatherer
     orphaned-packages: module udd.orphaned_packages_gatherer
+    pseudo-packages: exec perl /srv/udd.debian.org/udd/udd/pseudo_packages_gatherer.pl 
     bugs: exec DEBBUGS_CONFIG_FILE=/srv/udd.debian.org/udd/bugs-config perl /srv/udd.debian.org/udd/udd/bugs_gatherer.pl 
     carnivore: module udd.carnivore_gatherer
+    debian_maintainers: module udd.debian_maintainers_gatherer
     lintian: module udd.lintian_gatherer
     debtags: module udd.debtags_gatherer
     ubuntu-bugs: module udd.ubuntu_bugs_gatherer
     ddtp: module udd.ddtp_gatherer
     ftpnew: module udd.ftpnew_gatherer
+    ftp-autorejects: exec perl /srv/udd.debian.org/udd/udd/ftp_autorejects_gatherer.pl
     screenshots: module udd.screenshot_gatherer
     bibref: module udd.bibref_gatherer
     blends-prospective: module udd.blends_prospective_gatherer
@@ -43,355 +47,46 @@ general:
     netbsd-i386, hurd-powerpc, kfreebsd-powerpc, netbsd-powerpc, hurd-sparc,
     kfreebsd-sparc, netbsd-sparc, darwin-i386, freebsd-i386, openbsd-i386, darwin-powerpc]
 
-#### SQUEEZE
+#### NEW ARCHIVE GATHERER
+archive-ubuntu:
+  type: archive
+  path: /srv/udd.debian.org/mirrors/ubuntu/
+  distribution: ubuntu
+  tables-prefix: ubuntu_
+  update-command: /srv/udd.debian.org/udd/scripts/sync-dist.sh us.archive.ubuntu.com::ubuntu/dists/ /srv/udd.debian.org/mirrors/ubuntu/dists/
 
-debian-squeeze:
-  type: src-pkg
-  archs: [amd64, armel,
-          i386, ia64, mips,
-          mipsel, powerpc, s390, sparc, kfreebsd-amd64, kfreebsd-i386]       
-  directory: /srv/mirrors/debian/dists/squeeze/
-  components: [main, contrib, non-free, main/debian-installer, non-free/debian-installer]
+archive-debian-ports:
+  type: archive
+  path: /srv/mirrors/debian-ports/
+  distribution: debian-ports
+  tables-prefix: derivatives_
+
+archive-debian:
+  type: archive
+  path: /srv/mirrors/debian/
   distribution: debian
-  packages-table: packages
-  sources-table: sources
-  uploaders-table: uploaders
-  packages-schema: packages
-  sources-schema: sources
-  release: squeeze
-  descriptions-table: descriptions
 
-debian-squeeze-security:
-  type: src-pkg
-  archs: [amd64, armel, 
-          i386, ia64, mips,
-          mipsel, powerpc, s390, sparc, kfreebsd-amd64, kfreebsd-i386]       
-  directory: /srv/mirrors/debian-security/dists/squeeze/updates/
-  components: [main, contrib, non-free]
+archive-debian-backports:
+  type: archive
+  path: /srv/mirrors/debian-backports/
   distribution: debian
-  packages-table: packages
-  sources-table: sources
-  uploaders-table: uploaders
-  packages-schema: packages
-  sources-schema: sources
-  release: squeeze-security
-  descriptions-table: descriptions
 
-debian-squeeze-proposed-updates:
-  type: src-pkg
-  archs: [amd64, armel, i386, ia64, mips, mipsel, powerpc, s390, sparc, kfreebsd-amd64, kfreebsd-i386]       
-  directory: /srv/mirrors/debian/dists/squeeze-proposed-updates/
-  components: [main, contrib, non-free]
+archive-debian-security:
+  type: archive
+  path: /srv/mirrors/debian-security/
   distribution: debian
-  packages-table: packages
-  sources-table: sources
-  uploaders-table: uploaders
-  packages-schema: packages
-  sources-schema: sources
-  release: squeeze-proposed-updates
-  descriptions-table: descriptions
 
-debian-squeeze-updates:
-  type: src-pkg
-  archs: [amd64, armel, i386, ia64, mips, mipsel, powerpc, s390, sparc, kfreebsd-amd64, kfreebsd-i386]       
-  directory: /srv/mirrors/debian/dists/squeeze-updates/
-  components: [main, contrib, non-free]
+archive-debian-archive:
+  type: archive
+  path:
+   - /srv/mirrors/debian-archive/debian-backports/
+   - /srv/mirrors/debian-archive/debian-security/
+   - /srv/mirrors/debian-archive/debian-volatile/
+   - /srv/mirrors/debian-archive/debian-non-US/
+   - /srv/mirrors/debian-archive/debian-amd64/
+   - /srv/mirrors/debian-archive/debian/
   distribution: debian
-  packages-table: packages
-  sources-table: sources
-  uploaders-table: uploaders
-  packages-schema: packages
-  sources-schema: sources
-  release: squeeze-updates
-  descriptions-table: descriptions
-
-debian-backports-squeeze:
-  type: src-pkg
-  archs: [amd64, armel, i386, ia64, mips, mipsel, powerpc, s390, sparc, kfreebsd-amd64, kfreebsd-i386]       
-  directory: /srv/mirrors/debian-backports/dists/squeeze-backports/
-  components: [main, contrib, non-free, main/debian-installer]
-  distribution: debian
-  packages-table: packages
-  sources-table: sources
-  uploaders-table: uploaders
-  packages-schema: packages
-  sources-schema: sources
-  release: squeeze-backports
-  descriptions-table: descriptions
-
-#### WHEEZY
-
-
-debian-wheezy:
-  type: src-pkg
-  archs: [amd64, armel, armhf, i386, ia64, mips, mipsel, powerpc, s390, s390x, sparc, kfreebsd-amd64, kfreebsd-i386]
-  directory: /srv/mirrors/debian/dists/wheezy/
-  components: [main, contrib, non-free, main/debian-installer, non-free/debian-installer]
-  distribution: debian
-  packages-table: packages
-  sources-table: sources
-  uploaders-table: uploaders
-  packages-schema: packages
-  sources-schema: sources
-  release: wheezy
-
-debian-wheezy-security:
-  type: src-pkg
-  archs: [amd64, armel, i386, ia64, mips, mipsel, powerpc, s390, sparc, kfreebsd-amd64, kfreebsd-i386]       
-  directory: /srv/mirrors/debian-security/dists/wheezy/updates/
-  components: [main, contrib, non-free]
-  distribution: debian
-  packages-table: packages
-  sources-table: sources
-  uploaders-table: uploaders
-  packages-schema: packages
-  sources-schema: sources
-  release: wheezy-security
-
-debian-wheezy-proposed-updates:
-  type: src-pkg
-  archs: [amd64, armel, armhf, i386, ia64, mips, mipsel, powerpc, s390, s390x, sparc, kfreebsd-amd64, kfreebsd-i386]
-  directory: /srv/mirrors/debian/dists/wheezy-proposed-updates/
-  components: [main, contrib, non-free]
-  distribution: debian
-  packages-table: packages
-  sources-table: sources
-  uploaders-table: uploaders
-  packages-schema: packages
-  sources-schema: sources
-  release: wheezy-proposed-updates
-
-### SID / EXPERIMENTAL
-
-debian-sid:
-  type: src-pkg
-  archs: [amd64, armel, armhf, hurd-i386,
-          i386, ia64, mips,
-          mipsel, powerpc, s390, s390x, sparc, kfreebsd-amd64, kfreebsd-i386]
-  directory: /srv/mirrors/debian/dists/sid/
-  components: [main, contrib, non-free, main/debian-installer, non-free/debian-installer]
-  distribution: debian
-  packages-table: packages
-  sources-table: sources
-  uploaders-table: uploaders
-  packages-schema: packages
-  sources-schema: sources
-  release: sid
-
-debian-experimental:
-  type: src-pkg
-  archs: [amd64, armel, armhf, hurd-i386,
-          i386, ia64, mips,
-          mipsel, powerpc, s390, s390x, sparc, kfreebsd-amd64, kfreebsd-i386]
-  directory: /srv/mirrors/debian/dists/experimental/
-  components: [main, contrib, non-free, main/debian-installer, non-free/debian-installer]
-  distribution: debian
-  packages-table: packages
-  sources-table: sources
-  uploaders-table: uploaders
-  packages-schema: packages
-  sources-schema: sources
-  release: experimental
-
-
-#### UBUNTU
-ubuntu-raring:
-  type: src-pkg
-  archs: [amd64, i386]
-  directory: /srv/udd.debian.org/mirrors/ubuntu/raring
-  update-command: /srv/udd.debian.org/udd/scripts/sync-dist.sh us.archive.ubuntu.com::ubuntu/dists/ /srv/udd.debian.org/mirrors/ubuntu
-  components: [main, multiverse, universe, restricted]
-  distribution: ubuntu
-  release: raring
-  packages-table: ubuntu_packages
-  sources-table: ubuntu_sources
-  uploaders-table: ubuntu_uploaders
-  packages-schema: packages
-  sources-schema: sources
-
-ubuntu-raring-security:
-  type: src-pkg
-  archs: [amd64, i386]
-  directory: /srv/udd.debian.org/mirrors/ubuntu/raring-security
-  components: [main, multiverse, universe, restricted]
-  distribution: ubuntu
-  release: raring-security
-  packages-table: ubuntu_packages
-  sources-table: ubuntu_sources
-  uploaders-table: ubuntu_uploaders
-  packages-schema: packages
-  sources-schema: sources
-
-ubuntu-raring-updates:
-  type: src-pkg
-  archs: [amd64, i386]
-  directory: /srv/udd.debian.org/mirrors/ubuntu/raring-updates
-  components: [main, multiverse, universe, restricted]
-  distribution: ubuntu
-  release: raring-updates
-  packages-table: ubuntu_packages
-  sources-table: ubuntu_sources
-  uploaders-table: ubuntu_uploaders
-  packages-schema: packages
-  sources-schema: sources
-
-ubuntu-raring-proposed:
-  type: src-pkg
-  archs: [amd64, i386]
-  directory: /srv/udd.debian.org/mirrors/ubuntu/raring-proposed
-  components: [main, multiverse, universe, restricted]
-  distribution: ubuntu
-  release: raring-proposed
-  packages-table: ubuntu_packages
-  sources-table: ubuntu_sources
-  uploaders-table: ubuntu_uploaders
-  packages-schema: packages
-  sources-schema: sources
-
-ubuntu-raring-backports:
-  type: src-pkg
-  archs: [amd64, i386]
-  directory: /srv/udd.debian.org/mirrors/ubuntu/raring-backports
-  components: [main, multiverse, universe, restricted]
-  distribution: ubuntu
-  release: raring-backports
-  packages-table: ubuntu_packages
-  sources-table: ubuntu_sources
-  uploaders-table: ubuntu_uploaders
-  packages-schema: packages
-  sources-schema: sources
-
-ubuntu-quantal:
-  type: src-pkg
-  archs: [amd64, i386]
-  directory: /srv/udd.debian.org/mirrors/ubuntu/quantal
-  update-command: /srv/udd.debian.org/udd/scripts/sync-dist.sh us.archive.ubuntu.com::ubuntu/dists/ /srv/udd.debian.org/mirrors/ubuntu
-  components: [main, multiverse, universe, restricted]
-  distribution: ubuntu
-  release: quantal
-  packages-table: ubuntu_packages
-  sources-table: ubuntu_sources
-  uploaders-table: ubuntu_uploaders
-  packages-schema: packages
-  sources-schema: sources
-
-ubuntu-quantal-security:
-  type: src-pkg
-  archs: [amd64, i386]
-  directory: /srv/udd.debian.org/mirrors/ubuntu/quantal-security
-  components: [main, multiverse, universe, restricted]
-  distribution: ubuntu
-  release: quantal-security
-  packages-table: ubuntu_packages
-  sources-table: ubuntu_sources
-  uploaders-table: ubuntu_uploaders
-  packages-schema: packages
-  sources-schema: sources
-
-ubuntu-quantal-updates:
-  type: src-pkg
-  archs: [amd64, i386]
-  directory: /srv/udd.debian.org/mirrors/ubuntu/quantal-updates
-  components: [main, multiverse, universe, restricted]
-  distribution: ubuntu
-  release: quantal-updates
-  packages-table: ubuntu_packages
-  sources-table: ubuntu_sources
-  uploaders-table: ubuntu_uploaders
-  packages-schema: packages
-  sources-schema: sources
-
-ubuntu-quantal-proposed:
-  type: src-pkg
-  archs: [amd64, i386]
-  directory: /srv/udd.debian.org/mirrors/ubuntu/quantal-proposed
-  components: [main, multiverse, universe, restricted]
-  distribution: ubuntu
-  release: quantal-proposed
-  packages-table: ubuntu_packages
-  sources-table: ubuntu_sources
-  uploaders-table: ubuntu_uploaders
-  packages-schema: packages
-  sources-schema: sources
-
-ubuntu-quantal-backports:
-  type: src-pkg
-  archs: [amd64, i386]
-  directory: /srv/udd.debian.org/mirrors/ubuntu/quantal-backports
-  components: [main, multiverse, universe, restricted]
-  distribution: ubuntu
-  release: quantal-backports
-  packages-table: ubuntu_packages
-  sources-table: ubuntu_sources
-  uploaders-table: ubuntu_uploaders
-  packages-schema: packages
-  sources-schema: sources
-
-ubuntu-precise:
-  type: src-pkg
-  archs: [amd64, i386]
-  directory: /srv/udd.debian.org/mirrors/ubuntu/precise
-  components: [main, multiverse, universe, restricted]
-  distribution: ubuntu
-  release: precise
-  packages-table: ubuntu_packages
-  sources-table: ubuntu_sources
-  uploaders-table: ubuntu_uploaders
-  packages-schema: packages
-  sources-schema: sources
-
-ubuntu-precise-security:
-  type: src-pkg
-  archs: [amd64, i386]
-  directory: /srv/udd.debian.org/mirrors/ubuntu/precise-security
-  components: [main, multiverse, universe, restricted]
-  distribution: ubuntu
-  release: precise-security
-  packages-table: ubuntu_packages
-  sources-table: ubuntu_sources
-  uploaders-table: ubuntu_uploaders
-  packages-schema: packages
-  sources-schema: sources
-
-ubuntu-precise-updates:
-  type: src-pkg
-  archs: [amd64, i386]
-  directory: /srv/udd.debian.org/mirrors/ubuntu/precise-updates
-  components: [main, multiverse, universe, restricted]
-  distribution: ubuntu
-  release: precise-updates
-  packages-table: ubuntu_packages
-  sources-table: ubuntu_sources
-  uploaders-table: ubuntu_uploaders
-  packages-schema: packages
-  sources-schema: sources
-
-ubuntu-precise-proposed:
-  type: src-pkg
-  archs: [amd64, i386]
-  directory: /srv/udd.debian.org/mirrors/ubuntu/precise-proposed
-  components: [main, multiverse, universe, restricted]
-  distribution: ubuntu
-  release: precise-proposed
-  packages-table: ubuntu_packages
-  sources-table: ubuntu_sources
-  uploaders-table: ubuntu_uploaders
-  packages-schema: packages
-  sources-schema: sources
-
-ubuntu-precise-backports:
-  type: src-pkg
-  archs: [amd64, i386]
-  directory: /srv/udd.debian.org/mirrors/ubuntu/precise-backports
-  components: [main, multiverse, universe, restricted]
-  distribution: ubuntu
-  release: precise-backports
-  packages-table: ubuntu_packages
-  sources-table: ubuntu_sources
-  uploaders-table: ubuntu_uploaders
-  packages-schema: packages
-  sources-schema: sources
-
+  tables-prefix: archived_
 
 ### OTHER DERIVATIVES
 
@@ -422,47 +117,6 @@ skolelinux-squeeze:
   uploaders-table: derivatives_uploaders
   packages-schema: packages
   sources-schema: sources
-
-debian-ports-sid:
-  type: src-pkg
-  archs: [alpha, hppa, hurd-i386, m68k, powerpcspe, ppc64, sh4, sparc64 ]
-  directory: /srv/mirrors/debian-ports/dists/sid/
-  components: [main]
-  distribution: debian-ports
-  packages-table: derivatives_packages
-  sources-table: derivatives_sources
-  uploaders-table: derivatives_uploaders
-  packages-schema: packages
-  sources-schema: sources
-  release: sid
-  no-sources: true
-
-debian-ports-unreleased:
-  type: src-pkg
-  archs: [alpha, hppa, hurd-i386, m68k, powerpcspe, ppc64, sh4, sparc64 ]
-  directory: /srv/mirrors/debian-ports/dists/unreleased/
-  components: [main]
-  distribution: debian-ports
-  packages-table: derivatives_packages
-  sources-table: derivatives_sources
-  uploaders-table: derivatives_uploaders
-  packages-schema: packages
-  sources-schema: sources
-  release: unreleased
-
-debian-ports-experimental:
-  type: src-pkg
-  archs: [alpha, hppa, hurd-i386, m68k, powerpcspe, ppc64, sh4, sparc64 ]
-  directory: /srv/mirrors/debian-ports/dists/experimental/
-  components: [main]
-  distribution: debian-ports
-  packages-table: derivatives_packages
-  sources-table: derivatives_sources
-  uploaders-table: derivatives_uploaders
-  packages-schema: packages
-  sources-schema: sources
-  release: experimental
-  no-sources: true
 
 #### OTHER IMPORTERS
 
@@ -566,6 +220,13 @@ orphaned-packages:
   schema: orphaned_packages
   bugs-path: /srv/bugs.debian.org
 
+pseudo-packages:
+  type: pseudo-packages
+  description-path: /srv/bugs.debian.org/pseudopackages/pseudo-packages.description
+  maintainers-path: /srv/bugs.debian.org/pseudopackages/pseudo-packages.maintainers
+  table: pseudo_packages
+  schema: pseudo_packages
+
 carnivore:
   type: carnivore
   update-command: /srv/udd.debian.org/udd/scripts/sync-carnivore.sh
@@ -575,6 +236,12 @@ carnivore:
   keys-table: carnivore_keys
   login-table: carnivore_login
   schema: carnivore
+
+debian_maintainers:
+  type: debian_maintainers
+  update-command: rm -f /srv/udd.debian.org/mirrors/dm.txt && wget -q http://ftp-master.debian.org/dm.txt -O /srv/udd.debian.org/mirrors/dm.txt
+  path: /srv/udd.debian.org/mirrors/dm.txt
+  table: debian_maintainers
 
 lintian:
   type: lintian
@@ -638,6 +305,13 @@ ftpnew:
   table_sources:  new_sources
   table_packages: new_packages
   releases_ignore: "'etch'"
+
+ftp-autorejects:
+  type: ftp-autorejects
+  update-command: rm -f /srv/udd.debian.org/mirrors/lintian.tags && wget -q http://ftp-master.debian.org/static/lintian.tags -O /srv/udd.debian.org/mirrors/lintian.tags
+  path: /srv/udd.debian.org/mirrors/lintian.tags
+  table: ftp_autorejects
+  schema: ftp_autorejects
 
 screenshots:
   type: screenshots

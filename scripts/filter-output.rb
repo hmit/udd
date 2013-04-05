@@ -1,4 +1,7 @@
 #!/usr/bin/ruby -w
+# coding: utf-8
+
+STDIN.set_encoding("BINARY")
 
 LINES = [
   "Can't parse line 66715: /org/lintian.debian.org/root/collection/strings: line 37: strings/./usr/share/doc/HOWTO/it-html/ELF-HOWTO/: Is a directory",
@@ -8,6 +11,9 @@ LINES = [
   /Skipping upload: /,
   /Can't parse line .* Use of uninitialized value in split at/,
   /Can't parse line .* Use of uninitialized value.*in pattern match \(m\/\/\) at/,
+  /debtags: can not parse line /,
+  /Bug .*: unable to open .srv.bugs.debian.org.versions.pkg/,
+  /failed to convert to utf8/
 ]
 
 STDIN.each_line do |l|

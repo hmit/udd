@@ -324,7 +324,6 @@ if cgi.params != {}
   $uddd.sources.keys.sort.each do |src|
     next if not $uddd.versions.include?(src)
     next if (not $uddd.versions[src].include?('debian') or not $uddd.versions[src].include?('ubuntu'))
-    puts "<tr><td class=\"left\">#{src_reason(src)}&nbsp;</td>"
 
     ub = $uddd.ubuntu_bugs[src]
     if ub.nil?
@@ -353,7 +352,11 @@ if cgi.params != {}
       ustb += "<br>bpo:&nbsp;#{du["#{USTB}-backports"][:version]}" if du["#{USTB}-backports"]
 
       udev = du[UDEV][:version] if du[UDEV]
-      if udev != sid and sid != ''
+      if udev == sid
+        if bugs == 0 and patches == 0
+          next
+        end
+      elsif sid != ''
         if UDDData.compare_versions(udev, sid) == -1
           if udev =~ /ubuntu/
             udev = "<a href=\"http://ubuntudiff.debian.net/?query=-FPackage+#{src}\"><span class=\"prio_high\" title=\"Outdated version in Ubuntu, with an Ubuntu patch\">#{udev}</span></a>"
@@ -373,6 +376,7 @@ if cgi.params != {}
       udev += "<br>bpo:&nbsp;#{du["#{UDEV}-backports"][:version]}" if du["#{UDEV}-backports"]
     end
 
+    puts "<tr><td class=\"left\">#{src_reason(src)}&nbsp;</td>"
     if bugs > 0
       puts "<td><a href=\"https://bugs.launchpad.net/ubuntu/+source/#{src}\">#{bugs}</a></td>"
     else
@@ -400,6 +404,7 @@ if cgi.params != {}
   puts <<-EOF
 </tbody>
 </table>
+<p>Packages with the same version in <i>#{UDEV}</i> and <i>Debian sid</i>, no bugs and no patches are not listed.</p>
 </div>
   EOF
 

@@ -1,4 +1,4 @@
-#!/usr/bin/ruby -w
+#!/usr/bin/ruby
 # Used by Harvest@Ubuntu
 
 require 'dbi'

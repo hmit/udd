@@ -188,17 +188,73 @@ sub update_bug {
 
 	my $location = $src_config{archived} ? 'archive' : 'db_h';
 	my $table = $src_config{archived} ? $archived_table : $unarchived_table;
+	my $other_table = $src_config{archived} ? $unarchived_table : $archived_table;
 
 	my $start = time();
 
 	foreach my $prefix ($unarchived_table, $archived_table) {
 		foreach my $postfix (qw{_packages _merged_with _found_in _fixed_in _tags _blocks _blockedby}, '') {
-			$dbh->do("DELETE FROM $prefix$postfix where id in ($bug_nr)") or die
+			$dbh->do("DELETE FROM $prefix$postfix where id in ($bug_nr)") or die;
 		}
 	}
+	$dbh->do("DELETE FROM ${other_table}_stamps where id in ($bug_nr)") or die;
 
 	# Read all bugs
-	my $insert_bugs_handle = $dbh->prepare("INSERT INTO $table (id, package, source, arrival, status, severity, submitter, submitter_name, submitter_email, owner, owner_name, owner_email, done, done_name, done_email, done_date, title, forwarded, last_modified, affects_oldstable, affects_stable, affects_testing, affects_unstable, affects_experimental) VALUES (\$1, \$2, \$3, \$4::abstime, \$5, \$6, \$7, \$8, \$9, \$10, \$11, \$12, \$13, \$14, \$15, \$16::abstime, \$17, \$18, \$19::abstime, \$20, \$21, \$22, \$23, \$24)");
+	my $insert_bugs_handle = $dbh->prepare("INSERT INTO $table ( ".
+		"id, ".
+		"package, ".
+		"source, ".
+		"arrival, ".
+		"status, ".
+		"severity, ".
+		"submitter, ".
+		"submitter_name, ".
+		"submitter_email, ".
+		"owner, ".
+		"owner_name, ".
+		"owner_email, ".
+		"done, ".
+		"done_name, ".
+		"done_email, ".
+		"done_date, ".
+		"title, ".
+		"forwarded, ".
+		"last_modified, ".
+		"affects_oldstable, ".
+		"affects_stable, ".
+		"affects_testing, ".
+		"affects_unstable, ".
+		"affects_experimental, ".
+		"affected_packages, ".
+		"affected_sources ".
+	") VALUES (".
+		"\$1, ".
+		"\$2, ".
+		"\$3, ".
+		"\$4::abstime, ".
+		"\$5, ".
+		"\$6, ".
+		"\$7, ".
+		"\$8, ".
+		"\$9, ".
+		"\$10, ".
+		"\$11, ".
+		"\$12, ".
+		"\$13, ".
+		"\$14, ".
+		"\$15, ".
+		"\$16::abstime, ".
+		"\$17, ".
+		"\$18, ".
+		"\$19::abstime, ".
+		"\$20, ".
+		"\$21, ".
+		"\$22, ".
+		"\$23, ".
+		"\$24, ".
+		"\$25, ".
+		"\$26 ".
+	")");
 	my $insert_bugs_packages_handle = $dbh->prepare("INSERT INTO ${table}_packages (id, package, source) VALUES (\$1, \$2, \$3)");
 	my $insert_bugs_found_handle = $dbh->prepare("INSERT INTO ${table}_found_in (id, version) VALUES (\$1, \$2)");
 	my $insert_bugs_fixed_handle = $dbh->prepare("INSERT INTO ${table}_fixed_in (id, version) VALUES (\$1, \$2)");
@@ -233,6 +289,8 @@ sub update_bug {
 	} qw{date log_modified done_date};
 
 	my $srcpkg = get_source($bug{package});
+	my $affected_packages = $bug{affects};
+	my $affected_sources = get_source($bug{affects});
 
 	# split emails
 	my (@addr, $submitter_name, $submitter_email, $owner_name, $owner_email, $done_name, $done_email);
@@ -321,11 +379,34 @@ sub update_bug {
 	}
 
 	# Insert data into bugs table
-	$insert_bugs_handle->execute($bug_nr, $bug{package}, $srcpkg, $bug{date}, $bug{pending},
-		$bug{severity}, $bug{originator}, $submitter_name, $submitter_email, $bug{owner},
-		$owner_name, $owner_email, $bug{done}, $done_name, $done_email, $bug{done_date},
-		$bug{subject}, $bug{forwarded}, $bug{log_modified},
-		$present_in_oldstable, $present_in_stable, $present_in_testing, $present_in_unstable, $present_in_experimental) or die $!;
+	$insert_bugs_handle->execute(
+		$bug_nr,
+		$bug{package},
+		$srcpkg,
+		$bug{date},
+		$bug{pending},
+		$bug{severity},
+		$bug{originator},
+		$submitter_name,
+		$submitter_email,
+		$bug{owner},
+		$owner_name,
+		$owner_email,
+		$bug{done},
+		$done_name,
+		$done_email,
+		$bug{done_date},
+		$bug{subject},
+		$bug{forwarded},
+		$bug{log_modified},
+		$present_in_oldstable,
+		$present_in_stable,
+		$present_in_testing,
+		$present_in_unstable,
+		$present_in_experimental,
+		$affected_packages,
+		$affected_sources
+	) or die $!;
 
 	my $src;
 	foreach my $pkg (keys %{{ map { $_ => 1 } split(/\s*[, ]\s*/, $bug{package})}}) {

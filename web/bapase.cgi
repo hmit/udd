@@ -1,4 +1,4 @@
-#!/usr/bin/ruby -w
+#!/usr/bin/ruby
 require 'dbi'
 require 'cgi'
 
@@ -274,25 +274,22 @@ $actions = Actions::fetch
 
 puts <<-EOF
 <html><head>
-<style type="text/css">
-  td, th {
-    border: 1px solid gray;
-    padding-left: 2px;
-    padding-right: 2px;
-  }
-  th {
-    font-size: 8pt;
-  }
-  tr:hover  {
-    background-color: #ccc;
-  }
-  table {
-    border-collapse: collapse;
-  }
-</style>
+<link rel="stylesheet" href="css/tablesorter/style.css" type="text/css" />
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/jquery.tablesorter.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function() {
+        // call the tablesorter plugin
+        $("table").tablesorter({
+            // sort on the first column and third column, order asc
+            // sortList: [[0,0],[2,0]]
+            sortList: [[0,0]]
+        });
+    });
+</script>
 <title>Bapase</title>
 </head><body>
-<table border="1"><tr>
+<table class="tablesorter"><thead><tr>
 <th></th><th>Package</th><th>Action</th>
 EOF
 puts "<th>Orphaned</th>" if orphaned
@@ -304,7 +301,7 @@ puts <<-EOF
 <th>Last upload</th>
 <th>NMUs</th>
 <th>Comments</th>
-</tr>
+</tr></thead>
 EOF
 tqs = Time::now
 sth = dbh.prepare(query)

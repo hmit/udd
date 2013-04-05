@@ -46,13 +46,21 @@ class history_daily_gatherer(gatherer):
     data['vcstype_mtn'] = rows.get('Mtn',0)
     data['vcstype_svn'] = rows.get('Svn',0)
 
+    cur.execute("""SELECT component, COUNT(DISTINCT source) AS cnt FROM sources
+    WHERE distribution='debian' and release='sid' GROUP BY component""")
+    rows = {}
+    for r in cur.fetchall():
+        rows[r[0]] = r[1]
+    data['total_sid_main'] = rows['main']
+    data['total_sid_contrib'] = rows['contrib']
+    data['total_sid_nonfree'] = rows['non-free']
+
     cur2.execute("""INSERT INTO history.sources_count (ts, 
         format_3native, format_3quilt,
-        vcstype_arch, vcstype_bzr, vcstype_cvs, vcstype_darcs, vcstype_git, vcstype_hg, vcstype_mtn, vcstype_svn
-        ) VALUES (NOW(),
-        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+        vcstype_arch, vcstype_bzr, vcstype_cvs, vcstype_darcs, vcstype_git, vcstype_hg, vcstype_mtn, vcstype_svn, total_sid_main, total_sid_contrib, total_sid_nonfree) VALUES (NOW(),
+        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
             (data['format_3native'], data['format_3quilt'],
-             data['vcstype_arch'], data['vcstype_bzr'], data['vcstype_cvs'], data['vcstype_darcs'], data['vcstype_git'], data['vcstype_hg'], data['vcstype_mtn'], data['vcstype_svn']))
+             data['vcstype_arch'], data['vcstype_bzr'], data['vcstype_cvs'], data['vcstype_darcs'], data['vcstype_git'], data['vcstype_hg'], data['vcstype_mtn'], data['vcstype_svn'], data['total_sid_main'], data['total_sid_contrib'], data['total_sid_nonfree']))
 
 if __name__ == '__main__':
   main()

@@ -77,24 +77,20 @@ UAR=/srv/udd.debian.org/udd/update-and-run.sh
 #echo "Got push notif for $ARCHIVE"
 case "$ARCHIVE" in
    "")
-      $UAR debian-{wheezy,squeeze,sid,experimental} debian-{squeeze,wheezy}-proposed-updates debian-squeeze-updates upstream
-#      if [ $(($RANDOM % 10)) -eq 0 ]; then
-#      else
-#	      $UAR debian-{wheezy,sid,experimental} debian-wheezy-proposed-updates
-#      fi
+      $UAR archive-debian upstream
       ;;
    ubuntu)
       ;;
    security)
-      $UAR debian-squeeze-security debian-wheezy-security
+      $UAR archive-debian-security
       ;;
    volatile)
       ;;
    backports)
-      $UAR debian-backports-squeeze
+      $UAR archive-debian-backports
       ;;
    debian-ports)
-      $UAR debian-ports-sid debian-ports-experimental debian-ports-unreleased
+      $UAR archive-debian-ports
       ;;
    *)
       echo "Unknown archive: $ARCHIVE"

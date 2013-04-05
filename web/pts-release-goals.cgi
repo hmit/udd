@@ -1,4 +1,6 @@
-#!/usr/bin/ruby -w
+#!/usr/bin/ruby
+# encoding: utf-8
+Encoding.default_internal = 'UTF-8'
 
 # See #647258
 

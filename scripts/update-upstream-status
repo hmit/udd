@@ -1,4 +1,4 @@
-#!/usr/bin/ruby -w
+#!/usr/bin/ruby
 
 DEB_MIRROR='/srv/mirrors/debian'
 
@@ -112,7 +112,7 @@ end
 
 def get_status(source, version, watch_file)
   # strip debian revision
-  version = version.gsub(/-[\d.]+$/,'')
+  version = version.gsub(/-[\da-zA-Z.~+]+$/,'')
   # strip epoch
   version = version.gsub(/^[\d]+:/,'')
   f = `mktemp /dev/shm/watch.#{source}.XXXXXX`.chomp

@@ -9,6 +9,7 @@ CREATE TABLE sources
     vcs_url text, vcs_browser text,
     python_version text, ruby_versions text, checksums_sha1 text, checksums_sha256 text,
     original_maintainer text, dm_upload_allowed boolean,
+    testsuite text, autobuild text, extra_source_only text,
     PRIMARY KEY (source, version, distribution, release, component));
 
 GRANT SELECT ON sources TO PUBLIC;
@@ -64,7 +65,7 @@ CREATE TABLE packages
     installed_size int, homepage text, size int,
     build_essential text, origin text, sha1 text, replaces text, section text,
     md5sum text, bugs text, priority text, tag text, task text, python_version text,
-    ruby_versions text,
+    ruby_versions text, multi_arch text,
     provides text, conflicts text, sha256 text, original_maintainer text,
     distribution text, release text, component text,
   PRIMARY KEY (package, version, architecture, distribution, release, component),
@@ -89,6 +90,7 @@ CREATE TABLE ubuntu_sources
     vcs_url text, vcs_browser text,
     python_version text, ruby_versions text, checksums_sha1 text, checksums_sha256 text,
     original_maintainer text, dm_upload_allowed boolean,
+    testsuite text, autobuild text, extra_source_only text,
     PRIMARY KEY (source, version, distribution, release, component));
 
 CREATE INDEX ubuntu_sources_distrelcomp_idx on ubuntu_sources(distribution, release, component);
@@ -119,7 +121,7 @@ CREATE TABLE ubuntu_packages
     installed_size int, homepage text, size int,
     build_essential text, origin text, sha1 text, replaces text, section text,
     md5sum text, bugs text, priority text, tag text, task text, python_version text,
-    ruby_versions text,
+    ruby_versions text, multi_arch text,
     provides text, conflicts text, sha256 text, original_maintainer text,
     distribution text, release text, component text,
   PRIMARY KEY (package, version, architecture, distribution, release, component),
@@ -144,6 +146,7 @@ CREATE TABLE derivatives_sources
     vcs_url text, vcs_browser text,
     python_version text, ruby_versions text, checksums_sha1 text, checksums_sha256 text,
     original_maintainer text, dm_upload_allowed boolean,
+    testsuite text, autobuild text, extra_source_only text,
     PRIMARY KEY (source, version, distribution, release, component));
 
 CREATE INDEX derivatives_sources_distrelcomp_idx on derivatives_sources(distribution, release, component);
@@ -174,7 +177,7 @@ CREATE TABLE derivatives_packages
     installed_size int, homepage text, size int,
     build_essential text, origin text, sha1 text, replaces text, section text,
     md5sum text, bugs text, priority text, tag text, task text, python_version text,
-    ruby_versions text,
+    ruby_versions text, multi_arch text,
     provides text, conflicts text, sha256 text, original_maintainer text,
     distribution text, release text, component text,
   PRIMARY KEY (package, version, architecture, distribution, release, component),
@@ -188,6 +191,76 @@ GRANT SELECT ON derivatives_packages_distrelcomparch TO PUBLIC;
 CREATE INDEX derivatives_packages_source_idx on derivatives_packages(source);
 CREATE INDEX derivatives_packages_distrelcomp_idx on derivatives_packages(distribution, release, component);
 
+-- Archived releases
+
+CREATE TABLE archived_sources
+  (source text, version debversion, maintainer text,
+    maintainer_name text, maintainer_email text, format text, files text,
+    uploaders text, bin text, architecture text, standards_version text,
+    homepage text, build_depends text, build_depends_indep text,
+    build_conflicts text, build_conflicts_indep text, priority text, section
+    text, distribution text, release text, component text, vcs_type text,
+    vcs_url text, vcs_browser text,
+    python_version text, ruby_versions text, checksums_sha1 text, checksums_sha256 text,
+    original_maintainer text, dm_upload_allowed boolean,
+    testsuite text, autobuild text, extra_source_only text,
+    PRIMARY KEY (source, version, distribution, release, component));
+
+CREATE INDEX archived_sources_distrelcomp_idx on archived_sources(distribution, release, component);
+
+-- no primary key possible: duplicate rows are possible because duplicate entries
+-- in Uploaders: are allowed. yes.
+CREATE TABLE archived_uploaders (source text, version debversion, distribution text,
+	release text, component text, uploader text, name text, email text);
+   
+GRANT SELECT ON archived_uploaders TO PUBLIC;
+
+CREATE INDEX archived_uploaders_distrelcompsrcver_idx on archived_uploaders(distribution, release, component, source, version);
+
+CREATE TABLE archived_packages_summary ( package text, version debversion, source text,
+source_version debversion, maintainer text, maintainer_name text, maintainer_email text, distribution text, release text,
+component text,
+PRIMARY KEY (package, version, distribution, release, component));
+
+CREATE INDEX archived_packages_summary_distrelcompsrcver_idx on archived_packages_summary(distribution, release, component, source, source_version);
+
+CREATE TABLE archived_packages_distrelcomparch (distribution text, release text,
+component text, architecture text);
+
+CREATE TABLE archived_packages
+  (package text, version debversion, architecture text, maintainer text, maintainer_name text, maintainer_email text, description
+    text, description_md5 text, source text, source_version debversion, essential text, depends text,
+    recommends text, suggests text, enhances text, pre_depends text, breaks text,
+    installed_size int, homepage text, size int,
+    build_essential text, origin text, sha1 text, replaces text, section text,
+    md5sum text, bugs text, priority text, tag text, task text, python_version text,
+    ruby_versions text, multi_arch text,
+    provides text, conflicts text, sha256 text, original_maintainer text,
+    distribution text, release text, component text,
+  PRIMARY KEY (package, version, architecture, distribution, release, component),
+  FOREIGN KEY (package, version, distribution, release, component) REFERENCES archived_packages_summary DEFERRABLE);
+
+GRANT SELECT ON archived_sources TO PUBLIC;
+GRANT SELECT ON archived_packages TO PUBLIC;
+GRANT SELECT ON archived_packages_summary TO PUBLIC;
+GRANT SELECT ON archived_packages_distrelcomparch TO PUBLIC;
+
+CREATE INDEX archived_packages_source_idx on archived_packages(source);
+CREATE INDEX archived_packages_distrelcomp_idx on archived_packages(distribution, release, component);
+
+CREATE TABLE archived_descriptions (
+    package          text not null,
+    distribution     text not null,
+    release          text not null,
+    component        text not null,
+    language         text not null,
+    description      text not null,
+    long_description text not null,
+    description_md5  text not null, -- md5 sum of the original English description
+    PRIMARY KEY (package, distribution, release, component, language, description, description_md5)
+);
+GRANT SELECT ON archived_descriptions TO PUBLIC;
+
 -- Bugs (archived and unarchived)
 
 CREATE TYPE bugs_severity AS ENUM ('fixed', 'wishlist', 'minor', 'normal', 'important', 'serious', 'grave', 'critical');
@@ -200,7 +273,9 @@ CREATE TABLE bugs
      last_modified timestamp, forwarded text, affects_oldstable boolean,
      affects_stable boolean,
     affects_testing boolean, affects_unstable boolean,
-    affects_experimental boolean);
+    affects_experimental boolean,
+	affected_packages text,
+	affected_sources text);
 
 CREATE TABLE bugs_packages
   (id int REFERENCES bugs, package text, source text,
@@ -246,7 +321,9 @@ CREATE TABLE archived_bugs
      last_modified timestamp, forwarded text, affects_oldstable boolean,
      affects_stable boolean,
     affects_testing boolean, affects_unstable boolean,
-    affects_experimental boolean);
+    affects_experimental boolean,
+	affected_packages text,
+	affected_sources text);
 
 CREATE TABLE archived_bugs_packages
   (id int REFERENCES archived_bugs, package text, source text,
@@ -393,6 +470,20 @@ GRANT SELECT on carnivore_emails TO PUBLIC;
 GRANT SELECT on carnivore_names TO PUBLIC;
 GRANT SELECT on carnivore_keys TO PUBLIC;
 GRANT SELECT on carnivore_login TO PUBLIC;
+
+-- debian maintainers
+
+CREATE TABLE debian_maintainers (
+maintainer TEXT,
+maintainer_name TEXT,
+maintainer_email TEXT,
+fingerprint TEXT,
+package TEXT,
+granted_by_fingerprint TEXT
+);
+
+GRANT SELECT ON debian_maintainers TO PUBLIC;
+
 
 -- Popcon
 
@@ -938,3 +1029,29 @@ title
 FROM bugs WHERE package='sponsorship-requests' AND status='pending';
 
 GRANT SELECT ON sponsorship_requests TO PUBLIC;
+
+-- ftp-master autorejects
+CREATE TYPE ftp_autoreject_type AS ENUM('lintian');
+CREATE TYPE ftp_autoreject_level AS ENUM('fatal','nonfatal');
+CREATE TABLE ftp_autorejects (
+tag TEXT,
+autoreject_type ftp_autoreject_type,
+autoreject_level ftp_autoreject_level,
+PRIMARY KEY(tag)
+);
+
+GRANT SELECT ON ftp_autorejects TO PUBLIC;
+
+-- pseudo-packages
+
+CREATE TABLE pseudo_packages (
+package TEXT,
+maintainer TEXT,
+maintainer_name TEXT,
+maintainer_email TEXT,
+description TEXT,
+PRIMARY KEY(package)
+);
+
+GRANT SELECT ON pseudo_packages TO PUBLIC;
+
