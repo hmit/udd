@@ -121,8 +121,9 @@ class blends_metadata_gatherer(gatherer):
     self.cur.execute("DELETE FROM %s" % (my_config['table-dependencies']))
     self.cur.execute("DELETE FROM %s" % (my_config['table-tasks']))
     self.cur.execute("DELETE FROM %s" % (my_config['table-metadata']))
-    query = """PREPARE blend_metadata_insert AS INSERT INTO %s (blend, blendname, projecturl, tasksprefix)
-               VALUES ($1, $2, $3, $4)""" % (my_config['table-metadata'])
+    query = """PREPARE blend_metadata_insert AS INSERT INTO %s (blend, blendname, projecturl, tasksprefix,
+               homepage, aliothurl, projectlist, logourl, outputdir, datadir, vcsdir, css, advertising, pkglist, dehsmail)
+               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)""" % (my_config['table-metadata'])
     self.cur.execute(query)
     query = """PREPARE blend_tasks_insert AS INSERT INTO %s (blend, task, metapackage)
                VALUES ($1, $2, $3)""" % (my_config['table-tasks'])
@@ -171,6 +172,27 @@ class blends_metadata_gatherer(gatherer):
         meta['blendname']  = stanza['projectname']  # Printed name of the project
         meta['projecturl'] = stanza['projecturl']   # Link to the developer page with dynamic content
                                                     # like for instance these tasks pages
+        meta['homepage']   = stanza['homepage']
+        meta['aliothurl']  = stanza['aliothurl']
+        meta['projectlist']= stanza['projectlist']
+        if stanza.has_key('logourl'):
+          meta['logourl']     = stanza['logourl']
+        else:
+          meta['logourl']     = ''
+        meta['outputdir']  = stanza['outputdir']
+        meta['datadir']    = stanza['datadir']
+        meta['vcsdir']     = stanza['vcsdir']
+        meta['css']        = stanza['css']
+        if stanza.has_key('advertising'):
+          meta['advertising'] = stanza['advertising']
+        else:
+          meta['advertising'] = ''
+        meta['pkglist']    = stanza['pkglist']
+        if stanza.has_key('dehsmail'):
+          meta['dehsmail']    = stanza['dehsmail']
+        else:
+          meta['dehsmail']    = ''
+
       f.close()
       ctrlfile = ctrlfiletemplate % meta['blend']
       p = ''
@@ -193,7 +215,8 @@ class blends_metadata_gatherer(gatherer):
         p = s.replace('debian-', '')
       # print p + ' (' + s + ')'
       meta['tasksprefix'] = p
-      query = "EXECUTE blend_metadata_insert (%(blend)s, %(blendname)s, %(projecturl)s, %(tasksprefix)s)"
+      query = """EXECUTE blend_metadata_insert (%(blend)s, %(blendname)s, %(projecturl)s, %(tasksprefix)s,
+                 %(homepage)s, %(aliothurl)s, %(projectlist)s, %(logourl)s, %(outputdir)s, %(datadir)s, %(vcsdir)s, %(css)s, %(advertising)s, %(pkglist)s, %(dehsmail)s)"""
       try:
         self.cur.execute(query, meta)
       except IntegrityError, err:

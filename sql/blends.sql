@@ -4,6 +4,17 @@ CREATE TABLE blends_metadata (
      blendname   TEXT,   --  'Debian Med'   (== human readable name)
      projecturl  TEXT,   --  'http://debian-med.alioth.debian.org/'
      tasksprefix TEXT,   --  'med'
+     homepage    TEXT,
+     aliothurl   TEXT,
+     projectlist TEXT,
+     logourl     TEXT,
+     outputdir   TEXT,
+     datadir     TEXT,
+     vcsdir      TEXT,
+     css         TEXT,
+     advertising TEXT,
+     pkglist     TEXT,
+     dehsmail    TEXT,
      PRIMARY KEY (blend)
 );
 

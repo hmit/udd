@@ -209,7 +209,7 @@ class ArchiveGatherer
 
       # check if package has already been imported
       if d['architecture'] == 'all'
-        n = [d['package'], d['version']]
+        n = [d['package'], d['version'], release, component]
         next if @all_packages.has_key?(n)
         @all_packages[n] = true
       end
