@@ -274,9 +274,9 @@ $actions = Actions::fetch
 
 puts <<-EOF
 <html><head>
-<link rel="stylesheet" href="css/tablesorter/style.css" type="text/css" />
-<script type="text/javascript" src="js/jquery.min.js"></script>
-<script type="text/javascript" src="js/jquery.tablesorter.min.js"></script>
+<link rel="stylesheet" href="/css/tablesorter/style.css" type="text/css" />
+<script type="text/javascript" src="/js/jquery.min.js"></script>
+<script type="text/javascript" src="/js/jquery.tablesorter.min.js"></script>
 <script type="text/javascript">
     $(document).ready(function() {
         // call the tablesorter plugin
