@@ -19,11 +19,13 @@ class UDDData
   attr_accessor :debug
   attr_reader :sources, :versions, :all_bugs, :bugs_tags, :bugs_count, :migration, :buildd, :dmd_todos, :ubuntu_bugs
 
-  def initialize(emails = {}, addsources = "", bin2src = false)
+  def initialize(emails = {}, addsources = "", bin2src = false, ignsources = "", ignbin2src = false)
     @debug = false
     @emails = emails
     @addsources = addsources
     @bin2src = bin2src
+    @ignsources = ignsources
+    @ignbin2src = ignbin2src
 
     @dbh = nil
     begin
@@ -122,6 +124,20 @@ and s2.version > s1.version);
     @addsources.each do |p|
       p.chomp!
       srcs[p] = [:manually_listed]
+    end
+
+    if @ignbin2src
+      q = <<-EOF
+      select distinct source from packages
+         where package in (#{@ignsources.split(/\s/).map { |e| quote(e) }.join(',')})
+      EOF
+      @ignsources = dbget(q).map { |e| e[0] }
+    else
+      @ignsources = @ignsources.split(/\s/)
+    end
+    @ignsources.each do |p|
+      p.chomp!
+      srcs.delete(p)
     end
 
     if not srcs.empty?
