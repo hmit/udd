@@ -17,6 +17,12 @@ default_packages = CGI.escapeHTML(cgi.params['packages'][0]) if cgi.params['pack
 default_bin2src = ''
 default_bin2src = CGI.escapeHTML(cgi.params['bin2src'][0]) if cgi.params['bin2src'][0]
 
+default_ignpackages = ''
+default_ignpackages = CGI.escapeHTML(cgi.params['ignpackages'][0]) if cgi.params['ignpackages'][0]
+default_ignbin2src = ''
+default_ignbin2src = CGI.escapeHTML(cgi.params['ignbin2src'][0]) if cgi.params['ignbin2src'][0]
+
+
 defaults = {}
 defaults['nosponsor'] = {}
 defaults['nouploader'] = {}
@@ -117,9 +123,13 @@ email: <input id="email#{i}" type='text' size='100' name='email#{i}' value='#{de
 end
 puts <<-EOF
 <br/>
-additional (source) packages (one per line or space-separated):<br/>
+<b>additional</b> (source) packages (one per line or space-separated):<br/>
 <textarea id="packages" name="packages" cols="80" rows="1"/>#{default_packages}</textarea><br/>
 <input id="bin2src" name="bin2src" type="checkbox" #{default_bin2src != '' ? 'checked' : ''}/> Packages are binary packages, convert to source packages<br/>
+<br/>
+(source) packages to <b>ignore</b> (one per line or space-separated):<br/>
+<textarea id="ignpackages" name="ignpackages" cols="80" rows="1"/>#{default_ignpackages}</textarea><br/>
+<input id="ignbin2src" name="ignbin2src" type="checkbox" #{default_ignbin2src != '' ? 'checked' : ''}/> Packages are binary packages, convert to source packages<br/>
 
 &nbsp;&nbsp; <input type='submit' value='Go' onsubmit="removeBlankFields(this);"/>
 </form>
@@ -142,7 +152,7 @@ if cgi.params != {}
       emails[em] = types
     end
   end
-  $uddd = UDDData::new(emails, cgi.params["packages"][0] || "", cgi.params["bin2src"][0] == 'on')
+  $uddd = UDDData::new(emails, cgi.params["packages"][0] || "", cgi.params["bin2src"][0] == 'on', cgi.params["ignpackages"][0] || "", cgi.params["ignbin2src"][0] == 'on')
   $uddd.get_sources
   $uddd.get_sources_status
   $uddd.get_dmd_todos
