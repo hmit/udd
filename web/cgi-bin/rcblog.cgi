@@ -173,7 +173,7 @@ Help make a first step towards resolution!
 <tr><td>13</td><td>release+7</td><td>50 (24+26)</td><td>+50 (+24/+26)</td></tr>
 <tr><td>14</td><td>release+8</td><td>51 (32+19)</td><td>+51 (+32/+19)</td></tr>
 <tr><td>15</td><td>release+9</td><td>39 (32+7)</td><td>+39 (+32/+7)</td></tr>
-<tr><td>16</td><td>release+10</td><td></td><td></td></tr>
+<tr><td>16</td><td>release+10</td><td>20 (12+8)</td><td>+20 (+12/+8)</td></tr>
 <tr><td>17</td><td>release+11</td><td></td><td></td></tr>
 <tr><td>18</td><td>release+12</td><td></td><td></td></tr>
 </table>
