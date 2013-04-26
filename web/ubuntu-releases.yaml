@@ -1,4 +1,4 @@
 --- 
 lts: precise
-stable: quantal
-devel: raring
+stable: raring
+devel: saucy
