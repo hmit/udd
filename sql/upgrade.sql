@@ -839,3 +839,10 @@ granted_by_fingerprint TEXT
 
 GRANT SELECT ON debian_maintainers TO PUBLIC;
 
+-- wnpp view
+CREATE VIEW wnpp AS
+SELECT id, SUBSTRING(title from '^([A-Z]{1,3}): .*') as type, SUBSTRING(title from '^[A-Z]{1,3}: ([^ ]+)(?: -- .*)') as source, title FROM bugs WHERE package='wnpp' AND status!='done';
+
+GRANT SELECT ON wnpp TO PUBLIC;
+
+

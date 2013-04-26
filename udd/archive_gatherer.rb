@@ -321,7 +321,7 @@ class ArchiveGatherer
     todelete.uniq.each do |td|
       @db.exec("DELETE FROM #{@tabprefix}packages WHERE distribution=$1 AND release=$2 AND component=$3",
                     [ @conf['distribution'], td[:rel], td[:comp]])
-      @db.exec("DELETE FROM #{@tabprefix}descriptions WHERE distribution=$1 AND release=$2 AND component=$3",
+      @db.exec("DELETE FROM #{@tabprefix}descriptions WHERE distribution=$1 AND release=$2 AND component=$3 AND language='en'",
                     [ @conf['distribution'], td[:rel], td[:comp]])
     end
 
