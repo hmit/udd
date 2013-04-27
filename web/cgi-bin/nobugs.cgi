@@ -318,14 +318,24 @@ if rows.length > 0
 	print "<td><a href=\"http://qa.debian.org/developer.php?login=#{r['maintainer_email']}\">#{r['maintainer_name']}</a></td>"
     puts "<td>#{r['popcon']}</td>" if cols['cpopcon']
 	if cols['firstupload']
-      d = r['firstupload']
-      d = Date::new(d.year, d.month, d.day)
-      puts "<td>#{d}</td>"
+	  if r['firstupload']
+	  then
+        d = r['firstupload']
+        d = Date::new(d.year, d.month, d.day)
+        puts "<td>#{d}</td>"
+	  else
+	    puts "<td></td>"
+	  end
 	end
 	if cols['lastupload']
-      d = r['lastupload']
-      d = Date::new(d.year, d.month, d.day)
-      puts "<td>#{d}</td>"
+	  if r['lastupload']
+	  then
+        d = r['lastupload']
+        d = Date::new(d.year, d.month, d.day)
+        puts "<td>#{d}</td>"
+	  else
+	    puts "<td></td>"
+	  end
 	end
 	puts "</tr>"
   end
