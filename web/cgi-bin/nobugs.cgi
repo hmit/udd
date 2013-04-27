@@ -27,6 +27,7 @@ BUGTYPES = [
 
 SORTS = [
   ['source', 'source package'],
+  ['maintainer_name', 'maintainer'],
   ['popcon', 'popularity contest'],
   ['firstupload', 'first upload in debian'],
   ['lastupload', 'last upload in debian'],
