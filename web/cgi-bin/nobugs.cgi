@@ -28,10 +28,14 @@ BUGTYPES = [
 SORTS = [
   ['source', 'source package'],
   ['popcon', 'popularity contest'],
+  ['firstupload', 'first upload in debian'],
+  ['lastupload', 'last upload in debian'],
 ]
 
 COLUMNS = [
   ['cpopcon', 'popularity&nbsp;contest'],
+  ['firstupload', 'first upload in debian'],
+  ['lastupload', 'last upload in debian'],
 ]
 
 cgi = CGI::new
@@ -76,6 +80,8 @@ else
 end
 # hack to enable popcon column if sortby = popcon
 cols['cpopcon'] = true if sortby == 'popcon'
+cols['firstupload'] = true if sortby == 'firstupload'
+cols['lastupload'] = true if sortby == 'lastupload'
 
 puts <<-EOF
 <html>
@@ -217,10 +223,22 @@ if cols['cpopcon'] == true
   q += ", coalesce(max(popcon_src.insts), 0) as popcon "
 end
 
+if cols['firstupload'] == true
+  q += ", min(upload_history.date) as firstupload "
+end
+
+if cols['lastupload'] == true
+  q += ", max(upload_history.date) as lastupload "
+end
+
 q += "\nfrom sources "
 
 if cols['cpopcon'] == true
   q += " left join popcon_src on (sources.source = popcon_src.source) \n"
+end
+
+if cols['firstupload'] == true || cols['lastupload'] == true
+  q += " left join upload_history on (sources.source = upload_history.source) \n"
 end
 
 
@@ -273,6 +291,8 @@ if rows.length > 0
   puts '<thead>'
   puts '<tr><th>package</th>'
   puts '<th>popcon</th>' if cols['cpopcon']
+  puts '<th>first upload</th>' if cols['firstupload']
+  puts '<th>last upload</th>' if cols['lastupload']
   puts '</thead>'
   puts '<tbody>'
 
@@ -280,6 +300,16 @@ if rows.length > 0
     print "<tr>"
 	print "<td><a href=\"http://packages.qa.debian.org/#{r['source']}\">#{r['source']}</a></td>"
     puts "<td>#{r['popcon']}</td>" if cols['cpopcon']
+	if cols['firstupload']
+      d = r['firstupload']
+      d = Date::new(d.year, d.month, d.day)
+      puts "<td>#{d}</td>"
+	end
+	if cols['lastupload']
+      d = r['lastupload']
+      d = Date::new(d.year, d.month, d.day)
+      puts "<td>#{d}</td>"
+	end
 	puts "</tr>"
   end
 
