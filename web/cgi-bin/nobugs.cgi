@@ -217,7 +217,7 @@ tstart = Time::now
 dbh = DBI::connect('DBI:Pg:dbname=udd;port=5452;host=localhost', 'guest')
 dbh.execute("SET statement_timeout TO 90000")
 
-q = "select sources.source "
+q = "select sources.source, min(sources.maintainer_name) as maintainer_name, min(sources.maintainer_email) as maintainer_email "
 
 if cols['cpopcon'] == true
   q += ", coalesce(max(popcon_src.insts), 0) as popcon "
@@ -290,6 +290,7 @@ if rows.length > 0
   puts '<table class="buglist tablesorter">'
   puts '<thead>'
   puts '<tr><th>package</th>'
+  puts '<th>maintainer</th>'
   puts '<th>popcon</th>' if cols['cpopcon']
   puts '<th>first upload</th>' if cols['firstupload']
   puts '<th>last upload</th>' if cols['lastupload']
@@ -299,6 +300,7 @@ if rows.length > 0
   rows.each do |r|
     print "<tr>"
 	print "<td><a href=\"http://packages.qa.debian.org/#{r['source']}\">#{r['source']}</a></td>"
+	print "<td><a href=\"http://qa.debian.org/developer.php?login=#{r['maintainer_email']}\">#{r['maintainer_name']}</a></td>"
     puts "<td>#{r['popcon']}</td>" if cols['cpopcon']
 	if cols['firstupload']
       d = r['firstupload']
