@@ -251,16 +251,30 @@ if archived
   q += " left join archived_bugs on sources.source = archived_bugs.source \n"
 end
 
+where = false
 if release != "any"
   q += "where sources.release = '#{release}' "
+  where = true
 end
 
 if unarchived
-  q += " and bugs.source is null "
+  if where
+    q += " and "
+  else
+  	q += " where "
+	where = true
+  end
+  q += " bugs.source is null "
 end
 
 if archived
-  q += " and archived_bugs.source is null "
+  if where
+    q += " and "
+  else
+  	q += " where "
+	where = true
+  end
+  q += " archived_bugs.source is null "
 end
 
 q += " group by sources.source "
