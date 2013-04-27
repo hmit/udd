@@ -11,8 +11,6 @@ require 'yaml'
 
 puts "Content-type: text/html\n\n"
 
-UREL=YAML::load(IO::read('ubuntu-releases.yaml'))
-
 RELEASE_RESTRICT = [
   ['wheezy', 'wheezy'], 
   ['jessy', 'jessy'], 
