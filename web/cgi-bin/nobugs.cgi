@@ -13,7 +13,7 @@ puts "Content-type: text/html\n\n"
 
 RELEASE_RESTRICT = [
   ['wheezy', 'wheezy'], 
-  ['jessy', 'jessy'], 
+  ['jessie', 'jessie'], 
   ['sid', 'sid'], 
   ['squeeze', 'squeeze'], 
   ['any', 'any'], 
