@@ -175,7 +175,7 @@ Help make a first step towards resolution!
 <tr><td>15</td><td>release+9</td><td>39 (32+7)</td><td>+39 (+32/+7)</td></tr>
 <tr><td>16</td><td>release+10</td><td>20 (12+8)</td><td>+20 (+12/+8)</td></tr>
 <tr><td>17</td><td>release+11</td><td>24 (19+5)</td><td>+24 (+19/+5)</td></tr>
-<tr><td>18</td><td>release+12</td><td></td><td></td></tr>
+<tr><td>18</td><td>release+12</td><td>2 (2+0)</td><td>+2 (+2/+0)</td></tr>
 </table>
 
 </body></html>
