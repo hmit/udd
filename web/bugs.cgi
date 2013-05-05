@@ -14,14 +14,14 @@ puts "Content-type: text/html\n\n"
 UREL=YAML::load(IO::read('ubuntu-releases.yaml'))
 
 RELEASE_RESTRICT = [
-  ['wheezy', 'wheezy', 'id in (select id from bugs_rt_affects_testing)'],
+  ['jessie', 'jessie', 'id in (select id from bugs_rt_affects_testing)'],
   ['sid', 'sid', 'id in (select id from bugs_rt_affects_unstable)'],
-  ['wheezy_and_sid', 'wheezy and sid', 'id in (select id from bugs_rt_affects_testing) and id in (select id from bugs_rt_affects_unstable)'],
-  ['wheezy_or_sid', 'wheezy or sid', 'id in (select id from bugs_rt_affects_testing union select id from bugs_rt_affects_unstable)'],
-  ['wheezy_not_sid', 'wheezy, not sid', 'id in (select id from bugs_rt_affects_testing) and id not in (select id from bugs_rt_affects_unstable)'],
-  ['sid_not_wheezy', 'sid, not wheezy', 'id in (select id from bugs_rt_affects_unstable) and id not in (select id from bugs_rt_affects_testing)'],
-  ['squeeze', 'squeeze', 'id in (select id from bugs_rt_affects_stable)'],
-  ['lenny', 'lenny', 'id in (select id from bugs_rt_affects_oldstable)'],
+  ['jessie_and_sid', 'jessie and sid', 'id in (select id from bugs_rt_affects_testing) and id in (select id from bugs_rt_affects_unstable)'],
+  ['jessie_or_sid', 'jessie or sid', 'id in (select id from bugs_rt_affects_testing union select id from bugs_rt_affects_unstable)'],
+  ['jessie_not_sid', 'jessie, not sid', 'id in (select id from bugs_rt_affects_testing) and id not in (select id from bugs_rt_affects_unstable)'],
+  ['sid_not_jessie', 'sid, not jessie', 'id in (select id from bugs_rt_affects_unstable) and id not in (select id from bugs_rt_affects_testing)'],
+  ['wheezy', 'wheezy', 'id in (select id from bugs_rt_affects_stable)'],
+  ['squeeze', 'squeeze', 'id in (select id from bugs_rt_affects_oldstable)'],
   ['any', 'any', 'id in (select id from bugs where status!=\'done\')'],
 ]
 
@@ -393,12 +393,14 @@ $TagsSingleLetter = {
   'sarge-ignore' => 'sar-i',
   'squeeze-ignore' => 'squ-i',
   'wheezy-ignore' => 'whe-i',
+  'jessie-ignore' => 'jes-i',
   'woody' => 'wod',
   'sarge' => 'sar',
   'etch' => 'etc',
   'lenny' => 'len',
   'squeeze' => 'squ',
   'wheezy' => 'whe',
+  'jessie' => 'jes',
   'sid' => 'sid',
   'experimental' => 'exp',
   'l10n' => 'l10n',
