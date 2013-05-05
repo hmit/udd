@@ -906,3 +906,9 @@ AND (id in (select id from sources, bugs_packages where sources.source = bugs_pa
 AND (id in (select id from sources, bugs_packages where sources.source = bugs_packages.source and release='sid')
  OR id in (select id from packages_summary, bugs_packages where packages_summary.package = bugs_packages.package and release='sid'));
 
+GRANT SELECT ON bugs_rt_affects_oldstable TO PUBLIC;
+GRANT SELECT ON bugs_rt_affects_stable TO PUBLIC;
+GRANT SELECT ON bugs_rt_affects_testing_and_unstable TO PUBLIC;
+GRANT SELECT ON bugs_rt_affects_unstable TO PUBLIC;
+GRANT SELECT ON bugs_rt_affects_testing TO PUBLIC;
+
