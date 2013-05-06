@@ -381,34 +381,34 @@ CREATE TABLE bugs_usertags
 CREATE VIEW bugs_rt_affects_oldstable AS
 SELECT id, package, source FROM bugs
 WHERE affects_oldstable
-AND (id NOT IN (SELECT id FROM bugs_tags WHERE tag IN ('sid', 'sarge', 'etch', 'squeeze', 'wheezy', 'experimental'))
-OR id IN (SELECT id FROM bugs_tags WHERE tag = 'lenny'))
-AND id NOT IN (select id FROM bugs_tags WHERE tag = 'lenny-ignore')
-AND (id in (select id from sources, bugs_packages where sources.source = bugs_packages.source and release='lenny')
- OR id in (select id from packages_summary, bugs_packages where packages_summary.package = bugs_packages.package and release='lenny'));
-
-CREATE VIEW bugs_rt_affects_stable AS
-SELECT id, package, source FROM bugs
-WHERE affects_stable
-AND (id NOT IN (SELECT id FROM bugs_tags WHERE tag IN ('sid', 'sarge', 'etch', 'lenny', 'wheezy', 'experimental'))
+AND (id NOT IN (SELECT id FROM bugs_tags WHERE tag IN ('sid', 'sarge', 'etch', 'lenny', 'wheezy', 'jessie', 'experimental'))
 OR id IN (SELECT id FROM bugs_tags WHERE tag = 'squeeze'))
 AND id NOT IN (select id FROM bugs_tags WHERE tag = 'squeeze-ignore')
 AND (id in (select id from sources, bugs_packages where sources.source = bugs_packages.source and release='squeeze')
  OR id in (select id from packages_summary, bugs_packages where packages_summary.package = bugs_packages.package and release='squeeze'));
 
-CREATE VIEW bugs_rt_affects_testing AS
+CREATE VIEW bugs_rt_affects_stable AS
 SELECT id, package, source FROM bugs
-WHERE affects_testing 
-AND (id NOT IN (SELECT id FROM bugs_tags WHERE tag IN ('sid', 'sarge', 'etch', 'lenny', 'squeeze', 'experimental'))
+WHERE affects_stable
+AND (id NOT IN (SELECT id FROM bugs_tags WHERE tag IN ('sid', 'sarge', 'etch', 'lenny', 'squeeze', 'jessie', 'experimental'))
 OR id IN (SELECT id FROM bugs_tags WHERE tag = 'wheezy'))
 AND id NOT IN (select id FROM bugs_tags WHERE tag = 'wheezy-ignore')
 AND (id in (select id from sources, bugs_packages where sources.source = bugs_packages.source and release='wheezy')
  OR id in (select id from packages_summary, bugs_packages where packages_summary.package = bugs_packages.package and release='wheezy'));
 
+CREATE VIEW bugs_rt_affects_testing AS
+SELECT id, package, source FROM bugs
+WHERE affects_testing 
+AND (id NOT IN (SELECT id FROM bugs_tags WHERE tag IN ('sid', 'sarge', 'etch', 'lenny', 'squeeze', 'wheezy', 'experimental'))
+OR id IN (SELECT id FROM bugs_tags WHERE tag = 'jessie'))
+AND id NOT IN (select id FROM bugs_tags WHERE tag = 'jessie-ignore')
+AND (id in (select id from sources, bugs_packages where sources.source = bugs_packages.source and release='jessie')
+ OR id in (select id from packages_summary, bugs_packages where packages_summary.package = bugs_packages.package and release='jessie'));
+
 CREATE VIEW bugs_rt_affects_unstable AS
 SELECT id, package, source FROM bugs
 WHERE affects_unstable 
-AND (id NOT IN (SELECT id FROM bugs_tags WHERE tag IN ('lenny', 'sarge', 'etch', 'squeeze', 'wheezy', 'experimental'))
+AND (id NOT IN (SELECT id FROM bugs_tags WHERE tag IN ('lenny', 'sarge', 'etch', 'squeeze', 'wheezy', 'jessie', 'experimental'))
 OR id IN (SELECT id FROM bugs_tags WHERE tag = 'sid'))
 AND (id in (select id from sources, bugs_packages where sources.source = bugs_packages.source and release='sid')
  OR id in (select id from packages_summary, bugs_packages where packages_summary.package = bugs_packages.package and release='sid'));
@@ -416,10 +416,10 @@ AND (id in (select id from sources, bugs_packages where sources.source = bugs_pa
 CREATE VIEW bugs_rt_affects_testing_and_unstable AS
 SELECT id, package, source FROM bugs
 WHERE affects_unstable AND affects_testing
-AND (id NOT IN (SELECT id FROM bugs_tags WHERE tag IN ('sarge', 'etch', 'lenny', 'squeeze', 'experimental'))
-OR (id IN (SELECT id FROM bugs_tags WHERE tag = 'sid') AND id IN (SELECT id FROM bugs_tags WHERE tag = 'wheezy')))
-AND (id in (select id from sources, bugs_packages where sources.source = bugs_packages.source and release='wheezy')
- OR id in (select id from packages_summary, bugs_packages where packages_summary.package = bugs_packages.package and release='wheezy'))
+AND (id NOT IN (SELECT id FROM bugs_tags WHERE tag IN ('sarge', 'etch', 'lenny', 'squeeze', 'wheezy', 'experimental'))
+OR (id IN (SELECT id FROM bugs_tags WHERE tag = 'sid') AND id IN (SELECT id FROM bugs_tags WHERE tag = 'jessie')))
+AND (id in (select id from sources, bugs_packages where sources.source = bugs_packages.source and release='jessie')
+ OR id in (select id from packages_summary, bugs_packages where packages_summary.package = bugs_packages.package and release='jessie'))
 AND (id in (select id from sources, bugs_packages where sources.source = bugs_packages.source and release='sid')
  OR id in (select id from packages_summary, bugs_packages where packages_summary.package = bugs_packages.package and release='sid'));
 

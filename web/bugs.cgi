@@ -14,14 +14,14 @@ puts "Content-type: text/html\n\n"
 UREL=YAML::load(IO::read('ubuntu-releases.yaml'))
 
 RELEASE_RESTRICT = [
-  ['wheezy', 'wheezy', 'id in (select id from bugs_rt_affects_testing)'],
+  ['jessie', 'jessie', 'id in (select id from bugs_rt_affects_testing)'],
   ['sid', 'sid', 'id in (select id from bugs_rt_affects_unstable)'],
-  ['wheezy_and_sid', 'wheezy and sid', 'id in (select id from bugs_rt_affects_testing) and id in (select id from bugs_rt_affects_unstable)'],
-  ['wheezy_or_sid', 'wheezy or sid', 'id in (select id from bugs_rt_affects_testing union select id from bugs_rt_affects_unstable)'],
-  ['wheezy_not_sid', 'wheezy, not sid', 'id in (select id from bugs_rt_affects_testing) and id not in (select id from bugs_rt_affects_unstable)'],
-  ['sid_not_wheezy', 'sid, not wheezy', 'id in (select id from bugs_rt_affects_unstable) and id not in (select id from bugs_rt_affects_testing)'],
-  ['squeeze', 'squeeze', 'id in (select id from bugs_rt_affects_stable)'],
-  ['lenny', 'lenny', 'id in (select id from bugs_rt_affects_oldstable)'],
+  ['jessie_and_sid', 'jessie and sid', 'id in (select id from bugs_rt_affects_testing) and id in (select id from bugs_rt_affects_unstable)'],
+  ['jessie_or_sid', 'jessie or sid', 'id in (select id from bugs_rt_affects_testing union select id from bugs_rt_affects_unstable)'],
+  ['jessie_not_sid', 'jessie, not sid', 'id in (select id from bugs_rt_affects_testing) and id not in (select id from bugs_rt_affects_unstable)'],
+  ['sid_not_jessie', 'sid, not jessie', 'id in (select id from bugs_rt_affects_unstable) and id not in (select id from bugs_rt_affects_testing)'],
+  ['wheezy', 'wheezy', 'id in (select id from bugs_rt_affects_stable)'],
+  ['squeeze', 'squeeze', 'id in (select id from bugs_rt_affects_oldstable)'],
   ['any', 'any', 'id in (select id from bugs where status!=\'done\')'],
 ]
 
@@ -38,18 +38,23 @@ FILTERS = [
  ['deferred', 'fixed in deferred/delayed', "id in (select id from deferred_closes)"],
  ['notmain', 'packages not in main', 'id not in (select id from bugs_packages, sources where bugs_packages.source = sources.source and component=\'main\')'],
  ['notwheezy', 'packages not in wheezy', 'id not in (select id from bugs_packages, sources where bugs_packages.source = sources.source and release=\'wheezy\')'],
+ ['notjessie', 'packages not in jessie', 'id not in (select id from bugs_packages, sources where bugs_packages.source = sources.source and release=\'jessie\')'],
  ['base', 'packages in base system', 'bugs.source in (select source from sources where priority=\'required\' or priority=\'important\')'],
  ['standard', 'packages in standard installation', 'bugs.source in (select source from sources where priority=\'standard\')'],
  ['orphaned', 'orphaned packages', 'bugs.source in (select source from orphaned_packages where type in (\'ITA\', \'O\'))'],
  ['merged', 'merged bugs', 'id in (select id from bugs_merged_with where id > merged_with)'],
  ['done', 'marked as done', 'status = \'done\''],
  ['outdatedwheezy', 'outdated binaries in wheezy', "bugs.source in (select distinct p1.source from packages_summary p1, packages_summary p2 where p1.source = p2.source and p1.release='wheezy' and p2.release='wheezy' and p1.source_version != p2.source_version)"],
+ ['outdatedjessie', 'outdated binaries in jessie', "bugs.source in (select distinct p1.source from packages_summary p1, packages_summary p2 where p1.source = p2.source and p1.release='jessie' and p2.release='jessie' and p1.source_version != p2.source_version)"],
  ['outdatedsid', 'outdated binaries in sid', "bugs.source in (select distinct p1.source from packages_summary p1, packages_summary p2 where p1.source = p2.source and p1.release='sid' and p2.release='sid' and p1.source_version != p2.source_version)"],
- ['needmig', 'different versions in wheezy and sid', "bugs.source in (select s1.source from sources s1, sources s2 where s1.source = s2.source and s1.release = 'wheezy' and s2.release='sid' and s1.version != s2.version)"],
+ ['needmig', 'different versions in jessie and sid', "bugs.source in (select s1.source from sources s1, sources s2 where s1.source = s2.source and s1.release = 'jessie' and s2.release='sid' and s1.version != s2.version)"],
  ['newerubuntu', 'newer in Ubuntu than in sid', "bugs.source in (select s1.source from sources_uniq s1, ubuntu_sources s2 where s1.source = s2.source and s1.release = 'sid' and s2.release='#{UREL['devel']}' and s1.version < s2.version)"],
  ['rtwheezy-will-remove', 'RT tag for wheezy: will-remove', "id in (select id from bugs_usertags where email='release.debian.org@packages.debian.org' and tag='wheezy-will-remove')"],
  ['rtwheezy-can-defer', 'RT tag for wheezy: can-defer', "id in (select id from bugs_usertags where email='release.debian.org@packages.debian.org' and tag='wheezy-can-defer')"],
  ['rtwheezy-is-blocker', 'RT tag for wheezy: is-blocker', "id in (select id from bugs_usertags where email='release.debian.org@packages.debian.org' and tag='wheezy-is-blocker')"],
+ ['rtjessie-will-remove', 'RT tag for jessie: will-remove', "id in (select id from bugs_usertags where email='release.debian.org@packages.debian.org' and tag='jessie-will-remove')"],
+ ['rtjessie-can-defer', 'RT tag for jessie: can-defer', "id in (select id from bugs_usertags where email='release.debian.org@packages.debian.org' and tag='jessie-can-defer')"],
+ ['rtjessie-is-blocker', 'RT tag for jessie: is-blocker', "id in (select id from bugs_usertags where email='release.debian.org@packages.debian.org' and tag='jessie-is-blocker')"],
  ['unblock-hint', 'RT unblock hint', "bugs.source in (select hints.source from hints where type in ('approve','unblock'))"],
 ]
 
@@ -85,7 +90,7 @@ COLUMNS = [
   ['cclaimed', 'claimed&nbsp;by'],
   ['cdeferred', 'deferred/delayed'],
   ['caffected', 'affected&nbsp;releases'],
-  ['crttags', 'release&nbsp;team&nbsp;tags&nbsp;for&nbsp;wheezy'],
+  ['crttags', 'release&nbsp;team&nbsp;tags'],
 ]
 
 cgi = CGI::new
@@ -93,7 +98,7 @@ cgi = CGI::new
 if RELEASE_RESTRICT.map { |r| r[0] }.include?(cgi.params['release'][0])
   release = cgi.params['release'][0]
 else
-  release = 'wheezy'
+  release = 'jessie'
 end
 # columns
 cols = {}
@@ -251,7 +256,7 @@ RELEASE_RESTRICT.each do |r|
   puts "<label><input type='radio' name='release' value='#{r[0]}' #{checked}/>#{r[1]}</label>&nbsp;&nbsp;"
 end
 puts <<-EOF
-<br/>(This already uses release tags ('sid', 'wheezy') and xxx-ignore ('wheezy-ignore') to include/exclude bugs)</p>
+<br/>(This already uses release tags ('sid', 'jessie') and xxx-ignore ('jessie-ignore') to include/exclude bugs)</p>
 <table class="invisible"><tr><td>
 <table class="buglist">
 <tr><th colspan='4'>FILTERS</th></tr>
@@ -393,12 +398,14 @@ $TagsSingleLetter = {
   'sarge-ignore' => 'sar-i',
   'squeeze-ignore' => 'squ-i',
   'wheezy-ignore' => 'whe-i',
+  'jessie-ignore' => 'jes-i',
   'woody' => 'wod',
   'sarge' => 'sar',
   'etch' => 'etc',
   'lenny' => 'len',
   'squeeze' => 'squ',
   'wheezy' => 'whe',
+  'jessie' => 'jes',
   'sid' => 'sid',
   'experimental' => 'exp',
   'l10n' => 'l10n',
@@ -580,10 +587,10 @@ puts <<-EOF
 </div>
 <p><b>Useful queries:</b>
 <ul>
-<li><a href="bugs.cgi?release=wheezy_and_sid&patch=ign&merged=ign&done=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&ctags=1&ctags=1&cdeferred=1"><b>Bug squasher view:</b> Affecting sid and wheezy, not marked as done, not tagged patch; those need to be fixed, probably by a patch+upload</a></li>
-<li><a href="bugs.cgi?release=wheezy_and_sid&patch=only&merged=ign&done=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&chints=1&ctags=1&cdeferred=1"><b>Sponsor view:</b> Affecting sid and wheezy, not marked as done, tagged 'patch'; those need a DD to sponsor an upload</a></li>
-<li><a href="bugs.cgi?release=wheezy_and_sid&merged=ign&done=only&fnewerval=7&rc=1&sortby=id&sorto=asc&ctags=1&cdeferred=1&caffected=1"><b>Cleaner view:</b> Affecting sid and wheezy, but marked as done; why is it still affecting unstable? fixed only in experimental? missing binaries? wrong changelog?</a></li>
-<li><a href="bugs.cgi?release=wheezy_not_sid&merged=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&chints=1&ctags=1&cdeferred=1&crttags=1"><b>Release Team view:</b> Affecting wheezy, but not sid. Help the fix migrate to wheezy!</a></li>
+<li><a href="bugs.cgi?release=jessie_and_sid&patch=ign&merged=ign&done=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&ctags=1&ctags=1&cdeferred=1"><b>Bug squasher view:</b> Affecting sid and jessie, not marked as done, not tagged patch; those need to be fixed, probably by a patch+upload</a></li>
+<li><a href="bugs.cgi?release=jessie_and_sid&patch=only&merged=ign&done=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&chints=1&ctags=1&cdeferred=1"><b>Sponsor view:</b> Affecting sid and jessie, not marked as done, tagged 'patch'; those need a DD to sponsor an upload</a></li>
+<li><a href="bugs.cgi?release=jessie_and_sid&merged=ign&done=only&fnewerval=7&rc=1&sortby=id&sorto=asc&ctags=1&cdeferred=1&caffected=1"><b>Cleaner view:</b> Affecting sid and jessie, but marked as done; why is it still affecting unstable? fixed only in experimental? missing binaries? wrong changelog?</a></li>
+<li><a href="bugs.cgi?release=jessie_not_sid&merged=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&chints=1&ctags=1&cdeferred=1&crttags=1"><b>Release Team view:</b> Affecting jessie, but not sid. Help the fix migrate to jessie!</a></li>
 </ul>
 
 <div class="footer">
