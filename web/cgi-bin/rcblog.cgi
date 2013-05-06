@@ -113,10 +113,10 @@ puts <<-EOF
  <li>
  <strong>In Total: <a href="http://udd.debian.org/bugs.cgi?release=any&merged=ign&rc=1">#{tot}</a></strong>
   <ul>
-   <li><strong>Affecting jessie: <a href="http://udd.debian.org/bugs.cgi?release=jessie&merged=ign&rc=1">#{jessie}</a></strong>
+   <li><strong>Affecting Jessie: <a href="http://udd.debian.org/bugs.cgi?release=jessie&merged=ign&rc=1">#{jessie}</a></strong>
     That's the number we need to get down to zero before the release. They can be split in two big categories:
     <ul>
-     <li><strong>Affecting jessie and unstable: <a href="http://udd.debian.org/bugs.cgi?release=jessie_and_sid&merged=ign&rc=1">#{jessie_sid}</a></strong>
+     <li><strong>Affecting Jessie and unstable: <a href="http://udd.debian.org/bugs.cgi?release=jessie_and_sid&merged=ign&rc=1">#{jessie_sid}</a></strong>
       Those need someone to find a fix, or to finish the work to upload a fix to unstable:
       <ul>
        <li><strong><a href="http://udd.debian.org/bugs.cgi?release=jessie_and_sid&patch=only&merged=ign&done=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&ctags=1&cdeferred=1">#{wh_patch}</a> bugs are tagged 'patch'.</strong>
@@ -131,8 +131,8 @@ Help make a first step towards resolution!
       </ul>
      </li>
 
-     <li><strong>Affecting jessie only: <a href="http://udd.debian.org/bugs.cgi?release=jessie_not_sid&merged=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&chints=1&ctags=1&cdeferred=1&crttags=1">#{jessie_only}</a></strong>
-      Those are already fixed in unstable, but the fix still needs to migrate to jessie.  You can help by submitting unblock requests for fixed packages, by investigating why packages do not migrate, or by reviewing submitted unblock requests.
+     <li><strong>Affecting Jessie only: <a href="http://udd.debian.org/bugs.cgi?release=jessie_not_sid&merged=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&chints=1&ctags=1&cdeferred=1&crttags=1">#{jessie_only}</a></strong>
+      Those are already fixed in unstable, but the fix still needs to migrate to Jessie.  You can help by submitting unblock requests for fixed packages, by investigating why packages do not migrate, or by reviewing submitted unblock requests.
       <ul>
        <li><strong><a href="http://udd.debian.org/bugs.cgi?release=jessie_not_sid&merged=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&chints=1&ctags=1&cdeferred=1&crttags=1&unblock-hint=only">#{wo_unblocked}</a> bugs are in packages that are unblocked by the release team.</strong>
        <li><strong><a href="http://udd.debian.org/bugs.cgi?release=jessie_not_sid&merged=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&chints=1&ctags=1&cdeferred=1&crttags=1&unblock-hint=ign">#{wo_notunblocked}</a> bugs are in packages that are not unblocked.</strong>
