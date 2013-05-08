@@ -45,10 +45,10 @@ class UDDData
     dbget <<-EOF
 CREATE TEMPORARY VIEW sources_most_recent AS
 select distinct source, version, maintainer_email from sources s1
-where release in ('squeeze', 'wheezy', 'sid')
+where release in ('squeeze', 'wheezy', 'jessie', 'sid')
 and not exists (select * from sources s2
 where s1.source = s2.source
-and release in ('squeeze', 'wheezy', 'sid')
+and release in ('squeeze', 'wheezy', 'jessie', 'sid')
 and s2.version > s1.version);
     EOF
 
@@ -69,10 +69,10 @@ and s2.version > s1.version);
     dbget <<-EOF
 CREATE TEMPORARY VIEW uploaders_most_recent AS
 select distinct source, version, email from uploaders s1
-where release in ('squeeze', 'wheezy', 'sid')
+where release in ('squeeze', 'wheezy', 'jessie', 'sid')
 and not exists (select * from uploaders s2
 where s1.source = s2.source
-and release in ('squeeze', 'wheezy', 'sid')
+and release in ('squeeze', 'wheezy', 'jessie', 'sid')
 and s2.version > s1.version);
     EOF
 
@@ -419,11 +419,11 @@ SELECT DISTINCT value, label
 FROM 
 (SELECT maintainer_email AS value, maintainer AS label
 from sources
-where release in ('sid', 'experimental', 'wheezy', 'squeeze')
+where release in ('sid', 'experimental', 'jessie', 'wheezy', 'squeeze')
 union
 select email as value, uploader as label
 from uploaders
-where release in ('sid', 'experimental', 'wheezy', 'squeeze')
+where release in ('sid', 'experimental', 'jessie', 'wheezy', 'squeeze')
 ) emails
 WHERE label LIKE ?
     EOF

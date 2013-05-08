@@ -206,6 +206,7 @@ if cgi.params != {}
 <th>&nbsp;&nbsp;&nbsp;&nbsp;source&nbsp;&nbsp;&nbsp;&nbsp;</th>
 <th>&nbsp;&nbsp;&nbsp;&nbsp;squeeze&nbsp;&nbsp;&nbsp;&nbsp;</th>
 <th>&nbsp;&nbsp;&nbsp;&nbsp;wheezy&nbsp;&nbsp;&nbsp;&nbsp;</th>
+<th>&nbsp;&nbsp;&nbsp;&nbsp;jessie&nbsp;&nbsp;&nbsp;&nbsp;</th>
 <th>&nbsp;&nbsp;&nbsp;&nbsp;sid&nbsp;&nbsp;&nbsp;&nbsp;</th>
 <th>&nbsp;&nbsp;&nbsp;&nbsp;experimental&nbsp;&nbsp;&nbsp;&nbsp;</th>
 <th>&nbsp;&nbsp;&nbsp;&nbsp;vcs&nbsp;&nbsp;&nbsp;&nbsp;</th>
@@ -220,16 +221,23 @@ if cgi.params != {}
     dv = $uddd.versions[src]['debian']
     puts "<tr><td class=\"left\"><a href=\"http://packages.qa.debian.org/#{src}\">#{src_reason(src)}</a></td>"
 
-    t_stable = t_testing = t_unstable = t_experimental = t_vcs = ''
+    t_oldstable = t_stable = t_testing = t_unstable = t_experimental = t_vcs = ''
 
-    t_stable += dv['squeeze'][:version] if dv['squeeze']
-    t_stable += "<br>sec: #{dv['squeeze-security'][:version]}" if dv['squeeze-security']
-    t_stable += "<br>pu: #{dv['squeeze-proposed-updates'][:version]}" if dv['squeeze-proposed-updates']
-    t_stable += "<br>bpo: #{dv['squeeze-backports'][:version]}" if dv['squeeze-backports']
+    t_oldstable += dv['squeeze'][:version] if dv['squeeze']
+    t_oldstable += "<br>sec: #{dv['squeeze-security'][:version]}" if dv['squeeze-security']
+    t_oldstable += "<br>pu: #{dv['squeeze-proposed-updates'][:version]}" if dv['squeeze-proposed-updates']
+    t_oldstable += "<br>bpo: #{dv['squeeze-backports'][:version]}" if dv['squeeze-backports']
+    t_oldstable += "<br>bpo-sl: #{dv['squeeze-backports-sloppy'][:version]}" if dv['squeeze-backports-sloppy']
 
-    t_testing += dv['wheezy'][:version] if dv['wheezy']
-    t_testing += "<br>sec: #{dv['wheezy-security'][:version]}" if dv['wheezy-security']
-    t_testing += "<br>pu: #{dv['wheezy-proposed-updates'][:version]}" if dv['wheezy-proposed-updates']
+    t_stable += dv['wheezy'][:version] if dv['wheezy']
+    t_stable += "<br>sec: #{dv['wheezy-security'][:version]}" if dv['wheezy-security']
+    t_stable += "<br>pu: #{dv['wheezy-proposed-updates'][:version]}" if dv['wheezy-proposed-updates']
+    t_stable += "<br>bpo: #{dv['wheezy-backports'][:version]}" if dv['wheezy-backports']
+    t_stable += "<br>bpo-sl: #{dv['wheezy-backports-sloppy'][:version]}" if dv['wheezy-backports-sloppy']
+
+    t_testing += dv['jessie'][:version] if dv['jessie']
+    t_testing += "<br>sec: #{dv['jessie-security'][:version]}" if dv['jessie-security']
+    t_testing += "<br>pu: #{dv['jessie-proposed-updates'][:version]}" if dv['jessie-proposed-updates']
 
     if dv['sid']
       t_unstable += dv['sid'][:version]
@@ -260,7 +268,7 @@ if cgi.params != {}
       end
     end
 
-    UDDData.group_values(t_stable, t_testing, t_unstable, t_experimental, t_vcs).each do |v|
+    UDDData.group_values(t_oldstable, t_stable, t_testing, t_unstable, t_experimental, t_vcs).each do |v|
       if v[:count] == 1
         puts "<td>"
       else
