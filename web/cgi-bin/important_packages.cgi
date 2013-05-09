@@ -59,5 +59,21 @@ end until newsrcs.empty?
 
 puts "# Final list of #{srcs.length} important source packages:"
 puts srcs.sort.join("\n")
+
+# bugs affecting sid
+sth = dbh.prepare("select count(*) from bugs 
+where id in (select id from bugs_rt_affects_unstable) 
+and not (id in (select id from bugs_merged_with where id > merged_with)) 
+AND (severity >= 'serious')")
+sth.execute
+affsid = sth.fetch_all[0][0]
+sth = dbh.prepare("select count(*) from bugs 
+where id in (select id from bugs_rt_affects_unstable) 
+and not (id in (select id from bugs_merged_with where id > merged_with)) 
+AND (severity >= 'serious')
+AND source in ('#{srcs.join('\',\'')}')")
+sth.execute
+affsidimp = sth.fetch_all[0][0]
+puts "# #{affsid} RC bugs affecting sid, #{affsidimp} RC bugs affecting sid's important packages"
 exit(0)
 
