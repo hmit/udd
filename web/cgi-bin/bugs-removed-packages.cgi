@@ -26,7 +26,7 @@ SELECT source, package, id from bugs
 where not affects_unstable and not affects_testing
 and not affects_stable and not affects_experimental
 and not exists (
-select * from bugs_packages where bugs_packages.id = bugs.id and bugs_packages.source in (select source from sources where distribution='debian' and release in ('squeeze', 'wheezy', 'sid', 'experimental')))
+select * from bugs_packages where bugs_packages.id = bugs.id and bugs_packages.source in (select source from sources where distribution='debian' and release in ('squeeze', 'wheezy', 'jessie', 'sid', 'experimental')))
 and not exists (select * from bugs_packages where bugs_packages.id = bugs.id
 and source in (#{PSEUDO_PKGS.map { |p| "'#{p}'"}.join(",")}))
 and not package ~ '^(linux|kernel)-(image|source)-'
