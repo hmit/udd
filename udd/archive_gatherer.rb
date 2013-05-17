@@ -12,6 +12,8 @@ require 'deb822'
 require 'zlib'
 require 'digest'
 
+DODESC=false
+
 DEBUG = false
 TESTMODE = false
 VCS = [ 'Svn', 'Git', 'Arch', 'Bzr', 'Cvs', 'Darcs', 'Hg', 'Mtn']
@@ -249,7 +251,9 @@ class ArchiveGatherer
         else
           d['long_description'] = ''
         end
-        @db.exec_prepared('description_insert', @description_fields.map { |e| d[e] })
+        if DODESC
+          @db.exec_prepared('description_insert', @description_fields.map { |e| d[e] })
+        end
       end
      
       @db.exec_prepared('package_insert', @package_fields.map { |e| d[e] })
@@ -284,7 +288,9 @@ class ArchiveGatherer
     @db.exec("ANALYZE #{@tabprefix}sources")
     @db.exec("ANALYZE #{@tabprefix}uploaders")
     @db.exec("ANALYZE #{@tabprefix}packages")
-    @db.exec("ANALYZE #{@tabprefix}descriptions")
+    if DODESC
+      @db.exec("ANALYZE #{@tabprefix}descriptions")
+    end
     @db.exec("ANALYZE #{@tabprefix}packages_summary")
     @db.exec("ANALYZE #{@tabprefix}packages_distrelcomparch")
 
@@ -321,8 +327,10 @@ class ArchiveGatherer
     todelete.uniq.each do |td|
       @db.exec("DELETE FROM #{@tabprefix}packages WHERE distribution=$1 AND release=$2 AND component=$3",
                     [ @conf['distribution'], td[:rel], td[:comp]])
-      @db.exec("DELETE FROM #{@tabprefix}descriptions WHERE distribution=$1 AND release=$2 AND component=$3 AND language='en'",
-                    [ @conf['distribution'], td[:rel], td[:comp]])
+      if DODESC
+        @db.exec("DELETE FROM #{@tabprefix}descriptions WHERE distribution=$1 AND release=$2 AND component=$3 AND language='en'",
+                 [ @conf['distribution'], td[:rel], td[:comp]])
+      end
     end
 
     todo.each do |td|
