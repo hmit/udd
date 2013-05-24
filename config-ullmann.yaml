@@ -27,6 +27,7 @@ general:
     screenshots: module udd.screenshot_gatherer
     bibref: module udd.bibref_gatherer
     blends-prospective: module udd.blends_prospective_gatherer
+    blends-metadata: module udd.blends_metadata_gatherer
     clone-udd-bugs: exec /srv/udd.debian.org/udd/scripts/clone_udd_bugs_inject.sh
     dehs: module udd.dehs_gatherer
     ldap: module udd.ldap_gatherer
@@ -334,6 +335,14 @@ blends-prospective:
   update-command: /srv/udd.debian.org/udd/scripts/fetch_machine-readable.sh
   path: /srv/udd.debian.org/mirrors/machine-readable
   table: blends_prospectivepackages
+
+blends-metadata:
+  type: blends-metadata
+  update-command: /srv/udd.debian.org/udd/scripts/fetch_blends_metadata.sh
+  path: /srv/udd.debian.org/mirrors/blends
+  table-metadata: blends_metadata
+  table-tasks: blends_tasks
+  table-dependencies: blends_dependencies
 
 clone-udd-bugs:
   type: clone-udd-bugs
