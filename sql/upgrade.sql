@@ -87,8 +87,14 @@ INSERT INTO releases VALUES ( 'squeeze-proposed-updates', NULL,         602 );
 INSERT INTO releases VALUES ( 'wheezy',                  NULL,         700 );
 INSERT INTO releases VALUES ( 'wheezy-security',         NULL,         701 );
 INSERT INTO releases VALUES ( 'wheezy-proposed-updates', NULL,         702 );
+INSERT INTO releases VALUES ( 'jessie',                   NULL,         800 );
+INSERT INTO releases VALUES ( 'jessie-security',          NULL,         801 );
+INSERT INTO releases VALUES ( 'jessie-proposed-updates',  NULL,         802 );
 INSERT INTO releases VALUES ( 'sid',                      NULL,      100000 );
 INSERT INTO releases VALUES ( 'experimental',             NULL,           0 ); /* this pseudo releases does not fit any order and it is not higher than unstable */
+
+UPDATE releases SET releasedate = '2011-02-06' WHERE release like 'squeeze%' ;
+UPDATE releases SET releasedate = '2013-05-05' WHERE release like 'wheezy%' ;
 
 GRANT SELECT ON releases TO PUBLIC ;
 
