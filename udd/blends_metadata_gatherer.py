@@ -53,7 +53,7 @@ class blends_metadata_gatherer(gatherer):
 
   def inject_package(self, blend, task, strength, dist, component, dep):
     if dep in self.list_of_deps_in_task:
-      print "Blend %s task %s: Packages %s is mentioned more than once" % (blend, task, dep)
+      self.log.info("Blend %s task %s: Packages %s is mentioned more than once" % (blend, task, dep))
     else:
       query = "EXECUTE blend_inject_package (%s, %s, %s, %s, %s, %s)" \
                % (quote(blend), quote(task), quote(dep), quote(strength[0]), quote(dist), quote(component))
@@ -61,9 +61,9 @@ class blends_metadata_gatherer(gatherer):
         self.cur.execute(query)
         self.list_of_deps_in_task.append(dep)
       except IntegrityError, err:
-        print query, err
+        self.log.error("%s (%s)" % (query, err))
       except InternalError, err:
-        print "INTEGRITY", query, err
+        self.log.error("INTEGRITY: %s (%s)" % (query, err))
 
 
   def handle_dep_line(self, blend, task, strength, dependencies):
@@ -108,11 +108,11 @@ class blends_metadata_gatherer(gatherer):
             self.cur.execute(query)
             in_udd = self.cur.fetchone()
             if in_udd:
-              print "UBUNTU", dep
+              self.log.info("UBUNTU: %s" % dep)
               self.inject_package(blend, task, strength, 'ubuntu', in_udd[1], dep)
             else:
               if debug != 0:
-                print "Blend %s task %s: Package %s not found" % (blend, task, dep)
+                self.log.info("Blend %s task %s: Package %s not found" % (blend, task, dep))
 
   def run(self):
     my_config = self.my_config
@@ -206,21 +206,20 @@ class blends_metadata_gatherer(gatherer):
             break
       except:
         if debug != 0:
-          print "Unable to read", ctrlfile
+          self.log.error("Unable to read %s" % ctrlfile)
         s = meta['blend']
       f.close()
       if p != '':
         p = p[0:p.find('-')]
       else:
         p = s.replace('debian-', '')
-      # print p + ' (' + s + ')'
       meta['tasksprefix'] = p
       query = """EXECUTE blend_metadata_insert (%(blend)s, %(blendname)s, %(projecturl)s, %(tasksprefix)s,
                  %(homepage)s, %(aliothurl)s, %(projectlist)s, %(logourl)s, %(outputdir)s, %(datadir)s, %(vcsdir)s, %(css)s, %(advertising)s, %(pkglist)s, %(dehsmail)s)"""
       try:
         self.cur.execute(query, meta)
       except IntegrityError, err:
-        print >>stderr, err
+        self.log.error("taskfile = %s: %s" % (taskfile, err))
 
       for t in listdir(tasksdirtemplate % meta['blend']):
         if t.startswith('.'):
@@ -229,7 +228,7 @@ class blends_metadata_gatherer(gatherer):
         try:
           f = open(taskfile, 'r')
         except:
-          print >>stderr, "error reading %s" % taskfile
+          self.log.error("error reading %s" % taskfile)
         self.list_of_deps_in_task = []
         # read task metadata
         if f:
@@ -237,7 +236,8 @@ class blends_metadata_gatherer(gatherer):
           taskmeta = ictrl.next()
           if not taskmeta.has_key('task'):
             if debug != 0:
-	      print "%s has no key 'Task'" % taskfile
+	      self.log.debug("%s has no key 'Task'" % taskfile)
+            continue
           task = { 'blend'            : meta['blend'],
                    'task'             : t,
                    'metapackage'      : True,
@@ -265,7 +265,7 @@ class blends_metadata_gatherer(gatherer):
         try:
           self.cur.execute(query, task)
         except IntegrityError, err:
-          print >>stderr, err
+          self.log.error("taskfile = %s: %s" % (taskfile, err))
 
         # now read single dependencies
         try:
