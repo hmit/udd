@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS blends_metadata CASCADE;
 CREATE TABLE blends_metadata (
   -- fieldname   type,   --  example value
      blend       TEXT,   --  'debian-med'   (== the source package name)
@@ -20,6 +21,7 @@ CREATE TABLE blends_metadata (
 
 GRANT SELECT ON blends_metadata TO PUBLIC;
 
+DROP TABLE IF EXISTS blends_tasks;
 CREATE TABLE blends_tasks (
   -- fieldname   type,    --  example value
      blend       TEXT REFERENCES blends_metadata,
@@ -30,6 +32,7 @@ CREATE TABLE blends_tasks (
 
 GRANT SELECT ON blends_tasks TO PUBLIC;
 
+DROP TABLE IF EXISTS blends_dependencies;
 CREATE TABLE blends_dependencies (
   -- fieldname    type,
      blend        TEXT REFERENCES blends_metadata,
