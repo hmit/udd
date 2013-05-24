@@ -235,10 +235,9 @@ class blends_metadata_gatherer(gatherer):
           ictrl = deb822.Deb822.iter_paragraphs(f)
           try:
             taskmeta = ictrl.next()
-          except StopIteration, err:
-            self.log.error("!!! For some reason the iteration has stopped in taskfile %s. (%s)" % (taskfile, err))
           except :
-            self.log.error("!!! For some reason ictrl has thrown an exception in taskfile %s." % taskfile)
+            self.log.error("The file %s does not seem to be a taskfile because it is not dep822 compatible." % taskfile)
+            continue
           if not taskmeta.has_key('task'):
             if debug != 0:
 	      self.log.debug("%s has no key 'Task'" % taskfile)
