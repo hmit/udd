@@ -125,8 +125,8 @@ class blends_metadata_gatherer(gatherer):
                homepage, aliothurl, projectlist, logourl, outputdir, datadir, vcsdir, css, advertising, pkglist, dehsmail)
                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)""" % (my_config['table-metadata'])
     self.cur.execute(query)
-    query = """PREPARE blend_tasks_insert AS INSERT INTO %s (blend, task, metapackage)
-               VALUES ($1, $2, $3)""" % (my_config['table-tasks'])
+    query = """PREPARE blend_tasks_insert AS INSERT INTO %s (blend, task, metapackage, description, long_description)
+               VALUES ($1, $2, $3, $4, $5)""" % (my_config['table-tasks'])
     self.cur.execute(query)
     
     query = """PREPARE blend_check_existing_package AS
@@ -238,14 +238,30 @@ class blends_metadata_gatherer(gatherer):
           if not taskmeta.has_key('task'):
             if debug != 0:
 	      print "%s has no key 'Task'" % taskfile
-          task = { 'blend'       : meta['blend'],
-                   'task'        : t,
-                   'metapackage' : True,
+          task = { 'blend'            : meta['blend'],
+                   'task'             : t,
+                   'metapackage'      : True,
+                   'description'      : '',
+                   'long_description' : '',
                  }
           if taskmeta.has_key('metapackage'):
             if taskmeta['metapackage'].lower() == 'false':
               task['metapackage'] = False
-        query = "EXECUTE blend_tasks_insert (%(blend)s, %(task)s, %(metapackage)s)"
+          try:
+            desc               = taskmeta['description']
+          except KeyError, err:
+            self.log.error("taskfile=%s is lacking description (%s)" % (taskfile, err))
+            continue
+          lines                = desc.splitlines()
+          try:
+            task['description'] = lines[0]
+          except IndexError, err:
+            self.log.exception("Did not found first line in description: taskfile=%s" % (taskfile))
+            continue
+          for line in lines[1:]:
+            task['long_description'] += line + "\n"
+
+        query = "EXECUTE blend_tasks_insert (%(blend)s, %(task)s, %(metapackage)s, %(description)s, %(long_description)s)"
         try:
           self.cur.execute(query, task)
         except IntegrityError, err:

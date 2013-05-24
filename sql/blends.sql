@@ -23,10 +23,12 @@ GRANT SELECT ON blends_metadata TO PUBLIC;
 
 DROP TABLE IF EXISTS blends_tasks;
 CREATE TABLE blends_tasks (
-  -- fieldname   type,    --  example value
-     blend       TEXT REFERENCES blends_metadata,
-     task        TEXT,    --  'bio'
-     metapackage BOOLEAN, --  Some tasks should not end up in a metapackage
+  -- fieldname        type,    --  example value
+     blend            TEXT REFERENCES blends_metadata,
+     task             TEXT,    --  'bio'
+     metapackage      BOOLEAN, --  Some tasks should not end up in a metapackage
+     description      TEXT,
+     long_description TEXT,
      PRIMARY KEY (blend, task)
 );
 
