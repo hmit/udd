@@ -1765,6 +1765,7 @@ CREATE TABLE blends_metadata (
      advertising TEXT,
      pkglist     TEXT,
      dehsmail    TEXT,
+     distribution TEXT,
      PRIMARY KEY (blend)
 );
 
