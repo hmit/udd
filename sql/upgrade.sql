@@ -7,33 +7,33 @@
  *   http://lists.debian.org/debian-qa/2010/02/msg00001.html                            *
  ****************************************************************************************/
 
+DROP TABLE IF EXISTS releases;
+
 CREATE TABLE releases (
        release     text,  /* keep name column as in other tables */
        releasedate date,
+       role        text,
        sort        int,
        PRIMARY KEY (release)
 );
 
-INSERT INTO releases VALUES ( 'etch',                     '2007-04-08', 400 );
-INSERT INTO releases VALUES ( 'etch-security',            '2007-04-08', 401 ); /* date or NULL ?? */
-INSERT INTO releases VALUES ( 'etch-proposed-updates',    '2007-04-08', 402 ); /* date or NULL ?? */
-INSERT INTO releases VALUES ( 'lenny',                    '2009-02-14', 500 );
-INSERT INTO releases VALUES ( 'lenny-security',           '2009-02-14', 501 ); /* date or NULL ?? */
-INSERT INTO releases VALUES ( 'lenny-proposed-updates',   '2009-02-14', 502 ); /* date or NULL ?? */
-INSERT INTO releases VALUES ( 'squeeze',                  NULL,         600 );
-INSERT INTO releases VALUES ( 'squeeze-security',         NULL,         601 );
-INSERT INTO releases VALUES ( 'squeeze-proposed-updates', NULL,         602 );
-INSERT INTO releases VALUES ( 'wheezy',                  NULL,         700 );
-INSERT INTO releases VALUES ( 'wheezy-security',         NULL,         701 );
-INSERT INTO releases VALUES ( 'wheezy-proposed-updates', NULL,         702 );
-INSERT INTO releases VALUES ( 'jessie',                   NULL,         800 );
-INSERT INTO releases VALUES ( 'jessie-security',          NULL,         801 );
-INSERT INTO releases VALUES ( 'jessie-proposed-updates',  NULL,         802 );
-INSERT INTO releases VALUES ( 'sid',                      NULL,      100000 );
-INSERT INTO releases VALUES ( 'experimental',             NULL,           0 ); /* this pseudo releases does not fit any order and it is not higher than unstable */
-
-UPDATE releases SET releasedate = '2011-02-06' WHERE release like 'squeeze%' ;
-UPDATE releases SET releasedate = '2013-05-05' WHERE release like 'wheezy%' ;
+INSERT INTO releases VALUES ( 'etch',                     '2007-04-08', '',            400 );
+INSERT INTO releases VALUES ( 'etch-security',            '2007-04-08', '',            401 ); /* date or NULL ?? */
+INSERT INTO releases VALUES ( 'etch-proposed-updates',    '2007-04-08', '',            402 ); /* date or NULL ?? */
+INSERT INTO releases VALUES ( 'lenny',                    '2009-02-14', '',            500 );
+INSERT INTO releases VALUES ( 'lenny-security',           '2009-02-14', '',            501 ); /* date or NULL ?? */
+INSERT INTO releases VALUES ( 'lenny-proposed-updates',   '2009-02-14', '',            502 ); /* date or NULL ?? */
+INSERT INTO releases VALUES ( 'squeeze',                  '2011-02-06', 'oldstable',   600 );
+INSERT INTO releases VALUES ( 'squeeze-security',         '2011-02-06', '',            601 );
+INSERT INTO releases VALUES ( 'squeeze-proposed-updates', '2011-02-06', '',            602 );
+INSERT INTO releases VALUES ( 'wheezy',                   '2013-05-05', 'stable',      700 );
+INSERT INTO releases VALUES ( 'wheezy-security',          '2013-05-05', '',            701 );
+INSERT INTO releases VALUES ( 'wheezy-proposed-updates',  '2013-05-05', '',            702 );
+INSERT INTO releases VALUES ( 'jessie',                   NULL,         'testing',     800 );
+INSERT INTO releases VALUES ( 'jessie-security',          NULL,         '',            801 );
+INSERT INTO releases VALUES ( 'jessie-proposed-updates',  NULL,         '',            802 );
+INSERT INTO releases VALUES ( 'sid',                      NULL,         'unstable', 100000 );
+INSERT INTO releases VALUES ( 'experimental',             NULL,         'experimental',  0 ); /* this pseudo releases does not fit any order and it is not higher than unstable */
 
 GRANT SELECT ON releases TO PUBLIC ;
 
