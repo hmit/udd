@@ -125,8 +125,8 @@ class blends_metadata_gatherer(gatherer):
                homepage, aliothurl, projectlist, logourl, outputdir, datadir, vcsdir, css, advertising, pkglist, dehsmail)
                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)""" % (my_config['table-metadata'])
     self.cur.execute(query)
-    query = """PREPARE blend_tasks_insert AS INSERT INTO %s (blend, task, metapackage, description, long_description)
-               VALUES ($1, $2, $3, $4, $5)""" % (my_config['table-tasks'])
+    query = """PREPARE blend_tasks_insert AS INSERT INTO %s (blend, task, title, metapackage, description, long_description)
+               VALUES ($1, $2, $3, $4, $5, $6)""" % (my_config['table-tasks'])
     self.cur.execute(query)
     
     query = """PREPARE blend_check_existing_package AS
@@ -244,6 +244,7 @@ class blends_metadata_gatherer(gatherer):
             continue
           task = { 'blend'            : meta['blend'],
                    'task'             : t,
+                   'title'            : taskmeta['task'],
                    'metapackage'      : True,
                    'description'      : '',
                    'long_description' : '',
@@ -265,7 +266,7 @@ class blends_metadata_gatherer(gatherer):
           for line in lines[1:]:
             task['long_description'] += line + "\n"
 
-        query = "EXECUTE blend_tasks_insert (%(blend)s, %(task)s, %(metapackage)s, %(description)s, %(long_description)s)"
+        query = "EXECUTE blend_tasks_insert (%(blend)s, %(task)s, %(title)s, %(metapackage)s, %(description)s, %(long_description)s)"
         try:
           self.cur.execute(query, task)
         except IntegrityError, err:

@@ -1775,6 +1775,7 @@ CREATE TABLE blends_tasks (
   -- fieldname        type,    --  example value
      blend            TEXT REFERENCES blends_metadata,
      task             TEXT,    --  'bio'
+     title            TEXT,    --  'Biology'
      metapackage      BOOLEAN, --  Some tasks should not end up in a metapackage
      description      TEXT,
      long_description TEXT,
