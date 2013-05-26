@@ -10,12 +10,12 @@
 DROP TABLE IF EXISTS releases;
 
 CREATE TABLE releases (
-       release      text,  /* keep name column as in other tables */
-       releasedate  date,
-       role         text,
-       version      text,
-       distribution text,
-       sort         int,
+       release        text,  /* keep name column as in other tables */
+       releasedate    date,
+       role           text,
+       releaseversion text,
+       distribution   text,
+       sort           int,
        PRIMARY KEY (release)
 );
 
