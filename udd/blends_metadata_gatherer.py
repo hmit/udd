@@ -130,7 +130,7 @@ class blends_metadata_gatherer(gatherer):
     self.cur.execute(query)
     
     query = """PREPARE blend_check_existing_package AS
-                 SELECT DISTINCT package, distribution, component, r.sort FROM packages p
+                 SELECT DISTINCT package, p.distribution, component, r.sort FROM packages p
                  JOIN releases r ON p.release = r.release
                  WHERE package = $1
                  ORDER BY r.sort DESC
