@@ -63,7 +63,7 @@ $gShowSeverities = "critical, grave, serious, important, normal, minor, wishlist
            "confirmed", "ipv6", "lfs", "fixed-in-experimental",
            "fixed-upstream", "l10n", "etch", "etch-ignore",
 	   "lenny", "lenny-ignore", "squeeze", "squeeze-ignore",
-	   "wheezy", "wheezy-ignore",
+	   "wheezy", "wheezy-ignore","jessie", "jessie-ignore",
          );
 
 %gTagsSingleLetter = (patch => '+',
@@ -145,9 +145,10 @@ $gPackageVersionRe = q([A-Za-z0-9:+\.~-]+);
 		     	 stable       => 'stable',
 			 oldstable    => 'oldstable',
 			 sid          => 'unstable',
-			 wheezy       => 'testing',
-			 squeeze      => 'stable',
-			 lenny        => 'oldstable',
+			 jessie	      => 'testing',
+			 wheezy       => 'stable',
+			 squeeze      => 'oldstable',
+			 #lenny        => 'oldstable',
 			 #etch         => 'oldstable',
 			 #sarge        => 'oldstable',
 			);
@@ -166,10 +167,12 @@ $gPackageVersionRe = q([A-Za-z0-9:+\.~-]+);
 # don taken off 2007-08-22
 # don back on 2007-09-20 for 440720
 # don -- not going to revisit this ban for another year; someone else can if they want.
+# don and again for 706365 even though he was still banned. Yeay.
 		'Filipus Klutiero', 'ido@vif.ca',
                 'Philippe Cloutier', 'philippe.cloutier.2@ulaval.ca',
                 'Filipus Klutiero', 'cheal@hotpop.com', 
 		'Philippe Cloutier', 'chealer@gmail.com',
+		'Filipus Klutiero','chealer@gmail.com',
 #		'Laurence J. Lane', 'ljlane@debian.org',
 		);
 # blocks people from using control@
@@ -182,6 +185,7 @@ $gPackageVersionRe = q([A-Za-z0-9:+\.~-]+);
                     user => 'btsreadonly',
                     pass => 'gai3saiK',
                    );
+$gLibravatarUriOptions = '?d=http://bugs.debian.org/css/1x1.png';
 
 
 1;
