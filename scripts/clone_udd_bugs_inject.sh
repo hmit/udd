@@ -24,6 +24,8 @@ DROP TABLE IF EXISTS bugs_packages;
 DROP TABLE IF EXISTS bugs_blocks;
 DROP TABLE IF EXISTS bugs_tags;
 DROP VIEW  IF EXISTS all_bugs ;
+DROP VIEW  IF EXISTS sponsorship_requests; 
+DROP VIEW  IF EXISTS wnpp; 
 DROP TABLE IF EXISTS bugs;
 DROP TABLE IF EXISTS bugs_usertags;
 DROP TABLE IF EXISTS archived_bugs_blockedby;
@@ -97,6 +99,20 @@ left join popcon_src ps on s.source = ps.source
 left join bugs on op.bug = bugs.id
 where s.distribution='debian' and s.release='sid';
 GRANT SELECT ON bapase TO PUBLIC;
+
+CREATE VIEW sponsorship_requests AS
+SELECT id,
+SUBSTRING(title from '^RFS: ([^/]*)/') as source,
+SUBSTRING(title from '/([^ ]*)( |$)') as version,
+title
+FROM bugs WHERE package='sponsorship-requests' AND status='pending';
+
+GRANT SELECT ON sponsorship_requests TO PUBLIC;
+
+CREATE VIEW wnpp AS
+SELECT id, SUBSTRING(title from '^([A-Z]{1,3}): .*') as type, SUBSTRING(title from '^[A-Z]{1,3}: ([^ ]+   )(?: -- .*)') as source, title FROM bugs WHERE package='wnpp' AND status!='done';
+
+GRANT SELECT ON wnpp TO PUBLIC;
 
 EOT
 
