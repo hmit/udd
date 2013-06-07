@@ -59,7 +59,7 @@ class ArchiveGatherer
           (Source, Version, Distribution, Release, Component, Uploader, Name, Email)
         VALUES
           ($1, $2, '#{@conf['distribution']}', $3, $4, $5, $6, $7)
-    EOF
+EOF
     @uploader_fields =
       ['package', 'version', 'release', 'component', 'uploader',
        'name', 'email']
@@ -303,7 +303,15 @@ class ArchiveGatherer
       next if TESTMODE
       source =~ /#{path}\/dists\/(.*)\/(.*)\/source\/Sources.gz/
       component = $2
-      release = $1.gsub('/', '-')
+      release = $1
+      # this is a hack. there's squeeze-updates on ftp.debian.org, and squeeze/updates
+      # on security.debian.org. so we rename the latter to squeeze-security.
+      if path =~ /debian-security/ and release =~ /(.*)\/updates/
+        release = $1 + '-security'
+      else
+        release = release.gsub('/', '-')
+      end
+
       puts "Processing #{source} rel=#{release} comp=#{component}" if DEBUG
       process_sources(source, release, component)
     end
