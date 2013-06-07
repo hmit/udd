@@ -225,18 +225,21 @@ if cgi.params != {}
 
     t_oldstable += dv['squeeze'][:version] if dv['squeeze']
     t_oldstable += "<br>sec: #{dv['squeeze-security'][:version]}" if dv['squeeze-security']
+    t_oldstable += "<br>upd: #{dv['squeeze-updates'][:version]}" if dv['squeeze-updates']
     t_oldstable += "<br>pu: #{dv['squeeze-proposed-updates'][:version]}" if dv['squeeze-proposed-updates']
     t_oldstable += "<br>bpo: #{dv['squeeze-backports'][:version]}" if dv['squeeze-backports']
     t_oldstable += "<br>bpo-sl: #{dv['squeeze-backports-sloppy'][:version]}" if dv['squeeze-backports-sloppy']
 
     t_stable += dv['wheezy'][:version] if dv['wheezy']
     t_stable += "<br>sec: #{dv['wheezy-security'][:version]}" if dv['wheezy-security']
+    t_stable += "<br>upd: #{dv['wheezy-updates'][:version]}" if dv['wheezy-updates']
     t_stable += "<br>pu: #{dv['wheezy-proposed-updates'][:version]}" if dv['wheezy-proposed-updates']
     t_stable += "<br>bpo: #{dv['wheezy-backports'][:version]}" if dv['wheezy-backports']
     t_stable += "<br>bpo-sl: #{dv['wheezy-backports-sloppy'][:version]}" if dv['wheezy-backports-sloppy']
 
     t_testing += dv['jessie'][:version] if dv['jessie']
     t_testing += "<br>sec: #{dv['jessie-security'][:version]}" if dv['jessie-security']
+    t_testing += "<br>upd: #{dv['jessie-updates'][:version]}" if dv['jessie-updates']
     t_testing += "<br>pu: #{dv['jessie-proposed-updates'][:version]}" if dv['jessie-proposed-updates']
 
     if dv['sid']
