@@ -319,7 +319,14 @@ class ArchiveGatherer
       package =~ /#{path}\/dists\/(.*)\/(.*)\/binary-(.*)\/Packages.gz/
       architecture = $3
       component = $2
-      release = $1.gsub('/', '-')
+      release = $1
+      # this is a hack. there's squeeze-updates on ftp.debian.org, and squeeze/updates
+      # on security.debian.org. so we rename the latter to squeeze-security.
+      if path =~ /debian-security/ and release =~ /(.*)\/updates/
+        release = $1 + '-security'
+      else
+        release = release.gsub('/', '-')
+      end
 
       todo << { :package => package, :rel => release, :comp => component, :arch => architecture }
       todelete << {:rel => release, :comp => component}
