@@ -13,3 +13,7 @@ pg_dump --no-owner -p 5452 \
     udd | xz > udd-bugs.sql.xz.new
 mv udd-bugs.sql.xz.new udd-bugs.sql.xz
 
+pg_dump --no-owner -p 5452 \
+        -t popcon -t popcon_src udd | xz > udd-popcon.sql.xz.new
+mv udd-popcon.sql.xz.new udd-popcon.sql.xz
+
