@@ -1798,3 +1798,47 @@ CREATE TABLE blends_dependencies (
 );
 
 GRANT SELECT ON blends_dependencies TO PUBLIC;
+
+CREATE TABLE mentors_users (
+  id NUMERIC,
+  name TEXT,
+  email TEXT,
+  gpg_id TEXT,
+  PRIMARY KEY (id));
+
+CREATE TABLE mentors_packages (
+  id NUMERIC,
+  name TEXT,
+  user_id NUMERIC,
+  description TEXT,
+  needs_sponsor NUMERIC,
+  PRIMARY KEY(id)
+);
+
+CREATE TABLE mentors_package_versions (
+    id NUMERIC,
+    package_id NUMERIC,
+    version debversion,
+    maintainer TEXT,
+    section TEXT,
+    distribution TEXT,
+    component TEXT,
+    priority TEXT,
+    uploaded TIMESTAMP,
+    closes TEXT,
+    PRIMARY KEY(id)
+);
+
+CREATE TABLE mentors_package_info (
+  id NUMERIC,
+  package_version_id NUMERIC,
+  from_plugin TEXT,
+  outcome TEXT,
+  data text,
+  severity numeric
+);
+
+GRANT SELECT ON mentors_users TO PUBLIC;
+GRANT SELECT ON mentors_packages TO PUBLIC;
+GRANT SELECT ON mentors_package_versions TO PUBLIC;
+GRANT SELECT ON mentors_package_info TO PUBLIC;

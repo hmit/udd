@@ -3,6 +3,7 @@ general:
   dbport: 5452
   types:
     archive: exec ruby /srv/udd.debian.org/udd/udd/archive_gatherer.rb
+    mentors: exec ruby /srv/udd.debian.org/udd/udd/mentors_gatherer.rb
     sources: module udd.sources_gatherer
     packages: module udd.packages_gatherer
     setup: exec python db_manager.py
@@ -383,3 +384,6 @@ i18n-apps:
 deferred:
   type: deferred
   url: http://ftp-master.debian.org/deferred/status
+
+mentors:
+  type: mentors
