@@ -31,19 +31,19 @@ class MentorsGatherer
     @mdb = PG.connect({ :host => 'mentors.debian.net', :dbname => 'debexpo_live', :user => 'udd', :password => 'UInyXCjdKL9JY', :port => 5432})
 
     @db.prepare 'users_insert', <<-EOF
-    INSERT INTO mentors_users (id, name, email, gpg_id) VALUES ($1, $2, $3, $4)
+    INSERT INTO mentors_raw_users (id, name, email, gpg_id) VALUES ($1, $2, $3, $4)
     EOF
 
     @db.prepare 'packages_insert', <<-EOF
-    INSERT INTO mentors_packages (id, name, user_id, description, needs_sponsor) VALUES ($1, $2, $3, $4, $5)
+    INSERT INTO mentors_raw_packages (id, name, user_id, description, needs_sponsor) VALUES ($1, $2, $3, $4, $5)
     EOF
 
     @db.prepare 'package_versions_insert', <<-EOF
-    INSERT INTO mentors_package_versions (id, package_id, version, maintainer, section, distribution, component, priority, uploaded, closes) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+    INSERT INTO mentors_raw_package_versions (id, package_id, version, maintainer, section, distribution, component, priority, uploaded, closes) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
     EOF
 
     @db.prepare 'package_info_insert', <<-EOF
-    INSERT INTO mentors_package_info (id, package_version_id, from_plugin, outcome, data, severity) VALUES ($1, $2, $3, $4, $5, $6)
+    INSERT INTO mentors_raw_package_info (id, package_version_id, from_plugin, outcome, data, severity) VALUES ($1, $2, $3, $4, $5, $6)
     EOF
   end
 
@@ -51,27 +51,27 @@ class MentorsGatherer
     @db.exec("BEGIN")
     @db.exec("SET CONSTRAINTS ALL DEFERRED")
 
-    @db.exec("DELETE FROM mentors_users")
+    @db.exec("DELETE FROM mentors_raw_users")
     res = @mdb.exec("SELECT id, name, email, gpg_id from users_filtered").values
     res.each { |r| @db.exec_prepared('users_insert', r) }
 
-    @db.exec("DELETE FROM mentors_packages")
+    @db.exec("DELETE FROM mentors_raw_packages")
     res = @mdb.exec("SELECT id, name, user_id, description, needs_sponsor from packages").values
     res.each { |r| @db.exec_prepared('packages_insert', r) }
 
-    @db.exec("DELETE FROM mentors_package_versions")
+    @db.exec("DELETE FROM mentors_raw_package_versions")
     res = @mdb.exec("SELECT id, package_id, version, maintainer, section, distribution, component, priority, uploaded, closes from package_versions").values
     res.each { |r| @db.exec_prepared('package_versions_insert', r) }
 
-    @db.exec("DELETE FROM mentors_package_info")
+    @db.exec("DELETE FROM mentors_raw_package_info")
     res = @mdb.exec("SELECT id, package_version_id, from_plugin, outcome, data, severity from package_info").values
     res.each { |r| @db.exec_prepared('package_info_insert', r) }
 
     @db.exec("COMMIT")
-    @db.exec("ANALYSE mentors_users")
-    @db.exec("ANALYSE mentors_packages")
-    @db.exec("ANALYSE mentors_package_versions")
-    @db.exec("ANALYSE mentors_package_info")
+    @db.exec("ANALYSE mentors_raw_users")
+    @db.exec("ANALYSE mentors_raw_packages")
+    @db.exec("ANALYSE mentors_raw_package_versions")
+    @db.exec("ANALYSE mentors_raw_package_info")
   end
 end
 

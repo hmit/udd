@@ -1799,14 +1799,14 @@ CREATE TABLE blends_dependencies (
 
 GRANT SELECT ON blends_dependencies TO PUBLIC;
 
-CREATE TABLE mentors_users (
+CREATE TABLE mentors_raw_users (
   id NUMERIC,
   name TEXT,
   email TEXT,
   gpg_id TEXT,
   PRIMARY KEY (id));
 
-CREATE TABLE mentors_packages (
+CREATE TABLE mentors_raw_packages (
   id NUMERIC,
   name TEXT,
   user_id NUMERIC,
@@ -1815,7 +1815,7 @@ CREATE TABLE mentors_packages (
   PRIMARY KEY(id)
 );
 
-CREATE TABLE mentors_package_versions (
+CREATE TABLE mentors_raw_package_versions (
     id NUMERIC,
     package_id NUMERIC,
     version debversion,
@@ -1829,7 +1829,7 @@ CREATE TABLE mentors_package_versions (
     PRIMARY KEY(id)
 );
 
-CREATE TABLE mentors_package_info (
+CREATE TABLE mentors_raw_package_info (
   id NUMERIC,
   package_version_id NUMERIC,
   from_plugin TEXT,
@@ -1838,7 +1838,15 @@ CREATE TABLE mentors_package_info (
   severity numeric
 );
 
-GRANT SELECT ON mentors_users TO PUBLIC;
-GRANT SELECT ON mentors_packages TO PUBLIC;
-GRANT SELECT ON mentors_package_versions TO PUBLIC;
-GRANT SELECT ON mentors_package_info TO PUBLIC;
+CREATE VIEW mentors_most_recent_package_versions AS
+SELECT mpv.*
+   FROM mentors_raw_package_versions mpv left outer join mentors_raw_package_versions mpv2
+   on (mpv.package_id = mpv2.package_id and mpv.id < mpv2.id and 
+   mpv.distribution = mpv2.distribution)
+   where mpv2.id is null and mpv.package_id is not null;
+
+GRANT SELECT ON mentors_raw_users TO PUBLIC;
+GRANT SELECT ON mentors_raw_packages TO PUBLIC;
+GRANT SELECT ON mentors_raw_package_versions TO PUBLIC;
+GRANT SELECT ON mentors_raw_package_info TO PUBLIC;
+GRANT SELECT ON mentors_most_recent_package_versions TO PUBLIC;
