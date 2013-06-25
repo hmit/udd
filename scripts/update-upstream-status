@@ -120,7 +120,8 @@ def get_status(source, version, watch_file)
     fd.print watch_file
   end
 #  p "uscan --dehs --no-download --watchfile #{f} --package #{source} --upstream-version #{version}"
-  r = `PERL_LWP_SSL_VERIFY_HOSTNAME=0 uscan --dehs --no-download --watchfile #{f} --package #{source} --upstream-version #{version}`
+  ENV['PERL_LWP_SSL_VERIFY_HOSTNAME']='0' 
+  r = `uscan --dehs --no-download --watchfile #{f} --package #{source} --upstream-version #{version}`
   FileUtils::rm(f)
   d = REXML::Document::new(r)
 #  puts watch_file
