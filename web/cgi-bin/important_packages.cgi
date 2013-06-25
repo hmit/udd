@@ -4,7 +4,7 @@ require 'dbi'
 require 'pp'
 
 EXC_SRC = [ ]
-INC_SRC = [ ]
+INC_SRC = [ 'debian-installer', 'piuparts', 'debian-cd' ]
 POPCON_PERCENT = 5 # x% of submissions must have the package installed
 
 puts "Content-type: text/plain\n\n"
@@ -75,5 +75,24 @@ AND source in ('#{srcs.join('\',\'')}')")
 sth.execute
 affsidimp = sth.fetch_all[0][0]
 puts "# #{affsid} RC bugs affecting sid, #{affsidimp} RC bugs affecting sid's important packages"
+puts "# Packages that would be automatically removed from testing, not including their reverse-(build-)depends:"
+sth = dbh.prepare("select id, bugs.source, title, last_modified  from bugs 
+where id in (select id from bugs_rt_affects_unstable) 
+and not (id in (select id from bugs_merged_with where id > merged_with)) 
+AND (severity >= 'serious')
+AND source not in ('#{srcs.join('\',\'')}') order by last_modified")
+sth.execute
+rems = sth.fetch_all
+rems.each do |r|
+  puts "## #{r[1]} #{r[0]} #{r[2]} (last modified: #{r[3]}"
+end
+
+puts "# Important+orphaned packages"
+sth = dbh.prepare("select * from orphaned_packages where source in ('#{srcs.join('\',\'')}')")
+sth.execute
+sth.fetch_all.each do |r|
+  puts "## #{r.join(' ')}"
+end
+
 exit(0)
 
