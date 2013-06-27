@@ -91,6 +91,8 @@ srcnames = pkgs.map { |e| e['name'] }
 
 srcstatus = dbget("select source, version, release from sources where source in (#{srcnames.map { |e| quote(e) }.join(',')}) and release not in ('squeeze', 'wheezy', 'jessie')")
 
+itps = dbget("select * from wnpp where type='ITP'")
+
 puts <<-EOF
 <table class="buglist tablesorter">
 <thead>
@@ -103,7 +105,12 @@ EOF
 pkgs.each do |l|
   st = srcstatus.select { |e| e['source'] == l['name'] }
   if st.empty?
-    status = "not in Debian"
+    itp = itps.select { |i| i['source'] == l['name'] }[0]
+    if itp.nil?
+      status = "not in Debian (no ITP)"
+    else
+      status = "not in Debian (<a href=\"http://bugs.debian.org/#{itp['id']}\">ITP</a>)"
+    end
   else
     v = nil
     if l['distribution'] == 'unstable'
