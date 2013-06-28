@@ -125,8 +125,8 @@ class blends_metadata_gatherer(gatherer):
                homepage, aliothurl, projectlist, logourl, outputdir, datadir, vcsdir, css, advertising, pkglist, dehsmail, distribution)
                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)""" % (my_config['table-metadata'])
     self.cur.execute(query)
-    query = """PREPARE blend_tasks_insert AS INSERT INTO %s (blend, task, title, metapackage, description, long_description)
-               VALUES ($1, $2, $3, $4, $5, $6)""" % (my_config['table-tasks'])
+    query = """PREPARE blend_tasks_insert AS INSERT INTO %s (blend, task, title, section, enhances, leaf, test_always_lang, metapackage, description, long_description)
+               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)""" % (my_config['table-tasks'])
     self.cur.execute(query)
     
     query = """PREPARE blend_check_existing_package AS
@@ -249,10 +249,22 @@ class blends_metadata_gatherer(gatherer):
           task = { 'blend'            : meta['blend'],
                    'task'             : t,
                    'title'            : taskmeta['task'],
+                   'section'          : '',
+                   'enhances'         : '',
+                   'leaf'             : '',
+                   'test_always_lang' : '',
                    'metapackage'      : True,
                    'description'      : '',
                    'long_description' : '',
                  }
+          if taskmeta.has_key('section'):
+            task['section'] = taskmeta['section']
+          if taskmeta.has_key('enhances'):
+            task['enhances'] = taskmeta['enhances']
+          if taskmeta.has_key('leaf'):
+            task['leaf'] = taskmeta['leaf']
+          if taskmeta.has_key('test-always-lang'):
+            task['test_always_lang'] = taskmeta['test-always-lang']
           if taskmeta.has_key('metapackage'):
             if taskmeta['metapackage'].lower() == 'false':
               task['metapackage'] = False
@@ -270,7 +282,7 @@ class blends_metadata_gatherer(gatherer):
           for line in lines[1:]:
             task['long_description'] += line + "\n"
 
-        query = "EXECUTE blend_tasks_insert (%(blend)s, %(task)s, %(title)s, %(metapackage)s, %(description)s, %(long_description)s)"
+        query = "EXECUTE blend_tasks_insert (%(blend)s, %(task)s, %(title)s, %(section)s, %(enhances)s, %(leaf)s, %(test_always_lang)s, %(metapackage)s, %(description)s, %(long_description)s)"
         try:
           self.cur.execute(query, task)
         except IntegrityError, err:

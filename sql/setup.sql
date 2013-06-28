@@ -1778,6 +1778,10 @@ CREATE TABLE blends_tasks (
      task             TEXT,    --  'bio'
      title            TEXT,    --  'Biology'
      metapackage      BOOLEAN, --  Some tasks should not end up in a metapackage
+     section          TEXT,
+     enhances         TEXT,
+     leaf             TEXT,
+     test_always_lang TEXT,
      description      TEXT,
      long_description TEXT,
      PRIMARY KEY (blend, task)
