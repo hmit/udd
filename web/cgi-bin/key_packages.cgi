@@ -57,7 +57,7 @@ begin
   puts "# Adding #{newsrcs.length} source packages: #{newsrcs.sort}"
 end until newsrcs.empty?
 
-puts "# Final list of #{srcs.length} important source packages:"
+puts "# Final list of #{srcs.length} key source packages:"
 puts srcs.sort.join("\n")
 
 # bugs affecting sid
@@ -74,7 +74,7 @@ AND (severity >= 'serious')
 AND source in ('#{srcs.join('\',\'')}')")
 sth.execute
 affsidimp = sth.fetch_all[0][0]
-puts "# #{affsid} RC bugs affecting sid, #{affsidimp} RC bugs affecting sid's important packages"
+puts "# #{affsid} RC bugs affecting sid, #{affsidimp} RC bugs affecting sid's key packages"
 puts "# Packages that would be automatically removed from testing, not including their reverse-(build-)depends:"
 sth = dbh.prepare("select id, bugs.source, title, last_modified  from bugs 
 where id in (select id from bugs_rt_affects_unstable) 
@@ -87,7 +87,7 @@ rems.each do |r|
   puts "## #{r[1]} #{r[0]} #{r[2]} (last modified: #{r[3]}"
 end
 
-puts "# Important+orphaned packages"
+puts "# key+orphaned packages"
 sth = dbh.prepare("select * from orphaned_packages where source in ('#{srcs.join('\',\'')}')")
 sth.execute
 sth.fetch_all.each do |r|
