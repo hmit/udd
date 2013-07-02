@@ -302,6 +302,8 @@ class blends_metadata_gatherer(gatherer):
             self.handle_dep_line(meta['blend'], t, 'suggests', dep['suggests'])
           if dep.has_key('ignore'):
             self.handle_dep_line(meta['blend'], t, 'ignore', dep['ignore'])
+          if dep.has_key('avoid'):
+            self.handle_dep_line(meta['blend'], t, 'avoid', dep['avoid'])
           try:
             dep = ictrl.next()
           except:
