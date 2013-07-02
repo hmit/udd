@@ -1803,6 +1803,17 @@ CREATE TABLE blends_dependencies (
 
 GRANT SELECT ON blends_dependencies TO PUBLIC;
 
+DROP TABLE IF EXISTS blends_dependencies_alternatives;
+CREATE TABLE blends_dependencies_alternatives (
+  -- fieldname    type,
+     blend        TEXT REFERENCES blends_metadata,
+     task         TEXT,
+     alternatives TEXT, -- content is in format: package1 | package2 | package3 ...
+     PRIMARY KEY (blend, task)
+);
+
+GRANT SELECT ON blends_dependencies_alternatives TO PUBLIC;
+
 CREATE TABLE mentors_raw_users (
   id NUMERIC,
   name TEXT,
