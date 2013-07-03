@@ -344,6 +344,7 @@ blends-metadata:
   table-metadata: blends_metadata
   table-tasks: blends_tasks
   table-dependencies: blends_dependencies
+  table-alternatives: blends_dependencies_alternatives
 
 clone-udd-bugs:
   type: clone-udd-bugs
