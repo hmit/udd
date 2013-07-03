@@ -82,8 +82,17 @@ class blends_metadata_gatherer(gatherer):
     # create an object for each later
     deps_in_one_line = []
     for depl in depslist:
-      if depl.strip() != '': # avoid confusion when ',' is at end of line
-        deps_in_one_line.append(depl.strip())
+      dl = depl.strip()
+      if dl != '': # avoid confusion when ',' is at end of line
+        if re.search('\s', dl):
+          self.log.error("Blend %s task %s: Syntax error '%s'" % (blend, task, dl))
+          # trying to fix the syntax error after issuing error message
+          dlspaces = re.sub('\s+', ',', dl).split(',')
+          for dls in dlspaces:
+            deps_in_one_line.append(dls.strip())
+            self.log.info("Blend %s task %s: Found '%s' package inside broken syntax string - please fix task file anyway" % (blend, task, dls.strip()))
+        else:
+          deps_in_one_line.append(dl)
 
     for dep in deps_in_one_line:
       query = "EXECUTE blend_check_existing_package ('%s')" % (dep)
