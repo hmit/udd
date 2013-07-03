@@ -1803,6 +1803,10 @@ CREATE TABLE blends_dependencies (
 
 GRANT SELECT ON blends_dependencies TO PUBLIC;
 
+-- This table's data is used to properly generate the task-description file for a Blend
+-- Tasksel doesn't allow boolean(eg OR : |) comparisons in dependencies such as package1 | package2. 
+-- In these cases we need to know which packages, from the blends_dependencies table, are the alternatives between them
+-- in order to include only one package (the first available) from a group of alternatives in the task-description file.
 DROP TABLE IF EXISTS blends_dependencies_alternatives;
 CREATE TABLE blends_dependencies_alternatives (
   -- fieldname    type,
