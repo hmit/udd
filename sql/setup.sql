@@ -1809,8 +1809,7 @@ CREATE TABLE blends_dependencies_alternatives (
      blend        TEXT REFERENCES blends_metadata,
      task         TEXT,
      alternatives TEXT, -- content is in format: package1 | package2 | package3 ...
-     dependency   CHARACTER(1) CHECK (dependency IN ('d', 'i', 'r', 's', 'a')), -- Depends / Ignore / Recommends / Suggests / Avoid
-     PRIMARY KEY (blend, task)
+     dependency   CHARACTER(1) CHECK (dependency IN ('d', 'i', 'r', 's', 'a')) -- Depends / Ignore / Recommends / Suggests / Avoid
 );
 
 GRANT SELECT ON blends_dependencies_alternatives TO PUBLIC;
