@@ -1797,7 +1797,7 @@ CREATE TABLE blends_dependencies (
      package      TEXT,
      dependency   CHARACTER(1) CHECK (dependency IN ('d', 'i', 'r', 's', 'a')), -- Depends / Ignore / Recommends / Suggests / Avoid
      distribution TEXT CHECK (distribution IN ('debian', 'new', 'prospective', 'ubuntu', 'other')),
-     component    TEXT CHECK (component IN ('main', 'contrib', 'non-free', 'universe', 'multiverse', 'restricted', 'local')),
+     component    TEXT CHECK (component IN ('main', 'main/debian-installer', 'contrib', 'non-free', 'universe', 'multiverse', 'restricted', 'local')),
      PRIMARY KEY (blend, task, package)
 );
 
