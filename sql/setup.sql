@@ -1813,7 +1813,9 @@ CREATE TABLE blends_dependencies_alternatives (
      blend        TEXT REFERENCES blends_metadata,
      task         TEXT,
      alternatives TEXT, -- content is in format: package1 | package2 | package3 ...
-     dependency   CHARACTER(1) CHECK (dependency IN ('d', 'i', 'r', 's', 'a')) -- Depends / Ignore / Recommends / Suggests / Avoid
+     dependency   CHARACTER(1) CHECK (dependency IN ('d', 'i', 'r', 's', 'a')), -- Depends / Ignore / Recommends / Suggests / Avoid
+     distribution TEXT CHECK (distribution IN ('debian', 'new', 'prospective', 'ubuntu', 'other')),
+     component    TEXT CHECK (component IN ('main', 'main/debian-installer', 'contrib', 'non-free', 'universe', 'multiverse', 'restricted', 'local'))
 );
 
 GRANT SELECT ON blends_dependencies_alternatives TO PUBLIC;

@@ -65,11 +65,12 @@ class blends_metadata_gatherer(gatherer):
       except InternalError, err:
         self.log.error("INTEGRITY: %s (%s)" % (query, err))
 
-  def inject_package_alternatives(self, blend, task, strength, alternatives):
+  def inject_package_alternatives(self, blend, task, strength, dist, component, alternatives):
     if alternatives in self.list_of_package_alternatives:
       self.log.info("Blend %s task %s: Packages alternatives %s is mentioned more than once" % (blend, task, alternatives))
     else:
-      query = "EXECUTE blend_inject_package_alternatives (%s, %s, %s, %s)"  % (quote(blend), quote(task), quote(alternatives), quote(strength[0]))
+      query = "EXECUTE blend_inject_package_alternatives (%s, %s, %s, %s, %s, %s)" \
+               % (quote(blend), quote(task), quote(alternatives), quote(strength[0]), quote(dist), quote(component))
       try:
         self.cur.execute(query)
         self.list_of_package_alternatives.append(alternatives)
@@ -153,7 +154,7 @@ class blends_metadata_gatherer(gatherer):
                 if debug != 0:
                   self.log.info("Blend %s task %s: Package %s not found" % (blend, task, dep))
       if alt_in_udd[0] < 1000:
-        self.inject_package_alternatives(blend, task, strength, alt)
+        self.inject_package_alternatives(blend, task, strength, alt_in_udd[1], alt_in_udd[2], alt)
 
   def run(self):
     my_config = self.my_config
@@ -193,8 +194,8 @@ class blends_metadata_gatherer(gatherer):
     self.cur.execute(query)
 
     query = """PREPARE blend_inject_package_alternatives AS
-                 INSERT INTO %s  (blend, task, alternatives, dependency)
-                 VALUES ($1, $2, $3, $4)""" % (my_config['table-alternatives'])
+                 INSERT INTO %s  (blend, task, alternatives, dependency, distribution, component)
+                 VALUES ($1, $2, $3, $4, $5, $6)""" % (my_config['table-alternatives'])
     self.cur.execute(query)
 
     query = """PREPARE blend_check_ubuntu_package AS
