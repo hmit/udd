@@ -65,6 +65,18 @@ class blends_metadata_gatherer(gatherer):
       except InternalError, err:
         self.log.error("INTEGRITY: %s (%s)" % (query, err))
 
+  def inject_package_alternatives(self, blend, task, strength, alternatives):
+    if alternatives in self.list_of_package_alternatives:
+      self.log.info("Blend %s task %s: Packages alternatives %s is mentioned more than once" % (blend, task, alternatives))
+    else:
+      query = "EXECUTE blend_inject_package_alternatives (%s, %s, %s, %s)"  % (quote(blend), quote(task), quote(alternatives), quote(strength[0]))
+      try:
+        self.cur.execute(query)
+        self.list_of_package_alternatives.append(alternatives)
+      except IntegrityError, err:
+        self.log.error("%s (%s)" % (query, err))
+      except InternalError, err:
+        self.log.error("INTEGRITY: %s (%s)" % (query, err))
 
   def handle_dep_line(self, blend, task, strength, dependencies):
     # Hack: Debian Edu tasks files are using '\' at EOL which is broken
@@ -75,9 +87,12 @@ class blends_metadata_gatherer(gatherer):
     # Remove versions from versioned depends
     deps = re.sub(' *\([ ><=\.0-9]+\) *', '', deps)
 
+    # temporary strip spaces from alternatives ('|') to enable erroneous space handling as it was done before
+    deps = re.sub('\s*\|\s*', '|', deps)
+
     # turn alternatives ('|') into real depends for this purpose
     # because we are finally interested in all alternatives
-    depslist = deps.replace('|',',').split(',')
+    depslist = deps.split(',')
     # Collect all dependencies in one line first,
     # create an object for each later
     deps_in_one_line = []
@@ -92,7 +107,14 @@ class blends_metadata_gatherer(gatherer):
             deps_in_one_line.append(dls.strip())
             self.log.info("Blend %s task %s: Found '%s' package inside broken syntax string - please fix task file anyway" % (blend, task, dls.strip()))
         else:
-          deps_in_one_line.append(dl)
+          # in case we have to deal with a set of alternatives
+          if re.search('\|', dl):
+            for da in dl.split('|'):
+              deps_in_one_line.append(da)
+            dl = re.sub('\|', ' | ', dl)
+          else:
+            deps_in_one_line.append(dl)
+          self.inject_package_alternatives(blend, task, strength, dl)
 
     for dep in deps_in_one_line:
       query = "EXECUTE blend_check_existing_package ('%s')" % (dep)
@@ -128,6 +150,7 @@ class blends_metadata_gatherer(gatherer):
     self.cur = self.cursor()
 
     self.cur.execute("DELETE FROM %s" % (my_config['table-dependencies']))
+    self.cur.execute("DELETE FROM %s" % (my_config['table-alternatives']))
     self.cur.execute("DELETE FROM %s" % (my_config['table-tasks']))
     self.cur.execute("DELETE FROM %s" % (my_config['table-metadata']))
     query = """PREPARE blend_metadata_insert AS INSERT INTO %s (blend, blendname, projecturl, tasksprefix,
@@ -157,6 +180,11 @@ class blends_metadata_gatherer(gatherer):
     query = """PREPARE blend_inject_package AS
                  INSERT INTO %s (blend, task, package, dependency, distribution, component)
                  VALUES ($1, $2, $3, $4, $5, $6)""" % (my_config['table-dependencies'])
+    self.cur.execute(query)
+
+    query = """PREPARE blend_inject_package_alternatives AS
+                 INSERT INTO %s  (blend, task, alternatives, dependency)
+                 VALUES ($1, $2, $3, $4)""" % (my_config['table-alternatives'])
     self.cur.execute(query)
 
     query = """PREPARE blend_check_ubuntu_package AS
@@ -243,6 +271,7 @@ class blends_metadata_gatherer(gatherer):
         except:
           self.log.error("error reading %s" % taskfile)
         self.list_of_deps_in_task = []
+        self.list_of_package_alternatives = []
         # read task metadata
         if f:
           ictrl = deb822.Deb822.iter_paragraphs(f)
