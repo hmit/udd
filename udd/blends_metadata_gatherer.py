@@ -95,7 +95,7 @@ class blends_metadata_gatherer(gatherer):
     depslist = deps.split(',')
     # Collect all dependencies in one line first,
     # create an object for each later
-    deps_in_one_line = []
+    alts_in_one_line = []
     for depl in depslist:
       dl = depl.strip()
       if dl != '': # avoid confusion when ',' is at end of line
@@ -104,46 +104,56 @@ class blends_metadata_gatherer(gatherer):
           # trying to fix the syntax error after issuing error message
           dlspaces = re.sub('\s+', ',', dl).split(',')
           for dls in dlspaces:
-            deps_in_one_line.append(dls.strip())
+            alts_in_one_line.append(dls.strip())
             self.log.info("Blend %s task %s: Found '%s' package inside broken syntax string - please fix task file anyway" % (blend, task, dls.strip()))
         else:
           # in case we have to deal with a set of alternatives
           if re.search('\|', dl):
-            for da in dl.split('|'):
-              deps_in_one_line.append(da)
+            #for da in dl.split('|'):
+            #  deps_in_one_line.append(da)
             dl = re.sub('\|', ' | ', dl)
-          else:
-            deps_in_one_line.append(dl)
-          self.inject_package_alternatives(blend, task, strength, dl)
+          alts_in_one_line.append(dl)
+          # self.inject_package_alternatives(blend, task, strength, dl)
 
-    for dep in deps_in_one_line:
-      query = "EXECUTE blend_check_existing_package ('%s')" % (dep)
-      self.cur.execute(query)
-      in_udd = self.cur.fetchone()
-      if in_udd:
-        self.inject_package(blend, task, strength, in_udd[1], in_udd[2], dep)
-      else:
-        query = "EXECUTE blend_check_package_in_new ('%s')" % (dep)
+    for alt in alts_in_one_line:
+      alt_in_udd = [1000, '', '']
+      for dep in alt.split(' | '):
+        query = "EXECUTE blend_check_existing_package ('%s')" % (dep)
         self.cur.execute(query)
         in_udd = self.cur.fetchone()
         if in_udd:
-          self.inject_package(blend, task, strength, 'new', in_udd[1], dep)
+          self.inject_package(blend, task, strength, in_udd[1], in_udd[2], dep)
+          alt_in_udd = [0, in_udd[1], in_udd[2]]
         else:
-          query = "EXECUTE blend_check_package_in_prospective ('%s')" % (dep)
+          query = "EXECUTE blend_check_package_in_new ('%s')" % (dep)
           self.cur.execute(query)
           in_udd = self.cur.fetchone()
           if in_udd:
-            self.inject_package(blend, task, strength, 'prospective', in_udd[1], dep)
+            self.inject_package(blend, task, strength, 'new', in_udd[1], dep)
+            if alt_in_udd[0] > 1:
+              alt_in_udd = [1, 'new', in_udd[1]]
           else:
-            query = "EXECUTE blend_check_ubuntu_package ('%s')" % (dep)
+            query = "EXECUTE blend_check_package_in_prospective ('%s')" % (dep)
             self.cur.execute(query)
             in_udd = self.cur.fetchone()
             if in_udd:
-              self.log.info("UBUNTU: %s" % dep)
-              self.inject_package(blend, task, strength, 'ubuntu', in_udd[1], dep)
+              self.inject_package(blend, task, strength, 'prospective', in_udd[1], dep)
+              if alt_in_udd[0] > 2:
+                alt_in_udd = [2, 'prospective', in_udd[1]]
             else:
-              if debug != 0:
-                self.log.info("Blend %s task %s: Package %s not found" % (blend, task, dep))
+              query = "EXECUTE blend_check_ubuntu_package ('%s')" % (dep)
+              self.cur.execute(query)
+              in_udd = self.cur.fetchone()
+              if in_udd:
+                self.log.info("UBUNTU: %s" % dep)
+                self.inject_package(blend, task, strength, 'ubuntu', in_udd[1], dep)
+                if alt_in_udd[0] > 3:
+                  alt_in_udd = [3, 'ubuntu', in_udd[1]]
+              else:
+                if debug != 0:
+                  self.log.info("Blend %s task %s: Package %s not found" % (blend, task, dep))
+      if alt_in_udd[0] < 1000:
+        self.inject_package_alternatives(blend, task, strength, alt)
 
   def run(self):
     my_config = self.my_config
