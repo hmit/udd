@@ -1,5 +1,7 @@
 -- Applications containing po files
 -- PO: field
+DROP TABLE IF EXISTS i18n_apps;
+
 CREATE TABLE i18n_apps (
     package         text,
     version         debversion,
@@ -19,6 +21,8 @@ CREATE TABLE i18n_apps (
 
 -- Packages containing debconf translation in po files
 -- PODEBCONF: field
+DROP TABLE IF EXISTS po_debconf;
+
 CREATE TABLE po_debconf (
     package         text,
     version         debversion,
