@@ -217,7 +217,7 @@ class blends_metadata_gatherer(gatherer):
     query = """PREPARE blend_check_existing_package_provides AS
                  SELECT DISTINCT provides, p.distribution, component, r.sort FROM packages p
                  JOIN releases r ON p.release = r.release
-                 WHERE provides ~ ('[ ,]*'||$1||'[ ,]*')
+                 WHERE provides ~ ('((\s|,)'||$1||'(\s+|,|$)|^'||$1||'$)')
                  ORDER BY r.sort DESC
                  LIMIT 1"""
     self.cur.execute(query)
@@ -227,7 +227,7 @@ class blends_metadata_gatherer(gatherer):
     self.cur.execute(query)
 
     query = """PREPARE blend_check_package_in_new_provides AS
-                 SELECT DISTINCT provides, component FROM new_packages WHERE provides ~ ('[ ,]*'||$1||'[ ,]*') LIMIT 1"""
+                 SELECT DISTINCT provides, component FROM new_packages WHERE provides ~ ('((\s|,)'||$1||'(\s+|,|$)|^'||$1||'$)') LIMIT 1"""
     self.cur.execute(query)
 
     query = """PREPARE blend_check_package_in_prospective AS
@@ -253,7 +253,7 @@ class blends_metadata_gatherer(gatherer):
 
     query = """PREPARE blend_check_ubuntu_package_provides AS
                  SELECT DISTINCT provides, component, regexp_replace(release, '-.*$', '') as release FROM ubuntu_packages
-                 WHERE provides ~ ('[ ,]*'||$1||'[ ,]*')
+                 WHERE provides ~ ('((\s|,)'||$1||'(\s+|,|$)|^'||$1||'$)')
                  ORDER BY release DESC
                  LIMIT 1"""
     self.cur.execute(query)
