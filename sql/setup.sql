@@ -1798,6 +1798,7 @@ CREATE TABLE blends_dependencies (
      dependency   CHARACTER(1) CHECK (dependency IN ('d', 'i', 'r', 's', 'a')), -- Depends / Ignore / Recommends / Suggests / Avoid
      distribution TEXT CHECK (distribution IN ('debian', 'new', 'prospective', 'ubuntu', 'other')),
      component    TEXT CHECK (component IN ('main', 'main/debian-installer', 'contrib', 'non-free', 'universe', 'multiverse', 'restricted', 'local')),
+     provides     BOOLEAN, -- true if package is a virtual package
      PRIMARY KEY (blend, task, package)
 );
 
@@ -1810,12 +1811,13 @@ GRANT SELECT ON blends_dependencies TO PUBLIC;
 DROP TABLE IF EXISTS blends_dependencies_alternatives;
 CREATE TABLE blends_dependencies_alternatives (
   -- fieldname    type,
-     blend        TEXT REFERENCES blends_metadata,
-     task         TEXT,
-     alternatives TEXT, -- content is in format: package1 | package2 | package3 ...
-     dependency   CHARACTER(1) CHECK (dependency IN ('d', 'i', 'r', 's', 'a')), -- Depends / Ignore / Recommends / Suggests / Avoid
-     distribution TEXT CHECK (distribution IN ('debian', 'new', 'prospective', 'ubuntu', 'other')),
-     component    TEXT CHECK (component IN ('main', 'main/debian-installer', 'contrib', 'non-free', 'universe', 'multiverse', 'restricted', 'local'))
+     blend              TEXT REFERENCES blends_metadata,
+     task               TEXT,
+     alternatives       TEXT, -- content is in format: package1 | package2 | package3 ...
+     dependency         CHARACTER(1) CHECK (dependency IN ('d', 'i', 'r', 's', 'a')), -- Depends / Ignore / Recommends / Suggests / Avoid
+     distribution       TEXT CHECK (distribution IN ('debian', 'new', 'prospective', 'ubuntu', 'other')),
+     component          TEXT CHECK (component IN ('main', 'main/debian-installer', 'contrib', 'non-free', 'universe', 'multiverse', 'restricted', 'local')),
+     contains_provides  BOOLEAN  -- true if alternatives contain a virtual package
 );
 
 GRANT SELECT ON blends_dependencies_alternatives TO PUBLIC;

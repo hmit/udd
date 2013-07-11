@@ -10,7 +10,7 @@ from sys import stderr, exit
 from os import listdir
 from os.path import exists
 from fnmatch import fnmatch
-from psycopg2 import IntegrityError, InternalError, ProgrammingError
+from psycopg2 import IntegrityError, InternalError, ProgrammingError, DataError
 import re
 import logging
 import logging.handlers
@@ -51,12 +51,12 @@ class blends_metadata_gatherer(gatherer):
     self.deps  = []
 
 
-  def inject_package(self, blend, task, strength, dist, component, dep):
+  def inject_package(self, blend, task, strength, dist, component, dep, provides):
     if dep in self.list_of_deps_in_task:
       self.log.info("Blend %s task %s: Packages %s is mentioned more than once" % (blend, task, dep))
     else:
-      query = "EXECUTE blend_inject_package (%s, %s, %s, %s, %s, %s)" \
-               % (quote(blend), quote(task), quote(dep), quote(strength[0]), quote(dist), quote(component))
+      query = "EXECUTE blend_inject_package (%s, %s, %s, %s, %s, %s, %s)" \
+               % (quote(blend), quote(task), quote(dep), quote(strength[0]), quote(dist), quote(component), quote(provides))
       try:
         self.cur.execute(query)
         self.list_of_deps_in_task.append(dep)
@@ -65,12 +65,12 @@ class blends_metadata_gatherer(gatherer):
       except InternalError, err:
         self.log.error("INTEGRITY: %s (%s)" % (query, err))
 
-  def inject_package_alternatives(self, blend, task, strength, dist, component, alternatives):
+  def inject_package_alternatives(self, blend, task, strength, dist, component, alternatives, contains_provides):
     if alternatives in self.list_of_package_alternatives:
       self.log.info("Blend %s task %s: Packages alternatives %s is mentioned more than once" % (blend, task, alternatives))
     else:
-      query = "EXECUTE blend_inject_package_alternatives (%s, %s, %s, %s, %s, %s)" \
-               % (quote(blend), quote(task), quote(alternatives), quote(strength[0]), quote(dist), quote(component))
+      query = "EXECUTE blend_inject_package_alternatives (%s, %s, %s, %s, %s, %s, %s)" \
+               % (quote(blend), quote(task), quote(alternatives), quote(strength[0]), quote(dist), quote(component), quote(contains_provides))
       try:
         self.cur.execute(query)
         self.list_of_package_alternatives.append(alternatives)
@@ -117,44 +117,78 @@ class blends_metadata_gatherer(gatherer):
           # self.inject_package_alternatives(blend, task, strength, dl)
 
     for alt in alts_in_one_line:
+      contains_provides = 'false'
       alt_in_udd = [1000, '', '']
       for dep in alt.split(' | '):
         query = "EXECUTE blend_check_existing_package ('%s')" % (dep)
         self.cur.execute(query)
         in_udd = self.cur.fetchone()
         if in_udd:
-          self.inject_package(blend, task, strength, in_udd[1], in_udd[2], dep)
+          self.inject_package(blend, task, strength, in_udd[1], in_udd[2], dep, contains_provides)
           alt_in_udd = [0, in_udd[1], in_udd[2]]
         else:
-          query = "EXECUTE blend_check_package_in_new ('%s')" % (dep)
-          self.cur.execute(query)
-          in_udd = self.cur.fetchone()
-          if in_udd:
-            self.inject_package(blend, task, strength, 'new', in_udd[1], dep)
-            if alt_in_udd[0] > 1:
-              alt_in_udd = [1, 'new', in_udd[1]]
+          # for package names like 'espresso++' we need to escape '+' sign in regexp search
+          query = "EXECUTE blend_check_existing_package_provides ('%s')" % (dep.replace('+', '\+'))
+          try:
+            self.cur.execute(query)
+          except DataError, err:
+            print >>stderr, query
+            print >>stderr, err
+            exit(1)
+          in_udd_provides = self.cur.fetchone()
+          if in_udd_provides:
+            contains_provides = 'true'
+            self.inject_package(blend, task, strength, in_udd_provides[1], in_udd_provides[2], dep, contains_provides)
+            alt_in_udd = [0, in_udd_provides[1], in_udd_provides[2]]
           else:
-            query = "EXECUTE blend_check_package_in_prospective ('%s')" % (dep)
+            query = "EXECUTE blend_check_package_in_new ('%s')" % (dep)
             self.cur.execute(query)
             in_udd = self.cur.fetchone()
             if in_udd:
-              self.inject_package(blend, task, strength, 'prospective', in_udd[1], dep)
-              if alt_in_udd[0] > 2:
-                alt_in_udd = [2, 'prospective', in_udd[1]]
+              self.inject_package(blend, task, strength, 'new', in_udd[1], dep, contains_provides)
+              if alt_in_udd[0] > 1:
+                alt_in_udd = [1, 'new', in_udd[1]]
             else:
-              query = "EXECUTE blend_check_ubuntu_package ('%s')" % (dep)
+              query = "EXECUTE blend_check_package_in_new_provides ('%s')" % (dep.replace('+', '\+'))
               self.cur.execute(query)
-              in_udd = self.cur.fetchone()
-              if in_udd:
-                self.log.info("UBUNTU: %s" % dep)
-                self.inject_package(blend, task, strength, 'ubuntu', in_udd[1], dep)
-                if alt_in_udd[0] > 3:
-                  alt_in_udd = [3, 'ubuntu', in_udd[1]]
+              in_udd_provides = self.cur.fetchone()
+              if in_udd_provides:
+                contains_provides = 'true'
+                self.inject_package(blend, task, strength, 'new', in_udd_provides[1], dep, contains_provides)
+                if alt_in_udd[0] > 1:
+                  alt_in_udd = [1, 'new', in_udd_provides[1]]
               else:
-                if debug != 0:
-                  self.log.info("Blend %s task %s: Package %s not found" % (blend, task, dep))
+                query = "EXECUTE blend_check_package_in_prospective ('%s')" % (dep)
+                self.cur.execute(query)
+                in_udd = self.cur.fetchone()
+                if in_udd:
+                  self.inject_package(blend, task, strength, 'prospective', in_udd[1], dep, contains_provides)
+                  if alt_in_udd[0] > 2:
+                    alt_in_udd = [2, 'prospective', in_udd[1]]
+                else:
+                  query = "EXECUTE blend_check_ubuntu_package ('%s')" % (dep)
+                  self.cur.execute(query)
+                  in_udd = self.cur.fetchone()
+                  if in_udd:
+                    self.log.info("UBUNTU: %s" % dep)
+                    self.inject_package(blend, task, strength, 'ubuntu', in_udd[1], dep, contains_provides)
+                    if alt_in_udd[0] > 3:
+                      alt_in_udd = [3, 'ubuntu', in_udd[1]]
+                  else:
+                    query = "EXECUTE blend_check_ubuntu_package_provides ('%s')" % (dep.replace('+', '\+'))
+                    self.cur.execute(query)
+                    in_udd_provides = self.cur.fetchone()
+                    if in_udd_provides:
+                      contains_provides = 'true'
+                      self.log.info("UBUNTU: %s" % dep)
+                      self.inject_package(blend, task, strength, 'ubuntu', in_udd_provides[1], dep, contains_provides)
+                      if alt_in_udd[0] > 3:
+                        alt_in_udd = [3, 'ubuntu', in_udd_provides[1]]
+                    else:
+                      if debug != 0:
+                        self.log.info("Blend %s task %s: Package %s not found" % (blend, task, dep))
       if alt_in_udd[0] < 1000:
-        self.inject_package_alternatives(blend, task, strength, alt_in_udd[1], alt_in_udd[2], alt)
+        self.inject_package_alternatives(blend, task, strength, alt_in_udd[1], alt_in_udd[2], alt, contains_provides)
 
   def run(self):
     my_config = self.my_config
@@ -180,8 +214,20 @@ class blends_metadata_gatherer(gatherer):
                  LIMIT 1"""
     self.cur.execute(query)
 
+    query = """PREPARE blend_check_existing_package_provides AS
+                 SELECT DISTINCT provides, p.distribution, component, r.sort FROM packages p
+                 JOIN releases r ON p.release = r.release
+                 WHERE provides ~ ('[ ,]*'||$1||'[ ,]*')
+                 ORDER BY r.sort DESC
+                 LIMIT 1"""
+    self.cur.execute(query)
+
     query = """PREPARE blend_check_package_in_new AS
                  SELECT DISTINCT package, component FROM new_packages WHERE package = $1 LIMIT 1"""
+    self.cur.execute(query)
+
+    query = """PREPARE blend_check_package_in_new_provides AS
+                 SELECT DISTINCT provides, component FROM new_packages WHERE provides ~ ('[ ,]*'||$1||'[ ,]*') LIMIT 1"""
     self.cur.execute(query)
 
     query = """PREPARE blend_check_package_in_prospective AS
@@ -189,18 +235,25 @@ class blends_metadata_gatherer(gatherer):
     self.cur.execute(query)
 
     query = """PREPARE blend_inject_package AS
-                 INSERT INTO %s (blend, task, package, dependency, distribution, component)
-                 VALUES ($1, $2, $3, $4, $5, $6)""" % (my_config['table-dependencies'])
+                 INSERT INTO %s (blend, task, package, dependency, distribution, component, provides)
+                 VALUES ($1, $2, $3, $4, $5, $6, $7)""" % (my_config['table-dependencies'])
     self.cur.execute(query)
 
     query = """PREPARE blend_inject_package_alternatives AS
-                 INSERT INTO %s  (blend, task, alternatives, dependency, distribution, component)
-                 VALUES ($1, $2, $3, $4, $5, $6)""" % (my_config['table-alternatives'])
+                 INSERT INTO %s  (blend, task, alternatives, dependency, distribution, component, contains_provides)
+                 VALUES ($1, $2, $3, $4, $5, $6, $7)""" % (my_config['table-alternatives'])
     self.cur.execute(query)
 
     query = """PREPARE blend_check_ubuntu_package AS
                  SELECT DISTINCT package, component, regexp_replace(release, '-.*$', '') as release FROM ubuntu_packages
                  WHERE package = $1
+                 ORDER BY release DESC
+                 LIMIT 1"""
+    self.cur.execute(query)
+
+    query = """PREPARE blend_check_ubuntu_package_provides AS
+                 SELECT DISTINCT provides, component, regexp_replace(release, '-.*$', '') as release FROM ubuntu_packages
+                 WHERE provides ~ ('[ ,]*'||$1||'[ ,]*')
                  ORDER BY release DESC
                  LIMIT 1"""
     self.cur.execute(query)
