@@ -170,7 +170,7 @@ class blends_metadata_gatherer(gatherer):
                   self.cur.execute(query)
                   in_udd = self.cur.fetchone()
                   if in_udd:
-                    self.log.info("UBUNTU: %s" % dep)
+                    self.log.info("Blend %s task %s: Package %s is provided in Ubuntu" % (blend, task, dep))
                     self.inject_package(blend, task, strength, 'ubuntu', in_udd[1], dep, contains_provides)
                     if alt_in_udd[0] > 3:
                       alt_in_udd = [3, 'ubuntu', in_udd[1]]
@@ -180,7 +180,7 @@ class blends_metadata_gatherer(gatherer):
                     in_udd_provides = self.cur.fetchone()
                     if in_udd_provides:
                       contains_provides = 'true'
-                      self.log.info("Blend %s task %s: Package %s found in Ubuntu" % (blend, task, dep))
+                      self.log.info("Blend %s task %s: Package %s is a virtual package provided in Ubuntu" % (blend, task, dep))
                       self.inject_package(blend, task, strength, 'ubuntu', in_udd_provides[1], dep, contains_provides)
                       if alt_in_udd[0] > 3:
                         alt_in_udd = [3, 'ubuntu', in_udd_provides[1]]
