@@ -66,18 +66,15 @@ class blends_metadata_gatherer(gatherer):
         self.log.error("INTEGRITY: %s (%s)" % (query, err))
 
   def inject_package_alternatives(self, blend, task, strength, dist, component, alternatives, contains_provides):
-    if alternatives in self.list_of_package_alternatives:
-      self.log.info("Blend %s task %s: Packages alternatives %s is mentioned more than once" % (blend, task, alternatives))
-    else:
-      query = "EXECUTE blend_inject_package_alternatives (%s, %s, %s, %s, %s, %s, %s)" \
-               % (quote(blend), quote(task), quote(alternatives), quote(strength[0]), quote(dist), quote(component), quote(contains_provides))
-      try:
-        self.cur.execute(query)
-        self.list_of_package_alternatives.append(alternatives)
-      except IntegrityError, err:
-        self.log.error("%s (%s)" % (query, err))
-      except InternalError, err:
-        self.log.error("INTEGRITY: %s (%s)" % (query, err))
+    query = "EXECUTE blend_inject_package_alternatives (%s, %s, %s, %s, %s, %s, %s)" \
+              % (quote(blend), quote(task), quote(alternatives), quote(strength[0]), quote(dist), quote(component), quote(contains_provides))
+    try:
+      self.cur.execute(query)
+      # self.list_of_package_alternatives.append(alternatives)
+    except IntegrityError, err:
+      self.log.error("%s (%s)" % (query, err))
+    except InternalError, err:
+      self.log.error("INTEGRITY: %s (%s)" % (query, err))
 
   def handle_dep_line(self, blend, task, strength, dependencies, is_prospective):
     # Hack: Debian Edu tasks files are using '\' at EOL which is broken
@@ -110,11 +107,8 @@ class blends_metadata_gatherer(gatherer):
         else:
           # in case we have to deal with a set of alternatives
           if re.search('\|', dl):
-            #for da in dl.split('|'):
-            #  deps_in_one_line.append(da)
             dl = re.sub('\|', ' | ', dl)
           alts_in_one_line.append(dl)
-          # self.inject_package_alternatives(blend, task, strength, dl)
 
     for alt in alts_in_one_line:
       contains_provides = 'false'
@@ -338,7 +332,7 @@ class blends_metadata_gatherer(gatherer):
         except:
           self.log.error("error reading %s" % taskfile)
         self.list_of_deps_in_task = []
-        self.list_of_package_alternatives = []
+        # self.list_of_package_alternatives = []
         # read task metadata
         if f:
           ictrl = deb822.Deb822.iter_paragraphs(f)
