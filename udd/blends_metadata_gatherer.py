@@ -79,7 +79,7 @@ class blends_metadata_gatherer(gatherer):
       except InternalError, err:
         self.log.error("INTEGRITY: %s (%s)" % (query, err))
 
-  def handle_dep_line(self, blend, task, strength, dependencies):
+  def handle_dep_line(self, blend, task, strength, dependencies, is_prospective):
     # Hack: Debian Edu tasks files are using '\' at EOL which is broken
     #       in RFC 822 files, but blend-gen-control from blends-dev relies
     #       on this.  So remove this stuff here for the Moment
@@ -180,13 +180,16 @@ class blends_metadata_gatherer(gatherer):
                     in_udd_provides = self.cur.fetchone()
                     if in_udd_provides:
                       contains_provides = 'true'
-                      self.log.info("UBUNTU: %s" % dep)
+                      self.log.info("Blend %s task %s: Package %s found in Ubuntu" % (blend, task, dep))
                       self.inject_package(blend, task, strength, 'ubuntu', in_udd_provides[1], dep, contains_provides)
                       if alt_in_udd[0] > 3:
                         alt_in_udd = [3, 'ubuntu', in_udd_provides[1]]
                     else:
-                      if debug != 0:
-                        self.log.info("Blend %s task %s: Package %s not found" % (blend, task, dep))
+                      if is_prospective:
+                        if debug != 0:
+                          self.log.debug("Blend %s task %s: Prospective package %s" % (blend, task, dep))
+                      else:
+                          self.log.info("Blend %s task %s: Package %s not found" % (blend, task, dep))
       if alt_in_udd[0] < 1000:
         self.inject_package_alternatives(blend, task, strength, alt_in_udd[1], alt_in_udd[2], alt, contains_provides)
 
@@ -396,16 +399,19 @@ class blends_metadata_gatherer(gatherer):
         except:
           dep = None
         while dep:
+          is_prospective = False
+          if dep.has_key('Pkg-Description') and dep.has_key('Homepage'):
+            is_prospective = True
           if dep.has_key('depends'):
-            self.handle_dep_line(meta['blend'], t, 'depends', dep['depends'])
+            self.handle_dep_line(meta['blend'], t, 'depends', dep['depends'], is_prospective)
           if dep.has_key('recommends'):
-            self.handle_dep_line(meta['blend'], t, 'recommends', dep['recommends'])
+            self.handle_dep_line(meta['blend'], t, 'recommends', dep['recommends'], is_prospective)
           if dep.has_key('suggests'):
-            self.handle_dep_line(meta['blend'], t, 'suggests', dep['suggests'])
+            self.handle_dep_line(meta['blend'], t, 'suggests', dep['suggests'], is_prospective)
           if dep.has_key('ignore'):
-            self.handle_dep_line(meta['blend'], t, 'ignore', dep['ignore'])
+            self.handle_dep_line(meta['blend'], t, 'ignore', dep['ignore'], is_prospective)
           if dep.has_key('avoid'):
-            self.handle_dep_line(meta['blend'], t, 'avoid', dep['avoid'])
+            self.handle_dep_line(meta['blend'], t, 'avoid', dep['avoid'], is_prospective)
           try:
             dep = ictrl.next()
           except:
