@@ -214,7 +214,7 @@ class blends_metadata_gatherer(gatherer):
     query = """PREPARE blend_check_existing_package_provides AS
                  SELECT DISTINCT provides, p.distribution, component, r.sort FROM packages p
                  JOIN releases r ON p.release = r.release
-                 WHERE provides ~ ('((\s|,)'||$1||'(\s+|,|$)|^'||$1||'$)')
+                 WHERE provides ~ ('((\s|,)'||$1||'(\s+|,|$)|^'||$1||'$)') -- This should be equivalent: ('\y'||$1||'\y'); remark: psql is using '\y' where otherwise '\b' is used for word boundaries
                  ORDER BY r.sort DESC
                  LIMIT 1"""
     self.cur.execute(query)
@@ -225,6 +225,7 @@ class blends_metadata_gatherer(gatherer):
 
     query = """PREPARE blend_check_package_in_new_provides AS
                  SELECT DISTINCT provides, component FROM new_packages WHERE provides ~ ('((\s|,)'||$1||'(\s+|,|$)|^'||$1||'$)') LIMIT 1"""
+                                                                                        # This should be equivalent: ('\y'||$1||'\y'); remark: psql is using '\y' where otherwise '\b' is used for word boundaries
     self.cur.execute(query)
 
     query = """PREPARE blend_check_package_in_prospective AS
@@ -250,7 +251,7 @@ class blends_metadata_gatherer(gatherer):
 
     query = """PREPARE blend_check_ubuntu_package_provides AS
                  SELECT DISTINCT provides, component, regexp_replace(release, '-.*$', '') as release FROM ubuntu_packages
-                 WHERE provides ~ ('((\s|,)'||$1||'(\s+|,|$)|^'||$1||'$)')
+                 WHERE provides ~ ('((\s|,)'||$1||'(\s+|,|$)|^'||$1||'$)') -- This should be equivalent: ('\y'||$1||'\y'); remark: psql is using '\y' where otherwise '\b' is used for word boundaries
                  ORDER BY release DESC
                  LIMIT 1"""
     self.cur.execute(query)
