@@ -199,8 +199,8 @@ class blends_metadata_gatherer(gatherer):
                homepage, aliothurl, projectlist, logourl, outputdir, datadir, vcsdir, css, advertising, pkglist, dehsmail, distribution)
                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)""" % (my_config['table-metadata'])
     self.cur.execute(query)
-    query = """PREPARE blend_tasks_insert AS INSERT INTO %s (blend, task, title, section, enhances, leaf, test_always_lang, metapackage, description, long_description)
-               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)""" % (my_config['table-tasks'])
+    query = """PREPARE blend_tasks_insert AS INSERT INTO %s (blend, task, title, section, enhances, leaf, test_always_lang, metapackage, metapackage_name, description, long_description)
+               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)""" % (my_config['table-tasks'])
     self.cur.execute(query)
     
     query = """PREPARE blend_check_existing_package AS
@@ -354,6 +354,7 @@ class blends_metadata_gatherer(gatherer):
                    'leaf'             : '',
                    'test_always_lang' : '',
                    'metapackage'      : True,
+                   'metapackage_name' : None,
                    'description'      : '',
                    'long_description' : '',
                  }
@@ -368,6 +369,8 @@ class blends_metadata_gatherer(gatherer):
           if taskmeta.has_key('metapackage'):
             if taskmeta['metapackage'].lower() == 'false':
               task['metapackage'] = False
+          if task['metapackage']:
+              task['metapackage_name'] = meta['tasksprefix'] + '-' + t
           try:
             desc               = taskmeta['description']
           except KeyError, err:
@@ -382,7 +385,7 @@ class blends_metadata_gatherer(gatherer):
           for line in lines[1:]:
             task['long_description'] += line + "\n"
 
-        query = "EXECUTE blend_tasks_insert (%(blend)s, %(task)s, %(title)s, %(section)s, %(enhances)s, %(leaf)s, %(test_always_lang)s, %(metapackage)s, %(description)s, %(long_description)s)"
+        query = "EXECUTE blend_tasks_insert (%(blend)s, %(task)s, %(title)s, %(section)s, %(enhances)s, %(leaf)s, %(test_always_lang)s, %(metapackage)s, %(metapackage_name)s, %(description)s, %(long_description)s)"
         try:
           self.cur.execute(query, task)
         except IntegrityError, err:
