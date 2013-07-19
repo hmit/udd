@@ -27,23 +27,22 @@ query = '''WITH tagged_bugs AS (
              FROM bugs b
              JOIN bugs_usertags bt ON bt.id = b.id
              WHERE bt.email = 'debian-python@lists.debian.org'
-             AND bt.tag = 'py%(helper)s-deprecation')
+             AND bt.tag = 'pysupport-deprecation')
            SELECT s.source, max(s.version) AS version,
            s.maintainer_name AS maintainer, s.release, b.id AS bug
            FROM sources_uniq s
            LEFT OUTER JOIN tagged_bugs b ON (b.source = s.source
              AND b.source = s.source)
            WHERE s.release IN ('sid', 'experimental')
-           AND (s.build_depends LIKE '%%python-%(helper)s%%'
-             OR s.build_depends_indep LIKE '%%python-%(helper)s%%')
+           AND (s.build_depends LIKE '%python-support%'
+             OR s.build_depends_indep LIKE '%python-support%')
            GROUP BY s.source, s.maintainer_name, s.release, b.id
            ORDER BY s.source, version DESC'''
 
 conn = connect(database='udd', port=5452, host='localhost', user='guest')
 cur = conn.cursor()
-for helper in helpers_list:
-    cur.execute(query % {'helper': helper})
-    helpers['python-%s' % helper] = cur.fetchall()
+cur.execute(query)
+packages = cur.fetchall()
 cur.close()
 conn.close()
 
@@ -57,8 +56,7 @@ print('''Content-Type: text/html\n\n
 </head>
 <body>''')
 
-for helper in helpers_list:
-    print('''<h1>Packages build-depending on python-%s</h1>
+print('''<h1>Packages build-depending on python-support</h1>
 <table border="1" cellpadding="3">
 <tr>
 <th>Package</th>
@@ -66,21 +64,21 @@ for helper in helpers_list:
 <th>Maintainer</th>
 <th>Release</th>
 <th>Transition bug</th>
-</tr>''' % helper)
-    for row in helpers['python-%s' % helper]:
-        print('<tr>')
-        print('<td><a href="http://packages.qa.debian.org/%s">%s</a></td>' %
-           (row[0], row[0]))
-        print('<td>%s</td>' % row[1])
-        print('<td>%s</td>' % row[2])
-        print('<td>%s</td>' % row[3])
-        if row[4]:
-            print('<td><a href="http://bugs.debian.org/%s">%s</a></td>' %
-                  (row[4], row[4]))
-        else:
-            print('<td></td>')
-        print('</tr>')
-    print('</table>')
+</tr>''')
+for row in packages:
+    print('<tr>')
+    print('<td><a href="http://packages.qa.debian.org/%s">%s</a></td>' %
+       (row[0], row[0]))
+    print('<td>%s</td>' % row[1])
+    print('<td>%s</td>' % row[2])
+    print('<td>%s</td>' % row[3])
+    if row[4]:
+        print('<td><a href="http://bugs.debian.org/%s">%s</a></td>' %
+              (row[4], row[4]))
+    else:
+        print('<td></td>')
+    print('</tr>')
+print('</table>')
 
 print('''<p>
 <a href="http://validator.w3.org/check?uri=referer">
