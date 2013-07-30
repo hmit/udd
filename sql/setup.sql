@@ -1818,7 +1818,8 @@ CREATE TABLE blends_dependencies_alternatives (
      dependency         CHARACTER(1) CHECK (dependency IN ('d', 'i', 'r', 's', 'a')), -- Depends / Ignore / Recommends / Suggests / Avoid
      distribution       TEXT CHECK (distribution IN ('debian', 'new', 'prospective', 'ubuntu', 'other')),
      component          TEXT CHECK (component IN ('main', 'main/debian-installer', 'contrib', 'non-free', 'universe', 'multiverse', 'restricted', 'local')),
-     contains_provides  BOOLEAN  -- true if alternatives contain a virtual package
+     contains_provides  BOOLEAN,  -- true if alternatives contain a virtual package
+     PRIMARY KEY (blend, task, alternatives)
 );
 
 GRANT SELECT ON blends_dependencies_alternatives TO PUBLIC;

@@ -53,24 +53,33 @@ class blends_metadata_gatherer(gatherer):
 
   def inject_package(self, blend, task, strength, dist, component, dep, provides):
     if dep in self.list_of_deps_in_task:
-      self.log.info("Blend %s task %s: Packages %s is mentioned more than once" % (blend, task, dep))
-    else:
-      query = "EXECUTE blend_inject_package (%s, %s, %s, %s, %s, %s, %s)" \
-               % (quote(blend), quote(task), quote(dep), quote(strength[0]), quote(dist), quote(component), quote(provides))
-      try:
-        self.cur.execute(query)
-        self.list_of_deps_in_task.append(dep)
-      except IntegrityError, err:
-        self.log.error("%s (%s)" % (query, err))
-      except InternalError, err:
-        self.log.error("INTEGRITY: %s (%s)" % (query, err))
+      if strength in ('ignore', 'avoid'):
+        self.log.info("Blend %s task %s: Package %s is mentioned more than once.  There is no point in adding an extra entry with strength '%s'." % (blend, task, dep, strength))
+      else:
+        self.log.error("Blend %s task %s: Package %s is mentioned more than once.  Make sure that the higher dependency strength will be used. Currently ignored is '%s'." % (blend, task, dep, strength))
+      return
+    query = "EXECUTE blend_inject_package (%s, %s, %s, %s, %s, %s, %s)" \
+             % (quote(blend), quote(task), quote(dep), quote(strength[0]), quote(dist), quote(component), quote(provides))
+    try:
+      self.cur.execute(query)
+      self.list_of_deps_in_task.append(dep)
+    except IntegrityError, err:
+      self.log.error("%s (%s)" % (query, err))
+    except InternalError, err:
+      self.log.error("INTEGRITY: %s (%s)" % (query, err))
 
   def inject_package_alternatives(self, blend, task, strength, dist, component, alternatives, contains_provides):
+    if alternatives in self.list_of_package_alternatives:
+      if alternatives in self.list_of_deps_in_task:
+        self.log.debug("Blend %s task %s: The warning about duplicated package %s should have just happended'." % (blend, task, alternatives))
+      else:
+        self.log.error("Blend %s task %s: Alternative %s is mentioned more than once.  Make sure that the higher dependency strength will be used. Currently ignored is '%s'." % (blend, task, alternatives, strength))
+      return
     query = "EXECUTE blend_inject_package_alternatives (%s, %s, %s, %s, %s, %s, %s)" \
               % (quote(blend), quote(task), quote(alternatives), quote(strength[0]), quote(dist), quote(component), quote(contains_provides))
     try:
       self.cur.execute(query)
-      # self.list_of_package_alternatives.append(alternatives)
+      self.list_of_package_alternatives.append(alternatives)
     except IntegrityError, err:
       self.log.error("%s (%s)" % (query, err))
     except InternalError, err:
@@ -333,7 +342,7 @@ class blends_metadata_gatherer(gatherer):
         except:
           self.log.error("error reading %s" % taskfile)
         self.list_of_deps_in_task = []
-        # self.list_of_package_alternatives = []
+        self.list_of_package_alternatives = []
         # read task metadata
         if f:
           ictrl = deb822.Deb822.iter_paragraphs(f)
