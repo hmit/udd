@@ -425,9 +425,9 @@ select email as value, uploader as label
 from uploaders
 where release in ('sid', 'experimental', 'jessie', 'wheezy', 'squeeze')
 ) emails
-WHERE label LIKE ?
+WHERE label ~* ?
     EOF
-    r = dbget(q, "%#{email}%")
+    r = dbget(q, ".*#{email}.*")
     return r.map { |r| r.to_h }
   end
 
