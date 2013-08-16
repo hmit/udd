@@ -76,6 +76,7 @@ TYPES = [
   ['l10n', 'Localisation bugs', 'id in (select id from bugs_tags where tag=\'l10n\')', false],
   ['xsf', 'X Strike Force bugs', "bugs.source in (select source from sources where maintainer ~ 'debian-x@lists.debian.org')\n"],
   ['perl', 'Perl team', "bugs.source in (select source from sources where maintainer ~ 'pkg-perl-maintainers@lists.alioth.debian.org')\n"],
+  ['java', 'Java team', "bugs.source in (select source from sources where maintainer ~ 'pkg-java-maintainers@lists.alioth.debian.org' or maintainer ~ 'openjdk@lists.launchpad.net')\n"],
   ['games', 'Games team', "bugs.source in (select source from sources where maintainer ~ 'pkg-games-devel@lists.alioth.debian.org')\n"],
   ['kfreebsd', 'GNU/kFreeBSD bugs', 'id in (select id from bugs_usertags where email = \'debian-bsd@lists.debian.org\' and tag=\'kfreebsd\')', false],
   ['hurd', 'GNU/Hurd bugs', 'id in (select id from bugs_usertags where email = \'debian-hurd@lists.debian.org\' and tag=\'hurd\')', false],
