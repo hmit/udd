@@ -353,7 +353,7 @@ puts <<-EOF
 </div>
 
 <div class="footer">
-<small><a href="hacking.html">hacking / bug reporting / contact information</a> - <a href="http://anonscm.debian.org/gitweb/?p=collab-qa/udd.git;a=blob_plain;f=web/bugs.cgi">source code</a></small>
+<small><a href="https://wiki.debian.org/UltimateDebianDatabase/Hacking">hacking / bug reporting / contact information</a> - <a href="http://anonscm.debian.org/gitweb/?p=collab-qa/udd.git;a=blob_plain;f=web/bugs.cgi">source code</a></small>
 </div>
 </body>
 </html>
