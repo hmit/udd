@@ -9,6 +9,7 @@
 use DBI;
 use strict;
 use Data::Dumper;
+$Data::Dumper::Sortkeys = 1;
 use Time::Local;
 
 my $dbname= "udd";
@@ -21,7 +22,14 @@ my $now = time;
 my $arch_info = ();
 my $info = ();
 
-printf "Content-Type: text/plain\n\n";
+my $debug = 1;
+
+my $cgi = defined($ENV{"REMOTE_ADDR"});
+
+if ($cgi) {
+	printf "Content-Type: text/plain\n\n";
+	$debug = 0;
+}
 
 sub yesno {
 	my $val = shift;
@@ -37,33 +45,74 @@ sub time2stamp {
 	}
 }
 
+sub percentage {
+	my $val = shift;
+	return (int(1000*$val)/10);
+}
+
+sub show_secs {
+	my $secs = shift||0;
+	if ($secs < 10000) {
+		return "$secs s";
+	}
+	my $hours = int($secs/3600);
+	if ($hours < 50) {
+		return "$hours hours";
+	}
+	return int($hours/24)." days";
+}
+
+sub do_query {
+	my $handle = shift;
+	my $query = shift;
+
+	print ((time-$now)." $query\n") if $debug;
+	my $sthc = $handle->prepare($query);
+	$sthc->execute();
+	return $sthc;
+}
+
 my $query = "select count(*),release,architecture from packages where release in ('$testing','sid') group by release,architecture order by architecture,release;";
-my $sthc = $dbh->prepare($query);
-$sthc->execute();
+my $sthc = do_query($dbh,$query);
 while (my $rowsc = $sthc->fetchrow_hashref()) {
 	$arch_info->{$rowsc->{"architecture"}}->{"packages"}->{$rowsc->{"release"}} = $rowsc->{"count"};
 }
 
-my $query = "select count(*),release from sources where release in ('$testing','sid') group by release order by release;";
-$query = "select architecture,distribution,state,count(*) from wannabuild where distribution ='sid' and state='Installed' group by architecture,distribution,state order by count;";
-$sthc = $dbh->prepare($query);
-$sthc->execute();
+# count source packages in sid
+$query = "
+select
+	count(*)
+from
+	(
+		select
+			source,
+			max(version) as version
+		from
+			sources
+		where
+			sources.extra_source_only is null and
+			sources.release='sid' and
+			sources.component='main' and
+			sources.architecture!='all'
+		group by source
+	) as sources
+;
+";
+$sthc = do_query($dbh,$query);
 while (my $rowsc = $sthc->fetchrow_hashref()) {
-	$info->{"sources"}->{$rowsc->{"distribution"}} = $rowsc->{"count"};
+	$info->{"sources"}->{"sid"} = $rowsc->{"count"};
 }
 
 
-$query = "select architecture,distribution,state,count(*) from wannabuild where distribution ='sid' and state='Installed' group by architecture,distribution,state order by count;";
-$sthc = $dbh->prepare($query);
-$sthc->execute();
-while (my $rowsc = $sthc->fetchrow_hashref()) {
-	$arch_info->{$rowsc->{"architecture"}}->{"installed"} = $rowsc->{"count"};
-}
+#$query = "select architecture,distribution,state,count(*) from wannabuild where distribution ='sid' and state='Installed' group by architecture,distribution,state order by count;";
+#$sthc = do_query($dbh,$query);
+#while (my $rowsc = $sthc->fetchrow_hashref()) {
+#	$arch_info->{$rowsc->{"architecture"}}->{"installed"} = $rowsc->{"count"};
+#}
 
 my $lastok = $now - 30*24*3600;
 $query = "select architecture,builder,max(state_change) from packages_public where builder like 'buildd_%' group by architecture,builder order by max;";
-$sthc = $wbh->prepare($query);
-$sthc->execute();
+$sthc = do_query($wbh,$query);
 while (my $rowsc = $sthc->fetchrow_hashref()) {
 	my $stamp = time2stamp($rowsc->{"max"});
 	if ($stamp < $lastok) {
@@ -74,10 +123,8 @@ while (my $rowsc = $sthc->fetchrow_hashref()) {
 }
 
 $query = "select architecture,state,min(state_change),count(*) from packages_public group by architecture,state;";
-$sthc = $wbh->prepare($query);
-$sthc->execute();
+$sthc = do_query($wbh,$query);
 while (my $rowsc = $sthc->fetchrow_hashref()) {
-	#print Dumper $rowsc;
 	my $stamp = time2stamp($rowsc->{"min"});
 	my $state = $rowsc->{"state"};
 	$arch_info->{$rowsc->{"architecture"}}->{"buildstate_duration"}->{$state} = $now-$stamp;
@@ -87,16 +134,112 @@ while (my $rowsc = $sthc->fetchrow_hashref()) {
 my $period = $now - 3*30*24*3600;
 foreach my $arch (keys $arch_info) {
 	next if ($arch eq "all");
-	$query = "select max(build_time) from \"${arch}_public\".pkg_history where timestamp > to_timestamp($period) limit 1;";
-	$sthc = $wbh->prepare($query);
-	$sthc->execute();
+	$query = "select * from \"${arch}_public\".pkg_history where timestamp > to_timestamp($period) and build_time > 0 order by build_time desc limit 1;";
+	$sthc = do_query($wbh,$query);
 	if (my $rowsc = $sthc->fetchrow_hashref()) {
-		$arch_info->{$arch}->{"longest_build"} = $rowsc->{"max"};
+		$arch_info->{$arch}->{"longest_build_time"} = $rowsc->{"build_time"};
+		$arch_info->{$arch}->{"longest_build"} = $rowsc->{"package"}."/".$rowsc->{"distribution"};
+	}
+
+	$query = "select * from packages_public where architecture='$arch' and state='Needs-Build' order by state_change limit 1;";
+	$sthc = do_query($wbh,$query);
+	if (my $rowsc = $sthc->fetchrow_hashref()) {
+		my $stamp = time2stamp($rowsc->{"state_change"});
+		$arch_info->{$arch}->{"longest_needsbuild_time"} = $now - $stamp;
+		$arch_info->{$arch}->{"longest_needsbuild"} = $rowsc->{"package"}."/".$rowsc->{"distribution"};
 	}
 }
 
-#print Dumper $info;
-#print Dumper $arch_info;
+# count source packages in sid/main which have binary packages per arch
+$query = "
+select
+	architecture,
+	count(*)
+from
+	(
+		select
+			source,
+			version
+		from
+			sources
+		where
+			sources.extra_source_only is null and
+			sources.release='sid'
+	) as sources,
+	(
+		select
+			source,
+			architecture,
+			max(source_version) as source_version,
+			max(version) as version
+		from
+			packages
+		where
+			packages.release='sid' and
+			component = 'main'
+		group by
+			source,
+			architecture
+	) as packages
+where
+	packages.source = sources.source and
+	packages.source_version = sources.version
+group by architecture
+order by count
+;
+";
+my $sthc = do_query($dbh,$query);
+while (my $rowsc = $sthc->fetchrow_hashref()) {
+	$arch_info->{$rowsc->{"architecture"}}->{"packagecount"} = $rowsc->{"count"};
+}
+
+# count source packages in sid/main which have a higher version than the highest
+# binary version in sid per arch
+$query = "
+select
+	architecture,
+	count(*)
+from
+	(
+		select
+			source,
+			max(version) as version
+		from
+			sources
+		where
+			sources.extra_source_only is null and
+			sources.release='sid'
+		group by source
+	) as sources,
+	(
+		select
+			source,
+			architecture,
+			max(source_version) as source_version,
+			max(version) as version
+		from
+			packages
+		where
+			packages.release='sid' and
+			component = 'main'
+		group by
+			source,
+			architecture
+	) as packages
+where
+	packages.source = sources.source and
+	packages.source_version < sources.version
+group by architecture
+order by count
+;
+";
+my $sthc = do_query($dbh,$query);
+while (my $rowsc = $sthc->fetchrow_hashref()) {
+	$arch_info->{$rowsc->{"architecture"}}->{"outofdate"} = $rowsc->{"count"};
+}
+
+print Dumper $info if $debug;
+print Dumper $arch_info if $debug;
 
 foreach my $arch (sort keys $arch_info) {
 	next if ($arch eq "all");
@@ -104,10 +247,12 @@ foreach my $arch (sort keys $arch_info) {
 	my $a_i = $arch_info->{$arch};
 	print "  in sid: ".yesno($a_i->{"packages"}->{"sid"} > 0)."\n";
 	print "  in $testing: ".yesno($a_i->{"packages"}->{$testing} > 0)."\n";
-	print "  archive_coverage: ".int(100*$a_i->{"installed"}/$info->{"sources"}->{"sid"})."%\n";
+	print "  archive_coverage: ".percentage($a_i->{"packagecount"}/$info->{"sources"}->{"sid"})."%\n";
+	print "  archive_uptodate: ".percentage(($a_i->{"packagecount"}-$a_i->{outofdate})/$a_i->{"packagecount"})."%\n";
 	print "  active buildds: ".$a_i->{"builders"}."\n";
-	print "  longest build: ".int($a_i->{"longest_build"}/3600)." hours\n";
-	print "  longest time in needs-build: ".int($a_i->{"buildstate_duration"}->{"Needs-Build"}/3600)." hours\n";
+	print "  longest build: ".show_secs($a_i->{"longest_build_time"}).": ".$a_i->{"longest_build"}."\n";
+	print "  longest time in needs-build: ".show_secs($a_i->{"longest_needsbuild_time"}).": ".
+		$a_i->{"longest_needsbuild"}."\n";
 	print "  number of packages in needs-build: ".int($a_i->{"buildstate_count"}->{"Needs-Build"})."\n";
 }
 
