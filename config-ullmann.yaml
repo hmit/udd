@@ -12,6 +12,7 @@ general:
     popcon: module udd.popcon_gatherer
     testing-migrations: module udd.testing_migrations_gatherer
     upstream: exec /srv/udd.debian.org/udd/scripts/update-upstream-status
+    key-packages: exec /srv/udd.debian.org/udd/scripts/update-key-packages
     vcs: exec /srv/udd.debian.org/udd/scripts/update-vcs-status
     upload-history: module udd.upload_history_gatherer
     orphaned-packages: module udd.orphaned_packages_gatherer
@@ -149,6 +150,12 @@ upstream:
   type: upstream
   schema: upstream
   table: upstream
+
+key-packages:
+  type: key-packages
+  schema: key-packages
+  table: key-packages
+
 
 vcs:
   type: vcs

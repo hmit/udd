@@ -1875,3 +1875,13 @@ GRANT SELECT ON mentors_raw_packages TO PUBLIC;
 GRANT SELECT ON mentors_raw_package_versions TO PUBLIC;
 GRANT SELECT ON mentors_raw_package_info TO PUBLIC;
 GRANT SELECT ON mentors_most_recent_package_versions TO PUBLIC;
+
+-- key_packages
+CREATE TABLE key_packages (
+   source text,
+   primary key (source)
+);
+
+GRANT SELECT ON key_packages TO PUBLIC;
+
+
