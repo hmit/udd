@@ -76,4 +76,4 @@ srcs.sort.each do |src|
   sth.execute(src)
 end
 
-dbh.do("ANALYZE TABLE key_packages")
+dbh.do("ANALYZE key_packages")
