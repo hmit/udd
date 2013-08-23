@@ -1,0 +1,76 @@
+#!/usr/bin/ruby
+# This script generates http://udd.debian.org/how-can-i-help.json.gz which is
+# used by the how-can-i-help package to list possible contributions to Debian.
+
+require 'json'
+require 'dbi'
+require 'pp'
+require 'digest/md5'
+
+OFILE='/srv/udd.debian.org/udd/web/how-can-i-help.json.gz'
+
+$dbh = DBI::connect('DBI:Pg:dbname=udd;port=5452', 'udd')
+
+def dbget(q, *args)
+  if $debug
+    puts "<pre>#{q}</pre>"
+    p args if not args.nil?
+  end
+  rows, sth = nil
+  duration = DBI::Utils::measure do 
+    sth = $dbh.prepare(q)
+    sth.execute(*args)
+    rows = sth.fetch_all
+  end
+  if $debug
+    puts "### #{duration}s"
+    puts "<pre>"
+    puts DBI::Utils::TableFormatter.ascii(sth.column_names, rows)
+    puts "</pre>"
+  end
+  return rows
+end
+
+def system_r(s)
+  system(s) or raise
+end
+
+srcs = {}
+dbget("select distinct package, source from packages_summary").each do |r|
+  srcs[r['source']] ||= []
+  srcs[r['source']] << r['package']
+end
+
+helpitems = []
+dbget("select * from orphaned_packages").each do |r|
+  hash = Digest::MD5.hexdigest("wnpp #{r['type']} #{r['source']} #{r['bug']}")
+  helpitems << {
+    'type' => 'wnpp',
+    'hash' => hash,
+    'wnpptype'=> r['type'],
+    'source' => r['source'],
+    'packages' => srcs[r['source']],
+    'wnppbug' => r['bug'],
+    'wnppdesc' => r['description']
+  }
+end
+
+dbget("select id, source, package, title from bugs where id in (select id from bugs_usertags where email='debian-qa@lists.debian.org' and tag='gift') and status != 'done'").each do |r|
+  hash = Digest::MD5.hexdigest("gift #{r['id']}")
+  helpitems << {
+    'type' => 'gift',
+    'hash' => hash,
+    'source' => r['source'],
+    'package' => r['package'],
+    'bug' => r['id'],
+    'title' => r['title']
+  }
+end
+
+fd = File::new(OFILE+'.1', 'w')
+JSON::dump(helpitems, fd)
+fd.close
+
+system_r("gzip < #{OFILE+'.1'} > #{OFILE+'.2'}")
+system_r("mv #{OFILE+'.2'} #{OFILE}")
+system_r("rm #{OFILE+'.1'}")
