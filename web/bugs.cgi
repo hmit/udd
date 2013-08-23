@@ -148,6 +148,16 @@ if cgi.params['fnewerval'][0] =~ /^[0-9]+$/
 else
   fnewerval = 7
 end
+if ['', 'only', 'ign'].include?(cgi.params['flastmod'][0])
+  flastmod = cgi.params['flastmod'][0]
+else
+  flastmod = ''
+end
+if cgi.params['flastmodval'][0] =~ /^[0-9]+$/
+  flastmodval = cgi.params['flastmodval'][0].to_i
+else
+  flastmodval = 7
+end
 # types
 types = {}
 TYPES.each do |t|
@@ -285,6 +295,12 @@ puts <<-EOF
   <td style='text-align: center;'><input type='radio' name='fnewer' value='ign' #{fnewer=='ign'?'CHECKED=\'1\'':''}/></td>
   <td>newer than <input type='text' size='3' name='fnewerval' value='#{fnewerval}'/> days</td>
   </tr>
+  <tr>
+  <td style='text-align: center;'><input type='radio' name='flastmod' value='' #{flastmod==''?'CHECKED=\'1\'':''}/></td>
+  <td style='text-align: center;'><input type='radio' name='flastmod' value='only' #{flastmod=='only'?'CHECKED=\'1\'':''}/></td>
+  <td style='text-align: center;'><input type='radio' name='flastmod' value='ign' #{flastmod=='ign'?'CHECKED=\'1\'':''}/></td>
+  <td>modified in the last <input type='text' size='3' name='flastmodval' value='#{flastmodval}'/> days</td>
+  </tr>
 EOF
 puts "</table></td><td style='padding-left: 20px'><table class='buglist'>"
 puts "<tr><th colspan='2'>Bug types</th></tr>"
@@ -335,6 +351,11 @@ if fnewer == 'only'
   q += "and (current_timestamp - interval '#{fnewerval} days' <= arrival) \n"
 elsif fnewer == 'ign'
   q += "and (current_timestamp - interval '#{fnewerval} days' > arrival) \n"
+end
+if flastmod == 'only'
+  q += "and (current_timestamp - interval '#{flastmodval} days' <= last_modified) \n"
+elsif flastmod == 'ign'
+  q += "and (current_timestamp - interval '#{flastmodval} days' > last_modified) \n"
 end
 q2 = TYPES.select { |t| types[t[0]] }.map { |t| t[2] }.join("\n OR ")
 if q2 != ""
