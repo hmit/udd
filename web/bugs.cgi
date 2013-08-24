@@ -56,6 +56,7 @@ FILTERS = [
  ['rtjessie-will-remove', 'RT tag for jessie: will-remove', "id in (select id from bugs_usertags where email='release.debian.org@packages.debian.org' and tag='jessie-will-remove')"],
  ['rtjessie-can-defer', 'RT tag for jessie: can-defer', "id in (select id from bugs_usertags where email='release.debian.org@packages.debian.org' and tag='jessie-can-defer')"],
  ['rtjessie-is-blocker', 'RT tag for jessie: is-blocker', "id in (select id from bugs_usertags where email='release.debian.org@packages.debian.org' and tag='jessie-is-blocker')"],
+ ['rtjessie-no-auto-remove', 'RT tag for jessie: no-auto-remove', "id in (select id from bugs_usertags where email='release.debian.org@packages.debian.org' and tag='jessie-no-auto-remove')"],
  ['unblock-hint', 'RT unblock hint', "bugs.source in (select hints.source from hints where type in ('approve','unblock'))"],
  ['keypackages', 'key packages', 'bugs.source in (select source from key_packages)'],
 ]
