@@ -307,6 +307,8 @@ ftpnew:
   ftpmasterURL: http://ftp-master.debian.org/new/
   table_sources:  new_sources
   table_packages: new_packages
+  table_bugclosures: potential_bug_closures
+  origin_bugclosures: ftpnew
   releases_ignore: "'etch'"
 
 ftp-autorejects:

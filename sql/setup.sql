@@ -1884,4 +1884,19 @@ CREATE TABLE key_packages (
 
 GRANT SELECT ON key_packages TO PUBLIC;
 
+-- bugs that are closed by packages that are not in the archive (yet)
+-- currently filled by
+-- - ftpnew
+-- potential other sources
+-- - mentors
+CREATE TABLE potential_bug_closures
+  (id int,
+   source text,
+   distribution text,
+   origin text
+   );
 
+GRANT SELECT ON potential_bug_closures TO PUBLIC;
+
+CREATE INDEX potential_bug_closures_id_idx ON potential_bug_closures (id);
+CREATE INDEX potential_bug_closures_source_idx ON potential_bug_closures (source);

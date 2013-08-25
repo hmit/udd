@@ -268,3 +268,16 @@ GRANT SELECT ON bugs_rt_affects_testing_and_unstable TO PUBLIC;
 GRANT SELECT ON bugs_rt_affects_unstable TO PUBLIC;
 GRANT SELECT ON bugs_rt_affects_testing TO PUBLIC;
 
+-- 2013-08-25 bugs closed by packages in ftpnew
+-- (and potentially other sources like mentors)
+CREATE TABLE potential_bug_closures
+  (id int,
+   source text,
+   distribution text,
+   origin text
+   );
+
+GRANT SELECT ON potential_bug_closures TO PUBLIC;
+
+CREATE INDEX potential_bug_closures_id_idx ON potential_bug_closures (id);
+CREATE INDEX potential_bug_closures_source_idx ON potential_bug_closures (source);

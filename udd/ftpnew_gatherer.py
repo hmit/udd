@@ -17,6 +17,7 @@ from gatherer import gatherer
 import re
 from time import ctime
 from psycopg2 import IntegrityError, ProgrammingError
+import pprint
 
 def get_gatherer(connection, config, source):
   return ftpnew_gatherer(connection, config, source)
@@ -117,6 +118,17 @@ class bin_pkg():
         (self.b['Package'], self.b['Version'], self.b['Architecture'], self.b['Maintainer'],
          self.b['Description'], self.b['Long_Description'])
 
+class bug_closure():
+  def __init__(self, bugid, source, dist):
+    self.b = {}
+    self.b['Bugid']          = bugid
+    self.b['Source']         = source
+    self.b['Distribution']   = dist
+
+  def __str__(self):
+    return "Close bug %s: source package %s in %s " % \
+        (self.b['Bugid'], self.b['Source'], self.b['Distribution'])
+
 class ftpnew_gatherer(gatherer):
   "This class imports the data from New queue into the database"
   s_mandatory = {'Source': 0, 'Format': 0, 'Maintainer': 0, 'Package': 0, 'Version': 0, 'Files': 0,
@@ -192,6 +204,7 @@ class ftpnew_gatherer(gatherer):
 
     cur.execute("DELETE FROM %s" % my_config["table_sources"])
     cur.execute("DELETE FROM %s" % my_config["table_packages"])
+    cur.execute("DELETE FROM %s where origin = '%s'" % (my_config["table_bugclosures"],my_config['origin_bugclosures']))
 
     query = """PREPARE ftpnew_insert_source
       AS INSERT INTO %s (source, version, maintainer, maintainer_name, maintainer_email, binaries, 
@@ -206,6 +219,11 @@ class ftpnew_gatherer(gatherer):
                          installed_size, homepage, section, long_description, distribution, component, license)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)""" \
             % (my_config['table_packages'])
+    cur.execute(query)
+    query = """PREPARE ftpnew_insert_bugclosure
+      AS INSERT INTO %s (id, source, distribution, origin)
+      VALUES ($1, $2, $3, '%s')""" \
+            % (my_config['table_bugclosures'],my_config['origin_bugclosures'])
     cur.execute(query)
 
     ftpnew822file    = my_config['path']+'/new.822'
@@ -233,6 +251,7 @@ class ftpnew_gatherer(gatherer):
         srcpkg.s['Changed-By']    = to_unicode(stanza['changed-by'])
         # remove comma between binaries which are inserted in *.dsc information
         srcpkg.s['Bin']           = re.sub(", +", " ", stanza['binary'])
+        bugclosures = []
         try:
           srcpkg.s['Section']       = stanza['section']
           if stanza['section'].startswith('non-free'):
@@ -340,6 +359,7 @@ class ftpnew_gatherer(gatherer):
               found_itp = 0
               for val in values:
                 ival = int(val)
+                bugclosures.append(bug_closure(ival,srcpkg.s['Source'],srcpkg.s['Distribution']))
                 query = "SELECT title from bugs where id = %i and package = 'wnpp' and source = 'wnpp'" % (ival)
                 cur.execute(query)
                 wnpp_title = ''
@@ -512,14 +532,25 @@ class ftpnew_gatherer(gatherer):
             except KeyError, err:
               print >>stderr, "Missing information field for binary package %s: %s" % (binpkg.b['Package'], err)
               continue
+          for bugclosure in bugclosures:
+            query = """EXECUTE ftpnew_insert_bugclosure (
+                      %(Bugid)s,
+                      %(Source)s,
+                      %(Distribution)s)"""
+            try:
+              cur.execute(query, bugclosure.b)
+            except ProgrammingError, err:
+              print "ProgrammingError", err, "\n", query, "\n", bugclosure.b
     except KeyError, err:
       print >>stderr, "Unable to finish parsing %s because of unknown key %s" % (ftpnew822file, err)
 
     cur.execute("DEALLOCATE ftpnew_insert_source")
     cur.execute("DEALLOCATE ftpnew_insert_package")
+    cur.execute("DEALLOCATE ftpnew_insert_bugclosure")
     cur.execute("DEALLOCATE ftpnew_check_existing_package")
     cur.execute("ANALYZE %s" % my_config["table_sources"])
     cur.execute("ANALYZE %s" % my_config["table_packages"])
+    cur.execute("ANALYZE %s" % my_config["table_bugclosures"])
 
 if __name__ == '__main__':
   main()
