@@ -1900,3 +1900,19 @@ GRANT SELECT ON potential_bug_closures TO PUBLIC;
 
 CREATE INDEX potential_bug_closures_id_idx ON potential_bug_closures (id);
 CREATE INDEX potential_bug_closures_source_idx ON potential_bug_closures (source);
+
+-- piuparts_status
+
+CREATE TABLE piuparts_status
+  (section text,
+   source text,
+   version text,
+   status text
+   );
+
+GRANT SELECT ON piuparts_status TO PUBLIC;
+
+CREATE INDEX piuparts_status_section_idx ON piuparts_status (section);
+CREATE INDEX piuparts_status_source_idx ON piuparts_status (source);
+CREATE INDEX piuparts_status_status_idx ON piuparts_status (status);
+

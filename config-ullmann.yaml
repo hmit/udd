@@ -21,6 +21,7 @@ general:
     carnivore: module udd.carnivore_gatherer
     debian_maintainers: module udd.debian_maintainers_gatherer
     lintian: module udd.lintian_gatherer
+    piuparts: module udd.piuparts_gatherer
     debtags: module udd.debtags_gatherer
     ubuntu-bugs: module udd.ubuntu_bugs_gatherer
     ddtp: module udd.ddtp_gatherer
@@ -259,6 +260,12 @@ ubuntu-lintian:
   path: /srv/udd.debian.org/mirrors/ubuntu.lintian.log
   table: ubuntu_lintian
   schema: lintian
+
+piuparts:
+  type: piuparts
+  update-command: /srv/udd.debian.org/udd/scripts/fetch_piuparts_data.sh
+  path: /srv/udd.debian.org/mirrors/piuparts
+  table: piuparts_status
 
 dehs:
   type: dehs
