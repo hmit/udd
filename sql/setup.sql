@@ -1916,3 +1916,17 @@ CREATE INDEX piuparts_status_section_idx ON piuparts_status (section);
 CREATE INDEX piuparts_status_source_idx ON piuparts_status (source);
 CREATE INDEX piuparts_status_status_idx ON piuparts_status (status);
 
+-- testing autoremovals
+
+CREATE TABLE testing_autoremovals
+  (source text,
+   version text,
+   bugs text,
+   first_seen bigint,
+   last_checked bigint
+   );
+
+GRANT SELECT ON testing_autoremovals TO PUBLIC;
+
+CREATE INDEX testing_autoremovals_source_idx ON testing_autoremovals (source);
+
