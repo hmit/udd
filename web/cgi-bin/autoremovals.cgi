@@ -62,7 +62,11 @@ my $query = "select
 		s.source=r.source";
 my $sthc = do_query($dbh,$query);
 while (my $rowsc = $sthc->fetchrow_hashref()) {
-	my $sourceinfo = $rowsc->{"source"}.": bugs ".$rowsc->{"bugs"}.", flagged for removal in ".show_secs($rowsc->{"first_seen"}-$removaltime);
+	my $sourceinfo = $rowsc->{"source"}.": bugs ".$rowsc->{"bugs"}.", flagged for removal";
+	my $delay = $rowsc->{"first_seen"}-$removaltime;
+	if ($delay > 0) {
+		$sourceinfo .= " in ".show_secs($delay);
+	}
 	my $maintainers = {};
 	push @{$maintainerlist->{$rowsc->{"maintainer"}}}, $sourceinfo;
 	foreach my $upl (split(/,\s*/,$rowsc->{"uploaders"})) {
