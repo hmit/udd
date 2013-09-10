@@ -1813,6 +1813,8 @@ CREATE TABLE blends_dependencies_priorities (
      priority     int
 );
 
+GRANT SELECT ON blends_dependencies_priorities TO PUBLIC;
+
 INSERT INTO blends_dependencies_priorities (dependency, priority) VALUES ('d', 1);
 INSERT INTO blends_dependencies_priorities (dependency, priority) VALUES ('r', 2);
 INSERT INTO blends_dependencies_priorities (dependency, priority) VALUES ('s', 3);
