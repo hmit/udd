@@ -91,9 +91,6 @@ class blends_metadata_gatherer(gatherer):
     #       on this.  So remove this stuff here for the Moment
     deps = re.sub('\\\\\n\s+', '', dependencies)
 
-    # Remove versions from versioned depends
-    deps = re.sub(' *\([ ><=\.0-9]+\) *', '', deps)
-
     # temporary strip spaces from alternatives ('|') to enable erroneous space handling as it was done before
     deps = re.sub('\s*\|\s*', '|', deps)
 
@@ -106,6 +103,13 @@ class blends_metadata_gatherer(gatherer):
     for depl in depslist:
       dl = depl.strip()
       if dl != '': # avoid confusion when ',' is at end of line
+        # warn/clean versioned dependencies
+        match = re.search('\(\s*[><=]+.*\)', dl)
+        if match:
+          dl1 = re.sub('\s*\(\s*[><=]+[^)]+\)\s*', '', dl).strip()
+          self.log.info("Blend %s, task %s: Ignore versioned depends for '%s' -> '%s'" % (blend, task, dl, dl1))
+          dl  = dl1
+
         if re.search('\s', dl):
           self.log.error("Blend %s task %s: Syntax error '%s'" % (blend, task, dl))
           # trying to fix the syntax error after issuing error message
