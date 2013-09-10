@@ -1805,6 +1805,20 @@ CREATE TABLE blends_dependencies (
 
 GRANT SELECT ON blends_dependencies TO PUBLIC;
 
+-- For Blends bugs pages in web sentinel we need some priorisation of the dependency relations to make sure we get the
+-- proper relation for more than one binary package from a single source package with different dependency relation.
+DROP TABLE IF EXISTS blends_dependencies_priorities;
+CREATE TABLE blends_dependencies_priorities (
+     dependency   CHARACTER(1) CHECK (dependency IN ('d', 'i', 'r', 's', 'a')), -- Depends / Ignore / Recommends / Suggests / Avoid
+     priority     int
+);
+
+INSERT INTO blends_dependencies_priorities (dependency, priority) VALUES ('d', 1);
+INSERT INTO blends_dependencies_priorities (dependency, priority) VALUES ('r', 2);
+INSERT INTO blends_dependencies_priorities (dependency, priority) VALUES ('s', 3);
+INSERT INTO blends_dependencies_priorities (dependency, priority) VALUES ('a', 4);
+INSERT INTO blends_dependencies_priorities (dependency, priority) VALUES ('i', 5);
+
 -- This table's data is used to properly generate the task-description file for a Blend
 -- Tasksel doesn't allow boolean(eg OR : |) comparisons in dependencies such as package1 | package2. 
 -- In these cases we need to know which packages, from the blends_dependencies table, are the alternatives between them
