@@ -367,7 +367,7 @@ clone-udd-bugs:
 
 wannabuild:
   type: wannabuild
-  wbdb: "dbname=wanna-build host=buildd.debian.org port=5433 user=guest"
+  wbdb: "service=wanna-build"
   archs: [alpha, amd64, arm, armel, armhf, hppa, hurd-i386,
     i386, ia64, kfreebsd-amd64, kfreebsd-i386, mips,
     mipsel, powerpc, s390, s390x, sparc]

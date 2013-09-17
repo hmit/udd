@@ -15,7 +15,7 @@ use Time::Local;
 my $dbname= "udd";
 my $dbport = "5452";
 my $dbh = DBI->connect("dbi:Pg:host=localhost;dbname=$dbname;port=$dbport;user=guest");
-my $wbh = DBI->connect("dbi:Pg:host=buildd.debian.org;dbname=wanna-build;port=5433;user=guest");
+my $wbh = DBI->connect("dbi:Pg:service=wanna-build");
 my $testing = "jessie";
 my $now = time;
 
