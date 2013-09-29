@@ -11,7 +11,8 @@ my $dbport = "5452";
 my $dbh = DBI->connect("dbi:Pg:host=localhost;dbname=$dbname;port=$dbport;user=guest");
 my $testing = "jessie";
 my $now = time;
-my $removaltime = $now - 10*24*3600;
+# in the initial stage, the autoremovals happen after 15 days instead of 10
+my $removaltime = $now - 15*24*3600;
 
 my $info = ();
 

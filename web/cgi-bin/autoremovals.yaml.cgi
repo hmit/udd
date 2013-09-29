@@ -29,7 +29,8 @@ for row in rows:
   entry['bugs'] = row['bugs'].split(",")
   entry['last_checked'] = datetime.utcfromtimestamp(row['last_checked'])
   first_seen = datetime.utcfromtimestamp(row['first_seen'])
-  removal_date = first_seen + timedelta(10)
+  # in the initial stage, the autoremovals happen after 15 days instead of 10
+  removal_date = first_seen + timedelta(15)
   entry['removal_date'] = removal_date
   data[row['source']] = entry
 
