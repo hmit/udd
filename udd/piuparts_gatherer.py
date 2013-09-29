@@ -36,11 +36,11 @@ class ftpnew_gatherer(gatherer):
     cur.execute(query)
 
     sf = open(my_config["path"]+"/sections.yaml")
-    sections = yaml.load(sf.read())
+    sections = yaml.safe_load(sf.read())
     sf.close()
     for section in sections:
       sf = open(my_config["path"]+"/"+section+".yaml")
-      section_data = yaml.load(sf.read())
+      section_data = yaml.safe_load(sf.read())
       sf.close()
       for source_data in section_data:
         query = """EXECUTE piuparts_insert (

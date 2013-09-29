@@ -46,7 +46,7 @@ class dehs_gatherer(gatherer):
 
     entries = []
     f = open(my_config['path'])
-    pkgs = yaml.load(f)
+    pkgs = yaml.safe_load(f)
     for e in pkgs:
       if not 'status' in e:
           ustat = 'error'

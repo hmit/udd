@@ -91,7 +91,7 @@ class upstream_reader():
     self.ubibrefsinglelist = []
 
     try:
-      self.fields = yaml.load(uf.read())
+      self.fields = yaml.safe_load(uf.read())
     except yaml.scanner.ScannerError, err:
       self.log.error("Scanner error in file %s: %s" % (ufile, str(err)))
       return

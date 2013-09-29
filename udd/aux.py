@@ -64,7 +64,7 @@ def unlock(config, source):
 
 def load_config(str):
   """Load and check configuration from the string"""
-  config = yaml.load(str)
+  config = yaml.safe_load(str)
   if not 'general' in config:
     raise ConfigException('general section not specified')
   
