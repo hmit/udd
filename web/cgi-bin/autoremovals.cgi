@@ -34,7 +34,7 @@ sub show_secs {
 	if ($hours < 50) {
 		return "$hours hours";
 	}
-	return int($hours/24)." days";
+	return (int(10*$hours/24)/10)." days";
 }
 
 sub do_query {
