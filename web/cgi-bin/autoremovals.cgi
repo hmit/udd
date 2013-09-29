@@ -60,7 +60,17 @@ my $query = "select
 		sources s
 	where
 		s.release='sid' and
-		s.source=r.source";
+		-- get maintainer info only for newest version in sid
+		s.version = (
+			select
+				max(version)
+			from sources
+			where release = 'sid'
+			and sources.source = r.source
+			group by source
+		)  and
+		s.source=r.source
+	";
 my $sthc = do_query($dbh,$query);
 while (my $rowsc = $sthc->fetchrow_hashref()) {
 	my $sourceinfo = $rowsc->{"source"}.": bugs ".$rowsc->{"bugs"}.", flagged for removal";
