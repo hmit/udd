@@ -9,7 +9,7 @@ STDOUT.reopen(fd)
 STDERR.reopen(fd)
 
 EXC_SRC = [ ]
-INC_SRC = [ 'debian-installer', 'piuparts', 'debian-cd' ]
+INC_SRC = [ 'debian-installer', 'piuparts', 'debian-cd', 'debian-installer-netboot-images' ]
 POPCON_PERCENT = 5 # x% of submissions must have the package installed
 TESTING='jessie'
 
