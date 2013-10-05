@@ -311,3 +311,7 @@ GRANT SELECT ON testing_autoremovals TO PUBLIC;
 
 CREATE INDEX testing_autoremovals_source_idx ON testing_autoremovals (source);
 
+-- 2013-11-05 reason for key packages
+
+ALTER TABLE key_packages ADD COLUMN reason text;
+

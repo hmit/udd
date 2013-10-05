@@ -1895,6 +1895,7 @@ GRANT SELECT ON mentors_most_recent_package_versions TO PUBLIC;
 -- key_packages
 CREATE TABLE key_packages (
    source text,
+   reason text,
    primary key (source)
 );
 
