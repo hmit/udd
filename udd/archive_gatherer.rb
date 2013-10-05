@@ -323,11 +323,17 @@ EOF
       next if TESTMODE and not package =~ /rdy-updates\/main\/binary-i386/
       # those releases used a slightly different Packages format
       next if package =~ /\/srv\/mirrors\/debian-archive\/debian\/\/dists\/(bo|buzz|rex)\//
-      next if package =~ /debian-installer/
-      package =~ /#{path}\/dists\/(.*)\/(.*)\/binary-(.*)\/Packages.gz/
-      architecture = $3
-      component = $2
-      release = $1
+      if package =~ /debian-installer/
+        package =~ /#{path}\/dists\/(.*)\/(.*)\/debian-installer\/binary-(.*)\/Packages.gz/
+        architecture = $3
+        component = $2 + "/debian-installer"
+        release = $1
+      else
+        package =~ /#{path}\/dists\/(.*)\/(.*)\/binary-(.*)\/Packages.gz/
+        architecture = $3
+        component = $2
+        release = $1
+      end
       # this is a hack. there's squeeze-updates on ftp.debian.org, and squeeze/updates
       # on security.debian.org. so we rename the latter to squeeze-security.
       if path =~ /debian-security/ and release =~ /(.*)\/updates/
