@@ -25,6 +25,7 @@ data = []
 for row in rows:
   entry = {}
   entry['source'] = row['source']
+  entry['reason'] = row['reason']
   data.append(entry)
 
 print yaml.dump(data, default_flow_style=False)
