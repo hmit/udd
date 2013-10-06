@@ -34,14 +34,15 @@ sub main {
 	my $source = $ARGV[2];
 
 	my $dbname = $config->{general}->{dbname};
-	my $dbport;
+	my $dbconnect ="dbi:Pg:dbname=$dbname";
 	if ($config->{general}->{dbport} ne '') {
-	  $dbport = ";port=".$config->{general}->{dbport};
-	} else {
-	  $dbport = "";
+	  $dbconnect .= ";port=".$config->{general}->{dbport};
+	}
+	if (defined $config->{general}->{dbuser}) {
+	  $dbconnect .= ";host=localhost;user=".$config->{general}->{dbuser};
 	}
 	# Connection to DB
-	my $dbh = DBI->connect("dbi:Pg:dbname=$dbname".$dbport);
+	my $dbh = DBI->connect($dbconnect);
 	# We want to commit the transaction as a hole at the end
 	$dbh->{AutoCommit} = 0;
 	$dbh->do('SET CONSTRAINTS ALL DEFERRED');
