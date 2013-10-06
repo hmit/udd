@@ -96,7 +96,7 @@ sub update_autoremovals {
 
 	my $first_seen = get_first_seen($dbh,$table);
 
-	do_query($dbh,"DELETE FROM ${table}");
+	do_query($dbh,"DELETE FROM ${table}") unless $debug;
 	my $insert_autoremovals_handle = $dbh->prepare("INSERT INTO ${table} (source, version, bugs, first_seen, last_checked) VALUES (\$1, \$2, \$3, \$4, \$5)");
 
 	foreach my $buggy_src (sort keys %$buggy) {
@@ -114,10 +114,11 @@ sub update_autoremovals {
 			print "Version: $version\n";
 			print "Bugs: $bugs\n";
 			print "\n";
+		} else {
+			$insert_autoremovals_handle->execute($buggy_src,$version,$bugs,$first_seen,$updated);
 		}
-		$insert_autoremovals_handle->execute($buggy_src,$version,$bugs,$first_seen,$updated);
 	}
-	do_query($dbh,"ANALYZE ".$table);
+	do_query($dbh,"ANALYZE ".$table) unless $debug;
 	$dbh->commit();
 }
 
