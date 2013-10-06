@@ -199,7 +199,12 @@ sub get_bugs {
 SELECT	b.source, b.id, min(s.db_updated) as db_updated
 FROM	bugs b, bugs_stamps s 
 WHERE	b.severity >= 'serious'
-	AND b.affects_testing = true AND b.affects_unstable = true
+        AND b.affects_testing = true AND b.affects_unstable = true
+        AND b.source IN ( -- in testing
+                 SELECT s.source FROM sources s WHERE
+                    release = '$testing' AND
+                    extra_source_only is null
+            )
         AND b.source NOT IN ( -- Not in key packages
                  SELECT kp.source FROM key_packages kp
             )
@@ -226,11 +231,11 @@ WHERE	b.severity >= 'serious'
             )
         AND b.id NOT IN ( -- Bug not fixed in new
                  SELECT pbc.id FROM potential_bug_closures pbc
-				 WHERE origin = 'ftpnew'
+                 WHERE origin = 'ftpnew'
             )
-	-- shoud be only 5 days, because there is a 10 day waiting period afterward
-	AND b.last_modified < CURRENT_TIMESTAMP - INTERVAL '14 days'
-	AND b.id = s.id
+        -- shoud be only 5 days, because there is a 10 day waiting period afterward
+        AND b.last_modified < CURRENT_TIMESTAMP - INTERVAL '14 days'
+        AND b.id = s.id
 GROUP BY b.source, b.id
 
 ";
