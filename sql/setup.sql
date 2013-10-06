@@ -372,6 +372,8 @@ CREATE TABLE archived_bugs_stamps (
 ALTER TABLE ONLY archived_bugs_stamps
     ADD CONSTRAINT archived_bugs_stamps_pkey PRIMARY KEY (id);
 
+GRANT SELECT ON bugs_stamps TO PUBLIC;
+GRANT SELECT ON archived_bugs_stamps TO PUBLIC;
 
 -- usertags are either for archived or unarchived bugs, so we can't add a
 -- foreign key here.

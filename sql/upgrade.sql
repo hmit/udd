@@ -311,7 +311,12 @@ GRANT SELECT ON testing_autoremovals TO PUBLIC;
 
 CREATE INDEX testing_autoremovals_source_idx ON testing_autoremovals (source);
 
--- 2013-11-05 reason for key packages
+-- 2013-10-05 reason for key packages
 
 ALTER TABLE key_packages ADD COLUMN reason text;
+
+-- 2013-10-06 these tables were not public
+
+GRANT SELECT ON bugs_stamps TO PUBLIC;
+GRANT SELECT ON archived_bugs_stamps TO PUBLIC;
 
