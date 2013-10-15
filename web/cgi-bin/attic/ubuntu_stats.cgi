@@ -3,7 +3,7 @@
 require 'dbi'
 require 'pp'
 require 'yaml'
-RELEASE=YAML::load(IO::read('../../ubuntu-releases.yaml'))['devel']
+RELEASE=YAML::load(IO::read('../../ubuntu-releases.yaml'))['stable']
 
 puts "Content-type: text/plain\n\n"
 
@@ -24,7 +24,36 @@ end
 dbh = DBI::connect('DBI:Pg:dbname=udd;port=5452;host=localhost', 'guest')
 sth = dbh.prepare("select count(*) from ubuntu_sources where distribution = 'ubuntu' and release = '#{RELEASE}'")
 sth.execute ; rows = sth.fetch_all
-allpkgs = rows[0][0]
+allpkgs = rows[0][0].to_i
+
+puts "Not in debian (not in lenny or squeeze or wheezy or sid):"
+sth = dbh.prepare("select count(*) from ubuntu_sources where distribution = 'ubuntu' and release = '#{RELEASE}'
+AND source not in (select source from sources where distribution='debian' and release in ('sid', 'jessie', 'wheezy', 'squeeze', 'lenny'))")
+sth.execute ; rows = sth.fetch_all
+notindebian = rows[0][0].to_i
+
+puts "In debian:"
+sth = dbh.prepare("select count(*) from ubuntu_sources where distribution = 'ubuntu' and release = '#{RELEASE}'
+AND source in (select source from sources where distribution='debian' and release in ('sid', 'jessie', 'wheezy', 'squeeze', 'lenny'))")
+sth.execute ; rows = sth.fetch_all
+indebian = rows[0][0].to_i
+
+puts "In debian, not modified:"
+sth = dbh.prepare("select count(*) from ubuntu_sources where distribution = 'ubuntu' and release = '#{RELEASE}'
+AND source in (select source from sources where distribution='debian' and release in ('sid', 'jessie', 'wheezy', 'squeeze', 'lenny'))
+AND version !~ 'ubuntu'")
+sth.execute ; rows = sth.fetch_all
+indebian_notmod = rows[0][0].to_i
+
+puts "In debian, modified:"
+sth = dbh.prepare("select count(*) from ubuntu_sources where distribution = 'ubuntu' and release = '#{RELEASE}'
+AND source in (select source from sources where distribution='debian' and release in ('sid', 'jessie', 'wheezy', 'squeeze', 'lenny'))
+AND version ~ 'ubuntu'")
+sth.execute ; rows = sth.fetch_all
+indebian_mod = rows[0][0].to_i
+
+p [ allpkgs, notindebian, indebian, indebian_notmod, indebian_mod ]
+
 
 puts "Source packages in Ubuntu: #{allpkgs}"
 puts "Source packages per component: [main+restricted, universe+multiverse, total]"
@@ -44,7 +73,7 @@ puts "Not Ubuntu specific, not in debian (not in lenny or squeeze or wheezy or s
 sth = dbh.prepare("select component, count(*) from ubuntu_sources where distribution = 'ubuntu' and release = '#{RELEASE}'
 AND source !~ '^language-(support|pack)-.*' AND source !~ '^kde-l10n-.*'
 AND source !~ 'ubuntu' AND source !~ 'launchpad'
-AND source not in (select source from sources where distribution='debian' and release in ('sid', 'wheezy', 'squeeze', 'lenny'))
+AND source not in (select source from sources where distribution='debian' and release in ('sid', 'jessie', 'wheezy', 'squeeze', 'lenny'))
  group by component")
 sth.execute ; rows = sth.fetch_all
 pp getnums(rows)
