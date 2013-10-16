@@ -352,7 +352,7 @@ blends-prospective:
   path: /srv/udd.debian.org/mirrors/machine-readable
   table: blends_prospectivepackages
 
-blends-metadata:
+blends-all: &blends-conf
   type: blends-metadata
   update-command: /srv/udd.debian.org/udd/scripts/fetch_blends_metadata.sh
   path: /srv/udd.debian.org/mirrors/blends
@@ -360,6 +360,51 @@ blends-metadata:
   table-tasks: blends_tasks
   table-dependencies: blends_dependencies
   table-alternatives: blends_dependencies_alternatives
+
+blend-med:
+  <<: *blends-conf
+
+blend-accessibility:
+  <<: *blends-conf
+
+blend-ezgo:   
+  <<: *blends-conf
+
+blend-gis:
+  <<: *blends-conf      
+
+blend-junior:
+  <<: *blends-conf
+
+blend-med:
+  <<: *blends-conf
+
+blend-pan:
+  <<: *blends-conf
+
+blend-debichem:
+  <<: *blends-conf
+
+blend-edu:
+  <<: *blends-conf
+
+blend-games:
+  <<: *blends-conf
+
+blend-imaging:
+  <<: *blends-conf
+
+blend-lex:
+  <<: *blends-conf
+
+blend-multimedia:
+  <<: *blends-conf
+
+blend-science:
+  <<: *blends-conf
+
+blend-fun:
+  <<: *blends-conf
 
 clone-udd-bugs:
   type: clone-udd-bugs
