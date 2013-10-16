@@ -53,15 +53,18 @@ for blend in `ls ${BLENDSWEBCONFSUBDIR} | sed 's/\.conf$//'` ; do
     fi
     if [ "$VcsType" = "git" ] ; then
       if [ ! -d $blend ] ; then
-        git clone $VcsDir $blend >/dev/null 2>/dev/null
+        git clone $VcsDir $blend >/dev/null && true
+        if [ $? -gt 0 ] ; then echo "Unable to fetch data for $blend from $VcsDir" ; fi
       else
         if [ ! -d $blend/.git ] ; then
           rm -rf $blend
-          git clone $VcsDir $blend >/dev/null 2>/dev/null
+          git clone $VcsDir $blend >/dev/null && true
+          if [ $? -gt 0 ] ; then echo "Unable to fetch data for $blend from $VcsDir" ; fi
         else
           cd $blend
           git stash >/dev/null
-          git pull >/dev/null 2>/dev/null
+          git pull >/dev/null && true
+          if [ $? -gt 0 ] ; then echo "Unable to fetch data for $blend from $VcsDir" ; fi
           cd ..
         fi
       fi
