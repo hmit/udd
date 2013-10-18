@@ -1787,6 +1787,7 @@ CREATE TABLE blends_tasks (
      test_always_lang TEXT,
      description      TEXT,
      long_description TEXT,
+     hashkey          TEXT,    -- md5 hash to check if a task file has changed/updated
      PRIMARY KEY (blend, task)
 );
 
