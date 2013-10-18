@@ -4,8 +4,6 @@
 This script imports data about not yet uploaded packages prepared by Blends teams.
 """
 
-#TODO remove sys import
-import sys
 import hashlib
 from aux import quote
 from gatherer import gatherer
@@ -212,6 +210,7 @@ class blends_metadata_gatherer(gatherer):
       if alt_in_udd[0] < 1000:
         self.inject_package_alternatives(blend, task, strength, alt_in_udd[1], alt_in_udd[2], alt, contains_provides)
 
+  #TODO not sure if we need that 
   def delete_all_tables(self, table):
     my_config = self.my_config
     self.cur = self.cursor()
@@ -225,16 +224,23 @@ class blends_metadata_gatherer(gatherer):
     my_config = self.my_config
     self.cur = self.cursor()
 
-    #self.delete_all_tables()
-
     query = """PREPARE blend_metadata_insert AS INSERT INTO %s (blend, blendname, projecturl, tasksprefix,
                homepage, aliothurl, projectlist, logourl, outputdir, datadir, vcsdir, css, advertising, pkglist, dehsmail, distribution)
                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)""" % (my_config['table-metadata'])
     self.cur.execute(query)
-    #query = """PREPARE blend_tasks_insert AS INSERT INTO %s (blend, task, title, section, enhances, leaf, test_always_lang, metapackage, metapackage_name, description, long_description)
-    #           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)""" % (my_config['table-tasks'])
-    query = """PREPARE blend_tasks_insert AS INSERT INTO %s (blend, task, title, section, enhances, leaf, test_always_lang, metapackage, description, long_description, hashkey)
-               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)""" % (my_config['table-tasks'])
+
+    query = """PREPARE blend_metadata_update AS UPDATE %s SET 
+               blendname=$2, projecturl=$3, tasksprefix=$4, homepage=$5, aliothurl=$6, 
+               projectlist=$7, logourl=$8, outputdir=$9, datadir=$10, vcsdir=$11, css=$12, 
+               advertising=$13, pkglist=$14, dehsmail=$15, distribution=$16 WHERE blend=$1""" % (my_config['table-metadata'])
+    self.cur.execute(query)
+
+    query = """PREPARE blend_tasks_insert AS INSERT INTO %s (blend, task, title, section, enhances, leaf, test_always_lang, metapackage, metapackage_name, description, long_description, hashkey)
+               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)""" % (my_config['table-tasks'])
+    self.cur.execute(query)
+              
+    query = """PREPARE check_blend AS SELECT blend FROM %s WHERE blend=$1 
+          """ % ( my_config['table-metadata'] )
     self.cur.execute(query)
     
     query = """PREPARE blend_check_existing_package AS
@@ -293,6 +299,7 @@ class blends_metadata_gatherer(gatherer):
   def run(self):
     my_config = self.my_config
 
+    #moved all statements in a separate function
     self.prepare_statements()
 
     blendsdir = my_config['path']
@@ -309,6 +316,7 @@ class blends_metadata_gatherer(gatherer):
     if selected_source == 'blends-all':
       blends_to_update = all_blends_conf
     else:
+      #check if the given blend exists in webconf
       for md in all_blends_conf:
         md_cleaned = md.replace(".conf",'')
         source_cleaned = selected_source.split('-')[1]
@@ -324,6 +332,7 @@ class blends_metadata_gatherer(gatherer):
       self.sethandler()
       self.log.error("Can not find any conf in: {1} for {0} blend, aborting...".format(selected_source, metadatadir))
 
+    #here it either updates all the Blends with blend-all or updates only a single Blend 
     for md in blends_to_update:
       f = open(metadatadir+'/'+md, 'r')
       meta = { 'blend'       : '',
@@ -385,20 +394,31 @@ class blends_metadata_gatherer(gatherer):
       else:
         p = s.replace('debian-', '')
 
-      #TODO check again the blend metadata removal
       #try:
       #  self.cur.execute("DELETE FROM %s WHERE blend='%s'" % (my_config['table-metadata'], meta['blend'] ))
       #except IntegrityError, err:
-      #  self.log.error("Delete from %s: error %s" % (my_config['table-metadata'], err))
-      
-        
+      #  self.log.error("Delete from %s: error %s" % (my_config['table-metadata'], err))      
       meta['tasksprefix'] = p
-      #query = """EXECUTE blend_metadata_insert (%(blend)s, %(blendname)s, %(projecturl)s, %(tasksprefix)s,
-      #           %(homepage)s, %(aliothurl)s, %(projectlist)s, %(logourl)s, %(outputdir)s, %(datadir)s, %(vcsdir)s, %(css)s, %(advertising)s, %(pkglist)s, %(dehsmail)s, %(distribution)s)"""
-      #try:
-      #  self.cur.execute(query, meta)
-      #except IntegrityError, err:
-      #  self.log.error("taskfile = %s: %s" % (taskfile, err))
+
+      query = """EXECUTE check_blend ( '%s' )""" % ( meta['blend'] )
+      self.cur.execute(query)
+
+      blend_exists = self.cur.fetchone()
+      if blend_exists:
+        self.log.info("Updating existing Blend: %s" % ( meta['blend'] ))
+        query = """EXECUTE blend_metadata_update (%(blend)s, %(blendname)s, %(projecturl)s, %(tasksprefix)s,
+                 %(homepage)s, %(aliothurl)s, %(projectlist)s, %(logourl)s, %(outputdir)s, %(datadir)s, 
+                 %(vcsdir)s, %(css)s, %(advertising)s, %(pkglist)s, %(dehsmail)s, %(distribution)s)"""
+      else:
+        self.log.info("Creating new Blend: %s" % ( meta['blend'] ))
+        query = """EXECUTE blend_metadata_insert (%(blend)s, %(blendname)s, %(projecturl)s, %(tasksprefix)s,
+                 %(homepage)s, %(aliothurl)s, %(projectlist)s, %(logourl)s, %(outputdir)s, %(datadir)s, 
+                 %(vcsdir)s, %(css)s, %(advertising)s, %(pkglist)s, %(dehsmail)s, %(distribution)s)"""
+      
+      try:
+        self.cur.execute(query, meta)
+      except IntegrityError, err:
+        self.log.error("taskfile = %s: %s" % (taskfile, err))
 
       for t in listdir(tasksdirtemplate % meta['blend']):
         if t.startswith('.'):
@@ -436,6 +456,7 @@ class blends_metadata_gatherer(gatherer):
           if hash_from_db and hash_from_db[0] == taskhash:
             task_is_uptodate = True
 
+          #if the task file has not changed then skip it
           if task_is_uptodate:
             self.log.info("Task %s is up date. Continue to next task." % ( taskmeta['task'] ) )
             continue
@@ -487,8 +508,8 @@ class blends_metadata_gatherer(gatherer):
           for line in lines[1:]:
             task['long_description'] += line + "\n"
 
-        #query = "EXECUTE blend_tasks_insert (%(blend)s, %(task)s, %(title)s, %(section)s, %(enhances)s, %(leaf)s, %(test_always_lang)s, %(metapackage)s, %(metapackage_name)s, %(description)s, %(long_description)s, %(hashkey)s)"
-        query = "EXECUTE blend_tasks_insert (%(blend)s, %(task)s, %(title)s, %(section)s, %(enhances)s, %(leaf)s, %(test_always_lang)s, %(metapackage)s, %(description)s, %(long_description)s, %(hashkey)s)"
+        query = "EXECUTE blend_tasks_insert (%(blend)s, %(task)s, %(title)s, %(section)s, %(enhances)s, %(leaf)s, %(test_always_lang)s, %(metapackage)s, %(metapackage_name)s, %(description)s, %(long_description)s, %(hashkey)s)"
+        
         try:
           self.cur.execute(query, task)
         except IntegrityError, err:
@@ -522,6 +543,7 @@ class blends_metadata_gatherer(gatherer):
       self.meta[meta['blend']] = meta
 
     self.cur.execute("DEALLOCATE  blend_metadata_insert")
+    #self.cur.execute("DEALLOCATE  blend_metadata_update")
     self.cur.execute("ANALYZE %s" % my_config['table-metadata'])
 
 if __name__ == '__main__':
