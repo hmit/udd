@@ -80,7 +80,8 @@ while (my $rowsc = $sthc->fetchrow_hashref()) {
 	}
 	my $maintainers = {};
 	push @{$maintainerlist->{$rowsc->{"maintainer"}}}, $sourceinfo;
-	foreach my $upl (split(/,\s*/,$rowsc->{"uploaders"})) {
+	foreach my $upl (split(/>,\s*/,$rowsc->{"uploaders"})) {
+		$upl.=">" unless ($upl =~ m/>$/);
 		push @{$maintainerlist->{$upl}}, $sourceinfo;
 	}
 }

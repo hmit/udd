@@ -85,6 +85,7 @@ class blends_prospective_gatherer(gatherer):
     
     cur.execute('TRUNCATE %s' % my_config['table'])
     cur.execute("PREPARE check_source (text) AS SELECT COUNT(*) FROM sources WHERE source = $1")
+    cur.execute("PREPARE check_new_source (text) AS SELECT COUNT(*) FROM new_sources WHERE source = $1")
     cur.execute("PREPARE check_reference (text) AS SELECT COUNT(*) FROM bibref WHERE source = $1")
 
     cur.execute("""PREPARE check_itp (int) AS
@@ -109,6 +110,10 @@ class blends_prospective_gatherer(gatherer):
       for source in sources:
         cur.execute("EXECUTE check_source (%s)", (source,))
         prospective = True
+        if cur.fetchone()[0] > 0:
+          prospective = False
+
+        cur.execute("EXECUTE check_new_source (%s)", (source,))
         if cur.fetchone()[0] > 0:
           prospective = False
 

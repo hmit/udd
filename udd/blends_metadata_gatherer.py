@@ -420,6 +420,9 @@ class blends_metadata_gatherer(gatherer):
       except IntegrityError, err:
         self.log.error("taskfile = %s: %s" % (taskfile, err))
 
+      if not exists(tasksdirtemplate % meta['blend']):
+        self.log.error("No data for %s found.  Please check UDD update script.  Unable to update data of this Blend." % meta['blend'])
+        continue
       for t in listdir(tasksdirtemplate % meta['blend']):
         if t.startswith('.'):
           continue
