@@ -137,6 +137,11 @@ while (1) {
 	debug "# Getting sources for build-depends\n";
 	my $newsrcs_a = add_pkg_sources($dbh,$srcs,$pkgs);
 
+	debug "# Getting build-depends-indep for sources\n";
+	get_depends($dbh,"select source,build_depends_indep from sources
+		where release='$TESTING' and source in ('".join("','",keys %$newsrcs)."')","build-depends-indep",$pkgs);
+	my $newsrcs_b = add_pkg_sources($dbh,$srcs,$pkgs);
+
 	my $newsrcs_b = {};
 	if ($do_deps) {
 		$pkgs = {};
