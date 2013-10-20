@@ -160,15 +160,15 @@ while (1) {
 #print Dumper $srcs;
 
 debug "# Final list of ".(scalar keys %$srcs)." key source packages:\n";
-do_query($dbh,"DELETE FROM key_packages;");
+do_query($dbh,"DELETE FROM key_packages;") unless $debug;
 my $insert_handle = $dbh->prepare("INSERT INTO key_packages ".
 	"(source, reason) VALUES (\$1,\$2);");
 foreach my $source (sort keys %$srcs) {
 	my $reason = $srcs->{$source};
 	debug "$source\t$reason\n";
-	$insert_handle->execute($source,$reason);
+	$insert_handle->execute($source,$reason) unless $debug;
 }
 
-do_query($dbh,"ANALYZE key_packages");
+do_query($dbh,"ANALYZE key_packages") unless $debug;
 
 
