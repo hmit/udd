@@ -142,7 +142,7 @@ while (1) {
 		where release='$TESTING' and source in ('".join("','",keys %$newsrcs)."')","build-depends-indep",$pkgs);
 	my $newsrcs_b = add_pkg_sources($dbh,$srcs,$pkgs);
 
-	my $newsrcs_b = {};
+	my $newsrcs_c = {};
 	if ($do_deps) {
 		$pkgs = {};
 		debug "# Getting depends for sources\n";
@@ -150,10 +150,10 @@ while (1) {
 			where release='$TESTING' and source in ('".join("','",keys %$newsrcs)."')","depends",$pkgs);
 
 		debug "# Getting sources for depends\n";
-		$newsrcs_b = add_pkg_sources($dbh,$srcs,$pkgs);
+		$newsrcs_c = add_pkg_sources($dbh,$srcs,$pkgs);
 	}
 
-	$newsrcs = {%$newsrcs_a,%$newsrcs_b};
+	$newsrcs = {%$newsrcs_a,%$newsrcs_b,%$newsrcs_c};
 
 	debug "# Adding ".(scalar keys %$newsrcs)." source packages: ".join(" ",sort keys %$newsrcs)."\n";
 	last unless scalar keys %$newsrcs;
