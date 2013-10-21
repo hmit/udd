@@ -213,7 +213,6 @@ class blends_metadata_gatherer(gatherer):
   #TODO not sure if we need that 
   def delete_all_tables(self, table):
     my_config = self.my_config
-    self.cur = self.cursor()
 
     self.cur.execute("DELETE FROM %s" % (my_config['table-dependencies']))
     self.cur.execute("DELETE FROM %s" % (my_config['table-alternatives']))
@@ -296,8 +295,36 @@ class blends_metadata_gatherer(gatherer):
                  LIMIT 1"""
     self.cur.execute(query)
 
+    query = """PREPARE gethashkey AS SELECT hashkey FROM %s WHERE task=$1 AND blend=$2
+                """ % (my_config['table-tasks'])
+    self.cur.execute(query)
+
+
+  def clean_up_tasks(self, blend, tasks):
+    my_conf = self.my_config
+    #make a str: 'task1','task2'... for the where clause
+    tasks_str =  ','.join([ "'{0}'".format(t) for t in tasks ])
+
+    self.log.info( "Clean up any removed/renamed tasks from blend {0}".format(blend) )
+
+    #clean up all the renamed/removed tasks from the following tables
+    for table in [ my_conf['table-dependencies'], my_conf['table-alternatives'], my_conf['table-tasks'] ]:
+      query = """
+            DELETE FROM {0} WHERE blend='{1}' and task not in ( {2} )
+          """.format( table, blend, tasks_str )
+      self.cur.execute(query)
+
+
+
+  def delete_task(self, blend, task):
+    my_conf = self.my_config
+    for table in [ my_conf['table-dependencies'], my_conf['table-alternatives'], my_conf['table-tasks'] ]:
+      query = "DELETE FROM ONLY %s WHERE blend='%s' AND task='%s'" % (table, blend, task )
+      self.cur.execute(query)
+    
   def run(self):
     my_config = self.my_config
+    self.cur = self.cursor()
 
     #moved all statements in a separate function
     self.prepare_statements()
@@ -334,6 +361,10 @@ class blends_metadata_gatherer(gatherer):
 
     #here it either updates all the Blends with blend-all or updates only a single Blend 
     for md in blends_to_update:
+      #a list to keep the existing tasks, after the update the tasks
+      #which do not exist in this list will be removed
+      existing_tasks = []
+
       f = open(metadatadir+'/'+md, 'r')
       meta = { 'blend'       : '',
                'blendname'   : '',
@@ -394,10 +425,7 @@ class blends_metadata_gatherer(gatherer):
       else:
         p = s.replace('debian-', '')
 
-      #try:
-      #  self.cur.execute("DELETE FROM %s WHERE blend='%s'" % (my_config['table-metadata'], meta['blend'] ))
-      #except IntegrityError, err:
-      #  self.log.error("Delete from %s: error %s" % (my_config['table-metadata'], err))      
+
       meta['tasksprefix'] = p
 
       query = """EXECUTE check_blend ( '%s' )""" % ( meta['blend'] )
@@ -423,6 +451,7 @@ class blends_metadata_gatherer(gatherer):
       if not exists(tasksdirtemplate % meta['blend']):
         self.log.error("No data for %s found.  Please check UDD update script.  Unable to update data of this Blend." % meta['blend'])
         continue
+
       for t in listdir(tasksdirtemplate % meta['blend']):
         if t.startswith('.'):
           continue
@@ -451,8 +480,9 @@ class blends_metadata_gatherer(gatherer):
           with open(taskfile, 'r') as readforhash:
             taskhash = self.get_hash(readforhash.read())
 
-          self.cur.execute("SELECT hashkey FROM %s WHERE task='%s' AND blend='%s'" % 
-                                            (my_config['table-tasks'], t, meta['blend']) )
+          existing_tasks.append(t)
+
+          self.cur.execute("EXECUTE gethashkey('%s', '%s')" % ( t, meta['blend'] ))
           hash_from_db = self.cur.fetchone()
 
           #check if the task exists and if it is up to date using the hash
@@ -461,14 +491,14 @@ class blends_metadata_gatherer(gatherer):
 
           #if the task file has not changed then skip it
           if task_is_uptodate:
-            self.log.info("Task %s is up date. Continue to next task." % ( taskmeta['task'] ) )
+            self.log.info("Task %s is up date. Continue to next task." % ( t ) )
+            existing_tasks.append(t)
             continue
           else:
-            self.log.info("Task %s has changed, proceed to update." % ( taskmeta['task'] ) )
+            self.log.info("Task %s has changed, proceed to update." % ( t ) )
             #clean up this task's data
-            self.cur.execute("DELETE FROM ONLY %s WHERE blend='%s' AND task='%s'" % (my_config['table-dependencies'], meta['blend'], t ))
-            self.cur.execute("DELETE FROM ONLY %s WHERE blend='%s' AND task='%s'" % (my_config['table-alternatives'], meta['blend'], t ))
-            self.cur.execute("DELETE FROM ONLY %s WHERE blend='%s' AND task='%s'" % (my_config['table-tasks'], meta['blend'], t ))
+            self.delete_task(meta['blend'], t)
+
 
           task = { 'blend'            : meta['blend'],
                    'task'             : t,
@@ -542,8 +572,11 @@ class blends_metadata_gatherer(gatherer):
           except:
             break
 
+        #here we have a successfully imported taskfile
+        existing_tasks.append(t)
 
       self.meta[meta['blend']] = meta
+      self.clean_up_tasks(meta['blend'], existing_tasks)
 
     self.cur.execute("DEALLOCATE  blend_metadata_insert")
     #self.cur.execute("DEALLOCATE  blend_metadata_update")
