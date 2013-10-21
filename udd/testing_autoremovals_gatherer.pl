@@ -99,16 +99,55 @@ sub update_autoremovals {
 	do_query($dbh,"DELETE FROM ${table}") unless $debug;
 	my $insert_autoremovals_handle = $dbh->prepare("INSERT INTO ${table} (source, version, bugs, first_seen, last_checked) VALUES (\$1, \$2, \$3, \$4, \$5)");
 
+	my $autoremovals = 0;
+	my $skipped = 0;
 	foreach my $buggy_src (sort keys %$buggy) {
 		# If it is not in testing, ignore it.
 		next unless $needs->{$buggy_src};
-		next if $rdeps->{$buggy_src};
 		# TODO can there be more than 1 version?
 		my $version =  join (' ', keys %{ $needs->{$buggy_src}->{'_version'}});
 		my $bugs = join (',', keys %{ $buggy->{$buggy_src} });
 		my $updated = min(values %{ $buggy->{$buggy_src}});
 		my $first_seen = $first_seen->{$buggy_src};
 		$first_seen = $now unless $first_seen;
+
+		# all rdeps for $buggy_src, recursively
+		my $my_rdeps = {};
+		# rdeps added during at this level
+		my $newrdeps = {};
+		# start with only this package
+		$newrdeps->{$buggy_src} = 1;
+		my $level = 0;
+		while (scalar keys %$newrdeps) {
+			my $_found = {};
+			foreach my $src (keys %$newrdeps) {
+				unless ($my_rdeps->{$src}) {
+					$my_rdeps->{$src} = $level;
+					foreach my $rrdep (keys %{$rdeps->{$src}}) {
+						unless ($my_rdeps->{$rrdep}) {
+							$_found->{$rrdep} = 1
+						}
+					}
+				}
+			}
+			$newrdeps = $_found;
+			$level++;
+		}
+		my $nonbuggy_rdeps;
+		foreach my $src (keys %$my_rdeps) {
+			if ($buggy->{$src}) {
+				#print "skip buggy rdep $src of $buggy_src\n" if $debug;
+				next;
+			}
+			$nonbuggy_rdeps->{$src} = $my_rdeps->{$src};
+		}
+
+		my $rdepcount = (scalar keys %$my_rdeps);
+		my $nbrdepcount = (scalar keys %$nonbuggy_rdeps);
+		if ($nbrdepcount) {
+			$skipped++;
+			next;
+		}
 		if ($debug) {
 			print "Package: $buggy_src\n";
 			print "Version: $version\n";
@@ -117,9 +156,11 @@ sub update_autoremovals {
 		} else {
 			$insert_autoremovals_handle->execute($buggy_src,$version,$bugs,$first_seen,$updated);
 		}
+		$autoremovals++
 	}
 	do_query($dbh,"ANALYZE ".$table) unless $debug;
 	$dbh->commit();
+	print "total: $autoremovals autoremovals, $skipped skipped for rdeps\n" if $debug;
 }
 
 sub do_query {
