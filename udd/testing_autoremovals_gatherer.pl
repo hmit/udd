@@ -94,6 +94,8 @@ sub update_autoremovals {
 
 	$buggy = get_bugs ($dbh, $bin2src);
 
+	my $popcon = get_popcon($dbh);
+
 	my $first_seen = get_first_seen($dbh,$table);
 
 	do_query($dbh,"DELETE FROM ${table}") unless $debug;
@@ -139,7 +141,7 @@ sub update_autoremovals {
 				#print "skip buggy rdep $src of $buggy_src\n" if $debug;
 				next;
 			}
-			$nonbuggy_rdeps->{$src} = $my_rdeps->{$src};
+			$nonbuggy_rdeps->{$src} = $popcon->{$src};
 		}
 
 		my $rdepcount = (scalar keys %$my_rdeps);
@@ -151,6 +153,7 @@ sub update_autoremovals {
 		if ($debug) {
 			print "Package: $buggy_src\n";
 			print "Version: $version\n";
+			print "Popcon: ".$popcon->{$buggy_src}."\n";
 			print "Bugs: $bugs\n";
 			print "\n";
 		} else {
@@ -300,6 +303,20 @@ GROUP BY b.source, b.id
     }
 
     return $buggy;
+}
+
+sub get_popcon {
+    my ($dbh) = @_;
+
+	my $popcon = {};
+	my $query = "select source, insts from popcon_src;";
+	my $sthc = do_query($dbh,$query);
+	while (my $pg = $sthc->fetchrow_hashref()) {
+		my $src = $pg->{'source'};
+		my $insts = $pg->{'insts'};
+		$popcon->{$src} = $insts;
+	}
+	return $popcon;
 }
 
 sub get_first_seen {
