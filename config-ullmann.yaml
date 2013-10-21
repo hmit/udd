@@ -11,7 +11,7 @@ general:
     src-pkg: module udd.src_and_pkg_gatherer
     popcon: module udd.popcon_gatherer
     testing-migrations: module udd.testing_migrations_gatherer
-    testing-autoremovals: exec perl /srv/udd.debian.org/udd-dev/udd/testing_autoremovals_gatherer.pl 
+    testing-autoremovals: exec perl /srv/udd.debian.org/udd/udd/testing_autoremovals_gatherer.pl 
     upstream: exec /srv/udd.debian.org/udd/scripts/update-upstream-status
     key-packages: exec /srv/udd.debian.org/udd/scripts/update-key-packages.pl
     vcs: exec /srv/udd.debian.org/udd/scripts/update-vcs-status
