@@ -145,8 +145,8 @@ sub _calculate_rdeps {
                 #print STDERR "N: $src ($el) -> $prov_src ($dep)\n" if $prov_src;
                 unless ($providers) {
                     if ($debug) {
-                        print STDERR "warning: cannot determine the provider of $dep ($src via $el)\n"
-                            unless $once{$dep}++;
+                        #print STDERR "warning: cannot determine the provider of $dep ($src via $el)\n"
+                        #    unless $once{$dep}++;
                     }
                     next;
                 }
@@ -318,7 +318,7 @@ sub read_package_data {
 			unless $pkg && defined $src_version;
 
 		unless ($needs->{$src}->{'_version'}->{$src_version}) {
-			print "$src $src_version not found\n" if $debug;
+			#print "$src $src_version not found\n" if $debug;
 			next;
 		}
 
