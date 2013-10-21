@@ -6,7 +6,7 @@ This script imports informations about translated applications
 inside Debian packages.
 """
 
-from aux import quote
+from aux import quote, to_unicode
 from gatherer import gatherer
 import re
 from debian import deb822
@@ -46,8 +46,8 @@ class pkg_info():
     self.maintainer       = ''
 
   def __str__(self):
-    return "Package %s: %s, %s\n%s" % \
-        (self.package, self.maintainer, self.version)
+    return "Package %s: %s, %s" % \
+        (self.package, to_unicode(self.maintainer), self.version)
 
 class po_info():
   def __init__(self, poline):
@@ -148,13 +148,17 @@ class i18n_apps_gatherer(gatherer):
 
     for lang in po_info_dict.keys():
       poinfo = po_info_dict[lang]
-      query = "EXECUTE %s_insert (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)" % \
+      try:
+        query = "EXECUTE %s_insert (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)" % \
                 (target_table, \
                  quote(self.pkg.package), quote(self.pkg.version), quote(self.pkg.release), \
                  quote(self.pkg.maintainer), quote(poinfo.po_file), quote(poinfo.language), \
                  quote(poinfo.pkg_version_lang), \
                  quote(poinfo.last_translator), quote(poinfo.language_team), \
                  poinfo.translated, poinfo.fuzzy, poinfo.untranslated)
+      except UnicodeDecodeError, err:
+        print >>stderr, "ASCII error for", self.pkg
+        continue
       try:
         cur.execute(query)
       except IntegrityError, err:
