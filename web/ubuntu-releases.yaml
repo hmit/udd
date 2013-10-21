@@ -1,4 +1,4 @@
 --- 
 lts: precise
-stable: raring
-devel: saucy
+stable: saucy
+devel: trusty
