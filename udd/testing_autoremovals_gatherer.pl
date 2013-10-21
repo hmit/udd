@@ -101,17 +101,11 @@ sub update_autoremovals {
 	do_query($dbh,"DELETE FROM ${table}") unless $debug;
 	my $insert_autoremovals_handle = $dbh->prepare("INSERT INTO ${table} (source, version, bugs, first_seen, last_checked) VALUES (\$1, \$2, \$3, \$4, \$5)");
 
-	my $autoremovals = 0;
+	my $autoremovals = {};
 	my $skipped = 0;
 	foreach my $buggy_src (sort keys %$buggy) {
 		# If it is not in testing, ignore it.
 		next unless $needs->{$buggy_src};
-		# TODO can there be more than 1 version?
-		my $version =  join (' ', keys %{ $needs->{$buggy_src}->{'_version'}});
-		my $bugs = join (',', keys %{ $buggy->{$buggy_src} });
-		my $updated = min(values %{ $buggy->{$buggy_src}});
-		my $first_seen = $first_seen->{$buggy_src};
-		$first_seen = $now unless $first_seen;
 
 		# all rdeps for $buggy_src, recursively
 		my $my_rdeps = {};
@@ -150,6 +144,18 @@ sub update_autoremovals {
 			$skipped++;
 			next;
 		}
+		$autoremovals->{$buggy_src} = 1;
+	}
+
+	foreach my $buggy_src (sort keys %$autoremovals) {
+		my $updated = min(values %{ $buggy->{$buggy_src}});
+		my $first_seen = $first_seen->{$buggy_src};
+		$first_seen = $now unless $first_seen;
+
+		# TODO can there be more than 1 version?
+		my $version =  join (' ', keys %{ $needs->{$buggy_src}->{'_version'}});
+		my $bugs = join (',', keys %{ $buggy->{$buggy_src} });
+
 		if ($debug) {
 			print "Package: $buggy_src\n";
 			print "Version: $version\n";
@@ -159,11 +165,10 @@ sub update_autoremovals {
 		} else {
 			$insert_autoremovals_handle->execute($buggy_src,$version,$bugs,$first_seen,$updated);
 		}
-		$autoremovals++
 	}
 	do_query($dbh,"ANALYZE ".$table) unless $debug;
 	$dbh->commit();
-	print "total: $autoremovals autoremovals, $skipped skipped for rdeps\n" if $debug;
+	print "total: ".(scalar keys $autoremovals)." autoremovals, $skipped skipped for rdeps\n" if $debug;
 }
 
 sub do_query {
