@@ -480,8 +480,6 @@ class blends_metadata_gatherer(gatherer):
           with open(taskfile, 'r') as readforhash:
             taskhash = self.get_hash(readforhash.read())
 
-          existing_tasks.append(t)
-
           self.cur.execute("EXECUTE gethashkey('%s', '%s')" % ( t, meta['blend'] ))
           hash_from_db = self.cur.fetchone()
 
