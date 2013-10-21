@@ -150,11 +150,19 @@ sub _calculate_rdeps {
                     }
                     next;
                 }
+				if (my $prov = $providers->{'_main'}) {
+					# when the package exists, only use that, not the packages
+					# that provide it
+					if ($prov ne $src) {
+						$rdeps->{$prov}->{$src} = 1;
+					}
+					next;
+				}
                 foreach my $prov (keys %$providers) {
                     next if $prov eq '_main'; # fake entry
                     next if $src eq $prov;    # self depends does not count
                     #print STDERR "N: $src deps on $prov (via $el)\n";
-                    $rdeps->{$prov}++;
+                    $rdeps->{$prov}->{$src} = 1;
                 }
             }
         }
