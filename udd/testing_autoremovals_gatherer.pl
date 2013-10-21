@@ -355,6 +355,12 @@ sub _split_dep {
     $dep =~ s/\([^\)]*\)//og;
     $dep =~ s/^\s*+//o;
     $dep =~ s/\s*+$//o;
-    return split m/\s*+[,|]\s*+/o, $dep;
+    my @deps = split m/\s*+[,]\s*+/o, $dep;
+	my @deps_first = ();
+	foreach my $dep (@deps) {
+    	my ($dep1, undef) = split m/\s*+[,|]\s*+/o, $dep;
+		push @deps_first, $dep1;
+	}
+    return @deps_first;
 }
 
