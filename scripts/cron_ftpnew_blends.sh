@@ -8,4 +8,5 @@ UAR=/srv/udd.debian.org/udd/update-and-run.sh
 
 $UAR ftpnew
 $UAR blends-prospective
-$UAR blends-metadata
+# $UAR blends-metadata
+$UAR blends-all
