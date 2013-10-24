@@ -69,10 +69,10 @@ for blend in `ls ${BLENDSWEBCONFSUBDIR} | sed 's/\.conf$//'` ; do
         else
           cd $blend
           git stash >/dev/null
-          git pull >/dev/null && true
+          git pull >/dev/null 2>/dev/null && true
           if [ $? -gt 0 ] ; then
             echo "Unable to pull data for $blend from $VcsDir - try without SSL verification"
-            GIT_SSL_NO_VERIFY=1 git pull >/dev/null && true
+            GIT_SSL_NO_VERIFY=1 git pull >/dev/null 2>/dev/null && true
           fi
           cd ..
         fi
