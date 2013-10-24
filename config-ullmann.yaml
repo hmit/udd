@@ -406,6 +406,9 @@ blend-science:
 blend-fun:
   <<: *blends-conf
 
+blend-openstudio:
+  <<: *blends-conf
+
 clone-udd-bugs:
   type: clone-udd-bugs
   update-command: /srv/udd.debian.org/udd/scripts/clone_udd_bugs_fetch.sh
