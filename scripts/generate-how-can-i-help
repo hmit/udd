@@ -68,7 +68,7 @@ dbget("select id, source, package, title from bugs where id in (select id from b
   }
 end
 
-dbget("""select packages_summary.source, package, sync
+dbget("""select distinct packages_summary.source, package, sync
       from packages_summary, migrations where distribution='debian' and release='sid'
       and package not in (select package from packages_summary where distribution='debian' and release='jessie')
       and packages_summary.source not in (select source from sources where distribution='debian' and release='jessie')
