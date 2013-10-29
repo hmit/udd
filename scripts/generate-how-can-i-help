@@ -68,6 +68,20 @@ dbget("select id, source, package, title from bugs where id in (select id from b
   }
 end
 
+dbget("""select packages_summary.source, package, sync
+      from packages_summary, migrations where distribution='debian' and release='sid'
+      and package not in (select package from packages_summary where distribution='debian' and release='jessie')
+      and packages_summary.source not in (select source from sources where distribution='debian' and release='jessie')
+      and packages_summary.source = migrations.source and sync is not null and age(sync) < interval '1 year'").each do |r|
+  hash = Digest::MD5.hexdigest("no-testing #{r['package']}")
+  helpitems << {
+    'type' => 'no-testing',
+    'hash' => hash,
+    'source' => r['source'],
+    'package' => r['package']
+  }
+end
+
 fd = File::new(OFILE+'.1', 'w')
 JSON::dump(helpitems, fd)
 fd.close
