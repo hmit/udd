@@ -35,20 +35,22 @@ def de_html(string):
   return string
 
 # These fields are not forewarded to UDD tables for the moment
-fields_to_pass   = ('Format',
-                    'Date',
-                    'Changed-By',
-                    'Files',
-                    'Uploaders',
-                    'Standards-Version',
-                    'Priority',
-                    'Urgency',
-                    'Dm-Upload-Allowed',
-                    'Autobuild',
+fields_to_pass   = ('Autobuild',
+                    'Build-Conflicts',
                     'Build-Depends',
                     'Build-Depends-Indep',
-                    'Build-Conflicts',
-                    'Python-Version')
+                    'Changed-By',
+                    'Date',
+                    'Dgit',
+                    'Dm-Upload-Allowed',
+                    'Files',
+                    'Format',
+                    'Priority',
+                    'Python-Version',
+                    'Standards-Version',
+                    'Uploaders',
+                    'Urgency',
+                   )
                     # + startswith('Npp-')
 
 # These fields are not documented (to my knowledge) but just occure from
