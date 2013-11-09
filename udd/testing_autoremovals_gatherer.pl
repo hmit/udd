@@ -13,6 +13,7 @@ use YAML::Syck;
 use List::Util qw(min max);
 
 my $testing = "jessie";
+my $removaldelay = 15*24*3600;
 my $debug = 0;
 my $now = time;
 print "start: ".$now."\n" if ($debug);
@@ -96,10 +97,10 @@ sub update_autoremovals {
 
 	my $popcon = get_popcon($dbh);
 
-	my $first_seen = get_first_seen($dbh,$table);
+	my $autoremoval_info = get_autoremoval_info($dbh,$table);
 
 	do_query($dbh,"DELETE FROM ${table}") unless $debug;
-	my $insert_autoremovals_handle = $dbh->prepare("INSERT INTO ${table} (source, version, bugs, first_seen, last_checked) VALUES (\$1, \$2, \$3, \$4, \$5)");
+	my $insert_autoremovals_handle = $dbh->prepare("INSERT INTO ${table} (source, version, bugs, first_seen, last_checked, removal_time) VALUES (\$1, \$2, \$3, \$4, \$5, \$6)");
 
 	my $autoremovals = {};
 	my $skipped = 0;
@@ -149,8 +150,10 @@ sub update_autoremovals {
 
 	foreach my $buggy_src (sort keys %$autoremovals) {
 		my $updated = min(values %{ $buggy->{$buggy_src}});
-		my $first_seen = $first_seen->{$buggy_src};
+		my $first_seen = $autoremoval_info->{$buggy_src}->{"first_seen"};
 		$first_seen = $now unless $first_seen;
+		my $removal_time = $autoremoval_info->{$buggy_src}->{"removal_time"}||0;
+		$removal_time = $first_seen + $removaldelay unless ($removal_time > $first_seen + $removaldelay);
 
 		# TODO can there be more than 1 version?
 		my $version =  join (' ', keys %{ $needs->{$buggy_src}->{'_version'}});
@@ -159,11 +162,12 @@ sub update_autoremovals {
 		if ($debug) {
 			print "Package: $buggy_src\n";
 			print "Version: $version\n";
+			print "Removal at: ".localtime($removal_time)."\n";
 			print "Popcon: ".$popcon->{$buggy_src}."\n";
 			print "Bugs: $bugs\n";
 			print "\n";
 		} else {
-			$insert_autoremovals_handle->execute($buggy_src,$version,$bugs,$first_seen,$updated);
+			$insert_autoremovals_handle->execute($buggy_src,$version,$bugs,$first_seen,$updated,$removal_time);
 		}
 	}
 	do_query($dbh,"ANALYZE ".$table) unless $debug;
@@ -324,18 +328,20 @@ sub get_popcon {
 	return $popcon;
 }
 
-sub get_first_seen {
+sub get_autoremoval_info {
     my ($dbh,$table) = @_;
 
-	my $first_seen = {};
-	my $query = "select source, min(first_seen) as first_seen from ${table} group by source;";
+	my $autoremoval_info = {};
+	my $query = "select source, min(first_seen) as first_seen, min(removal_time) as removal_time from ${table} group by source;";
 	my $sthc = do_query($dbh,$query);
 	while (my $pg = $sthc->fetchrow_hashref()) {
 		my $src = $pg->{'source'};
-		my $seen = $pg->{'first_seen'};
-		$first_seen->{$src} = $seen;
+		my $info = {};
+		$info->{"first_seen"} = $pg->{'first_seen'};
+		$info->{"removal_time"} = $pg->{'removal_time'};
+		$autoremoval_info->{$src} = $info;
 	}
-	return $first_seen;
+	return $autoremoval_info;
 }
 
 sub read_source_depends {
