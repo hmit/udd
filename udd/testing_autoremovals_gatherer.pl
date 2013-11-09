@@ -34,6 +34,10 @@ sub main {
 	my $command = $ARGV[1];
 	my $source = $ARGV[2];
 
+	if (defined $config->{general}->{debug}) {
+		$debug = $config->{general}->{debug};
+	}
+
 	my $dbname = $config->{general}->{dbname};
 	my $dbconnect ="dbi:Pg:dbname=$dbname";
 	if ($config->{general}->{dbport} ne '') {
