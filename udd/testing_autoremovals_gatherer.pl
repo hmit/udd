@@ -161,17 +161,20 @@ sub update_autoremovals {
 
 		# TODO can there be more than 1 version?
 		my $version =  join (' ', keys %{ $needs->{$buggy_src}->{'_version'}});
-		my $bugs = join (',', keys %{ $buggy->{$buggy_src} });
+		my $buginfo = "";
+		if (defined $buggy->{$buggy_src}) {
+			$buginfo = join (',', keys %{ $buggy->{$buggy_src} });
+		}
 
 		if ($debug) {
 			print "Package: $buggy_src\n";
 			print "Version: $version\n";
 			print "Removal at: ".localtime($removal_time)."\n";
-			print "Popcon: ".$popcon->{$buggy_src}."\n";
-			print "Bugs: $bugs\n";
+			print "Popcon: ".($popcon->{$buggy_src}||0)."\n";
+			print "Bugs: $buginfo\n";
 			print "\n";
 		} else {
-			$insert_autoremovals_handle->execute($buggy_src,$version,$bugs,$first_seen,$updated,$removal_time);
+			$insert_autoremovals_handle->execute($buggy_src,$version,$buginfo,$first_seen,$updated,$removal_time);
 		}
 	}
 	do_query($dbh,"ANALYZE ".$table) unless $debug;
