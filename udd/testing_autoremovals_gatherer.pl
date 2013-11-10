@@ -15,6 +15,9 @@ use List::Util qw(min max);
 my $testing = "jessie";
 my $removaldelay = 15*24*3600;
 my $debug = 0;
+# if the total popcon of all rdeps is less than this value, remove them all
+my $rdeppopconlimit = 1000;
+
 my $now = time;
 print "start: ".$now."\n" if ($debug);
 
@@ -104,7 +107,29 @@ sub update_autoremovals {
 	my $autoremoval_info = get_autoremoval_info($dbh,$table);
 
 	do_query($dbh,"DELETE FROM ${table}") unless $debug;
-	my $insert_autoremovals_handle = $dbh->prepare("INSERT INTO ${table} (source, version, bugs, first_seen, last_checked, removal_time) VALUES (\$1, \$2, \$3, \$4, \$5, \$6)");
+	my $insert_autoremovals_handle = $dbh->prepare("INSERT INTO ${table} (
+			source,
+			version,
+			bugs,
+			first_seen,
+			last_checked,
+			removal_time,
+			rdeps,
+			rdeps_popcon,
+			buggy_deps,
+			bugs_deps
+		) VALUES (
+			\$1,
+			\$2,
+			\$3,
+			\$4,
+			\$5,
+			\$6,
+			\$7,
+			\$8,
+			\$9,
+			\$10
+		)");
 
 	my $autoremovals = {};
 	my $skipped = 0;
@@ -146,17 +171,43 @@ sub update_autoremovals {
 		my $rdepcount = (scalar keys %$my_rdeps);
 		my $nbrdepcount = (scalar keys %$nonbuggy_rdeps);
 		if ($nbrdepcount) {
-			$skipped++;
-			next;
+			my $totalpopcon = 0;
+			foreach my $nb ( keys %$nonbuggy_rdeps) {
+				$totalpopcon += $nonbuggy_rdeps->{$nb}||0;
+			}
+			if ($totalpopcon < $rdeppopconlimit)  {
+				foreach my $rdep (keys %$my_rdeps) {
+					if ($rdep ne $buggy_src) {
+						$autoremovals->{$buggy_src}->{"rdep"}->{$rdep} = 1;
+						$autoremovals->{$rdep}->{"dep"}->{$buggy_src} = $buggy->{$buggy_src};
+						foreach my $bugid (keys %{$buggy->{$buggy_src}}) {
+							$autoremovals->{$rdep}->{"bugs_deps"}->{$bugid} =
+								$buggy->{$buggy_src}->{$bugid};
+						}
+					}
+				}
+				if ($debug) {
+					print "$buggy_src (".$popcon->{$buggy_src}."):  total popcon of non-buggy rdeps: $totalpopcon\n";
+					print Dumper $my_rdeps;
+					print "\n";
+				}
+				$autoremovals->{$buggy_src}->{"rdeps_popcon"} = $totalpopcon||0;
+			} else {
+				print "$buggy_src (".$popcon->{$buggy_src}."): skipped, total popcon of non-buggy rdeps: $totalpopcon\n\n" if $debug;
+				$skipped++;
+				next;
+			}
 		}
-		$autoremovals->{$buggy_src} = 1;
+		$autoremovals->{$buggy_src}->{"bugs"} = $buggy->{$buggy_src};
 	}
 
 	foreach my $buggy_src (sort keys %$autoremovals) {
-		my $updated = min(values %{ $buggy->{$buggy_src}});
+		my $updated = min(values %{ $buggy->{$buggy_src}},
+			values %{$autoremovals->{$buggy_src}->{"bugs_deps"}});
 		my $first_seen = $autoremoval_info->{$buggy_src}->{"first_seen"};
 		$first_seen = $now unless $first_seen;
 		my $removal_time = $autoremoval_info->{$buggy_src}->{"removal_time"}||0;
+		# TODO other removal delay for rdeps
 		$removal_time = $first_seen + $removaldelay unless ($removal_time > $first_seen + $removaldelay);
 
 		# TODO can there be more than 1 version?
@@ -165,6 +216,14 @@ sub update_autoremovals {
 		if (defined $buggy->{$buggy_src}) {
 			$buginfo = join (',', keys %{ $buggy->{$buggy_src} });
 		}
+		if ($debug) {
+			print Dumper $autoremovals->{$buggy_src};
+		}
+
+		my $rdeps = join(",",sort keys %{$autoremovals->{$buggy_src}->{"rdep"}});
+		my $rdeps_popcon = $autoremovals->{$buggy_src}->{"rdeps_popcon"}||0;
+		my $buggy_deps = join(",",sort keys %{$autoremovals->{$buggy_src}->{"dep"}});
+		my $bugs_deps = join(",",sort keys %{$autoremovals->{$buggy_src}->{"bugs_deps"}});
 
 		if ($debug) {
 			print "Package: $buggy_src\n";
@@ -172,9 +231,24 @@ sub update_autoremovals {
 			print "Removal at: ".localtime($removal_time)."\n";
 			print "Popcon: ".($popcon->{$buggy_src}||0)."\n";
 			print "Bugs: $buginfo\n";
+			print "rdeps: $rdeps\n";
+			print "rdeps_popcon: $rdeps_popcon\n";
+			print "buggy_deps: $buggy_deps\n";
+			print "bugs_deps: $bugs_deps\n";
 			print "\n";
 		} else {
-			$insert_autoremovals_handle->execute($buggy_src,$version,$buginfo,$first_seen,$updated,$removal_time);
+			$insert_autoremovals_handle->execute(
+				$buggy_src,
+				$version,
+				$buginfo,
+				$first_seen,
+				$updated,
+				$removal_time,
+				$rdeps,
+				$rdeps_popcon,
+				$buggy_deps,
+				$bugs_deps
+			);
 		}
 	}
 	do_query($dbh,"ANALYZE ".$table) unless $debug;
