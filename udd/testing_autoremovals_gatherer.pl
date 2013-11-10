@@ -14,6 +14,7 @@ use List::Util qw(min max);
 
 my $testing = "jessie";
 my $removaldelay = 15*24*3600;
+my $removaldelay_rdeps = 30*24*3600;
 my $debug = 0;
 # if the total popcon of all rdeps is less than this value, remove them all
 my $rdeppopconlimit = 1000;
@@ -206,15 +207,13 @@ sub update_autoremovals {
 			values %{$autoremovals->{$buggy_src}->{"bugs_deps"}});
 		my $first_seen = $autoremoval_info->{$buggy_src}->{"first_seen"};
 		$first_seen = $now unless $first_seen;
-		my $removal_time = $autoremoval_info->{$buggy_src}->{"removal_time"}||0;
-		# TODO other removal delay for rdeps
-		$removal_time = $first_seen + $removaldelay unless ($removal_time > $first_seen + $removaldelay);
-
 		# TODO can there be more than 1 version?
 		my $version =  join (' ', keys %{ $needs->{$buggy_src}->{'_version'}});
 		my $buginfo = "";
+		my $bugcount = 0;
 		if (defined $buggy->{$buggy_src}) {
 			$buginfo = join (',', keys %{ $buggy->{$buggy_src} });
+			$bugcount = scalar keys %{ $buggy->{$buggy_src} };
 		}
 		if ($debug) {
 			print Dumper $autoremovals->{$buggy_src};
@@ -224,6 +223,11 @@ sub update_autoremovals {
 		my $rdeps_popcon = $autoremovals->{$buggy_src}->{"rdeps_popcon"}||0;
 		my $buggy_deps = join(",",sort keys %{$autoremovals->{$buggy_src}->{"dep"}});
 		my $bugs_deps = join(",",sort keys %{$autoremovals->{$buggy_src}->{"bugs_deps"}});
+
+		my $delay = $removaldelay;
+		$delay = $removaldelay_rdeps unless $bugcount;
+		my $removal_time = $autoremoval_info->{$buggy_src}->{"removal_time"}||0;
+		$removal_time = $first_seen + $delay unless ($removal_time > $first_seen + $delay);
 
 		if ($debug) {
 			print "Package: $buggy_src\n";
