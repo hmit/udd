@@ -351,14 +351,26 @@ sub get_bugs {
 
 SELECT  b.source,
         b.id,
+        b.affects_unstable,
         EXTRACT(epoch FROM b.arrival) AS arrival,
         EXTRACT(epoch FROM b.last_modified) AS last_modified,
-        min(s.db_updated) AS db_updated
+        min(s.db_updated) AS last_check,
+        b4.bugs_unstable
 FROM    bugs_stamps s,
         bugs b
+        LEFT JOIN
+        -- RC bugs in unstable (caused by OTHER rc bugs)
+        ( 
+            SELECT b3.source, array_agg(b3.id) AS bugs_unstable
+            FROM bugs b3
+            WHERE b3.severity >= 'serious'
+                AND b3.affects_unstable = true
+                AND b3.affects_testing = false
+            GROUP BY b3.source
+        ) b4
+ON b.source = b4.source
 WHERE   b.severity >= 'serious'
         AND b.affects_testing = true
-        AND b.affects_unstable = true
         AND b.source IN ( -- in testing
                  SELECT s.source FROM sources s WHERE
                     release = '$testing' AND
@@ -394,7 +406,7 @@ WHERE   b.severity >= 'serious'
             )
         AND b.arrival < CURRENT_TIMESTAMP - INTERVAL '14 days'
         AND b.id = s.id
-GROUP BY b.source, b.id
+GROUP BY b.source, b.id, b4.source, b4.bugs_unstable
 
 ";
 
@@ -404,9 +416,20 @@ GROUP BY b.source, b.id
         my $bug = $pg->{'id'};
 
         foreach my $pkg (split m/\s*,\s*/, $pkgsource) {
-			$buggy->{$pkg}->{$bug}->{"last_check"} = $pg->{"db_updated"};
-			$buggy->{$pkg}->{$bug}->{"last_modified"} = $pg->{"last_modified"};
-			$buggy->{$pkg}->{$bug}->{"arrival"} = $pg->{"arrival"};
+			$buggy->{$pkg}->{$bug} = $pg;
+			unless ($pg->{"affects_unstable"}) {
+				unless ($pg->{"bugs_unstable"}) {
+					# if the bug is fixed in unstable, but not (yet) in
+					# testing and there are no other bugs affecting the
+					# package in unstable, we reset the counter on every run,
+					# so the package doesn't get autoremoved, but it stays on
+					# the list
+					# if the package has other bugs in unstable (which prevent
+					# migration of the fix to testing), the counter is NOT
+					# reset, and the package can still be autoremoved
+					$buggy->{$pkg}->{$bug}->{"last_modified"} = $now;
+				}
+			}
         }
     }
 
