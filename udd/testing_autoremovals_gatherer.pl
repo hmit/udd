@@ -203,8 +203,14 @@ sub update_autoremovals {
 	}
 
 	foreach my $buggy_src (sort keys %$autoremovals) {
-		my $updated = min(values %{ $buggy->{$buggy_src}},
-			values %{$autoremovals->{$buggy_src}->{"bugs_deps"}});
+		my @bugschecked = ();
+		my @bugsmodified = ();
+		foreach my $_bugdata (values %{ $buggy->{$buggy_src}}, values %{$autoremovals->{$buggy_src}->{"bugs_deps"}}) {
+			push @bugschecked, $_bugdata->{"last_check"};
+			push @bugsmodified, $_bugdata->{"last_modified"};
+		}
+		my $checked = min(@bugschecked);
+		my $modified = min(@bugsmodified);
 		my $first_seen = $autoremoval_info->{$buggy_src}->{"first_seen"};
 		$first_seen = $now unless $first_seen;
 		# TODO can there be more than 1 version?
@@ -228,6 +234,7 @@ sub update_autoremovals {
 		$delay = $removaldelay_rdeps unless $bugcount;
 		my $removal_time = $autoremoval_info->{$buggy_src}->{"removal_time"}||0;
 		$removal_time = $first_seen + $delay unless ($removal_time > $first_seen + $delay);
+		$removal_time = $modified + $delay unless ($removal_time > $modified + $delay);
 
 		if ($debug) {
 			print "Package: $buggy_src\n";
@@ -246,7 +253,7 @@ sub update_autoremovals {
 				$version,
 				$buginfo,
 				$first_seen,
-				$updated,
+				$checked,
 				$removal_time,
 				$rdeps,
 				$rdeps_popcon,
@@ -342,10 +349,16 @@ sub get_bugs {
 -- DEALINGS IN THE SOFTWARE.
 --
 
-SELECT	b.source, b.id, min(s.db_updated) as db_updated
-FROM	bugs b, bugs_stamps s 
-WHERE	b.severity >= 'serious'
-        AND b.affects_testing = true AND b.affects_unstable = true
+SELECT  b.source,
+        b.id,
+        EXTRACT(epoch FROM b.arrival) AS arrival,
+        EXTRACT(epoch FROM b.last_modified) AS last_modified,
+        min(s.db_updated) AS db_updated
+FROM    bugs_stamps s,
+        bugs b
+WHERE   b.severity >= 'serious'
+        AND b.affects_testing = true
+        AND b.affects_unstable = true
         AND b.source IN ( -- in testing
                  SELECT s.source FROM sources s WHERE
                     release = '$testing' AND
@@ -379,8 +392,7 @@ WHERE	b.severity >= 'serious'
                  SELECT pbc.id FROM potential_bug_closures pbc
                  WHERE origin = 'ftpnew'
             )
-        -- shoud be only 5 days, because there is a 10 day waiting period afterward
-        AND b.last_modified < CURRENT_TIMESTAMP - INTERVAL '14 days'
+        AND b.arrival < CURRENT_TIMESTAMP - INTERVAL '14 days'
         AND b.id = s.id
 GROUP BY b.source, b.id
 
@@ -392,7 +404,9 @@ GROUP BY b.source, b.id
         my $bug = $pg->{'id'};
 
         foreach my $pkg (split m/\s*,\s*/, $pkgsource) {
-			$buggy->{$pkg}->{$bug} = $pg->{"db_updated"};
+			$buggy->{$pkg}->{$bug}->{"last_check"} = $pg->{"db_updated"};
+			$buggy->{$pkg}->{$bug}->{"last_modified"} = $pg->{"last_modified"};
+			$buggy->{$pkg}->{$bug}->{"arrival"} = $pg->{"arrival"};
         }
     }
 
