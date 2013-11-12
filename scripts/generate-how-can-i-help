@@ -35,6 +35,13 @@ def system_r(s)
   system(s) or raise
 end
 
+class String
+  def forceutf8
+    self.encode!('UTF-16', 'UTF-8', :invalid => :replace, :replace => '')
+    self.encode!('UTF-8', 'UTF-16')
+  end
+end
+
 srcs = {}
 dbget("select distinct package, source from packages_summary").each do |r|
   srcs[r['source']] ||= []
@@ -52,7 +59,7 @@ dbget("select * from orphaned_packages").each do |r|
     'source' => r['source'],
     'packages' => srcs[r['source']],
     'wnppbug' => r['bug'],
-    'wnppdesc' => r['description']
+    'wnppdesc' => r['description'].nil? ? nil : r['description'].forceutf8
   }
 end
 
@@ -64,7 +71,7 @@ dbget("select id, source, package, title from bugs where id in (select id from b
     'source' => r['source'],
     'package' => r['package'],
     'bug' => r['id'],
-    'title' => r['title']
+    'title' => r['title'].forceutf8
   }
 end
 
