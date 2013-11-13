@@ -1,6 +1,8 @@
 #!/usr/bin/ruby
 # This script generates http://udd.debian.org/how-can-i-help.json.gz which is
 # used by the how-can-i-help package to list possible contributions to Debian.
+# 
+# encoding: US-ASCII
 
 require 'json'
 require 'dbi'
@@ -36,9 +38,8 @@ def system_r(s)
 end
 
 class String
-  def forceutf8
-    self.encode!('UTF-16', 'UTF-8', :invalid => :replace, :replace => '')
-    self.encode!('UTF-8', 'UTF-16')
+  def force_ascii
+    self.encode!('US-ASCII', 'UTF-8', :invalid => :replace, :undef => :replace, :replace => '?')
   end
 end
 
@@ -59,7 +60,7 @@ dbget("select * from orphaned_packages").each do |r|
     'source' => r['source'],
     'packages' => srcs[r['source']],
     'wnppbug' => r['bug'],
-    'wnppdesc' => r['description'].nil? ? nil : r['description'].forceutf8
+    'wnppdesc' => r['description'].nil? ? nil : r['description'].force_ascii
   }
 end
 
@@ -71,7 +72,7 @@ dbget("select id, source, package, title from bugs where id in (select id from b
     'source' => r['source'],
     'package' => r['package'],
     'bug' => r['id'],
-    'title' => r['title'].forceutf8
+    'title' => r['title'].force_ascii
   }
 end
 
