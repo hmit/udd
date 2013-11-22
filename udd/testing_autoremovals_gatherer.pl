@@ -94,24 +94,72 @@ sub update_autoremovals {
 
 	$buggy = get_bugs ($dbh, $bin2src);
 
+	my $popcon = get_popcon($dbh);
+
 	my $first_seen = get_first_seen($dbh,$table);
 
 	do_query($dbh,"DELETE FROM ${table}") unless $debug;
 	my $insert_autoremovals_handle = $dbh->prepare("INSERT INTO ${table} (source, version, bugs, first_seen, last_checked) VALUES (\$1, \$2, \$3, \$4, \$5)");
 
+	my $autoremovals = {};
+	my $skipped = 0;
 	foreach my $buggy_src (sort keys %$buggy) {
 		# If it is not in testing, ignore it.
 		next unless $needs->{$buggy_src};
-		next if $rdeps->{$buggy_src};
-		# TODO can there be more than 1 version?
-		my $version =  join (' ', keys %{ $needs->{$buggy_src}->{'_version'}});
-		my $bugs = join (',', keys %{ $buggy->{$buggy_src} });
+
+		# all rdeps for $buggy_src, recursively
+		my $my_rdeps = {};
+		# rdeps added during at this level
+		my $newrdeps = {};
+		# start with only this package
+		$newrdeps->{$buggy_src} = 1;
+		my $level = 0;
+		while (scalar keys %$newrdeps) {
+			my $_found = {};
+			foreach my $src (keys %$newrdeps) {
+				unless ($my_rdeps->{$src}) {
+					$my_rdeps->{$src} = $level;
+					foreach my $rrdep (keys %{$rdeps->{$src}}) {
+						unless ($my_rdeps->{$rrdep}) {
+							$_found->{$rrdep} = 1
+						}
+					}
+				}
+			}
+			$newrdeps = $_found;
+			$level++;
+		}
+		my $nonbuggy_rdeps;
+		foreach my $src (keys %$my_rdeps) {
+			if ($buggy->{$src}) {
+				#print "skip buggy rdep $src of $buggy_src\n" if $debug;
+				next;
+			}
+			$nonbuggy_rdeps->{$src} = $popcon->{$src};
+		}
+
+		my $rdepcount = (scalar keys %$my_rdeps);
+		my $nbrdepcount = (scalar keys %$nonbuggy_rdeps);
+		if ($nbrdepcount) {
+			$skipped++;
+			next;
+		}
+		$autoremovals->{$buggy_src} = 1;
+	}
+
+	foreach my $buggy_src (sort keys %$autoremovals) {
 		my $updated = min(values %{ $buggy->{$buggy_src}});
 		my $first_seen = $first_seen->{$buggy_src};
 		$first_seen = $now unless $first_seen;
+
+		# TODO can there be more than 1 version?
+		my $version =  join (' ', keys %{ $needs->{$buggy_src}->{'_version'}});
+		my $bugs = join (',', keys %{ $buggy->{$buggy_src} });
+
 		if ($debug) {
 			print "Package: $buggy_src\n";
 			print "Version: $version\n";
+			print "Popcon: ".$popcon->{$buggy_src}."\n";
 			print "Bugs: $bugs\n";
 			print "\n";
 		} else {
@@ -120,6 +168,7 @@ sub update_autoremovals {
 	}
 	do_query($dbh,"ANALYZE ".$table) unless $debug;
 	$dbh->commit();
+	print "total: ".(scalar keys $autoremovals)." autoremovals, $skipped skipped for rdeps\n" if $debug;
 }
 
 sub do_query {
@@ -145,16 +194,24 @@ sub _calculate_rdeps {
                 #print STDERR "N: $src ($el) -> $prov_src ($dep)\n" if $prov_src;
                 unless ($providers) {
                     if ($debug) {
-                        print STDERR "warning: cannot determine the provider of $dep ($src via $el)\n"
-                            unless $once{$dep}++;
+                        #print STDERR "warning: cannot determine the provider of $dep ($src via $el)\n"
+                        #    unless $once{$dep}++;
                     }
                     next;
                 }
+				if (my $prov = $providers->{'_main'}) {
+					# when the package exists, only use that, not the packages
+					# that provide it
+					if ($prov ne $src) {
+						$rdeps->{$prov}->{$src} = 1;
+					}
+					next;
+				}
                 foreach my $prov (keys %$providers) {
                     next if $prov eq '_main'; # fake entry
                     next if $src eq $prov;    # self depends does not count
                     #print STDERR "N: $src deps on $prov (via $el)\n";
-                    $rdeps->{$prov}++;
+                    $rdeps->{$prov}->{$src} = 1;
                 }
             }
         }
@@ -253,6 +310,20 @@ GROUP BY b.source, b.id
     return $buggy;
 }
 
+sub get_popcon {
+    my ($dbh) = @_;
+
+	my $popcon = {};
+	my $query = "select source, insts from popcon_src;";
+	my $sthc = do_query($dbh,$query);
+	while (my $pg = $sthc->fetchrow_hashref()) {
+		my $src = $pg->{'source'};
+		my $insts = $pg->{'insts'};
+		$popcon->{$src} = $insts;
+	}
+	return $popcon;
+}
+
 sub get_first_seen {
     my ($dbh,$table) = @_;
 
@@ -318,7 +389,7 @@ sub read_package_data {
 			unless $pkg && defined $src_version;
 
 		unless ($needs->{$src}->{'_version'}->{$src_version}) {
-			print "$src $src_version not found\n" if $debug;
+			#print "$src $src_version not found\n" if $debug;
 			next;
 		}
 
@@ -355,6 +426,12 @@ sub _split_dep {
     $dep =~ s/\([^\)]*\)//og;
     $dep =~ s/^\s*+//o;
     $dep =~ s/\s*+$//o;
-    return split m/\s*+[,|]\s*+/o, $dep;
+    my @deps = split m/\s*+[,]\s*+/o, $dep;
+	my @deps_first = ();
+	foreach my $dep (@deps) {
+    	my ($dep1, undef) = split m/\s*+[,|]\s*+/o, $dep;
+		push @deps_first, $dep1;
+	}
+    return @deps_first;
 }
 

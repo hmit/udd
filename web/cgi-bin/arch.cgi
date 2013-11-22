@@ -248,7 +248,7 @@ foreach my $arch (sort keys $arch_info) {
 	print "  in sid: ".yesno($a_i->{"packages"}->{"sid"} > 0)."\n";
 	print "  in $testing: ".yesno($a_i->{"packages"}->{$testing} > 0)."\n";
 	print "  archive_coverage: ".percentage($a_i->{"packagecount"}/$info->{"sources"}->{"sid"})."%\n";
-	print "  archive_uptodate: ".percentage(($a_i->{"packagecount"}-$a_i->{outofdate})/$a_i->{"packagecount"})."%\n";
+	print "  archive_uptodate: ".percentage(($a_i->{"packagecount"}-$a_i->{outofdate})/$a_i->{"packagecount"})."%\n" if ($a_i->{"packagecount"});
 	print "  active buildds: ".$a_i->{"builders"}."\n";
 	print "  longest build: ".show_secs($a_i->{"longest_build_time"}).": ".$a_i->{"longest_build"}."\n";
 	print "  longest time in needs-build: ".show_secs($a_i->{"longest_needsbuild_time"}).": ".

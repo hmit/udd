@@ -290,7 +290,11 @@ class blends_prospective_gatherer(gatherer):
             sprosp['maintainer_email'] = email
           else:
     	    self.log.info("Control file for source '%s' of %s is lacking Maintainer field" % (source, sprosp['blend']))
-
+            # set some reasonable non-NULL default since otherwise the import will be broken
+            sprosp['maintainer_name']  = '??? - ' + sprosp['blend'] + ' packaging team ???'
+            sprosp['maintainer_email'] = '<unknown@maintain.er>'
+            sprosp['maintainer']       = sprosp['maintainer_name'] + ' ' + sprosp['maintainer_email']
+    
           for prop in ('homepage', 'priority', 'section', 'uploaders', ):
             if src.has_key(prop):
               if prop == 'section':

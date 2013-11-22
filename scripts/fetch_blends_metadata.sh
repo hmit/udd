@@ -54,17 +54,26 @@ for blend in `ls ${BLENDSWEBCONFSUBDIR} | sed 's/\.conf$//'` ; do
     if [ "$VcsType" = "git" ] ; then
       if [ ! -d $blend ] ; then
         git clone $VcsDir $blend >/dev/null && true
-        if [ $? -gt 0 ] ; then echo "Unable to fetch data for $blend from $VcsDir" ; fi
+        if [ $? -gt 0 ] ; then 
+          echo "Unable to fetch initial data for $blend from $VcsDir - try without SSL verification" ;
+          GIT_SSL_NO_VERIFY=1 git clone $VcsDir $blend >/dev/null
+        fi
       else
         if [ ! -d $blend/.git ] ; then
           rm -rf $blend
           git clone $VcsDir $blend >/dev/null && true
-          if [ $? -gt 0 ] ; then echo "Unable to fetch data for $blend from $VcsDir" ; fi
+          if [ $? -gt 0 ] ; then
+            echo "Unable to create new clone of data for $blend from $VcsDir - try without SSL verification" ;
+            GIT_SSL_NO_VERIFY=1 git clone $VcsDir $blend >/dev/null
+          fi
         else
           cd $blend
           git stash >/dev/null
-          git pull >/dev/null && true
-          if [ $? -gt 0 ] ; then echo "Unable to fetch data for $blend from $VcsDir" ; fi
+          git pull >/dev/null 2>/dev/null && true
+          if [ $? -gt 0 ] ; then
+            echo "Unable to pull data for $blend from $VcsDir - try without SSL verification"
+            GIT_SSL_NO_VERIFY=1 git pull >/dev/null 2>/dev/null && true
+          fi
           cd ..
         fi
       fi
