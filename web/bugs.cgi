@@ -463,6 +463,7 @@ def genaffected(r)
   s += "<abbr title='affects testing'>T</abbr>" if r['affects_testing']
   s += "<abbr title='affects unstable'>U</abbr>" if r['affects_unstable']
   s += "<abbr title='affects experimental'>E</abbr>" if r['affects_experimental']
+  s += "<abbr title='in experimental, but not affected'><b>ē</b></abbr>" if $sources_in_experimental.include?(r['source']) and not r['affects_experimental']
   return "" if s == ""
   return "&nbsp;("+s+")"
 end
@@ -562,6 +563,15 @@ if rows.length > 0
       deferredbugs[r['id']] = "#{r['version']} (#{d}&nbsp;day#{d==1?'':'s'})"
     end
   end
+
+  if cols['caffected']
+    sources = rows.map { |r| r['source'] }.map { |e| "'#{e}'" }.join(',')
+    sthd = dbh.prepare("select source from sources where source in (#{sources}) and distribution='debian' and release='experimental'")
+    sthd.execute
+    rowsd = sthd.fetch_all
+    $sources_in_experimental = rowsd.map { |r| r['source'] }
+  end
+
 
   puts '<table class="buglist tablesorter">'
   puts '<thead>'
