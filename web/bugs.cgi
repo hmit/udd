@@ -50,9 +50,11 @@ FILTERS = [
  ['outdatedsid', 'outdated binaries in sid', "bugs.source in (select distinct p1.source from packages_summary p1, packages_summary p2 where p1.source = p2.source and p1.release='sid' and p2.release='sid' and p1.source_version != p2.source_version)"],
  ['needmig', 'different versions in jessie and sid', "bugs.source in (select s1.source from sources s1, sources s2 where s1.source = s2.source and s1.release = 'jessie' and s2.release='sid' and s1.version != s2.version)"],
  ['newerubuntu', 'newer in Ubuntu than in sid', "bugs.source in (select s1.source from sources_uniq s1, ubuntu_sources s2 where s1.source = s2.source and s1.release = 'sid' and s2.release='#{UREL['devel']}' and s1.version < s2.version)"],
+ ['rtwheezy-ignore', 'RT tag for wheezy: ignore', 'id in (select id from bugs_tags where tag=\'wheezy-ignore\')'],
  ['rtwheezy-will-remove', 'RT tag for wheezy: will-remove', "id in (select id from bugs_usertags where email='release.debian.org@packages.debian.org' and tag='wheezy-will-remove')"],
  ['rtwheezy-can-defer', 'RT tag for wheezy: can-defer', "id in (select id from bugs_usertags where email='release.debian.org@packages.debian.org' and tag='wheezy-can-defer')"],
  ['rtwheezy-is-blocker', 'RT tag for wheezy: is-blocker', "id in (select id from bugs_usertags where email='release.debian.org@packages.debian.org' and tag='wheezy-is-blocker')"],
+ ['rtjessie-ignore', 'RT tag for jessie: ignore', 'id in (select id from bugs_tags where tag=\'jessie-ignore\')'],
  ['rtjessie-will-remove', 'RT tag for jessie: will-remove', "id in (select id from bugs_usertags where email='release.debian.org@packages.debian.org' and tag='jessie-will-remove')"],
  ['rtjessie-can-defer', 'RT tag for jessie: can-defer', "id in (select id from bugs_usertags where email='release.debian.org@packages.debian.org' and tag='jessie-can-defer')"],
  ['rtjessie-is-blocker', 'RT tag for jessie: is-blocker', "id in (select id from bugs_usertags where email='release.debian.org@packages.debian.org' and tag='jessie-is-blocker')"],
@@ -74,6 +76,7 @@ TYPES = [
   ['l10n', 'Localisation bugs', 'id in (select id from bugs_tags where tag=\'l10n\')', false],
   ['xsf', 'X Strike Force bugs', "bugs.source in (select source from sources where maintainer ~ 'debian-x@lists.debian.org')\n"],
   ['perl', 'Perl team', "bugs.source in (select source from sources where maintainer ~ 'pkg-perl-maintainers@lists.alioth.debian.org')\n"],
+  ['java', 'Java team', "bugs.source in (select source from sources where maintainer ~ 'pkg-java-maintainers@lists.alioth.debian.org' or maintainer ~ 'openjdk@lists.launchpad.net')\n"],
   ['games', 'Games team', "bugs.source in (select source from sources where maintainer ~ 'pkg-games-devel@lists.alioth.debian.org')\n"],
   ['kfreebsd', 'GNU/kFreeBSD bugs', 'id in (select id from bugs_usertags where email = \'debian-bsd@lists.debian.org\' and tag=\'kfreebsd\')', false],
   ['hurd', 'GNU/Hurd bugs', 'id in (select id from bugs_usertags where email = \'debian-hurd@lists.debian.org\' and tag=\'hurd\')', false],
@@ -460,6 +463,7 @@ def genaffected(r)
   s += "<abbr title='affects testing'>T</abbr>" if r['affects_testing']
   s += "<abbr title='affects unstable'>U</abbr>" if r['affects_unstable']
   s += "<abbr title='affects experimental'>E</abbr>" if r['affects_experimental']
+  s += "<abbr title='in experimental, but not affected'><b>ē</b></abbr>" if $sources_in_experimental.include?(r['source']) and not r['affects_experimental']
   return "" if s == ""
   return "&nbsp;("+s+")"
 end
@@ -559,6 +563,15 @@ if rows.length > 0
       deferredbugs[r['id']] = "#{r['version']} (#{d}&nbsp;day#{d==1?'':'s'})"
     end
   end
+
+  if cols['caffected']
+    sources = rows.map { |r| r['source'] }.map { |e| "'#{e}'" }.join(',')
+    sthd = dbh.prepare("select source from sources where source in (#{sources}) and distribution='debian' and release='experimental'")
+    sthd.execute
+    rowsd = sthd.fetch_all
+    $sources_in_experimental = rowsd.map { |r| r['source'] }
+  end
+
 
   puts '<table class="buglist tablesorter">'
   puts '<thead>'
