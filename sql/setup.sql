@@ -1943,7 +1943,13 @@ CREATE TABLE testing_autoremovals
    version text,
    bugs text,
    first_seen bigint,
-   last_checked bigint
+   last_checked bigint,
+   removal_time bigint,
+   rdeps text,
+   buggy_deps text,
+   bugs_deps text,
+   rdeps_popcon bigint
+
    );
 
 GRANT SELECT ON testing_autoremovals TO PUBLIC;

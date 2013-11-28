@@ -13,7 +13,11 @@ use YAML::Syck;
 use List::Util qw(min max);
 
 my $testing = "jessie";
+my $removaldelay = 15*24*3600;
+my $removaldelay_rdeps = 30*24*3600;
 my $debug = 0;
+my $POPCON_PERCENT = 5; # x% of submissions must have the package installed
+
 my $now = time;
 print "start: ".$now."\n" if ($debug);
 
@@ -32,6 +36,10 @@ sub main {
 	my $config = LoadFile($ARGV[0]) or die "Could not load configuration: $!";
 	my $command = $ARGV[1];
 	my $source = $ARGV[2];
+
+	if (defined $config->{general}->{debug}) {
+		$debug = $config->{general}->{debug};
+	}
 
 	my $dbname = $config->{general}->{dbname};
 	my $dbconnect ="dbi:Pg:dbname=$dbname";
@@ -96,10 +104,36 @@ sub update_autoremovals {
 
 	my $popcon = get_popcon($dbh);
 
-	my $first_seen = get_first_seen($dbh,$table);
+	# if the total popcon of all rdeps is less than this value, remove them all
+	my $rdeppopconlimit = get_popcon_limit($dbh);
+	print "popcon limit rdeps: $rdeppopconlimit\n" if $debug;
+
+	my $autoremoval_info = get_autoremoval_info($dbh,$table);
 
 	do_query($dbh,"DELETE FROM ${table}") unless $debug;
-	my $insert_autoremovals_handle = $dbh->prepare("INSERT INTO ${table} (source, version, bugs, first_seen, last_checked) VALUES (\$1, \$2, \$3, \$4, \$5)");
+	my $insert_autoremovals_handle = $dbh->prepare("INSERT INTO ${table} (
+			source,
+			version,
+			bugs,
+			first_seen,
+			last_checked,
+			removal_time,
+			rdeps,
+			rdeps_popcon,
+			buggy_deps,
+			bugs_deps
+		) VALUES (
+			\$1,
+			\$2,
+			\$3,
+			\$4,
+			\$5,
+			\$6,
+			\$7,
+			\$8,
+			\$9,
+			\$10
+		)");
 
 	my $autoremovals = {};
 	my $skipped = 0;
@@ -141,29 +175,94 @@ sub update_autoremovals {
 		my $rdepcount = (scalar keys %$my_rdeps);
 		my $nbrdepcount = (scalar keys %$nonbuggy_rdeps);
 		if ($nbrdepcount) {
-			$skipped++;
-			next;
+			my $totalpopcon = 0;
+			foreach my $nb ( keys %$nonbuggy_rdeps) {
+				$totalpopcon += $nonbuggy_rdeps->{$nb}||0;
+			}
+			if ($totalpopcon < $rdeppopconlimit)  {
+				foreach my $rdep (keys %$my_rdeps) {
+					if ($rdep ne $buggy_src) {
+						$autoremovals->{$buggy_src}->{"rdep"}->{$rdep} = 1;
+						$autoremovals->{$rdep}->{"dep"}->{$buggy_src} = $buggy->{$buggy_src};
+						foreach my $bugid (keys %{$buggy->{$buggy_src}}) {
+							$autoremovals->{$rdep}->{"bugs_deps"}->{$bugid} =
+								$buggy->{$buggy_src}->{$bugid};
+						}
+					}
+				}
+				if ($debug) {
+					print "$buggy_src (".$popcon->{$buggy_src}."):  total popcon of non-buggy rdeps: $totalpopcon\n";
+					print Dumper $my_rdeps;
+					print "\n";
+				}
+				$autoremovals->{$buggy_src}->{"rdeps_popcon"} = $totalpopcon||0;
+			} else {
+				print "$buggy_src (".$popcon->{$buggy_src}."): skipped, total popcon of non-buggy rdeps: $totalpopcon\n\n" if $debug;
+				$skipped++;
+				next;
+			}
 		}
-		$autoremovals->{$buggy_src} = 1;
+		$autoremovals->{$buggy_src}->{"bugs"} = $buggy->{$buggy_src};
 	}
 
 	foreach my $buggy_src (sort keys %$autoremovals) {
-		my $updated = min(values %{ $buggy->{$buggy_src}});
-		my $first_seen = $first_seen->{$buggy_src};
+		my @bugschecked = ();
+		my @bugsmodified = ();
+		foreach my $_bugdata (values %{ $buggy->{$buggy_src}}, values %{$autoremovals->{$buggy_src}->{"bugs_deps"}}) {
+			push @bugschecked, $_bugdata->{"last_check"};
+			push @bugsmodified, $_bugdata->{"last_modified"};
+		}
+		my $checked = min(@bugschecked);
+		my $modified = min(@bugsmodified);
+		my $first_seen = $autoremoval_info->{$buggy_src}->{"first_seen"};
 		$first_seen = $now unless $first_seen;
-
 		# TODO can there be more than 1 version?
 		my $version =  join (' ', keys %{ $needs->{$buggy_src}->{'_version'}});
-		my $bugs = join (',', keys %{ $buggy->{$buggy_src} });
+		my $buginfo = "";
+		my $bugcount = 0;
+		if (defined $buggy->{$buggy_src}) {
+			$buginfo = join (',', keys %{ $buggy->{$buggy_src} });
+			$bugcount = scalar keys %{ $buggy->{$buggy_src} };
+		}
+		if ($debug) {
+			print Dumper $autoremovals->{$buggy_src};
+		}
+
+		my $rdeps = join(",",sort keys %{$autoremovals->{$buggy_src}->{"rdep"}});
+		my $rdeps_popcon = $autoremovals->{$buggy_src}->{"rdeps_popcon"}||0;
+		my $buggy_deps = join(",",sort keys %{$autoremovals->{$buggy_src}->{"dep"}});
+		my $bugs_deps = join(",",sort keys %{$autoremovals->{$buggy_src}->{"bugs_deps"}});
+
+		my $delay = $removaldelay;
+		$delay = $removaldelay_rdeps unless $bugcount;
+		my $removal_time = $autoremoval_info->{$buggy_src}->{"removal_time"}||0;
+		$removal_time = $first_seen + $delay unless ($removal_time > $first_seen + $delay);
+		$removal_time = $modified + $delay unless ($removal_time > $modified + $delay);
 
 		if ($debug) {
 			print "Package: $buggy_src\n";
 			print "Version: $version\n";
-			print "Popcon: ".$popcon->{$buggy_src}."\n";
-			print "Bugs: $bugs\n";
+			print "Removal at: ".localtime($removal_time)."\n";
+			print "Popcon: ".($popcon->{$buggy_src}||0)."\n";
+			print "Bugs: $buginfo\n";
+			print "rdeps: $rdeps\n";
+			print "rdeps_popcon: $rdeps_popcon\n";
+			print "buggy_deps: $buggy_deps\n";
+			print "bugs_deps: $bugs_deps\n";
 			print "\n";
 		} else {
-			$insert_autoremovals_handle->execute($buggy_src,$version,$bugs,$first_seen,$updated);
+			$insert_autoremovals_handle->execute(
+				$buggy_src,
+				$version,
+				$buginfo,
+				$first_seen,
+				$checked,
+				$removal_time,
+				$rdeps,
+				$rdeps_popcon,
+				$buggy_deps,
+				$bugs_deps
+			);
 		}
 	}
 	do_query($dbh,"ANALYZE ".$table) unless $debug;
@@ -189,6 +288,8 @@ sub _calculate_rdeps {
     foreach my $src (keys %$needs) {
         foreach my $el (keys %{$needs->{$src}}) {
             next if $el eq '_version';
+            # skip build-deps for now, because britney ignores them
+            next if $el eq '_BD';
             foreach my $dep (keys %{$needs->{$src}->{$el}}) {
                 my $providers = $bin2src->{$dep};
                 #print STDERR "N: $src ($el) -> $prov_src ($dep)\n" if $prov_src;
@@ -253,10 +354,28 @@ sub get_bugs {
 -- DEALINGS IN THE SOFTWARE.
 --
 
-SELECT	b.source, b.id, min(s.db_updated) as db_updated
-FROM	bugs b, bugs_stamps s 
-WHERE	b.severity >= 'serious'
-        AND b.affects_testing = true AND b.affects_unstable = true
+SELECT  b.source,
+        b.id,
+        b.affects_unstable,
+        EXTRACT(epoch FROM b.arrival) AS arrival,
+        EXTRACT(epoch FROM b.last_modified) AS last_modified,
+        min(s.db_updated) AS last_check,
+        b4.bugs_unstable
+FROM    bugs_stamps s,
+        bugs b
+        LEFT JOIN
+        -- RC bugs in unstable (caused by OTHER rc bugs)
+        ( 
+            SELECT b3.source, array_agg(b3.id) AS bugs_unstable
+            FROM bugs b3
+            WHERE b3.severity >= 'serious'
+                AND b3.affects_unstable = true
+                AND b3.affects_testing = false
+            GROUP BY b3.source
+        ) b4
+ON b.source = b4.source
+WHERE   b.severity >= 'serious'
+        AND b.affects_testing = true
         AND b.source IN ( -- in testing
                  SELECT s.source FROM sources s WHERE
                     release = '$testing' AND
@@ -290,10 +409,9 @@ WHERE	b.severity >= 'serious'
                  SELECT pbc.id FROM potential_bug_closures pbc
                  WHERE origin = 'ftpnew'
             )
-        -- shoud be only 5 days, because there is a 10 day waiting period afterward
-        AND b.last_modified < CURRENT_TIMESTAMP - INTERVAL '14 days'
+        AND b.arrival < CURRENT_TIMESTAMP - INTERVAL '14 days'
         AND b.id = s.id
-GROUP BY b.source, b.id
+GROUP BY b.source, b.id, b4.source, b4.bugs_unstable
 
 ";
 
@@ -303,7 +421,20 @@ GROUP BY b.source, b.id
         my $bug = $pg->{'id'};
 
         foreach my $pkg (split m/\s*,\s*/, $pkgsource) {
-			$buggy->{$pkg}->{$bug} = $pg->{"db_updated"};
+			$buggy->{$pkg}->{$bug} = $pg;
+			unless ($pg->{"affects_unstable"}) {
+				unless ($pg->{"bugs_unstable"}) {
+					# if the bug is fixed in unstable, but not (yet) in
+					# testing and there are no other bugs affecting the
+					# package in unstable, we reset the counter on every run,
+					# so the package doesn't get autoremoved, but it stays on
+					# the list
+					# if the package has other bugs in unstable (which prevent
+					# migration of the fix to testing), the counter is NOT
+					# reset, and the package can still be autoremoved
+					$buggy->{$pkg}->{$bug}->{"last_modified"} = $now;
+				}
+			}
         }
     }
 
@@ -324,18 +455,31 @@ sub get_popcon {
 	return $popcon;
 }
 
-sub get_first_seen {
+sub get_popcon_limit {
+    my ($dbh) = @_;
+
+	my $sthc = do_query($dbh,"select max(insts) from popcon");
+	my $pg = $sthc->fetchrow_hashref();
+	my $popcon_max = $pg->{"max"};
+	my $minpopcon = int($popcon_max * $POPCON_PERCENT/100);
+
+	return $minpopcon;
+}
+
+sub get_autoremoval_info {
     my ($dbh,$table) = @_;
 
-	my $first_seen = {};
-	my $query = "select source, min(first_seen) as first_seen from ${table} group by source;";
+	my $autoremoval_info = {};
+	my $query = "select source, min(first_seen) as first_seen, min(removal_time) as removal_time from ${table} group by source;";
 	my $sthc = do_query($dbh,$query);
 	while (my $pg = $sthc->fetchrow_hashref()) {
 		my $src = $pg->{'source'};
-		my $seen = $pg->{'first_seen'};
-		$first_seen->{$src} = $seen;
+		my $info = {};
+		$info->{"first_seen"} = $pg->{'first_seen'};
+		$info->{"removal_time"} = $pg->{'removal_time'};
+		$autoremoval_info->{$src} = $info;
 	}
-	return $first_seen;
+	return $autoremoval_info;
 }
 
 sub read_source_depends {
