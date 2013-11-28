@@ -16,8 +16,7 @@ my $testing = "jessie";
 my $removaldelay = 15*24*3600;
 my $removaldelay_rdeps = 30*24*3600;
 my $debug = 0;
-# if the total popcon of all rdeps is less than this value, remove them all
-my $rdeppopconlimit = 1000;
+my $POPCON_PERCENT = 5; # x% of submissions must have the package installed
 
 my $now = time;
 print "start: ".$now."\n" if ($debug);
@@ -104,6 +103,10 @@ sub update_autoremovals {
 	$buggy = get_bugs ($dbh, $bin2src);
 
 	my $popcon = get_popcon($dbh);
+
+	# if the total popcon of all rdeps is less than this value, remove them all
+	my $rdeppopconlimit = get_popcon_limit($dbh);
+	print "popcon limit rdeps: $rdeppopconlimit\n" if $debug;
 
 	my $autoremoval_info = get_autoremoval_info($dbh,$table);
 
@@ -450,6 +453,17 @@ sub get_popcon {
 		$popcon->{$src} = $insts;
 	}
 	return $popcon;
+}
+
+sub get_popcon_limit {
+    my ($dbh) = @_;
+
+	my $sthc = do_query($dbh,"select max(insts) from popcon");
+	my $pg = $sthc->fetchrow_hashref();
+	my $popcon_max = $pg->{"max"};
+	my $minpopcon = int($popcon_max * $POPCON_PERCENT/100);
+
+	return $minpopcon;
 }
 
 sub get_autoremoval_info {
