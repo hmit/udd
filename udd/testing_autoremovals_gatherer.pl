@@ -285,6 +285,8 @@ sub _calculate_rdeps {
     foreach my $src (keys %$needs) {
         foreach my $el (keys %{$needs->{$src}}) {
             next if $el eq '_version';
+            # skip build-deps for now, because britney ignores them
+            next if $el eq '_BD';
             foreach my $dep (keys %{$needs->{$src}->{$el}}) {
                 my $providers = $bin2src->{$dep};
                 #print STDERR "N: $src ($el) -> $prov_src ($dep)\n" if $prov_src;
