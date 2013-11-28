@@ -11,8 +11,6 @@ my $dbport = "5452";
 my $dbh = DBI->connect("dbi:Pg:host=localhost;dbname=$dbname;port=$dbport;user=guest");
 my $testing = "jessie";
 my $now = time;
-# in the initial stage, the autoremovals happen after 15 days instead of 10
-my $removaltime = $now - 15*24*3600;
 
 my $info = ();
 
@@ -51,7 +49,9 @@ my $maintainerlist = {};
 
 my $query = "select 
 		r.bugs,
+		r.buggy_deps,
 		r.first_seen,
+		r.removal_time,
 		r.source,
 		s.maintainer,
 		s.uploaders
@@ -73,8 +73,11 @@ my $query = "select
 	";
 my $sthc = do_query($dbh,$query);
 while (my $rowsc = $sthc->fetchrow_hashref()) {
-	my $sourceinfo = $rowsc->{"source"}.": bugs ".$rowsc->{"bugs"}.", flagged for removal";
-	my $delay = $rowsc->{"first_seen"}-$removaltime;
+	my $buginfo = "";
+	$buginfo .= "bugs ".$rowsc->{"bugs"}.", " if ($rowsc->{"bugs"} ne "");
+	$buginfo .= "buggy deps ".$rowsc->{"buggy_deps"}.", " if ($rowsc->{"buggy_deps"} ne "");
+	my $sourceinfo = $rowsc->{"source"}.": ".$buginfo."flagged for removal";
+	my $delay = $rowsc->{"removal_time"}-$now;
 	if ($delay > 0) {
 		$sourceinfo .= " in ".show_secs($delay);
 	}
