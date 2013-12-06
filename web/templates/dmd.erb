@@ -1,0 +1,309 @@
+<html>
+<head>
+<title>Debian Maintainer Dashboard</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<link href="http://www.debian.org/debian.css" rel="stylesheet" type="text/css">
+<link href="/css/dmd-wip.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="/js/jquery.min.js"></script>
+<script type="text/javascript" src="/js/jquery.tablesorter.min.js"></script>
+<script type="text/javascript" src="/js/jquery-ui.custom.min.js"></script>
+<script type="text/javascript" src="/js/jquery.cookie.min.js"></script>
+<script type="text/javascript" src="/js/dmd.js"></script>
+</head>
+<body>
+<%= render 'templates/header.erb' %>
+<div id="content">
+<h1>Maintainer dashboard</h1>
+
+<% if uddd %>
+    <ul class="toc">
+        <li><a href="#tab-todo">Todo list: <%= uddd.dmd_todos.length %> items</a></li>
+        <li><a href="#tab-versions">Versions</a></li>
+        <li><a href="#tab-bugs">Bugs</a></li>
+        <li><a href="#tab-ubuntu">Ubuntu</a></li>
+    </ul>
+
+<% else %>
+    <p> The maintainer dashboard exposes information about teams or maintainers' packages. It intends to help answering the question “I have few hours for Debian, what should I do now?”. At this point, the maintainer dashboard brings the following features:</p>
+    <ul>
+        <li>Reports buildd issues (failed builds)</li>
+        <li>Upstream status monitor that works (UDD has its own)</li>
+        <li>Knows about teams’ VCS (if your team uses PET) and display the current version in the VCS</li>
+        <li>Lists packages you maintain or co-maintain, and also the package you showed interest for by subscribing to them on the PTS</li>
+    </ul>
+<% end %>
+
+<table>
+<tbody>
+<div id="tab-search">
+<form id="searchForm" action="." method="get">
+    <% ['1','2','3'].each do |i| %>
+        <tr>
+        <th>
+            <label for="email<%= i %>">Maintainer / team</label>
+        </th>
+        <td>
+        <input id="email<%= i %>" type='text' size='36' name='email<%= i %>' value='<%= defaults['email'][i]%>' placeholder="email address"    />
+        &nbsp;&nbsp;ignore:
+        <input id="nouploader<%= i %>" name="nouploader<%= i %>" type="checkbox" <%= defaults['nouploader'][i] != '' ? 'checked':'' %>/>
+        <label for="nouploader<%= i %>">co-maintained</label>
+        <input id="nosponsor<%= i %>" name="nosponsor<%= i %>" type="checkbox" <%= defaults['nosponsor'][i] != '' ? 'checked' : '' %>/>
+        <label for="nosponsor<%= i %>">sponsored / NMUed</label>
+        </td>
+        </tr>
+    <% end %>
+    <tr>
+        <th>
+            <label for="packages">Additional packages</label>
+        </th>
+        <td>
+            <input id="packages" name="packages" size="36" placeholder="space-separated list" value="<%= default_packages %>"/>
+            &nbsp;<input id="bin2src" name="bin2src" type="checkbox" <%= default_bin2src != '' ? 'checked' : '' %>/>
+            <label for="bin2src">Packages are binary, convert to source package</label>
+        </td>
+    </tr>
+    <tr>
+    <th>
+        <label for="ignpackages">Packages to ignore</label>
+    </th>
+    <td>
+        <input id="ignpackages" name="ignpackages" size="36" placeholder="space-separated list" value="<% default_ignpackages %>"/>
+        &nbsp;<input id="ignbin2src" name="ignbin2src" type="checkbox" <%= default_ignbin2src != '' ? 'checked' : '' %>/>
+        <label for="ignbin2src">Packages are binary, convert to source package</label>
+    </td>
+    </tr>
+    <tr>
+        <td>
+        </td>
+        <td>
+            <input type='submit' value='Go' onsubmit="removeBlankFields(this);"/>
+        </td>
+    </tr>
+</form>
+</tbody>
+</table>
+
+
+<% if uddd %>
+<h2 id="tab-todo">Todo list</h2>
+<table class="tablesorter">
+<thead>
+<tr>
+    <th>type</th>
+    <th>source</th>
+    <th>description</th>
+    <th>hide</th>
+</tr>
+</thead>
+<tbody class='todos'>
+    <% uddd.dmd_todos.each do |t| %>
+    <tr id="<%= t[:shortname] %>">
+        <td><%= t[:type] %></td>
+        <td class="left">
+            <span title="<%= t[:reason] %>">
+            <a href="http://packages.qa.debian.org/<%= t[:source] %>"><%= t[:source] %></a>
+            </span>
+        </td>
+        <td class="left"><%= t[:description] %></td>
+        <td><a href="#" onclick="hide_todo('<%= t[:shortname] %>'); return false;">hide</a></td>
+    </tr>
+    <% end %>
+</tbody></table>
+<div align="right"><a href="#" onclick="reset_todos()">Show all todos</a></div>
+<p><small>Tip: Hover the source column to check the condition.</small></p>
+
+
+<h2 id="tab-versions">Versions</h2>
+<table class="tablesorter">
+<thead>
+<tr>
+    <th>source</th>
+    <th>squeeze</th>
+    <th>wheezy</th>
+    <th>jessie</th>
+    <th>sid</th>
+    <th>experimental</th>
+    <th>vcs</th>
+    <th>upstream</th>
+</tr>
+</thead>
+<tbody>
+<% uddd.sources.sort.each do |src,h| %>
+    <% next if not $uddd.versions.include?(src) %>
+    <% next if not $uddd.versions[src].include?('debian') %>
+    <tr><td class="left"><a href="http://packages.qa.debian.org/<%= src %>" title="<%= h[:reason] %>"><%= src %></a></td>
+
+    <% h[:versions].each do |v| %>
+      <% if v[:count] == 1 %>
+       <td>
+      <% else %>
+        <td colspan="<%= v[:count] %>">
+      <% end %>
+      <%= v[:value] %>
+      </td>
+    <% end %>
+
+    <% up = $uddd.versions[src]['upstream'] %>
+    <% if up %>
+    <td>
+      <% if up[:status] == :error %>
+        <span class="prio_high" title="uscan returned an error">error</a>
+      <% elsif up[:status] == :up_to_date %>
+         <%= up[:version] %>
+      <% elsif up[:status] == :newer_in_debian %>
+          <span class="prio_high" title="Debian version newer than upstream version. debian/watch bug?"><%= up[:version] %></a>
+      <% elsif up[:status] == :out_of_date %>
+          <span class="prio_high" title="Newer upstream version available"><%= up[:version] %></a>
+      <% elsif up[:status] == :out_of_date_in_unstable %>
+          <span class="prio_med" title="Newer upstream version available (already packaged in experimental)"><%= up[:version] %></a>
+      <% else %>
+          "Unhandled case!"
+      <% end %>
+    <% end %>
+    </td>
+    </tr>
+<% end %>
+</tbody>
+</table>
+
+
+
+<h2 id="tab-bugs">Bugs</h2>
+<table class="buglist tablesorter">
+<thead>
+<tr>
+    <th>source</th>
+    <th>all</th>
+    <th>RC</th>
+    <th>with patch</th>
+    <th>pending</th>
+</tr>
+</thead>
+<tbody>
+  <% bc = $uddd.bugs_count %>
+  <% bc.keys.sort.each do |src| %>
+    <% b = bc[src] %>
+    <% next if b[:all] == 0 %>
+    <tr><td class="left"><a href="http://packages.qa.debian.org/<%= src %>" title=""><%= src %></a></td>
+    <td><a href="http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=<%= src %>"><%= b[:all] > 0 ? b[:all] : '' %></a></td>
+    <td><a href="http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=<%= src %>&sev-inc=critical&sev-inc=grave&sev-inc=serious"><%= b[:rc] > 0 ? b[:rc] : '' %></a></td>
+    <td><a href="http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=<%= src %>&include=tags:patch"><%= b[:patch] > 0 ? b[:patch] : '' %></a></td>
+    <td><a href="http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=<%= src %>&pend-inc=pending-fixed&pend-inc=fixed"><%= b[:pending] > 0 ? b[:pending] : '' %></a></td></tr>
+  <% end %>
+</tbody>
+</table>
+
+
+<h2 id="tab-ubuntu">Ubuntu</h2>
+
+<% ur = YAML::load(IO::read('ubuntu-releases.yaml')) %>
+<% USTB=ur['stable'] %>
+<% UDEV=ur['devel'] %>
+
+<table class="buglist tablesorter">
+<thead>
+<tr>
+    <th>source</th>
+    <th>bugs</th>
+    <th>patches</th>
+    <th><%= USTB %> (stable)</th>
+    <th><%= UDEV %> (devel)</th>
+    <th>sid</th>
+    <th>links</th>
+</tr>
+</thead>
+<tbody>
+
+<% uddd.sources.keys.sort.each do |src| %>
+    <% next if not $uddd.versions.include?(src) %>
+    <% next if (not $uddd.versions[src].include?('debian') or not $uddd.versions[src].include?('ubuntu')) %>
+
+    <% ub = uddd.ubuntu_bugs[src] %>
+    <% if ub.nil?
+      bugs = 0
+      patches = 0
+    else
+      bugs = ub[:bugs]
+      patches = ub[:patches]
+    end
+
+    dv = uddd.versions[src]['debian']
+    if dv['sid']
+      sid = dv['sid'][:version]
+    else
+      sid = ''
+    end
+
+    du = uddd.versions[src]['ubuntu']
+    ustb = ''
+    udev = ''
+    if not du.nil?
+      ustb = du[USTB][:version] if du[USTB]
+      ustb += "<br>sec:&nbsp;#{du["#{USTB}-security"][:version]}" if du["#{USTB}-security"]
+      ustb += "<br>upd:&nbsp;#{du["#{USTB}-updates"][:version]}" if du["#{USTB}-updates"]
+      ustb += "<br>prop:&nbsp;#{du["#{USTB}-proposed"][:version]}" if du["#{USTB}-proposed"]
+      ustb += "<br>bpo:&nbsp;#{du["#{USTB}-backports"][:version]}" if du["#{USTB}-backports"]
+
+      udev = du[UDEV][:version] if du[UDEV]
+      if udev == sid
+        if bugs == 0 and patches == 0
+          next
+        end
+      elsif sid != ''
+        if UDDData.compare_versions(udev, sid) == -1
+          if udev =~ /ubuntu/
+            udev = "<a href=\"http://ubuntudiff.debian.net/?query=-FPackage+#{src}\"><span class=\"prio_high\" title=\"Outdated version in Ubuntu, with an Ubuntu patch\">#{udev}</span></a>"
+          else
+            udev = "<span class=\"prio_med\" title=\"Outdated version in Ubuntu\">#{udev}</span>"
+          end
+        elsif UDDData.compare_versions(udev, sid) == 1
+          udevnb = udev.gsub(/build\d+$/,'')
+          if UDDData.compare_versions(udevnb, sid) == 1
+            udev = "<a href=\"http://ubuntudiff.debian.net/?query=-FPackage+#{src}\"><span class=\"prio_high\" title=\"Newer version in Ubuntu\">#{udev}</span></a>"
+          end
+        end
+      end
+      udev += "<br>sec:&nbsp;#{du["#{UDEV}-security"][:version]}" if du["#{UDEV}-security"]
+      udev += "<br>upd:&nbsp;#{du["#{UDEV}-updates"][:version]}" if du["#{UDEV}-updates"]
+      udev += "<br>prop:&nbsp;#{du["#{UDEV}-proposed"][:version]}" if du["#{UDEV}-proposed"]
+      udev += "<br>bpo:&nbsp;#{du["#{UDEV}-backports"][:version]}" if du["#{UDEV}-backports"]
+    end %>
+
+    <tr><td class=\"left\"><%= src %>&nbsp;</td>
+    <% if bugs > 0 %>
+      <td><a href="https://bugs.launchpad.net/ubuntu/+source/<%= src %>"><%= bugs %></a></td>
+    <% else %>
+      <td></td>
+    <% end %>
+    <% if patches > 0 %>
+      <td><a href="https://bugs.launchpad.net/ubuntu/+source/<%= src %>/+patches"><%= patches %></a></td>
+    <% else %>
+      <td></td>
+    <% end %>
+
+    <% UDDData.group_values(ustb, udev, sid).each do |v| %>
+      <% if v[:count] == 1 %>
+        <td>
+      <% else %>
+        <td colspan=#{v[:count]}>
+      <% end %>
+          <%= v[:value] %>
+          </td>
+    <% end %>
+    <td><a href=\"http://packages.qa.debian.org/#{src}\">PTS</a>&nbsp;<a href=\"https://launchpad.net/ubuntu/+source/#{src}\">LP</a></td>
+    </tr>
+  <% end %>
+
+
+</tbody>
+</table>
+<p>Packages with the same version in <i><%= UDEV %></i> and <i>Debian sid</i>, no bugs and no patches are not listed.</p>
+<div text-align="right"><small>Generated in <%= Time::now - tstart %> seconds.</b></small></div>
+
+<% end %><!-- end if uddd -->
+<br />
+<br />
+</div><!-- end content -->
+<%= render 'templates/footer.erb' %>
+</body>
+</html>

@@ -1,0 +1,9 @@
+Options +ExecCGI +Indexes
+AddHandler cgi-script cgi 
+
+RewriteEngine on
+RewriteBase   /
+#RewriteRule ^$ index.cgi [L]
+RewriteRule ^index/$ index.cgi [L]
+RewriteRule ^dmd/(.*) dmd-wip.cgi [L]
+#RewriteRule ^bugs/(.*) bugs.cgi [L]

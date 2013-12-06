@@ -1,0 +1,20 @@
+<html>
+<head>
+<title>Database</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<link href="http://www.debian.org/debian.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+    <%= render 'templates/header.erb' %>
+
+    <div id="content"> 
+        <h1>Database</h1>
+        <p>Ultimate Debian Database (UDD) gathers a lot of data about various aspects of Debian in the same SQL database. It allows users to easily access and combine all these data.<span class="anchor" id="line-6"></span><span class="anchor" id="line-7"></span>Data currently being imported include: Packages and Sources files, from Debian and Ubuntu, Bugs from the Debian BTS, Popularity contest, History of uploads, History of migrations to testing, Lintian, Orphaned packages, Carnivore, Debtags, Ubuntu bugs (from Launchpad), Packages in NEW queue, DDTP translations.</p>
+         <span class="anchor" id="line-8"></span><span class="anchor" id="line-9"></span><ul><li>Some <strong>example queries</strong> are provided as CGI scripts, to make it easy for everyone to run them. You can <a class="http" href="http://udd.debian.org/cgi-bin/">browse them</a> or <a class="http" href="http://anonscm.debian.org/gitweb/?p=collab-qa/udd.git;a=tree;f=web/cgi-bin">view the source code</a>. <span class="anchor" id="line-10"></span></li><li><strong>Database schema</strong>: <a class="http" href="http://udd.debian.org/schema/">http://udd.debian.org/schema/</a> <span class="anchor" id="line-11"></span></li><li><strong>Source code</strong>: available in the git repository of the <a class="http" href="http://alioth.debian.org/projects/collab-qa/">collab-qa project</a> at <a class="http" href="http://anonscm.debian.org/gitweb/?p=collab-qa/udd.git;a=summary">http://anonscm.debian.org/gitweb/?p=collab-qa/udd.git;a=summary</a> <span class="anchor" id="line-12"></span></li><li><strong>Database server</strong>: runs on postgres with plperl and postgresql-debversion <span class="anchor" id="line-13"></span></li><li>UDD-based services: <span class="anchor" id="line-14"></span><ul><li><a class="http" href="http://udd.debian.org/bugs.cgi">Bugs Search</a>: multi-criteria search engine for bugs <span class="anchor" id="line-15"></span></li><li><a class="http" href="http://udd.debian.org/dmd.cgi">Debian Maintainer Dashboard</a> <span class="anchor" id="line-16"></span></li><li><a class="http" href="http://udd.debian.org/cgi-bin/bts-usertags.cgi">Bugs Usertags</a>: search for usertag on bugs <span class="anchor" id="line-17"></span></li><li><a class="http" href="http://udd.debian.org/sponsorstats.cgi">Sponsors Stats</a> gives some statistics about who is sponsoring uploads to Debian <span class="anchor" id="line-18"></span></li><li><a class="http" href="http://udd.debian.org/bapase.cgi">Bapase</a> allows to search for "interesting" packages using various criterias <span class="anchor" id="line-19"></span><span class="anchor" id="line-20"></span></li></ul></li></ul>
+
+        <p>More information is to be found on our <a href="https://wiki.debian.org/UltimateDebianDatabase">Wiki page</a>; contact us on <a class="irc" href="irc://irc.debian.org/debian-qa">#debian-qa</a> or <a class="mailto" href="mailto:debian-qa@lists.debian.org">debian-qa@lists.debian.org</a> (mailing list <a class="http" href="http://lists.debian.org/debian-qa/">subscription and archives</a>).</p>
+    </div>
+
+    <%= render 'templates/footer.erb' %>
+</body>
+</html>
