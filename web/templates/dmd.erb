@@ -11,32 +11,38 @@
 <script type="text/javascript" src="/js/dmd.js"></script>
 </head>
 <body>
-<%= render 'templates/header.erb' %>
-<div id="content">
-<h1>Maintainer dashboard</h1>
-
-<% if uddd %>
-    <ul class="toc">
-        <li><a href="#tab-todo">Todo list: <%= uddd.dmd_todos.length %> items</a></li>
-        <li><a href="#tab-versions">Versions</a></li>
-        <li><a href="#tab-bugs">Bugs</a></li>
-        <li><a href="#tab-ubuntu">Ubuntu</a></li>
-    </ul>
-
-<% else %>
-    <p> The maintainer dashboard exposes information about teams or maintainers' packages. It intends to help answering the question “I have few hours for Debian, what should I do now?”. At this point, the maintainer dashboard brings the following features:</p>
+<div id="header">
+  <div id="wikisection">
+    <p class="section"><a href="/" title="Ultimate Debian Database">UDD</a></p>
+  </div>
+  <div id="upperheader">
+    <div id="logo">
+        <a href="http://www.debian.org" title="Debian Home"><img src="http://www.debian.org/Pics/openlogo-50.png" alt="Debian" width="50" height="61"></a>
+    </div> <!-- end logo -->
+  </div> <!-- end upperheader -->
+  <!--UdmComment-->
+  <div id="navbar">
+    <p class="hidecss"><a href="#content">Skip Quicknav</a></p>
     <ul>
-        <li>Reports buildd issues (failed builds)</li>
-        <li>Upstream status monitor that works (UDD has its own)</li>
-        <li>Knows about teams’ VCS (if your team uses PET) and display the current version in the VCS</li>
-        <li>Lists packages you maintain or co-maintain, and also the package you showed interest for by subscribing to them on the PTS</li>
+       <li><a href="#search">Maintainer search</a></li>
+       <li><a href="#todo">Todo list</a></li>
+       <li><a href="#versions">Versions</a></li>
+       <li><a href="#bugs">Bugs</a></li>
+       <li><a href="#ubuntu">Ubuntu</a></li>
     </ul>
-<% end %>
+  </div> <!-- end navbar -->
+  <!-- <p id="breadcrumbs">&nbsp;Maintainer Dashboard</p> -->
+</div> <!-- end header -->
 
+<div id="content">
+    <p id="breadcrumbs">&nbsp;Maintainer Dashboard</p>
+    <a name="search" class="h1anchor"><h1>Maintainer dashboard</h1></a>
+    <p> The maintainer dashboard exposes information about teams or maintainers' packages. It intends to help answering the question “I have few hours for Debian, what should I do now?”. Fill in one or more email addresses in the form below to check it out; for example here is <a href="/dmd/?email1=debian-accessibility%40lists.debian.org#todo">the accessibility team todo list</a>.</p>
+    
 <table>
 <tbody>
-<div id="tab-search">
-<form id="searchForm" action="/dmd-wip.cgi" method="get">
+<div>
+<form id="searchForm" action="/dmd/#todo" method="get">
     <% ['1','2','3'].each do |i| %>
         <tr>
         <th>
@@ -73,8 +79,8 @@
     </td>
     </tr>
     <tr>
-        <td>
-        </td>
+        <th>
+        </th>
         <td>
             <input type='submit' value='Go' onsubmit="removeBlankFields(this);"/>
         </td>
@@ -85,8 +91,8 @@
 
 
 <% if uddd %>
-<h2 id="tab-todo">Todo list</h2>
-<table class="tablesorter">
+<a name="todo"><h2>Todo list</h2></a>
+<table class="tablesorter table table-bordered">
 <thead>
 <tr>
     <th>type</th>
@@ -110,11 +116,10 @@
     <% end %>
 </tbody></table>
 <div align="right"><a href="#" onclick="reset_todos()">Show all todos</a></div>
-<p><small>Tip: Hover the source column to check the condition.</small></p>
 
 
-<h2 id="tab-versions">Versions</h2>
-<table class="tablesorter">
+<a name="versions"><h2>Versions</h2></a>
+<table class="tablesorter table table-bordered">
 <thead>
 <tr>
     <th>source</th>
@@ -139,13 +144,13 @@
       <% else %>
         <td colspan="<%= v[:count] %>">
       <% end %>
-      <%= v[:value] %>
+      <%= v[:value] %> &nbsp;
       </td>
     <% end %>
 
+    <td>
     <% up = $uddd.versions[src]['upstream'] %>
     <% if up %>
-    <td>
       <% if up[:status] == :error %>
         <span class="prio_high" title="uscan returned an error">error</a>
       <% elsif up[:status] == :up_to_date %>
@@ -159,7 +164,8 @@
       <% else %>
           "Unhandled case!"
       <% end %>
-    <% end %>
+  <% end %>
+      &nbsp;
     </td>
     </tr>
 <% end %>
@@ -168,8 +174,8 @@
 
 
 
-<h2 id="tab-bugs">Bugs</h2>
-<table class="buglist tablesorter">
+<a name="bugs"><h2>Bugs</h2></a>
+<table class="buglist tablesorter table table-bordered">
 <thead>
 <tr>
     <th>source</th>
@@ -194,13 +200,13 @@
 </table>
 
 
-<h2 id="tab-ubuntu">Ubuntu</h2>
+<a name="ubuntu"><h2>Ubuntu</h2></a>
 
 <% ur = YAML::load(IO::read('ubuntu-releases.yaml')) %>
 <% USTB=ur['stable'] %>
 <% UDEV=ur['devel'] %>
 
-<table class="buglist tablesorter">
+<table class="buglist tablesorter table table-bordered">
 <thead>
 <tr>
     <th>source</th>
