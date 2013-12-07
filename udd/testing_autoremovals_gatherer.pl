@@ -234,7 +234,7 @@ sub update_autoremovals {
 		my $bugs_deps = join(",",sort keys %{$autoremovals->{$buggy_src}->{"bugs_deps"}});
 
 		my $delay = $removaldelay;
-		$delay = $removaldelay_rdeps unless $bugcount;
+		$delay = $removaldelay_rdeps if scalar keys %{$autoremovals->{$buggy_src}->{"rdep"}};
 		my $removal_time = $autoremoval_info->{$buggy_src}->{"removal_time"}||0;
 		$removal_time = $first_seen + $delay unless ($removal_time > $first_seen + $delay);
 		$removal_time = $modified + $delay unless ($removal_time > $modified + $delay);
