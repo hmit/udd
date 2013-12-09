@@ -1,64 +1,118 @@
-  body {
-    font-family : "DejaVu Sans", "Bitstream Vera Sans", "sans-serif;"
-  }
+label:hover { cursor: pointer; }
+input {outline: 1px solid transparent;}
 
-  table.buglist td, table.buglist th {
-    border: 1px solid gray;
-    padding-left: 3px;
-    padding-right: 3px;
-    text-align: center;
-  }
-
-  table.buglist td.left {
-    text-align: left;
-  }
-
-  table.buglist tr:hover  {
-    background-color: #ccc;
-    color: #000;
-  }
-  table.buglist tr:hover :link {
-    color: #00f;
-  }
-  table.buglist tr:hover :visited {
-    color: #707;
-  }
-  table {
-    border-collapse: collapse;
-  }
-
-div#body {
-  border-top: 2px solid #d70751;
-}
-
-div.footer {
-    padding: 0.3em 0;
-    background-color: #fff;
-    color: #000;
-    text-align: center;
-    border-top: 2px solid #d70751;
-    margin: 0 0 0 0;
-    border-bottom: 0;
-    font-size: 85%;
-}
-  div.footer :link {
-    color: #00f;
-  }
-  div.footer :visited {
-    color: #707;
-  }
-
-  span.prio_high {
+span.prio_high {
     color: #ff0000;
     font-weight: bold;
-  }
-
-  span.prio_med {
+}
+span.prio_med {
     color: #ccaa00;
     font-weight: bold;
-  }
+}
+a, a:link { text-decoration: none; }
+a:hover, a:link:hover { text-decoration: underline; }
+a[name] {
+  padding-top: 19px;
+  margin-top: -19px;
+  display: inline-block;
+}
 
-  /* tablesorter */
+a.h1anchor {
+  padding-top: 85px;
+  margin-top: -85px;
+}
+
+h2 {
+    margin: 8px 0;
+}
+#header {
+    position: fixed;
+    display: block;
+    top: 0;
+    width: 100%;
+    background-color: white;
+    background-image: url("http://www.debian.org/Pics/gradient.png");
+    background-position: 0 0;
+    background-repeat: repeat-x;
+}
+
+#content {
+    margin-top: 58px;
+    display: block;
+}
+.autocompletecontainer {
+  position:absolute;
+  width: 600px;
+} 
+.ui-menu {
+  background-color: #fff;
+  border: 1px solid #ddd;
+}
+.ui-menu li {
+  list-style-type: none;
+  cursor: pointer;
+}
+.ui-menu-item a:hover { text-decoration: none; }
+.ui-menu-item:hover { background-color: #eee; }
+#navbar ul { padding-right: 70px; }
+#navbar li.rightmenuitem { float: right; }
+.table {
+    font-size: 0.875em;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-bottom: 20px;
+}
+.table th, .table td {
+    border-top: 1px solid #DDDDDD;
+    line-height: 20px;
+    padding: 2px 4px;
+    text-align: left;
+    vertical-align: top;
+}
+.table th {
+    font-weight: bold;
+}
+.table thead th {
+    vertical-align: bottom;
+    padding: 4px;
+}
+.table tbody + tbody {
+    border-top: 2px solid #DDDDDD;
+}
+.table-bordered {
+    border-collapse: separate;
+    border-color: #DDDDDD;
+    border-image: none;
+    border-radius: 4px 4px 4px 4px;
+    border-style: solid solid solid none;
+    border-width: 1px 1px 1px 0;
+}
+.table-bordered th, .table-bordered td {
+    border-left: 1px solid #DDDDDD;
+}
+.table-bordered caption + thead tr:first-child th, .table-bordered caption + tbody tr:first-child th, .table-bordered caption + tbody tr:first-child td, .table-bordered colgroup + thead tr:first-child th, .table-bordered colgroup + tbody tr:first-child th, .table-bordered colgroup + tbody tr:first-child td, .table-bordered thead:first-child tr:first-child th, .table-bordered tbody:first-child tr:first-child th, .table-bordered tbody:first-child tr:first-child td {
+    border-top: 0 none;
+}
+.table-bordered thead:first-child tr:first-child th:first-child, .table-bordered tbody:first-child tr:first-child td:first-child {
+    border-top-left-radius: 4px;
+}
+.table-bordered thead:first-child tr:first-child th:last-child, .table-bordered tbody:first-child tr:first-child td:last-child {
+    border-top-right-radius: 4px;
+}
+.table-bordered thead:last-child tr:last-child th:first-child, .table-bordered tbody:last-child tr:last-child td:first-child, .table-bordered tfoot:last-child tr:last-child td:first-child {
+    border-radius: 0 0 0 4px;
+}
+.table-bordered thead:last-child tr:last-child th:last-child, .table-bordered tbody:last-child tr:last-child td:last-child, .table-bordered tfoot:last-child tr:last-child td:last-child {
+    border-bottom-right-radius: 4px;
+}
+.table-bordered caption + thead tr:first-child th:first-child, .table-bordered caption + tbody tr:first-child td:first-child, .table-bordered colgroup + thead tr:first-child th:first-child, .table-bordered colgroup + tbody tr:first-child td:first-child {
+    border-top-left-radius: 4px;
+}
+.table-bordered caption + thead tr:first-child th:last-child, .table-bordered caption + tbody tr:first-child td:last-child, .table-bordered colgroup + thead tr:first-child th:last-child, .table-bordered colgroup + tbody tr:first-child td:last-child {
+    border-top-right-radius: 4px;
+}
+
+/* tablesorter */
 table.tablesorter thead tr .header {
 	background-image: url(../images/tablesorter/bg.gif);
 	background-repeat: no-repeat;
@@ -74,4 +128,3 @@ table.tablesorter thead tr .headerSortDown {
 table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSortUp {
     background-color: #ddd;
 }
-

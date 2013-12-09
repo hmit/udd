@@ -3,7 +3,7 @@
 <title>Debian Maintainer Dashboard</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <link href="http://www.debian.org/debian.css" rel="stylesheet" type="text/css">
-<link href="/css/dmd-wip.css" rel="stylesheet" type="text/css">
+<link href="/css/dmd.css" rel="stylesheet" type="text/css">
 <script type="text/javascript" src="/js/jquery.min.js"></script>
 <script type="text/javascript" src="/js/jquery.tablesorter.min.js"></script>
 <script type="text/javascript" src="/js/jquery-ui.custom.min.js"></script>
@@ -18,12 +18,12 @@
   <div id="upperheader">
     <div id="logo">
         <a href="http://www.debian.org" title="Debian Home"><img src="http://www.debian.org/Pics/openlogo-50.png" alt="Debian" width="50" height="61"></a>
-    </div> <!-- end logo -->
+    </div>
   </div> <!-- end upperheader -->
-  <!--UdmComment-->
   <div id="navbar">
     <p class="hidecss"><a href="#content">Skip Quicknav</a></p>
     <ul>
+       <li><a href="/">Ultimate Database</a></li>
        <li><a href="#search">Maintainer search</a></li>
        <li><a href="#todo">Todo list</a></li>
        <li><a href="#versions">Versions</a></li>
@@ -43,21 +43,22 @@
 <tbody>
 <div>
 <form id="searchForm" action="/dmd/#todo" method="get">
-    <% ['1','2','3'].each do |i| %>
-        <tr>
-        <th>
-            <label for="email<%= i %>">Maintainer / team</label>
-        </th>
-        <td>
-        <input id="email<%= i %>" type='text' size='36' name='email<%= i %>' value='<%= defaults['email'][i]%>' placeholder="email address"    />
-        &nbsp;&nbsp;ignore:
-        <input id="nouploader<%= i %>" name="nouploader<%= i %>" type="checkbox" <%= defaults['nouploader'][i] != '' ? 'checked':'' %>/>
-        <label for="nouploader<%= i %>">co-maintained</label>
-        <input id="nosponsor<%= i %>" name="nosponsor<%= i %>" type="checkbox" <%= defaults['nosponsor'][i] != '' ? 'checked' : '' %>/>
-        <label for="nosponsor<%= i %>">sponsored / NMUed</label>
-        </td>
-        </tr>
-    <% end %>
+  <% ['1','2','3'].each do |i| %>
+    <tr>
+    <th>
+        <label for="email<%= i %>">Maintainer / team</label>
+    </th>
+    <td>
+    <div id="autocompletecontainer<%= i %>" class="autocompletecontainer"></div>
+    <input id="email<%= i %>" type='text' size='36' name='email<%= i %>' value='<%= defaults['email'][i]%>' placeholder="email address">
+    &nbsp;&nbsp;ignore:
+    <input id="nouploader<%= i %>" name="nouploader<%= i %>" type="checkbox" <%= defaults['nouploader'][i] != '' ? 'checked':'' %>/>
+    <label for="nouploader<%= i %>">co-maintained</label>
+    <input id="nosponsor<%= i %>" name="nosponsor<%= i %>" type="checkbox" <%= defaults['nosponsor'][i] != '' ? 'checked' : '' %>/>
+    <label for="nosponsor<%= i %>">sponsored / NMUed</label>
+    </td>
+    </tr>
+  <% end %>
     <tr>
         <th>
             <label for="packages">Additional packages</label>
@@ -65,7 +66,7 @@
         <td>
             <input id="packages" name="packages" size="36" placeholder="space-separated list" value="<%= default_packages %>"/>
             &nbsp;<input id="bin2src" name="bin2src" type="checkbox" <%= default_bin2src != '' ? 'checked' : '' %>/>
-            <label for="bin2src">Packages are binary, convert to source package</label>
+            <label for="bin2src">Packages are binary, convert to source packages</label>
         </td>
     </tr>
     <tr>
@@ -75,7 +76,7 @@
     <td>
         <input id="ignpackages" name="ignpackages" size="36" placeholder="space-separated list" value="<% default_ignpackages %>"/>
         &nbsp;<input id="ignbin2src" name="ignbin2src" type="checkbox" <%= default_ignbin2src != '' ? 'checked' : '' %>/>
-        <label for="ignbin2src">Packages are binary, convert to source package</label>
+        <label for="ignbin2src">Packages are binary, convert to source packages</label>
     </td>
     </tr>
     <tr>
@@ -115,7 +116,7 @@
     </tr>
     <% end %>
 </tbody></table>
-<div align="right"><a href="#" onclick="reset_todos()">Show all todos</a></div>
+<p><small><a href="#todo" onclick="reset_todos()">Show all todos</a></small></p>
 
 
 <a name="versions"><h2>Versions</h2></a>
@@ -142,7 +143,7 @@
       <% if v[:count] == 1 %>
        <td>
       <% else %>
-        <td colspan="<%= v[:count] %>">
+        <td colspan="<%= v[:count] %>" style="text-align: center;">
       <% end %>
       <%= v[:value] %> &nbsp;
       </td>
@@ -173,7 +174,6 @@
 </table>
 
 
-
 <a name="bugs"><h2>Bugs</h2></a>
 <table class="buglist tablesorter table table-bordered">
 <thead>
@@ -201,11 +201,6 @@
 
 
 <a name="ubuntu"><h2>Ubuntu</h2></a>
-
-<% ur = YAML::load(IO::read('ubuntu-releases.yaml')) %>
-<% USTB=ur['stable'] %>
-<% UDEV=ur['devel'] %>
-
 <table class="buglist tablesorter table table-bordered">
 <thead>
 <tr>
@@ -220,91 +215,38 @@
 </thead>
 <tbody>
 
-<% uddd.sources.keys.sort.each do |src| %>
-    <% next if not $uddd.versions.include?(src) %>
-    <% next if (not $uddd.versions[src].include?('debian') or not $uddd.versions[src].include?('ubuntu')) %>
-
-    <% ub = uddd.ubuntu_bugs[src] %>
-    <% if ub.nil?
-      bugs = 0
-      patches = 0
-    else
-      bugs = ub[:bugs]
-      patches = ub[:patches]
-    end
-
-    dv = uddd.versions[src]['debian']
-    if dv['sid']
-      sid = dv['sid'][:version]
-    else
-      sid = ''
-    end
-
-    du = uddd.versions[src]['ubuntu']
-    ustb = ''
-    udev = ''
-    if not du.nil?
-      ustb = du[USTB][:version] if du[USTB]
-      ustb += "<br>sec:&nbsp;#{du["#{USTB}-security"][:version]}" if du["#{USTB}-security"]
-      ustb += "<br>upd:&nbsp;#{du["#{USTB}-updates"][:version]}" if du["#{USTB}-updates"]
-      ustb += "<br>prop:&nbsp;#{du["#{USTB}-proposed"][:version]}" if du["#{USTB}-proposed"]
-      ustb += "<br>bpo:&nbsp;#{du["#{USTB}-backports"][:version]}" if du["#{USTB}-backports"]
-
-      udev = du[UDEV][:version] if du[UDEV]
-      if udev == sid
-        if bugs == 0 and patches == 0
-          next
-        end
-      elsif sid != ''
-        if UDDData.compare_versions(udev, sid) == -1
-          if udev =~ /ubuntu/
-            udev = "<a href=\"http://ubuntudiff.debian.net/?query=-FPackage+#{src}\"><span class=\"prio_high\" title=\"Outdated version in Ubuntu, with an Ubuntu patch\">#{udev}</span></a>"
-          else
-            udev = "<span class=\"prio_med\" title=\"Outdated version in Ubuntu\">#{udev}</span>"
-          end
-        elsif UDDData.compare_versions(udev, sid) == 1
-          udevnb = udev.gsub(/build\d+$/,'')
-          if UDDData.compare_versions(udevnb, sid) == 1
-            udev = "<a href=\"http://ubuntudiff.debian.net/?query=-FPackage+#{src}\"><span class=\"prio_high\" title=\"Newer version in Ubuntu\">#{udev}</span></a>"
-          end
-        end
-      end
-      udev += "<br>sec:&nbsp;#{du["#{UDEV}-security"][:version]}" if du["#{UDEV}-security"]
-      udev += "<br>upd:&nbsp;#{du["#{UDEV}-updates"][:version]}" if du["#{UDEV}-updates"]
-      udev += "<br>prop:&nbsp;#{du["#{UDEV}-proposed"][:version]}" if du["#{UDEV}-proposed"]
-      udev += "<br>bpo:&nbsp;#{du["#{UDEV}-backports"][:version]}" if du["#{UDEV}-backports"]
-    end %>
-
-    <tr><td class=\"left\"><%= src %>&nbsp;</td>
-    <% if bugs > 0 %>
-      <td><a href="https://bugs.launchpad.net/ubuntu/+source/<%= src %>"><%= bugs %></a></td>
+<% ubuntu.each do |p| %>
+    <tr><td class="left"><%= p[:src] %>&nbsp;</td>
+    <% if p[:bugs] > 0 %>
+        <td><a href="<%= p[:launchpad] %>"><%= p[:bugs] %></a></td>
     <% else %>
-      <td></td>
+      <td>&nbsp;</td>
     <% end %>
-    <% if patches > 0 %>
-      <td><a href="https://bugs.launchpad.net/ubuntu/+source/<%= src %>/+patches"><%= patches %></a></td>
+    <% if p[:patches] > 0 %>
+        <td><a href="<%= p[:launchpad] %>/+patches"><%= p[:patches] %></a></td>
     <% else %>
-      <td></td>
+      <td>&nbsp;</td>
     <% end %>
 
-    <% UDDData.group_values(ustb, udev, sid).each do |v| %>
+    <% p[:values].each do |v| %>
       <% if v[:count] == 1 %>
         <td>
       <% else %>
-        <td colspan=#{v[:count]}>
+          <td colspan="<%= v[:count] %>" style="text-align: center;">
       <% end %>
-          <%= v[:value] %>
-          </td>
+          <%= v[:value] %>&nbsp;
+      </td>
     <% end %>
-    <td><a href=\"http://packages.qa.debian.org/#{src}\">PTS</a>&nbsp;<a href=\"https://launchpad.net/ubuntu/+source/#{src}\">LP</a></td>
+    <td><a href="<%= p[:pts] %>">PTS</a>&nbsp;<a href="<%= p[:launchpad] %>">LP</a></td>
     </tr>
-  <% end %>
-
+<% end %>
 
 </tbody>
 </table>
+
 <p>Packages with the same version in <i><%= UDEV %></i> and <i>Debian sid</i>, no bugs and no patches are not listed.</p>
-<div text-align="right"><small>Generated in <%= Time::now - tstart %> seconds.</b></small></div>
+
+<small>Generated in <%= sprintf "%.2f", Time::now - tstart %> seconds.</b></small>
 
 <% end %><!-- end if uddd -->
 <br />

@@ -7,21 +7,24 @@ $(function() {
     select: function(event, ui) {
         $("#email1").val(ui.item.value);
         $("#searchForm").submit();
-    }
+    },
+    appendTo: '#autocompletecontainer1'
   });
   $( "#email2" ).autocomplete({
     source: "/dmd-emails.cgi",
     select: function(event, ui) {
         $("#email2").val(ui.item.value);
         $("#searchForm").submit();
-    }
+    },
+    appendTo: '#autocompletecontainer2'
   });
   $( "#email3" ).autocomplete({
     source: "/dmd-emails.cgi",
     select: function(event, ui) {
         $("#email3").val(ui.item.value);
         $("#searchForm").submit();
-    }
+    },
+    appendTo: '#autocompletecontainer3'
   });
 });
 $(document).ready(function() {

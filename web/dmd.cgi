@@ -4,12 +4,12 @@ require 'cgi'
 require 'yaml'
 
 STDERR.reopen(STDOUT) # makes live debugging much easier
-puts "Content-type: text/html\n\n"
 
 require File.expand_path(File.dirname(__FILE__))+'/inc/dmd-data'
+require File.expand_path(File.dirname(__FILE__))+'/inc/page'
+
 
 cgi = CGI::new
-
 tstart = Time::now
 
 default_packages = ''
@@ -21,7 +21,6 @@ default_ignpackages = ''
 default_ignpackages = CGI.escapeHTML(cgi.params['ignpackages'][0]) if cgi.params['ignpackages'][0]
 default_ignbin2src = ''
 default_ignbin2src = CGI.escapeHTML(cgi.params['ignbin2src'][0]) if cgi.params['ignbin2src'][0]
-
 
 defaults = {}
 defaults['nosponsor'] = {}
@@ -37,105 +36,8 @@ defaults['email'] = {}
   end
 end
 
-
-puts <<-EOF
-<html>
-<head>
-<style type="text/css" rel="stylesheet">
-@import "css/dmd.css";
-@import "css/jquery-ui-1.8.21.custom.css";
-</style>
-<title>Debian Maintainer Dashboard @ UDD</title>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-<script type="text/javascript" src="js/jquery.min.js"></script>
-<script type="text/javascript" src="js/jquery.tablesorter.min.js"></script>
-<script type="text/javascript" src="js/jquery-ui.custom.min.js"></script>
-<script type="text/javascript" src="js/jquery.cookie.min.js"></script>
-<script>
-$(function() {
-  $( "#tabs" ).tabs();
-  $( "#email1" ).autocomplete({
-    source: "dmd-emails.cgi",
-    select: function(event, ui) {
-        $("#email1").val(ui.item.value);
-        $("#searchForm").submit();
-    }
-  });
-  $( "#email2" ).autocomplete({
-    source: "dmd-emails.cgi",
-    select: function(event, ui) {
-        $("#email2").val(ui.item.value);
-        $("#searchForm").submit();
-    }
-  });
-  $( "#email3" ).autocomplete({
-    source: "dmd-emails.cgi",
-    select: function(event, ui) {
-        $("#email3").val(ui.item.value);
-        $("#searchForm").submit();
-    }
-  });
-});
-$(document).ready(function() {
-$("table.tablesorter").each(function(index) { $(this).tablesorter() });
-$("tbody.todos tr").each(function(index, elem) { if ($.cookie(elem.id) == '1') $(elem).hide(); });
-});
-function hide_todo(id) {
-  $.cookie(id, '1', { expires: 3650 });
-  $("tbody.todos tr#"+id).hide();
-}
-
-function reset_todos() {
-$("tbody.todos tr").each(function(index, elem) {
- $.cookie(elem.id, null);
- $(elem).show();
-});
-}
-
-function removeBlankFields(form) {
-	var inputs = form.getElementsByTagName("input");
-	var removeList = new Array();
-	for (var i=0; i<inputs.length; i++) {
-		if (inputs[i].value == "") {
-			removeList.push(inputs[i]);
-		}
-	}
-	for (x in removeList) {
-		removeList[x].parentNode.removeChild(removeList[x]);
-	}
-}
-</script>
-</head>
-<body>
-<h1 style="margin-bottom : 5px"><img src="http://qa.debian.org/debian.png" alt="Debian logo" width="188" height="52" style="vertical-align : -13px; ">Maintainer Dashboard <span style="color :#c70036">@</span> UDD</h1>
-<div id="body">
-<br/>
-<form id="searchForm" action="dmd.cgi" method="get">
-EOF
-
-['1','2','3'].each do |i|
-  puts <<-EOF
-email: <input id="email#{i}" type='text' size='100' name='email#{i}' value='#{defaults['email'][i]}'/>
-&nbsp;&nbsp;ignore:
-<input id="nouploader#{i}" name="nouploader#{i}" type="checkbox" #{defaults['nouploader'][i] != '' ? 'checked':''}/> co-maintained &nbsp;&nbsp;
-<input id="nosponsor#{i}" name="nosponsor#{i}" type="checkbox" #{defaults['nosponsor'][i] != '' ? 'checked' : ''}/> sponsored / NMUed <br/>
-  EOF
-end
-puts <<-EOF
-<br/>
-<b>additional</b> (source) packages (one per line or space-separated):<br/>
-<textarea id="packages" name="packages" cols="80" rows="1"/>#{default_packages}</textarea><br/>
-<input id="bin2src" name="bin2src" type="checkbox" #{default_bin2src != '' ? 'checked' : ''}/> Packages are binary packages, convert to source packages<br/>
-<br/>
-(source) packages to <b>ignore</b> (one per line or space-separated):<br/>
-<textarea id="ignpackages" name="ignpackages" cols="80" rows="1"/>#{default_ignpackages}</textarea><br/>
-<input id="ignbin2src" name="ignbin2src" type="checkbox" #{default_ignbin2src != '' ? 'checked' : ''}/> Packages are binary packages, convert to source packages<br/>
-
-&nbsp;&nbsp; <input type='submit' value='Go' onsubmit="removeBlankFields(this);"/>
-</form>
-EOF
-
 if cgi.params != {}
+
   emails = {}
 
   # for compatibility purposes
@@ -161,66 +63,33 @@ if cgi.params != {}
   def src_reason(pkg)
     s = $uddd.sources[pkg]
     if s[0] == :manually_listed
-      return "<span title=\"manually listed\"><b>#{pkg}</b></span>"
+      return "Manually listed"
     elsif s[0] == :maintainer
-      return "<span title=\"maintained by #{s[1]}\"><b>#{pkg}</b></span>"
+      return "Maintained by #{s[1]}"
     elsif s[0] == :uploader
-      return "<span title=\"co-maintained by #{s[1]}\">#{pkg}</span>"
+      return "Co-maintained by #{s[1]}"
     elsif s[0] == :sponsor
-      return "<span title=\"was uploaded by #{s[1]}\"><i>#{pkg}</i></span>"
+      return "Was uploaded by #{s[1]}"
     end
   end
 
-  puts <<-EOF
-<div id="tabs">
-	<ul>
-		<li><a href="#tabs-todo">TODO list</a></li>
-		<li><a href="#tabs-versions">Versions</a></li>
-		<li><a href="#tabs-bugs">Bugs</a></li>
-		<li><a href="#tabs-ubuntu">Ubuntu</a></li>
-	</ul>
-	<div id="tabs-todo">
-<table class="buglist tablesorter">
-<thead>
-<tr>
-<th>type</th><th>source</th><th>description</th><th>&nbsp;&nbsp;&nbsp;&nbsp;hide&nbsp;&nbsp;&nbsp;&nbsp;</th>
-</tr>
-</thead><tbody class='todos'>
-  EOF
+
   $uddd.dmd_todos.each do |t|
-    puts "<tr id='#{t[:shortname]}'><td>#{t[:type]}</td>"
-    puts "<td class=\"left\"><a href=\"http://packages.qa.debian.org/#{t[:source]}\">#{src_reason(t[:source])}</a></td>"
-    puts "<td class=\"left\">#{t[:description]}</td>"
-    puts "<td><a href=\"#\" onclick=\"hide_todo('#{t[:shortname]}'); return false;\">hide</a></td>"
+    pkg = t[:source]
+    t[:reason] = src_reason(pkg)
   end
-  puts "</tbody></table>"
-  puts "<p align=\"center\"><a href=\"#\" onclick=\"reset_todos()\">show all hidden todos</a></p>"
-  puts "</div>" # tabs-todo
 
-	puts '<div id="tabs-versions">'
+  
 
-  puts <<-EOF
-<table class="buglist tablesorter">
-<thead>
-<tr>
-<th>&nbsp;&nbsp;&nbsp;&nbsp;source&nbsp;&nbsp;&nbsp;&nbsp;</th>
-<th>&nbsp;&nbsp;&nbsp;&nbsp;squeeze&nbsp;&nbsp;&nbsp;&nbsp;</th>
-<th>&nbsp;&nbsp;&nbsp;&nbsp;wheezy&nbsp;&nbsp;&nbsp;&nbsp;</th>
-<th>&nbsp;&nbsp;&nbsp;&nbsp;jessie&nbsp;&nbsp;&nbsp;&nbsp;</th>
-<th>&nbsp;&nbsp;&nbsp;&nbsp;sid&nbsp;&nbsp;&nbsp;&nbsp;</th>
-<th>&nbsp;&nbsp;&nbsp;&nbsp;experimental&nbsp;&nbsp;&nbsp;&nbsp;</th>
-<th>&nbsp;&nbsp;&nbsp;&nbsp;vcs&nbsp;&nbsp;&nbsp;&nbsp;</th>
-<th>&nbsp;&nbsp;&nbsp;&nbsp;upstream&nbsp;&nbsp;&nbsp;&nbsp;</th>
-</tr>
-</thead>
-<tbody>
-  EOF
-  $uddd.sources.keys.sort.each do |src|
-    next if not $uddd.versions.include?(src)
-    next if not $uddd.versions[src].include?('debian')
+  $uddd.sources.each do |s|
+    h = Hash.new
+    src = s[0]
+    reason = src_reason(src)
+    h[src] = Hash.new
+    h[src][:reason] = reason
+
+
     dv = $uddd.versions[src]['debian']
-    puts "<tr><td class=\"left\"><a href=\"http://packages.qa.debian.org/#{src}\">#{src_reason(src)}</a></td>"
-
     t_oldstable = t_stable = t_testing = t_unstable = t_experimental = t_vcs = ''
 
     t_oldstable += dv['squeeze'][:version] if dv['squeeze']
@@ -271,77 +140,15 @@ if cgi.params != {}
       end
     end
 
-    UDDData.group_values(t_oldstable, t_stable, t_testing, t_unstable, t_experimental, t_vcs).each do |v|
-      if v[:count] == 1
-        puts "<td>"
-      else
-        puts "<td colspan=#{v[:count]}>"
-      end
-      puts v[:value]
-      puts "</td>"
-    end
-
-    up = $uddd.versions[src]['upstream']
-    puts "<td>"
-    if up
-      s = case up[:status]
-          when :error then "<span class=\"prio_high\" title=\"uscan returned an error\">error</a>"
-          when :up_to_date then up[:version]
-          when :newer_in_debian then "<span class=\"prio_high\" title=\"Debian version newer than upstream version. debian/watch bug?\">#{up[:version]}</a>"
-          when :out_of_date then "<span class=\"prio_high\" title=\"Newer upstream version available\">#{up[:version]}</a>"
-          when :out_of_date_in_unstable then "<span class=\"prio_med\" title=\"Newer upstream version available (already packaged in experimental)\">#{up[:version]}</a>"
-          else "Unhandled case!"
-          end
-      puts s
-    end
-    puts "</td>"
-
-    puts "</tr>"
+    h[src][:versions] = UDDData.group_values(t_oldstable, t_stable, t_testing, t_unstable, t_experimental, t_vcs)
+    $uddd.sources[src] = h[src]
   end
 
-  puts <<-EOF
-</tbody>
-</table>
-</div>
-<div id="tabs-bugs">
-<table class="buglist tablesorter">
-<thead>
-<tr>
-<th>&nbsp;&nbsp;&nbsp;&nbsp;source&nbsp;&nbsp;&nbsp;&nbsp;</th><th>&nbsp;&nbsp;&nbsp;&nbsp;all&nbsp;&nbsp;&nbsp;&nbsp;</th><th>&nbsp;&nbsp;&nbsp;&nbsp;RC&nbsp;&nbsp;&nbsp;&nbsp;</th><th>&nbsp;&nbsp;&nbsp;&nbsp;with patch&nbsp;&nbsp;&nbsp;&nbsp;</th><th>&nbsp;&nbsp;&nbsp;&nbsp;pending&nbsp;&nbsp;&nbsp;&nbsp;</th>
-</tr>
-</thead>
-<tbody>
-  EOF
-  bc = $uddd.bugs_count
-  bc.keys.sort.each do |src|
-    b = bc[src]
-    next if b[:all] == 0
-    puts "<tr><td class=\"left\"><a href=\"http://packages.qa.debian.org/#{src}\">#{src_reason(src)}</a></td>"
-    puts "<td><a href=\"http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=#{src}\">#{b[:all] > 0 ? b[:all] : ''}</a></td>"
-    puts "<td><a href=\"http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=#{src}&sev-inc=critical&sev-inc=grave&sev-inc=serious\">#{b[:rc] > 0 ? b[:rc] : ''}</a></td>"
-    puts "<td><a href=\"http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=#{src}&include=tags:patch\">#{b[:patch] > 0 ? b[:patch] : ''}</a></td>"
-    puts "<td><a href=\"http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=#{src}&pend-inc=pending-fixed&pend-inc=fixed\">#{b[:pending] > 0 ? b[:pending] : ''}</a></td></tr>"
-  end
-  puts "</tbody></table>"
-  puts "</div>"
 
-  puts '<div id="tabs-ubuntu">'
-
+  $ubuntu = Array.new
   ur = YAML::load(IO::read('ubuntu-releases.yaml'))
-  USTB=ur['stable']
-  UDEV=ur['devel']
-  puts <<-EOF
-<table class="buglist tablesorter">
-<thead>
-<tr>
-<th>source</th>
-<th>&nbsp;&nbsp;&nbsp;&nbsp;bugs&nbsp;&nbsp;&nbsp;&nbsp;</th><th>&nbsp;&nbsp;&nbsp;&nbsp;patches&nbsp;&nbsp;&nbsp;&nbsp;</th>
-<th>&nbsp;&nbsp;&nbsp;&nbsp;#{USTB} (stable)&nbsp;&nbsp;&nbsp;&nbsp;</th><th>&nbsp;&nbsp;&nbsp;&nbsp;#{UDEV} (devel)&nbsp;&nbsp;&nbsp;&nbsp;</th><th>&nbsp;&nbsp;&nbsp;&nbsp;sid&nbsp;&nbsp;&nbsp;&nbsp;</th>
-<th>&nbsp;&nbsp;&nbsp;&nbsp;links&nbsp;&nbsp;&nbsp;&nbsp;</th>
-</tr>
-</thead>
-<tbody>
-  EOF
+  USTB = ur['stable']
+  UDEV = ur['devel']
   $uddd.sources.keys.sort.each do |src|
     next if not $uddd.versions.include?(src)
     next if (not $uddd.versions[src].include?('debian') or not $uddd.versions[src].include?('ubuntu'))
@@ -397,47 +204,33 @@ if cgi.params != {}
       udev += "<br>bpo:&nbsp;#{du["#{UDEV}-backports"][:version]}" if du["#{UDEV}-backports"]
     end
 
-    puts "<tr><td class=\"left\">#{src_reason(src)}&nbsp;</td>"
-    if bugs > 0
-      puts "<td><a href=\"https://bugs.launchpad.net/ubuntu/+source/#{src}\">#{bugs}</a></td>"
-    else
-      puts "<td></td>"
-    end
-    if patches > 0
-      puts "<td><a href=\"https://bugs.launchpad.net/ubuntu/+source/#{src}/+patches\">#{patches}</a></td>"
-    else
-      puts "<td></td>"
-    end
-
-    UDDData.group_values(ustb, udev, sid).each do |v|
-      if v[:count] == 1
-        puts "<td>"
-      else
-        puts "<td colspan=#{v[:count]}>"
-      end
-      puts v[:value]
-      puts "</td>"
-    end
-    puts "<td><a href=\"http://packages.qa.debian.org/#{src}\">PTS</a>&nbsp;<a href=\"https://launchpad.net/ubuntu/+source/#{src}\">LP</a></td>"
-    puts "</tr>"
+    values = UDDData.group_values(ustb, udev, sid)
+    $ubuntu.push({:src => src,
+                  :bugs => bugs,
+                  :patches => patches,
+                  :pts => "http://packages.qa.debian.org/#{src}",
+                  :launchpad => "https://bugs.launchpad.net/ubuntu/+source/#{src}",
+                  :values => values
+    })
+    $ustb = USTB
+    $udev = UDEV
   end
-
-  puts <<-EOF
-</tbody>
-</table>
-<p>Packages with the same version in <i>#{UDEV}</i> and <i>Debian sid</i>, no bugs and no patches are not listed.</p>
-</div>
-  EOF
-
-  puts "</div>" # div#tabs
-  puts "<p><b>Generated in #{Time::now - tstart} seconds.</b></p>"
 
 end # cgi.params
 
-puts <<-EOF
-<div class="footer">
-<small><a href="https://wiki.debian.org/UltimateDebianDatabase/Hacking">hacking / bug reporting / contact information</a> - <a href="http://anonscm.debian.org/gitweb/?p=collab-qa/udd.git;a=blob_plain;f=web/dmd.cgi">source code</a></small>
-</div>
-</body></html>
-EOF
+
+page = Page.new({ :title => 'Debian Maintainer Dashboard',
+                  :default_packages => default_packages,
+                  :default_bin2src => default_bin2src,
+                  :default_ignpackages => default_ignpackages,
+                  :default_ignbin2src => default_ignbin2src,
+                  :defaults => defaults,
+                  :uddd => $uddd,
+                  :ubuntu => $ubuntu,
+                  :USTB => $ustb,
+                  :UDEV => $udev,
+                  :tstart => tstart })
+
+puts "Content-type: text/html\n\n"
+puts page.render("templates/dmd.erb")
 

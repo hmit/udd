@@ -3,5 +3,5 @@ AddHandler cgi-script cgi
 
 RewriteEngine on
 RewriteBase   /
-RewriteRule ^dmd/(.*) dmd-wip.cgi [L]
+RewriteRule ^dmd/(.*) dmd.cgi [L]
 #RewriteRule ^bugs/(.*) bugs.cgi [L]
