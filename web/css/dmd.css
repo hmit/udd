@@ -75,6 +75,7 @@ h2 {
 .table thead th {
     vertical-align: bottom;
     padding: 4px;
+    padding-right: 24px;
 }
 .table tbody + tbody {
     border-top: 2px solid #DDDDDD;
