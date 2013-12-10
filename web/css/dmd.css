@@ -12,16 +12,14 @@ span.prio_med {
 a, a:link { text-decoration: none; }
 a:hover, a:link:hover { text-decoration: underline; }
 a[name] {
-  padding-top: 19px;
-  margin-top: -19px;
-  display: inline-block;
+  padding-top: 28px;
+  margin-top: -28px;
+  text-decoration: none;
 }
-
-a.h1anchor {
-  padding-top: 85px;
-  margin-top: -85px;
+a[name].hanchor {
+  padding-top: 150px;
+  margin-top: -150px;
 }
-
 h2 {
     margin: 8px 0;
 }
@@ -40,6 +38,7 @@ h2 {
     margin-top: 58px;
     display: block;
 }
+.center { text-align: center; }
 .autocompletecontainer {
   position:absolute;
   width: 600px;
@@ -66,7 +65,6 @@ h2 {
     border-top: 1px solid #DDDDDD;
     line-height: 20px;
     padding: 2px 4px;
-    text-align: left;
     vertical-align: top;
 }
 .table th {

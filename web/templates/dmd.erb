@@ -36,7 +36,8 @@
 
 <div id="content">
     <p id="breadcrumbs">&nbsp;Maintainer Dashboard</p>
-    <a name="search" class="h1anchor"><h1>Maintainer dashboard</h1></a>
+    <h1>Maintainer dashboard</h1>
+    <a name="search" class="hanchor"></a>
     <p> The maintainer dashboard exposes information about teams or maintainers' packages. It intends to help answering the question “I have few hours for Debian, what should I do now?”. Fill in one or more email addresses in the form below to check it out; for example here is <a href="/dmd/?email1=debian-accessibility%40lists.debian.org#todo">the accessibility team todo list</a>.</p>
     
 <table>
@@ -106,13 +107,13 @@
     <% uddd.dmd_todos.each do |t| %>
     <tr id="<%= t[:shortname] %>">
         <td><%= t[:type] %></td>
-        <td class="left">
+        <td>
             <span title="<%= t[:reason] %>">
             <a href="http://packages.qa.debian.org/<%= t[:source] %>"><%= t[:source] %></a>
             </span>
         </td>
         <td class="left"><%= t[:description] %></td>
-        <td><a href="#" onclick="hide_todo('<%= t[:shortname] %>'); return false;">hide</a></td>
+        <td class="center"><a href="#" onclick="hide_todo('<%= t[:shortname] %>'); return false;">hide</a></td>
     </tr>
     <% end %>
 </tbody></table>
@@ -137,13 +138,13 @@
 <% uddd.sources.sort.each do |src,h| %>
     <% next if not $uddd.versions.include?(src) %>
     <% next if not $uddd.versions[src].include?('debian') %>
-    <tr><td class="left"><a href="http://packages.qa.debian.org/<%= src %>" title="<%= h[:reason] %>"><%= src %></a></td>
+    <tr><td><a href="http://packages.qa.debian.org/<%= src %>" title="<%= h[:reason] %>"><%= src %></a></td>
 
     <% h[:versions].each do |v| %>
       <% if v[:count] == 1 %>
        <td>
       <% else %>
-        <td colspan="<%= v[:count] %>" style="text-align: center;">
+        <td colspan="<%= v[:count] %>" class="center">
       <% end %>
       <%= v[:value] %> &nbsp;
       </td>
@@ -190,11 +191,11 @@
   <% bc.keys.sort.each do |src| %>
     <% b = bc[src] %>
     <% next if b[:all] == 0 %>
-    <tr><td class="left"><a href="http://packages.qa.debian.org/<%= src %>" title=""><%= src %></a></td>
-    <td><a href="http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=<%= src %>"><%= b[:all] > 0 ? b[:all] : '' %></a></td>
-    <td><a href="http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=<%= src %>&sev-inc=critical&sev-inc=grave&sev-inc=serious"><%= b[:rc] > 0 ? b[:rc] : '' %></a></td>
-    <td><a href="http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=<%= src %>&include=tags:patch"><%= b[:patch] > 0 ? b[:patch] : '' %></a></td>
-    <td><a href="http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=<%= src %>&pend-inc=pending-fixed&pend-inc=fixed"><%= b[:pending] > 0 ? b[:pending] : '' %></a></td></tr>
+    <tr><td><a href="http://packages.qa.debian.org/<%= src %>" title=""><%= src %></a></td>
+    <td class="center"><a href="http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=<%= src %>"><%= b[:all] > 0 ? b[:all] : '' %></a></td>
+    <td class="center"><a href="http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=<%= src %>&sev-inc=critical&sev-inc=grave&sev-inc=serious"><%= b[:rc] > 0 ? b[:rc] : '' %></a></td>
+    <td class="center"><a href="http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=<%= src %>&include=tags:patch"><%= b[:patch] > 0 ? b[:patch] : '' %></a></td>
+    <td class="center"><a href="http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=<%= src %>&pend-inc=pending-fixed&pend-inc=fixed"><%= b[:pending] > 0 ? b[:pending] : '' %></a></td></tr>
   <% end %>
 </tbody>
 </table>
@@ -218,12 +219,12 @@
 <% ubuntu.each do |p| %>
     <tr><td class="left"><%= p[:src] %>&nbsp;</td>
     <% if p[:bugs] > 0 %>
-        <td><a href="<%= p[:launchpad] %>"><%= p[:bugs] %></a></td>
+        <td class="center"><a href="<%= p[:launchpad] %>"><%= p[:bugs] %></a></td>
     <% else %>
       <td>&nbsp;</td>
     <% end %>
     <% if p[:patches] > 0 %>
-        <td><a href="<%= p[:launchpad] %>/+patches"><%= p[:patches] %></a></td>
+        <td class="center"><a href="<%= p[:launchpad] %>/+patches"><%= p[:patches] %></a></td>
     <% else %>
       <td>&nbsp;</td>
     <% end %>
@@ -232,7 +233,7 @@
       <% if v[:count] == 1 %>
         <td>
       <% else %>
-          <td colspan="<%= v[:count] %>" style="text-align: center;">
+          <td colspan="<%= v[:count] %>" class="center">
       <% end %>
           <%= v[:value] %>&nbsp;
       </td>
