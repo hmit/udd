@@ -75,7 +75,7 @@
         <label for="ignpackages">Packages to ignore</label>
     </th>
     <td>
-        <input id="ignpackages" name="ignpackages" size="36" placeholder="space-separated list" value="<% default_ignpackages %>"/>
+        <input id="ignpackages" name="ignpackages" size="36" placeholder="space-separated list" value="<%= default_ignpackages %>"/>
         &nbsp;<input id="ignbin2src" name="ignbin2src" type="checkbox" <%= default_ignbin2src != '' ? 'checked' : '' %>/>
         <label for="ignbin2src">Packages are binary, convert to source packages</label>
     </td>
