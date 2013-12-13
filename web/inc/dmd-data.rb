@@ -36,7 +36,6 @@ class UDDData
       puts "</pre>"
       exit(0)
     end
-    @dbh.execute("SET statement_timeout TO 5000")
   end
 
   def get_sources
@@ -460,13 +459,10 @@ WHERE label ~* ?
       p args if not args.nil?
     end
     rows, sth = nil
-    duration = DBI::Utils::measure do 
-      sth = @dbh.prepare(q)
-      sth.execute(*args)
-      rows = sth.fetch_all
-    end
+    sth = @dbh.prepare(q)
+    sth.execute(*args)
+    rows = sth.fetch_all
     if @debug
-      puts "### #{duration}s"
       puts "<pre>"
       puts DBI::Utils::TableFormatter.ascii(sth.column_names, rows)
       puts "</pre>"

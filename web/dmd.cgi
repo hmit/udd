@@ -88,7 +88,7 @@ if cgi.params != {}
     h[src] = Hash.new
     h[src][:reason] = reason
 
-
+    next if not $uddd.versions[src]
     dv = $uddd.versions[src]['debian']
     t_oldstable = t_stable = t_testing = t_unstable = t_experimental = t_vcs = ''
 

@@ -112,8 +112,8 @@
             <a href="http://packages.qa.debian.org/<%= t[:source] %>"><%= t[:source] %></a>
             </span>
         </td>
-        <td class="left"><%= t[:description] %></td>
-        <td class="center"><a href="#" onclick="hide_todo('<%= t[:shortname] %>'); return false;">hide</a></td>
+        <td><%= t[:description] %></td>
+        <td><a href="#" onclick="hide_todo('<%= t[:shortname] %>'); return false;">hide</a></td>
     </tr>
     <% end %>
 </tbody></table>
@@ -217,7 +217,7 @@
 <tbody>
 
 <% ubuntu.each do |p| %>
-    <tr><td class="left"><%= p[:src] %>&nbsp;</td>
+    <tr><td><%= p[:src] %>&nbsp;</td>
     <% if p[:bugs] > 0 %>
         <td class="center"><a href="<%= p[:launchpad] %>"><%= p[:bugs] %></a></td>
     <% else %>
