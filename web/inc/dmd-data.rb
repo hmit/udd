@@ -111,7 +111,7 @@ and s2.version > s1.version);
     upload_rows.each { |p| srcs[p[0]] = [:uploader, p[1]] }
     maint_rows.each { |p| srcs[p[0]] = [:maintainer, p[1]] }
 
-    if @bin2src
+    if @bin2src and @addsources != ''
       q = <<-EOF
       select distinct source from packages
          where package in (#{@addsources.split(/\s/).map { |e| quote(e) }.join(',')})
@@ -125,7 +125,7 @@ and s2.version > s1.version);
       srcs[p] = [:manually_listed]
     end
 
-    if @ignbin2src
+    if @ignbin2src and @ignsources != ''
       q = <<-EOF
       select distinct source from packages
          where package in (#{@ignsources.split(/\s/).map { |e| quote(e) }.join(',')})
