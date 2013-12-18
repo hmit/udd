@@ -6,11 +6,15 @@ require 'yaml'
 STDERR.reopen(STDOUT) # makes live debugging much easier
 
 require File.expand_path(File.dirname(__FILE__))+'/inc/dmd-data'
+require File.expand_path(File.dirname(__FILE__))+'/inc/dmd-todo-feed'
 require File.expand_path(File.dirname(__FILE__))+'/inc/page'
 
 
 cgi = CGI::new
 tstart = Time::now
+
+feed = ''
+feed = CGI.escapeHTML(cgi.params['feed'][0]) if cgi.params['feed'][0]
 
 default_packages = ''
 default_packages = CGI.escapeHTML(cgi.params['packages'][0]) if cgi.params['packages'][0]
@@ -55,6 +59,20 @@ if cgi.params != {}
     end
   end
   $uddd = UDDData::new(emails, cgi.params["packages"][0] || "", cgi.params["bin2src"][0] == 'on', cgi.params["ignpackages"][0] || "", cgi.params["ignbin2src"][0] == 'on')
+
+  if feed == 'todo'
+    $uddd.get_sources
+    $uddd.get_sources_status
+    $uddd.get_dmd_todos
+    todos = []
+    $uddd.dmd_todos.each do |t|
+        todos.push({:link  => "%s" % t[:link],
+                    :title => "%s: %s: %s" % [t[:source], t[:description], t[:details]]})
+    end
+    TodoFeed.new(todos)
+    exit
+  end
+
   $uddd.get_sources
   $uddd.get_sources_status
   $uddd.get_dmd_todos

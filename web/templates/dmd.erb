@@ -112,7 +112,11 @@
             <a href="http://packages.qa.debian.org/<%= t[:source] %>"><%= t[:source] %></a>
             </span>
         </td>
-        <td><%= t[:description] %></td>
+        <% if t[:link] %>
+            <td><%= t[:description] %>: <a href="<%= t[:link] %>"><%= t[:details] %></a></td>
+        <% else %>
+            <td><%= t[:description] %>: <%= t[:details] %></td>
+        <% end %>
         <td><a href="#" onclick="hide_todo('<%= t[:shortname] %>'); return false;">hide</a></td>
     </tr>
     <% end %>

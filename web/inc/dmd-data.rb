@@ -345,17 +345,33 @@ and source not in (select source from upload_history where date > (current_date 
       id = bug['id']
       h = Digest::MD5.hexdigest("#{bug['source']}_#{id}")
       if bug['status'] == 'done' and @bugs_tags[id].include?('rt_affects_unstable')
-        @dmd_todos << { :shortname => "rc_done_#{h}", :type => 'RC bug', :source => bug['source'],
-          :description => "RC bug marked as done but still affects unstable: <a href=\"http://bugs.debian.org/#{id}\">##{id}</a>: #{bug['title']}" }
+        @dmd_todos << { :shortname => "rc_done_#{h}",
+                        :type => 'RC bug',
+                        :source => bug['source'],
+                        :link => "http://bugs.debian.org/#{id}",
+                        :description => "RC bug marked as done but still affects unstable",
+                        :details =>" ##{id}: #{bug['title']}" }
       elsif (not @bugs_tags[id].include?('rt_affects_unstable')) and @bugs_tags[id].include?('rt_affects_testing')
-        testing_rc_bugs << { :shortname => "rc_testing_#{h}", :type => 'RC bug', :source => bug['source'],
-                             :description => "RC bug affecting testing only (ensure the package migrates): <a href=\"http://bugs.debian.org/#{id}\">##{id}</a>: #{bug['title']}" }
+        testing_rc_bugs << { :shortname => "rc_testing_#{h}",
+                             :type => 'RC bug',
+                             :source => bug['source'],
+                             :link => "http://bugs.debian.org/#{id}",
+                             :description => "RC bug affecting testing only (ensure the package migrates)",
+                             :details => "##{id}: #{bug['title']}" }
       elsif @bugs_tags[id].include?('rt_affects_unstable') or @bugs_tags[id].include?('rt_affects_testing')
-        @dmd_todos << { :shortname => "rc_std_#{h}", :type => 'RC bug', :source => bug['source'],
-                        :description => "RC bug needs fixing: <a href=\"http://bugs.debian.org/#{id}\">##{id}</a>: #{bug['title']}" }
+        @dmd_todos << { :shortname => "rc_std_#{h}",
+                        :type => 'RC bug',
+                        :source => bug['source'],
+                        :link => "http://bugs.debian.org/#{id}",
+                        :description => "RC bug needs fixing",
+                        :details => "##{id}: #{bug['title']}" }
       elsif @bugs_tags[id].include?('rt_affects_stable')
-        stable_rc_bugs << { :shortname => "rc_stable_#{h}", :type => 'RC bug (stable)', :source => bug['source'],
-                            :description => "RC bug affecting stable: <a href=\"http://bugs.debian.org/#{id}\">##{id}</a>: #{bug['title']}" }
+        stable_rc_bugs << { :shortname => "rc_stable_#{h}",
+                            :type => 'RC bug (stable)',
+                            :source => bug['source'],
+                            :link => "http://bugs.debian.org/#{id}",
+                            :description => "RC bug affecting stable",
+                            :details => "##{id}: #{bug['title']}" }
       end
     end
     @dmd_todos.concat(testing_rc_bugs)
@@ -364,8 +380,12 @@ and source not in (select source from upload_history where date > (current_date 
     @buildd.each_pair do |src, archs|
       archs.each do |arch|
         h = Digest::MD5.hexdigest("#{src}_#{arch.sort.to_s}")
-        @dmd_todos << { :shortname => "missingbuild_#{h}", :type => 'missing build', :source => src,
-                        :description => "Missing build on #{arch['architecture']}. state <i>#{arch['state']}</i> since #{arch['state_change'].to_date.to_s} (see <a href=\"https://buildd.debian.org/status/package.php?p=#{src}\">buildd.d.o</a>)" }
+        @dmd_todos << { :shortname => "missingbuild_#{h}",
+                        :type => 'missing build',
+                        :source => src,
+                        :link => "https://buildd.debian.org/status/package.php?p=#{src}",
+                        :description => "Missing build on #{arch['architecture']}",
+                        :details => " state <i>#{arch['state']}</i> since #{arch['state_change'].to_date.to_s}" }
       end
     end
 
@@ -374,38 +394,62 @@ and source not in (select source from upload_history where date > (current_date 
       sn = "migration_#{h}"
       if v['in_testing_age'].nil?
         if v['debian_age'] > MIN_AGE_IN_DEBIAN
-        @dmd_todos << { :shortname => sn, :type => 'testing migration', :source => src,
-                        :description => "Has been in Debian for #{v['debian_age']} days, but never migrated to testing (see <a href=\"http://qa.debian.org/excuses.php?package=#{src}\">excuses</a>)" }
+        @dmd_todos << { :shortname => sn,
+                        :type => 'testing migration',
+                        :source => src,
+                        :link => "http://qa.debian.org/excuses.php?package=#{src}",
+                        :description => "Migration",
+                        :details => "Has been in Debian for #{v['debian_age']} days, but never migrated to testing" }
         end
       elsif v['in_testing_age'] > 1 # in case there's some incoherency in udd
-        @dmd_todos << { :shortname => sn, :type => 'testing migration', :source => src,
-                        :description => "Not in testing for #{v['in_testing_age']} days (see <a href=\"http://qa.debian.org/excuses.php?package=#{src}\">excuses</a>)" }
+        @dmd_todos << { :shortname => sn,
+                        :type => 'testing migration',
+                        :source => src,
+                        :link => "http://qa.debian.org/excuses.php?package=#{src}",
+                        :description => "Migration",
+                        :details => "Not in testing for #{v['in_testing_age']} days" }
       else
         if v['sync_age'].nil?
           #        puts "Interesting buggy case with #{pkg}. Ignore."
         elsif v['sync_age'] > MIN_SYNC_INTERVAL
-        @dmd_todos << { :shortname => sn, :type => 'testing migration', :source => src,
-                        :description => "Has been trying to migrate for #{v['sync_age']} days (see <a href=\"http://qa.debian.org/excuses.php?package=#{src}\">excuses</a>)" }
+        @dmd_todos << { :shortname => sn,
+                        :type => 'testing migration',
+                        :source => src,
+                        :link => "http://qa.debian.org/excuses.php?package=#{src}",
+                        :description => "Migration",
+                        :details => "Has been trying to migrate for #{v['sync_age']} days" }
         end
       end
     end
 
     @ready_for_upload.each_pair do |src, v|
       h = Digest::MD5.hexdigest("#{src}_#{v['version']}_#{v['distribution']}")
-      @dmd_todos << { :shortname => "vcs_#{h}", :type => 'vcs', :source => src,
-                      :description => "new version #{v['version']} ready for upload in the <a href=\"http://pet.debian.net/#{v['team']}/pet.cgi\">#{v['team']} repository</a>" }
+      @dmd_todos << { :shortname => "vcs_#{h}",
+                      :type => 'vcs',
+                      :source => src,
+                      :link => "http://pet.debian.net/#{v['team']}/pet.cgi",
+                      :description => "New version",
+                      :details => "#{v['version']} ready for upload" }
     end
 
     @versions.each_pair do |src, v|
       next if not v.has_key?('upstream')
       if v['upstream'][:status] == :out_of_date
         h = Digest::MD5.hexdigest("#{src}_#{v['upstream'][:version]}")
-        @dmd_todos << { :shortname => "newupstream_#{h}", :type => 'new upstream', :source => src,
-                        :description => "new upstream version available: #{v['upstream'][:version]}" }
+        @dmd_todos << { :shortname => "newupstream_#{h}",
+                        :type => 'new upstream',
+                        :source => src,
+                        :link => nil,
+                        :description => "New version available",
+                        :details => "#{v['upstream'][:version]}" }
       elsif v['upstream'][:status] == :out_of_date_in_unstable
         h = Digest::MD5.hexdigest("#{src}_#{v['upstream'][:version]}")
-        @dmd_todos << { :shortname => "newupstreamunstable_#{h}", :type => 'new upstream', :source => src,
-                        :description => "new upstream version available: #{v['upstream'][:version]} (already in experimental, but not in unstable)" }
+        @dmd_todos << { :shortname => "newupstreamunstable_#{h}",
+                        :type => 'new upstream',
+                        :source => src,
+                        :link => nil,
+                        :description => "New upstream version available",
+                        :details => "#{v['upstream'][:version]} (already in experimental, but not in unstable)" }
       end
     end
 
