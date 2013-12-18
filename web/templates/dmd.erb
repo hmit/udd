@@ -51,7 +51,7 @@
     </th>
     <td>
     <div id="autocompletecontainer<%= i %>" class="autocompletecontainer"></div>
-    <input id="email<%= i %>" type='text' size='36' name='email<%= i %>' value='<%= defaults['email'][i]%>' placeholder="email address">
+    <input id="email<%= i %>" type='text' size='32' name='email<%= i %>' value='<%= defaults['email'][i]%>' placeholder="email address">
     &nbsp;&nbsp;ignore:
     <input id="nouploader<%= i %>" name="nouploader<%= i %>" type="checkbox" <%= defaults['nouploader'][i] != '' ? 'checked':'' %>/>
     <label for="nouploader<%= i %>">co-maintained</label>
@@ -65,7 +65,7 @@
             <label for="packages">Additional packages</label>
         </th>
         <td>
-            <input id="packages" name="packages" size="36" placeholder="space-separated list" value="<%= default_packages %>"/>
+            <input id="packages" name="packages" size="32" placeholder="space-separated list" value="<%= default_packages %>"/>
             &nbsp;<input id="bin2src" name="bin2src" type="checkbox" <%= default_bin2src != '' ? 'checked' : '' %>/>
             <label for="bin2src">Packages are binary, convert to source packages</label>
         </td>
@@ -75,7 +75,7 @@
         <label for="ignpackages">Packages to ignore</label>
     </th>
     <td>
-        <input id="ignpackages" name="ignpackages" size="36" placeholder="space-separated list" value="<%= default_ignpackages %>"/>
+        <input id="ignpackages" name="ignpackages" size="32" placeholder="space-separated list" value="<%= default_ignpackages %>"/>
         &nbsp;<input id="ignbin2src" name="ignbin2src" type="checkbox" <%= default_ignbin2src != '' ? 'checked' : '' %>/>
         <label for="ignbin2src">Packages are binary, convert to source packages</label>
     </td>
