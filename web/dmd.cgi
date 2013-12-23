@@ -1,20 +1,18 @@
 #!/usr/bin/ruby
 
 require 'cgi'
+require 'uri'
 require 'yaml'
 
 STDERR.reopen(STDOUT) # makes live debugging much easier
 
 require File.expand_path(File.dirname(__FILE__))+'/inc/dmd-data'
-require File.expand_path(File.dirname(__FILE__))+'/inc/dmd-todo-feed'
+require File.expand_path(File.dirname(__FILE__))+'/inc/dmd-feed'
 require File.expand_path(File.dirname(__FILE__))+'/inc/page'
 
 
 cgi = CGI::new
 tstart = Time::now
-
-feed = ''
-feed = CGI.escapeHTML(cgi.params['feed'][0]) if cgi.params['feed'][0]
 
 default_packages = ''
 default_packages = CGI.escapeHTML(cgi.params['packages'][0]) if cgi.params['packages'][0]
@@ -60,23 +58,20 @@ if cgi.params != {}
   end
   $uddd = UDDData::new(emails, cgi.params["packages"][0] || "", cgi.params["bin2src"][0] == 'on', cgi.params["ignpackages"][0] || "", cgi.params["ignbin2src"][0] == 'on')
 
-  if feed == 'todo'
-    $uddd.get_sources
-    $uddd.get_sources_status
-    $uddd.get_dmd_todos
-    todos = []
-    $uddd.dmd_todos.each do |t|
-        todos.push({:link  => "%s" % t[:link],
-                    :title => "%s: %s: %s" % [t[:source], t[:description], t[:details]]})
-    end
-    TodoFeed.new(todos)
-    exit
-  end
-
   $uddd.get_sources
   $uddd.get_sources_status
   $uddd.get_dmd_todos
   $uddd.get_ubuntu_bugs
+
+  if cgi.params['feed'][0] == 'todo' 
+    todos = []
+    $uddd.dmd_todos.each do |t|
+    todos.push({:link  => "%s" % t[:link],
+                :title => "%s: %s: %s" % [t[:source], t[:description], t[:details]]})
+    end
+    TodoFeed.new(todos)
+    exit
+  end
 
   def src_reason(pkg)
     s = $uddd.sources[pkg]
@@ -247,6 +242,7 @@ page = Page.new({ :title => 'Debian Maintainer Dashboard',
                   :ubuntu => $ubuntu,
                   :USTB => $ustb,
                   :UDEV => $udev,
+                  :feed => '/dmd/feed/?' + URI.encode_www_form(cgi.params),
                   :tstart => tstart })
 
 puts "Content-type: text/html\n\n"

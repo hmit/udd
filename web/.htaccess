@@ -3,5 +3,6 @@ AddHandler cgi-script cgi
 
 RewriteEngine on
 RewriteBase   /
+RewriteRule ^dmd/feed/ dmd.cgi?feed=todo [QSA,L]
 RewriteRule ^dmd/(.*) dmd.cgi [L]
 #RewriteRule ^bugs/(.*) bugs.cgi [L]
