@@ -489,7 +489,8 @@ sub get_autoremoval_info {
 sub read_source_depends {
     my ($dbh,$needs) = @_;
 
-	my $query = "select source, version, build_depends, build_depends_indep from sources where release = '$testing';";
+	my $query = "select source, version, build_depends, build_depends_indep from sources ".
+		" where release = '$testing' and extra_source_only is null;";
 	my $sthc = do_query($dbh,$query);
 	while (my $pg = $sthc->fetchrow_hashref()) {
 		my $src = $pg->{'source'};
