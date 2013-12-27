@@ -475,6 +475,9 @@ WHERE label ~* ?
   end
 
   def UDDData.compare_versions(v1, v2)
+    if not v1 or not v2
+      return 0
+    end
     if Debian::Dpkg::compare_versions(v1, 'lt', v2)
       return -1
     elsif Debian::Dpkg::compare_versions(v1, 'eq', v2)
