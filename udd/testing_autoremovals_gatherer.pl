@@ -146,16 +146,25 @@ sub update_autoremovals {
 		# rdeps added during at this level
 		my $newrdeps = {};
 		# start with only this package
-		$newrdeps->{$buggy_src} = 1;
+		$newrdeps->{$buggy_src} = $buggy_src;
 		my $level = 0;
 		while (scalar keys %$newrdeps) {
 			my $_found = {};
 			foreach my $src (keys %$newrdeps) {
 				unless ($my_rdeps->{$src}) {
-					$my_rdeps->{$src} = $level;
+					my $dep = $newrdeps->{$src};
+					$my_rdeps->{$src}->{'level'} = $level;
+					$my_rdeps->{$src}->{'dep'} = $dep;
+					my $depchain = "";
+					if ($src ne $dep) {
+						$depchain = $my_rdeps->{$dep}->{'dep_chain'};
+						$depchain = " ".$depchain if $depchain;
+						$depchain = $dep.$depchain;
+					}
+					$my_rdeps->{$src}->{'dep_chain'} = $depchain;
 					foreach my $rrdep (keys %{$rdeps->{$src}}) {
 						unless ($my_rdeps->{$rrdep}) {
-							$_found->{$rrdep} = 1
+							$_found->{$rrdep} = $src;
 						}
 					}
 				}
