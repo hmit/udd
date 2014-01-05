@@ -435,6 +435,15 @@ GROUP BY b.source, b.id, b4.source, b4.bugs_unstable
 
         foreach my $pkg (split m/\s*,\s*/, $pkgsource) {
 			$buggy->{$pkg}->{$bug} = $pg;
+
+			if ($buggy->{$pkg}->{$bug}->{"last_modified"} <
+				$buggy->{$pkg}->{$bug}->{"arrival"} + 14*24*3600) {
+				# we only start counting from 14 days after the bug was filed
+				$buggy->{$pkg}->{$bug}->{"last_modified"} =
+					$buggy->{$pkg}->{$bug}->{"arrival"} + 14*24*3600;
+
+			}
+
 			unless ($pg->{"affects_unstable"}) {
 				unless ($pg->{"bugs_unstable"}) {
 					# if the bug is fixed in unstable, but not (yet) in
