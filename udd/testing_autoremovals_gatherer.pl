@@ -16,7 +16,9 @@ my $testing = "jessie";
 my $removaldelay = 15*24*3600;
 my $removaldelay_rdeps = 30*24*3600;
 my $debug = 0;
-my $POPCON_PERCENT = 5; # x% of submissions must have the package installed
+# set to 0 to disable autoremoval of rdeps
+#my $POPCON_PERCENT = 5; # x% of submissions must have the package installed
+my $POPCON_PERCENT = 0; # x% of submissions must have the package installed
 
 my $now = time;
 print "start: ".$now."\n" if ($debug);
