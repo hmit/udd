@@ -177,7 +177,7 @@ EOF
         u['component'] = d['component']
         u['release'] = d['release']
         if d['uploaders'] =~ />,/
-          d['uploaders'].split(/>,\s*/).each do |upl|
+          d['uploaders'].split(/>\s*,\s*/).each do |upl|
             upl =~ /^\s*(.*) <([^>]*)(>)?$/ or raise
             u['email'] = $2
             u['name'] = $1.gsub('"', '')
