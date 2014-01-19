@@ -90,6 +90,18 @@ dbget("""select distinct packages_summary.source, package, sync
   }
 end
 
+dbget("""select source, version, bugs, removal_time from testing_autoremovals").each do |r|
+  hash = Digest::MD5.hexdigest("testing-autorm #{r['source']} #{r['version']} #{r['removal_time']}")
+  helpitems << {
+    'type' => 'testing-autorm',
+    'hash' => hash,
+    'source' => r['source'],
+    'packages' => srcs[r['source']],
+    'removal_time' => r['removal_time'],
+    'bugs' => r['bugs'].nil? ? [] : r['bugs'].split(',')
+  }
+end
+
 fd = File::new(OFILE+'.1', 'w')
 JSON::dump(helpitems, fd)
 fd.close
