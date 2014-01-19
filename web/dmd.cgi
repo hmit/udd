@@ -60,6 +60,7 @@ if cgi.params != {}
 
   $uddd.get_sources
   $uddd.get_sources_status
+  $uddd.get_autoremovals
   $uddd.get_dmd_todos
   $uddd.get_ubuntu_bugs
 

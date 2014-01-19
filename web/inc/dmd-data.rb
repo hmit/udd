@@ -17,7 +17,7 @@ end
 
 class UDDData
   attr_accessor :debug
-  attr_reader :sources, :versions, :all_bugs, :bugs_tags, :bugs_count, :migration, :buildd, :dmd_todos, :ubuntu_bugs
+  attr_reader :sources, :versions, :all_bugs, :bugs_tags, :bugs_count, :migration, :buildd, :dmd_todos, :ubuntu_bugs, :autoremovals
 
   def initialize(emails = {}, addsources = "", bin2src = false, ignsources = "", ignbin2src = false)
     @debug = false
@@ -328,6 +328,16 @@ and source not in (select source from upload_history where date > (current_date 
     end
   end
 
+  def get_autoremovals
+    @autoremovals = {}
+    return if @sources.empty?
+    q = "select source, version, bugs, removal_time from testing_autoremovals where source in (select source from mysources)"
+    rows = dbget(q)
+    rows.each do |r|
+      @autoremovals[r['source']] = r.to_h
+    end
+  end
+
   def get_sources_status
     get_sources_versions
     get_sources_bugs
@@ -451,6 +461,28 @@ and source not in (select source from upload_history where date > (current_date 
                         :description => "New upstream version available",
                         :details => "#{v['upstream'][:version]} (already in experimental, but not in unstable)" }
       end
+    end
+
+    @autoremovals.each_pair do |src, v|
+      if v['bugs'] != nil
+        bugs = v['bugs'].split(',').map { |b| "##{b}" }
+        if bugs.count > 1
+          bugs = " (bugs: #{bugs.join(', ')})"
+        else
+          bugs = " (bug: #{bugs[0]})"
+        end
+      else
+        bugs = ""
+      end
+
+      @dmd_todos << {
+        :shortname => "autoremoval_#{src}_#{v['version']}_#{v['removal_time']}",
+        :type => 'testing auto-removal',
+        :source => src,
+        :link => nil,
+        :description => "Testing auto-removal",
+        :details => "on #{Time.at(v['removal_time']).to_date.to_s}#{bugs}"
+      }
     end
 
     @dmd_todos
