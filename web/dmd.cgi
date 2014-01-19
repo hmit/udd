@@ -75,6 +75,7 @@ if cgi.params != {}
 
   def src_reason(pkg)
     s = $uddd.sources[pkg]
+    raise "bug!" if s.nil?
     if s[0] == :manually_listed
       return "Manually listed"
     elsif s[0] == :maintainer
