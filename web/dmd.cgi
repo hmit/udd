@@ -6,6 +6,8 @@ require 'yaml'
 
 STDERR.reopen(STDOUT) # makes live debugging much easier
 
+puts "Content-type: text/html\n\n"
+
 require File.expand_path(File.dirname(__FILE__))+'/inc/dmd-data'
 require File.expand_path(File.dirname(__FILE__))+'/inc/dmd-feed'
 require File.expand_path(File.dirname(__FILE__))+'/inc/page'
@@ -247,6 +249,5 @@ page = Page.new({ :title => 'Debian Maintainer Dashboard',
                   :feed => '/dmd/feed/?' + URI.encode_www_form(cgi.params),
                   :tstart => tstart })
 
-puts "Content-type: text/html\n\n"
 puts page.render("templates/dmd.erb")
 
