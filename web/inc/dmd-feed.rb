@@ -17,7 +17,6 @@ class TodoFeed
               end
           end
         end
-        puts "Content-type: text/xml\n\n"
         puts rss.to_s
     end
 end
