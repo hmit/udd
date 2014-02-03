@@ -105,6 +105,24 @@ dbget("""select source, version, bugs, removal_time from testing_autoremovals").
   }
 end
 
+dbget(" select distinct ss.id, ss.source, ss.version, ss.title
+        from sponsorship_requests ss, sources_uniq su
+        where su.release = 'sid'
+        and ss.source = su.source
+        and su.version < ss.version").each do |r|
+  hash = Digest::MD5.hexdigest("rfs #{r['source']} #{r['version']} #{r['id']}")
+  helpitems << {
+    'type' => 'rfs',
+    'hash' => hash,
+    'source' => r['source'],
+    'packages' => srcs[r['source']],
+    'version' => r['version'],
+    'title' => r['title'],
+    'id' => r['id']
+  }
+end
+
+
 fd = File::new(OFILE+'.1', 'w')
 JSON::dump(helpitems, fd)
 fd.close
