@@ -10,8 +10,11 @@ require 'pp'
 require 'digest/md5'
 
 OFILE='/srv/udd.debian.org/udd/web/how-can-i-help.json.gz'
+#if `hostname`.chomp == 'grep'
+#  OFILE='/tmp/how-can-i-help.json.gz'
+#end
 
-$dbh = DBI::connect('DBI:Pg:dbname=udd;port=5452', 'udd')
+$dbh = DBI::connect('DBI:Pg:dbname=udd;port=5452;host=localhost', 'guest')
 
 def dbget(q, *args)
   if $debug
