@@ -120,12 +120,16 @@ EOF
 
   def summarize_unknown
     if not @sources_unknown.empty?
-      puts "Unknown fields in Sources:"
-      pp @sources_unknown
+      if DEBUG
+        puts "Unknown fields in Sources:"
+        pp @sources_unknown
+      end
     end
     if not @packages_unknown.empty?
-      puts "Unknown fields in Packages:"
-      pp @packages_unknown
+      if DEBUG
+        puts "Unknown fields in Packages:"
+        pp @packages_unknown
+      end
     end
   end
 
