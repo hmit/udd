@@ -23,6 +23,7 @@ RELEASE_RESTRICT = [
   ['wheezy', 'wheezy', 'id in (select id from bugs_rt_affects_stable)'],
   ['squeeze', 'squeeze', 'id in (select id from bugs_rt_affects_oldstable)'],
   ['any', 'any', 'id in (select id from bugs where status!=\'done\')'],
+  ['na', 'not considered', 'true'],
 ]
 
 FILTERS = [
