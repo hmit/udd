@@ -14,6 +14,7 @@ LINES = [
   /Can't parse line .* Use of uninitialized value.*in pattern match \(m\/\/\) at/,
   /debtags: can not parse line /,
   /Bug .*: unable to open .srv.bugs.debian.org.versions.pkg/,
+  /Required fields not found, skipping./,
   /failed to convert to utf8/
 ]
 
