@@ -10,10 +10,10 @@ require 'cgi'
 require 'time'
 require 'yaml'
 require 'json'
-require 'net/http'
+require 'open-uri'
 puts "Content-type: text/yaml\n\n"
 
-rgs = Net::HTTP::get(URI("http://release.debian.org/testing/goals.yaml"))
+rgs = open("https://release.debian.org/testing/goals.yaml").read
 rgs = YAML::load(rgs)
 rgs = rgs['release-goals']
 # only rgs that are not rejected or proposed
