@@ -1,0 +1,264 @@
+<html>
+<head>
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/jquery.tablesorter.min.js"></script>
+<link href="/css/debian.css" rel="stylesheet" type="text/css">
+<link href="/css/dmd.css" rel="stylesheet" type="text/css">
+<style type="text/css">
+  body {
+    font-family : "DejaVu Sans", "Bitstream Vera Sans", "sans-serif;"
+  }
+  table.buglist td, table.buglist th {
+    border: 1px solid gray;
+    padding-left: 3px;
+    padding-right: 3px;
+  }
+  table.buglist tr:hover  {
+    background-color: #ccc;
+    color: #000;
+  }
+  table.buglist tr:hover :link {
+    color: #00f;
+  }
+  table.buglist tr:hover :visited {
+    color: #707;
+  }
+  table {
+    border-collapse: collapse;
+  }
+
+div#body {
+  border-top: 2px solid #d70751;
+}
+
+div.footer {
+    padding: 0.3em 0;
+    background-color: #fff;
+    color: #000;
+    text-align: center;
+    border-top: 2px solid #d70751;
+    margin: 0 0 0 0;
+    border-bottom: 0;
+    font-size: 85%;
+}
+  div.footer :link {
+    color: #00f;
+  }
+  div.footer :visited {
+    color: #707;
+  }
+
+  /* tablesorter */
+table.tablesorter thead tr .header {
+	text-align: left;
+	background-image: url(images/tablesorter/bg.gif);
+	background-repeat: no-repeat;
+	background-position: center right;
+	cursor: pointer;
+}
+table.tablesorter thead tr .headerSortUp {
+	background-image: url(images/tablesorter/asc.gif);
+}
+table.tablesorter thead tr .headerSortDown {
+	background-image: url(images/tablesorter/desc.gif);
+}
+table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSortUp {
+    background-color: #ddd;
+}
+</style>
+<title>Debian Bugs Search @ UDD</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<script type="text/javascript">
+function removeBlankFields(form) {
+	var inputs = form.getElementsByTagName("input");
+	var removeList = new Array();
+	for (var i=0; i<inputs.length; i++) {
+		if (inputs[i].value == "") {
+			removeList.push(inputs[i]);
+		}
+	}
+	for (x in removeList) {
+		removeList[x].parentNode.removeChild(removeList[x]);
+	}
+}
+</script>
+</head>
+<body>
+
+<div id="header">
+  <div id="wikisection">
+    <p class="section"><a href="/" title="Ultimate Debian Database">UDD</a></p>
+  </div>
+  <div id="upperheader">
+    <div id="logo">
+        <a href="http://www.debian.org" title="Debian Home"><img src="/img/openlogo-50.png" alt="Debian" width="50" height="61"></a>
+    </div>
+  </div> <!-- end upperheader -->
+  <div id="navbar">
+    <p class="hidecss"><a href="#content">Skip Quicknav</a></p>
+    <ul>
+       <li><a href="/">Ultimate Database</a></li>
+       <li><a href="/newbugs.cgi">Bugs search</a></li>
+    </ul>
+  </div> <!-- end navbar -->
+  <!-- <p id="breadcrumbs">&nbsp;Maintainer Dashboard</p> -->
+</div> <!-- end header -->
+
+<div id="content">
+
+<!--<h1 style="margin-bottom : 5px"><img src="/img/debian.png" alt="Debian logo" width="188" height="52" style="vertical-align : -13px; ">Bugs Search <span style="color :#c70036">@</span> UDD</h1>
+<div id="body">-->
+
+<form action="newbugs.cgi" method="get" onsubmit="removeBlankFields(this);">
+<p><b>Bugs affecting:</b>
+
+  <% RELEASE_RESTRICT.each do |r| %>
+  <% checked = (release == r[0] ? 'CHECKED=\'1\'':'') %>
+  <label><input type='radio' name='release' value='<%= r[0] %>' <%= checked %>/><%= r[1] %></label>&nbsp;&nbsp;
+   <% end %>
+
+<br/>(This already uses release tags ('sid', 'jessie') and xxx-ignore ('jessie-ignore') to include/exclude bugs)</p>
+<table class="invisible"><tr><td>
+<table class="buglist">
+<tr><th colspan='4'>FILTERS</th></tr>
+<tr><th>not considered</th><th>only</th><th>ignore</th><th>type</th></tr>
+
+  <% FILTERS.each do |r| %>
+  <tr>
+  <td style='text-align: center;'><input type='radio' name='<%= r[0] %>' value='' <%= filters[r[0]]==''?'CHECKED=\'1\'':'' %>/></td>
+  <td style='text-align: center;'><input type='radio' name='<%= r[0] %>' value='only' <%= filters[r[0]]=='only'?'CHECKED=\'1\'':'' %>/></td>
+  <td style='text-align: center;'><input type='radio' name='<%= r[0] %>' value='ign' <%= filters[r[0]]=='ign'?'CHECKED=\'1\'':'' %>/></td>
+  <td><%= r[1] %></td>
+  </tr>
+  <% end %>
+
+  <tr>
+  <td style='text-align: center;'><input type='radio' name='fnewer' value='' <%= fnewer==''?'CHECKED=\'1\'':'' %>/></td>
+  <td style='text-align: center;'><input type='radio' name='fnewer' value='only' <%= fnewer=='only'?'CHECKED=\'1\'':'' %>/></td>
+  <td style='text-align: center;'><input type='radio' name='fnewer' value='ign' <%= fnewer=='ign'?'CHECKED=\'1\'':'' %>/></td>
+  <td>newer than <input type='text' size='3' name='fnewerval' value='<%= fnewerval %>'/> days</td>
+  </tr>
+  <tr>
+  <td style='text-align: center;'><input type='radio' name='flastmod' value='' <%= flastmod==''?'CHECKED=\'1\'':'' %>/></td>
+  <td style='text-align: center;'><input type='radio' name='flastmod' value='only' <%= flastmod=='only'?'CHECKED=\'1\'':'' %>/></td>
+  <td style='text-align: center;'><input type='radio' name='flastmod' value='ign' <%= flastmod=='ign'?'CHECKED=\'1\'':'' %>/></td>
+  <td>modified in the last <input type='text' size='3' name='flastmodval' value='<%= flastmodval %>'/> days</td>
+  </tr>
+
+</table></td><td style='padding-left: 20px'>
+
+<table class='buglist'>
+<tr><th colspan='2'>Bug types</th></tr>
+
+  <% TYPES.each do |t| %>
+  <% checked = types[t[0]]?" checked='1'":"" %>
+  <tr><td><input type='checkbox' id='<%= t[0] %>' name='<%= t[0] %>' value='1'<%= checked %>/></td><td><label for='<%= t[0] %>'><%= t[1] %></label></td></tr>
+  <% end %>
+  
+</table></td></tr></table>
+
+<p><b>Sort by:</b>
+
+  <% SORTS.each do |r| %>
+  <% checked = (sortby == r[0] ? 'CHECKED=\'1\'':'') %>
+  <label><input type='radio' name='sortby' value='<%= r[0] %>' <%= checked %>/><%= r[1] %></label>&nbsp;&nbsp;
+  <% end %>
+
+<b> -- </b>
+
+  <% [['asc', 'increasing'],[ 'desc', 'decreasing']].each do |r| %>
+  <% checked = (sorto == r[0] ? 'CHECKED=\'1\'':'') %>
+  <label><input type='radio' name='sorto' value='<%= r[0] %>' <%= checked %>/><%= r[1] %></label>&nbsp;&nbsp;
+  <% end %>
+
+<br/>
+<b>Additional information:</b>
+
+  <% COLUMNS.each do |r| %>
+  <% checked = cols[r[0]] ? 'checked':'' %>
+  <label><input type='checkbox' name='<%= r[0] %>' value='1' <%= checked %>/><%= r[1] %></label>&nbsp;&nbsp;
+  <% end %>
+
+<br/>
+<input type='submit' value='Search'/></p>
+</form>
+
+<% if rows %>
+    <p><b><%= rows.length %> bugs found.</b></p>
+    <table class="buglist tablesorter">
+    <thead>
+    <tr><th>bug#</th>
+    <th>package</th><th>title</th>
+    <% if cols['cpopcon'] %><th>popcon</th><% end %>
+    <% if cols['cseverity'] %><th>severity</th><% end %>
+    <% if cols['chints'] %><th>hints</th><% end %>
+    <% if cols['cclaimed'] %><th>claimed by</th><% end %>
+    <% if cols['cdeferred'] %><th>deferred</th><% end %>
+    <% if cols['crttags'] %><th>RT tag</th><% end %>
+    <th>last&nbsp;modified</th></tr>
+    </thead>
+    <tbody>
+
+    <% rows.each do |r| %>
+        <tr><td style='text-align: left;'><a href=\"http://bugs.debian.org/<%= r['id'] %>\">#<%= r['id'] %></a>
+        <% if cols['ctags'] %><%= gentags(tags[r['id']]) %><% end %>
+        <% if cols['caffected'] %><%= genaffected(r) %><% end %>
+        </td>
+        <td style='text-align: center;'>        
+        <% srcs = r['source'].split(/,\s*/) %>
+        <% bins = r['package'].split(/,\s*/) %>
+        <% if bins.length == 1 %>
+          <!-- link to source package if there is only 1 package -->
+          <a href=\"http://packages.qa.debian.org/<%= srcs[0] %>\"><%= bins[0] %></a>
+        <% else %>
+          <!-- if there is more than 1, we don't know which package is from which -->
+          <!-- source, so link the the package and let the PTS sort it out -->
+          <!-- strip 'src:' from the package, as the PTS doesn't do this for us -->
+          <% puts bins.map { |b| "<a href=\"http://packages.qa.debian.org/#{b.sub('src:','')}\">#{b}</a>" }.join(', ') %>
+        <% end %>
+        </td>
+        <td><%= CGI::escapeHTML(r['title']) %></td>
+        <% if cols['cpopcon'] %><td><%= r['popcon'] %></td><% end %>
+        <% if cols['cseverity'] %><td><%= r['severity'] %></td><% end %>
+        <% if cols['chints'] %><td><%= genhints(r['source'], hints[r['source']], unblockreq[r['source']], unblockreqtags, unblockreqtype) %></td><% end %>
+        <% if cols['cclaimed'] %><td><%= claimedbugs[r['id']] %></td><% end %>
+        <% if cols['cdeferred'] %><td><%= deferredbugs[r['id']] %></td><% end %>
+        <% if cols['crttags'] %><td><%= ((rttags[r['id']]||[]).join(" ")) %></td><% end %>
+        <% d = r['last_modified'] %>
+        <% d = Date::new(d.year, d.month, d.day) %>
+        <td style='text-align: center;'><%= d %></td></tr>
+    <% end %>
+    
+    </tbody>
+    </table>
+
+<p><b>Generated in <%= timegen %> seconds. Last data update: <%= r2[0][0] %>
+<% puts "(%.1f hours ago)" % ((Time::now - Time::parse(r2[0][0].to_s)) / 3600) %>
+</b></p>
+<pre><%= q %></pre>
+
+<% end %>
+
+
+<p><b>Useful queries:</b>
+<ul>
+<li><a href="bugs.cgi?release=jessie_and_sid&patch=ign&merged=ign&done=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&ctags=1&ctags=1&cdeferred=1"><b>Bug squasher view:</b> Affecting sid and jessie, not marked as done, not tagged patch; those need to be fixed, probably by a patch+upload</a></li>
+<li><a href="bugs.cgi?release=jessie_and_sid&patch=only&merged=ign&done=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&chints=1&ctags=1&cdeferred=1"><b>Sponsor view:</b> Affecting sid and jessie, not marked as done, tagged 'patch'; those need a DD to sponsor an upload</a></li>
+<li><a href="bugs.cgi?release=jessie_and_sid&merged=ign&done=only&fnewerval=7&rc=1&sortby=id&sorto=asc&ctags=1&cdeferred=1&caffected=1"><b>Cleaner view:</b> Affecting sid and jessie, but marked as done; why is it still affecting unstable? fixed only in experimental? missing binaries? wrong changelog?</a></li>
+<li><a href="bugs.cgi?release=jessie_not_sid&merged=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&chints=1&ctags=1&cdeferred=1&crttags=1"><b>Release Team view:</b> Affecting jessie, but not sid. Help the fix migrate to jessie!</a></li>
+</ul>
+
+<div class="footer">
+<small><a href="https://wiki.debian.org/UltimateDebianDatabase/Hacking">hacking / bug reporting / contact information</a> - <a href="http://anonscm.debian.org/gitweb/?p=collab-qa/udd.git;a=blob_plain;f=web/bugs.cgi">source code</a></small>
+</div>
+</body>
+</html>
+<script type="text/javascript">
+$(document).ready(function() {
+$("table.tablesorter").tablesorter();
+});
+</script>
+
+</div>
+</body>
+</html>
