@@ -1,0 +1,30 @@
+table td {
+  padding-top: 0.2em;
+  padding-bottom: 0.2em;
+  border-top: 0;
+}
+
+#header {
+    position: relative;
+}
+
+#content {
+    margin-top: 12px;
+}
+
+#quicknav {
+    display: block;
+    position: fixed;
+    right: 0;
+    top: 85px;
+    padding: 0 12px;
+    color: #555;
+    background-color: #fff;
+    font-size: 0.9em;
+    /* border-left: 1px solid #eee; */
+    /* border-bottom: 1px solid #eee; */
+    /* background-image: url("http://www.debian.org/Pics/gradient.png"); */
+    border-bottom-left-radius: 5px;
+}
+
+.indent { padding: 0.5em 1em; }
