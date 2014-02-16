@@ -24,20 +24,23 @@
     <p class="hidecss"><a href="#content">Skip Quicknav</a></p>
     <ul>
        <li><a href="/">Ultimate Database</a></li>
-       <li><a href="#search">Maintainer search</a></li>
-       <li><a href="#todo">Todo list</a></li>
-       <li><a href="#versions">Versions</a></li>
-       <li><a href="#bugs">Bugs</a></li>
-       <li><a href="#ubuntu">Ubuntu</a></li>
+       <li><a href="#dashboard">Maintainer search</a></li>
     </ul>
   </div> <!-- end navbar -->
-  <!-- <p id="breadcrumbs">&nbsp;Maintainer Dashboard</p> -->
+  <p id="breadcrumbs">&nbsp;Maintainer Dashboard</p> 
 </div> <!-- end header -->
 
 <div id="content">
-    <p id="breadcrumbs">&nbsp;Maintainer Dashboard</p>
-    <h1>Maintainer dashboard</h1>
-    <a name="search" class="hanchor"></a>
+    <h1 id='dashboard'>Maintainer dashboard</h1>
+    <% if uddd %>
+      <div id='quicknav'>
+       <b>Navigation</b>:
+       <a href="#todo">Todo list</a>
+       <a href="#versions">Versions</a>
+       <a href="#bugs">Bugs</a>
+       <a href="#ubuntu">Ubuntu</a>
+     </div>
+   <% end %>
     <p> The maintainer dashboard exposes information about teams or maintainers' packages. It intends to help answering the question “I have a few hours for Debian, what should I do now?”. Fill in one or more email addresses in the form below to check it out; for example here is <a href="/dmd/?email1=debian-accessibility%40lists.debian.org#todo">the accessibility team todo list</a>.</p>
     
 <table>
@@ -93,7 +96,7 @@
 
 
 <% if uddd %>
-<a name="todo"><h2>Todo list</h2></a>
+<h2 id='todo'>Todo list</h2>
 <table class="tablesorter table table-bordered">
 <thead>
 <tr>
@@ -125,7 +128,7 @@
 <small><a href="#todo" onclick="reset_todos()">Show all todos</a></small></p> 
 
 
-<a name="versions"><h2>Versions</h2></a>
+<h2 id='versions'>Versions</h2>
 <table class="tablesorter table table-bordered">
 <thead>
 <tr>
@@ -180,7 +183,7 @@
 </table>
 
 
-<a name="bugs"><h2>Bugs</h2></a>
+<h2 id='bugs'>Bugs</h2>
 <table class="buglist tablesorter table table-bordered">
 <thead>
 <tr>
@@ -206,7 +209,7 @@
 </table>
 
 
-<a name="ubuntu"><h2>Ubuntu</h2></a>
+<h2 id='ubuntu'>Ubuntu</h2>
 <table class="buglist tablesorter table table-bordered">
 <thead>
 <tr>
@@ -259,5 +262,12 @@
 <br />
 </div><!-- end content -->
 <%= render 'templates/footer.erb' %>
+<script type="text/javascript">
+$(window).scroll(function(){
+     $("#quicknav").css("top",Math.max(0,85-$(this).scrollTop()));
+});
+$("#quicknav").css("top",Math.max(0,85-$(this).scrollTop()));
+</script>
+
 </body>
 </html>

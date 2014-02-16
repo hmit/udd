@@ -11,31 +11,11 @@ span.prio_med {
 }
 a, a:link { text-decoration: none; }
 a:hover, a:link:hover { text-decoration: underline; }
-a[name] {
-  padding-top: 28px;
-  margin-top: -28px;
-  text-decoration: none;
-}
-a[name].hanchor {
-  padding-top: 160px;
-  margin-top: -160px;
-}
 h2 {
     margin: 8px 0;
 }
-#header {
-    position: fixed;
-    display: block;
-    top: 0;
-    width: 100%;
-    background-color: white;
-    background-image: url("http://www.debian.org/Pics/gradient.png");
-    background-position: 0 0;
-    background-repeat: repeat-x;
-}
-
 #content {
-    margin-top: 58px;
+    margin-top: 12px;
     display: block;
 }
 .center { text-align: center; }
@@ -55,6 +35,17 @@ h2 {
 .ui-menu-item:hover { background-color: #eee; }
 #navbar ul { padding-right: 70px; }
 #navbar li.rightmenuitem { float: right; }
+#quicknav {
+    display: block;
+    position: fixed;
+    right: 0;
+    top: 85px;
+    padding: 0 12px;
+    color: #555;
+    background-color: #fff;
+    font-size: 0.9em;
+    border-bottom-left-radius: 5px;
+}
 .table {
     font-size: 0.875em;
     border-collapse: separate;
