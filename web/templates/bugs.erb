@@ -41,8 +41,8 @@
     <a href='#sort'>Sort</a> /
     <a href='#info'>Info</a> /
     <a href='#queries'>Queries</a> /
-    <a href="javascript:document.getElementById('searchform').submit();">Search</a>
-    <% if rows %>/ <a href='#results'>Results</a><% end %>
+    <a href="javascript:f=document.getElementById('searchform');removeBlankFields(f);f.submit();">Search</a>
+    <% if bugs %>/ <a href='#results'>Results</a><% end %>
 </div>
 
 <h3 id='distribution'>Distribution<sup>[<a href="#ftn.distro">1</a>]</sup></h3>
@@ -130,8 +130,8 @@
 </form>
 
 
-<% if rows %>
-    <h3 id='results'><%= rows.length %> bugs found.</h3>
+<% if bugs %>
+    <h3 id='results'><%= bugs.length %> bugs found</h3>
     <table class="table table-bordered tablesorter">
     <thead>
     <tr><th>bug#</th>
@@ -146,31 +146,31 @@
     </thead>
     <tbody>
 
-    <% rows.each do |r| %>
-        <tr><td style='text-align: left;'><a href=\"http://bugs.debian.org/<%= r['id'] %>\">#<%= r['id'] %></a>
-        <% if cols['ctags'] %><%= gentags(tags[r['id']]) %><% end %>
-        <% if cols['caffected'] %><%= genaffected(r) %><% end %>
+    <% bugs.each do |r| %>
+        <tr><td style='text-align: left;'><a href="http://bugs.debian.org/<%= r['id'] %>">#<%= r['id'] %></a>
+        <% if cols['ctags'] %><%= r['ctags'] %><% end %>
+        <% if cols['caffected'] %><%= r['caffected'] %><% end %>
         </td>
         <td style='text-align: center;'>        
         <% srcs = r['source'].split(/,\s*/) %>
         <% bins = r['package'].split(/,\s*/) %>
         <% if bins.length == 1 %>
           <!-- link to source package if there is only 1 package -->
-          <a href=\"http://packages.qa.debian.org/<%= srcs[0] %>\"><%= bins[0] %></a>
+          <a href="http://packages.qa.debian.org/<%= srcs[0] %>"><%= bins[0] %></a>
         <% else %>
           <!-- if there is more than 1, we don't know which package is from which -->
           <!-- source, so link the the package and let the PTS sort it out -->
           <!-- strip 'src:' from the package, as the PTS doesn't do this for us -->
-          <% puts bins.map { |b| "<a href=\"http://packages.qa.debian.org/#{b.sub('src:','')}\">#{b}</a>" }.join(', ') %>
+          <%= bins.map { |b| "<a href=\"http://packages.qa.debian.org/#{b.sub('src:','')}\">#{b}</a>" }.join(', ') %>
         <% end %>
         </td>
         <td><%= CGI::escapeHTML(r['title']) %></td>
         <% if cols['cpopcon'] %><td><%= r['popcon'] %></td><% end %>
         <% if cols['cseverity'] %><td><%= r['severity'] %></td><% end %>
-        <% if cols['chints'] %><td><%= genhints(r['source'], hints[r['source']], unblockreq[r['source']], unblockreqtags, unblockreqtype) %></td><% end %>
-        <% if cols['cclaimed'] %><td><%= claimedbugs[r['id']] %></td><% end %>
-        <% if cols['cdeferred'] %><td><%= deferredbugs[r['id']] %></td><% end %>
-        <% if cols['crttags'] %><td><%= ((rttags[r['id']]||[]).join(" ")) %></td><% end %>
+        <% if cols['chints'] %><td><%= r['chints'] %> &nbsp;</td><% end %>
+        <% if cols['cclaimed'] %><td><%= r['cclaimed'] %> &nbsp;</td><% end %>
+        <% if cols['cdeferred'] %><td><%= r['cdeffered'] %> &nbsp;</td><% end %>
+        <% if cols['crttags'] %><td><%= r['crttags'] %> &nbsp;</td><% end %>
         <% d = r['last_modified'] %>
         <% d = Date::new(d.year, d.month, d.day) %>
         <td style='text-align: center;'><%= d %></td></tr>
@@ -180,7 +180,7 @@
     </table>
 
 <p><b>Generated in <%= timegen %> seconds. Last data update: <%= r2[0][0] %>
-<% puts "(%.1f hours ago)" % ((Time::now - Time::parse(r2[0][0].to_s)) / 3600) %>
+<%= "(%.1f hours ago)" % ((Time::now - Time::parse(r2[0][0].to_s)) / 3600) %>
 </b></p>
 <pre><%= q %></pre>
 
@@ -214,6 +214,7 @@ function removeBlankFields(form) {
 $(window).scroll(function(){
             $("#quicknav").css("top",Math.max(0,85-$(this).scrollTop()));
             });
+$("#quicknav").css("top",Math.max(0,85-$(this).scrollTop()));
 </script>
 
 </body>

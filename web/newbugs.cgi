@@ -318,6 +318,12 @@ if cgi.params != {}
     end
 
 
+    bugs = []
+    rows.each do |r|
+        bugs.push(r.to_h)
+    end
+
+
     if rows.length > 0
 
       if cols['chints']
@@ -361,6 +367,10 @@ if cgi.params != {}
           unblockreqtags[r['id']] ||= []
           unblockreqtags[r['id']] << r['tag']
         end
+
+        bugs.each do |r|
+           r['chints'] = genhints(r['source'], hints[r['source']], unblockreq[r['source']], unblockreqtags, unblockreqtype)
+        end
       end
 
       if cols['ctags']
@@ -372,6 +382,10 @@ if cgi.params != {}
         rowst.each do |r|
           tags[r['id']] ||= []
           tags[r['id']] << r['tag']
+        end
+
+        bugs.each do |r|
+          r['ctags'] = gentags(tags[r['id']]).force_encoding("ASCII-8BIT")
         end
       end
 
@@ -385,6 +399,9 @@ if cgi.params != {}
           claimedbugs[r['id']] ||= []
           claimedbugs[r['id']] << r['tag']
         end
+        bugs.each do |r|
+          r['cclaimed'] = claimedbugs[r['id']]
+        end
       end
 
       if cols['crttags']
@@ -396,6 +413,9 @@ if cgi.params != {}
         rowst.each do |r|
           rttags[r['id']] ||= []
           rttags[r['id']] << r['tag']
+        end
+        bugs.each do |r|
+          r['crttags'] = ((rttags[r['id']]||[]).join(" "))
         end
       end
 
@@ -410,6 +430,9 @@ if cgi.params != {}
           d = r['du'].to_i
           deferredbugs[r['id']] = "#{r['version']} (#{d}&nbsp;day#{d==1?'':'s'})"
         end
+        bugs.each do |r|
+          r['cdeferred'] = deferredbugs[r['id']]
+        end
       end
 
       if cols['caffected']
@@ -418,6 +441,9 @@ if cgi.params != {}
         sthd.execute
         rowsd = sthd.fetch_all
         $sources_in_experimental = rowsd.map { |r| r['source'] }
+        bugs.each do |r|
+          r['caffected'] = genaffected(r).force_encoding("ASCII-8BIT")
+        end
       end
     end
 
@@ -440,7 +466,7 @@ page = Page.new({ :release => release,
                   :sortby => sortby,
                   :sorto => sorto,
                   :cols => cols,
-                  :rows => rows,
+                  :bugs => bugs,
                   :r2 => r2,
                   :q => q,
                   :timegen => timegen })
