@@ -14,7 +14,7 @@ primary key(source)
 =end
 
 dbh = DBI::connect('DBI:Pg:dbname=udd;port=5452', 'udd')
-petdbh = DBI::connect('DBI:Pg:dbname=pet;host=pet.debian.net;port=5432', 'guest')
+petdbh = DBI::connect('DBI:Pg:dbname=pet;host=bmdb1.debian.org;port=5435', 'guest')
 
 sth = petdbh.prepare <<-EOF
 select team.name as team, package.name as source, version, distribution
