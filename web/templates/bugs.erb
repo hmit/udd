@@ -31,7 +31,6 @@
 
 <div id="content">
 
-<form id='searchform' action="bugs2.cgi#results" method="get" onsubmit="removeBlankFields(this);">
 
 <div id='quicknav'>
     <b>Navigation</b>:
@@ -40,10 +39,23 @@
     <a href='#types'>Types</a> /
     <a href='#sort'>Sort</a> /
     <a href='#info'>Info</a> /
-    <a href='#queries'>Queries</a> /
+    <a href='#format'>Format</a> /
     <a href="javascript:f=document.getElementById('searchform');removeBlankFields(f);f.submit();">Search</a>
     <% if bugs %>/ <a href='#results'>Results</a><% end %>
 </div>
+
+<h3 id='queries'>Useful queries</h3>
+<div>
+    <ul>
+    <li><a href="bugs.cgi?release=jessie_and_sid&patch=ign&merged=ign&done=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&ctags=1&ctags=1&cdeferred=1"><b>Bug squasher view:</b> Affecting sid and jessie, not marked as done, not tagged patch; those need to be fixed, probably by a patch+upload</a></li>
+    <li><a href="bugs.cgi?release=jessie_and_sid&patch=only&merged=ign&done=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&chints=1&ctags=1&cdeferred=1"><b>Sponsor view:</b> Affecting sid and jessie, not marked as done, tagged 'patch'; those need a DD to sponsor an upload</a></li>
+    <li><a href="bugs.cgi?release=jessie_and_sid&merged=ign&done=only&fnewerval=7&rc=1&sortby=id&sorto=asc&ctags=1&cdeferred=1&caffected=1"><b>Cleaner view:</b> Affecting sid and jessie, but marked as done; why is it still affecting unstable? fixed only in experimental? missing binaries? wrong changelog?</a></li>
+    <li><a href="bugs.cgi?release=jessie_not_sid&merged=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&chints=1&ctags=1&cdeferred=1&crttags=1"><b>Release Team view:</b> Affecting jessie, but not sid. Help the fix migrate to jessie!</a></li>
+    </ul>
+</div>
+
+
+<form id='searchform' action="bugs2.cgi#results" method="get" onsubmit="removeBlankFields(this);">
 
 <h3 id='distribution'>Distribution<sup>[<a href="#ftn.distro">1</a>]</sup></h3>
 <div class='indent'>
@@ -115,16 +127,11 @@
 <% end %>
 </div>
 
-<h3 id='queries'>Useful queries</h3>
-<div>
-    <ul>
-    <li><a href="bugs.cgi?release=jessie_and_sid&patch=ign&merged=ign&done=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&ctags=1&ctags=1&cdeferred=1"><b>Bug squasher view:</b> Affecting sid and jessie, not marked as done, not tagged patch; those need to be fixed, probably by a patch+upload</a></li>
-    <li><a href="bugs.cgi?release=jessie_and_sid&patch=only&merged=ign&done=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&chints=1&ctags=1&cdeferred=1"><b>Sponsor view:</b> Affecting sid and jessie, not marked as done, tagged 'patch'; those need a DD to sponsor an upload</a></li>
-    <li><a href="bugs.cgi?release=jessie_and_sid&merged=ign&done=only&fnewerval=7&rc=1&sortby=id&sorto=asc&ctags=1&cdeferred=1&caffected=1"><b>Cleaner view:</b> Affecting sid and jessie, but marked as done; why is it still affecting unstable? fixed only in experimental? missing binaries? wrong changelog?</a></li>
-    <li><a href="bugs.cgi?release=jessie_not_sid&merged=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&chints=1&ctags=1&cdeferred=1&crttags=1"><b>Release Team view:</b> Affecting jessie, but not sid. Help the fix migrate to jessie!</a></li>
-    </ul>
+<h3 id='format'>Format</h3>
+<div class="indent">
+<label><input type='radio' name='format' value='html' checked='1'/>HTML</label><br/>
+<label><input type='radio' name='format' value='json'/>JSON</label>
 </div>
-
 
 <p><input type='submit' value='Search'/></p>
 </form>

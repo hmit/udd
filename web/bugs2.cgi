@@ -6,6 +6,7 @@ require 'pp'
 require 'cgi'
 require 'time'
 require 'yaml'
+require 'oj'
 require File.expand_path(File.dirname(__FILE__))+'/inc/page'
 
 #STDERR.reopen(STDOUT)
@@ -218,7 +219,11 @@ TYPES.each do |t|
     end
   end
 end
-
+if cgi.params['format'][0] == 'json'
+    format = 'json'
+else
+    format = 'html'
+end
 
 if cgi.params != {}
     # Generate and execute query
@@ -430,7 +435,7 @@ if cgi.params != {}
         deferredbugs = {}
         rowsd.each do |r|
           d = r['du'].to_i
-          deferredbugs[r['id']] = "#{r['version']} (#{d}&nbsp;day#{d==1?'':'s'})"
+          deferredbugs[r['id']] = "#{r['version']} (#{d} day#{d==1?'':'s'})"
         end
         bugs.each do |r|
           r['cdeferred'] = deferredbugs[r['id']]
@@ -455,7 +460,12 @@ if cgi.params != {}
     timegen = sprintf "%.3f", Time::now - tstart
 end
 
-page = Page.new({ :release => release,
+
+if format == 'json'
+    puts "Content-type: application/json\n\n"
+    puts Oj.dump bugs
+else
+    page = Page.new({ :release => release,
                   :RELEASE_RESTRICT => RELEASE_RESTRICT,
                   :FILTERS => FILTERS,
                   :filters => filters,
@@ -472,6 +482,6 @@ page = Page.new({ :release => release,
                   :r2 => r2,
                   :q => q,
                   :timegen => timegen })
-
-puts "Content-type: text/html\n\n"
-puts page.render("templates/bugs.erb")
+    puts "Content-type: text/html\n\n"
+    puts page.render("templates/bugs.erb")
+end
