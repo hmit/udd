@@ -219,11 +219,7 @@ TYPES.each do |t|
     end
   end
 end
-if cgi.params['format'][0] == 'json'
-    format = 'json'
-else
-    format = 'html'
-end
+format = cgi.params['format'][0]
 
 if cgi.params != {}
     # Generate and execute query
@@ -463,7 +459,11 @@ end
 
 if format == 'json'
     puts "Content-type: application/json\n\n"
-    puts Oj.dump bugs
+    puts Oj.dump(bugs)
+elsif format == 'yaml'
+    puts "Content-type: application/x-yaml\n\n"
+    # ruby encoding is too hard, use oj to do the work
+    puts Oj.load(Oj.dump(bugs)).to_yaml
 else
     page = Page.new({ :release => release,
                   :RELEASE_RESTRICT => RELEASE_RESTRICT,
