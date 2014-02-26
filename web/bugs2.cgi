@@ -297,8 +297,6 @@ if cgi.params != {}
       s
     end
 
-
-
     def gentags(tags)
       return '' if tags.nil?
       tags.sort!
@@ -306,7 +304,7 @@ if cgi.params != {}
         puts "unknowntag: #{tag}" if $TagsSingleLetter[tag].nil?
         "<abbr title='#{tag}'>#{$TagsSingleLetter[tag]}</abbr>"
       end
-      return '&nbsp;[' + texttags.join('|') + ']'
+      return '[' + texttags.join('|') + ']'
     end
 
     def genaffected(r)
@@ -317,18 +315,15 @@ if cgi.params != {}
       s += "<abbr title='affects experimental'>E</abbr>" if r['affects_experimental']
       s += "<abbr title='in experimental, but not affected'><b>ē</b></abbr>" if $sources_in_experimental.include?(r['source']) and not r['affects_experimental']
       return "" if s == ""
-      return "&nbsp;("+s+")"
+      return "("+s+")"
     end
-
 
     bugs = []
     rows.each do |r|
         bugs.push(r.to_h)
     end
 
-
     if rows.length > 0
-
       if cols['chints']
         # this used to be 'relevant_hints' instead of hints (which checks the
         # version in unstable) - changed because package info sync is down

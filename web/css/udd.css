@@ -33,6 +33,7 @@ h2 {
 }
 .ui-menu-item a:hover { text-decoration: none; }
 .ui-menu-item:hover { background-color: #eee; }
+.indent { padding: 0.5em 1em; }
 #navbar ul { padding-right: 70px; }
 #navbar li.rightmenuitem { float: right; }
 #quicknav {
@@ -47,18 +48,17 @@ h2 {
 }
 table td {
     border-top: 0;
+    padding-top: 0.2em;
+    padding-bottom: 0.2em;
 }
 .table {
     font-size: 0.875em;
     border-collapse: separate;
-    border-spacing: 0;
-    margin-bottom: 20px;
 }
 .table th, .table td {
     border-top: 1px solid #c5c5c5;
-    line-height: 20px;
+    line-height: 21px;
     padding: 2px 4px;
-    vertical-align: top;
 }
 .table th {
     font-weight: bold;

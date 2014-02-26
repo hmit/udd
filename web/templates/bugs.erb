@@ -1,10 +1,9 @@
 <html>
 <head>
-<script type="text/javascript" src="js/jquery.min.js"></script>
-<script type="text/javascript" src="js/jquery.tablesorter.min.js"></script>
+<script type="text/javascript" src="/js/jquery.min.js"></script>
+<script type="text/javascript" src="/js/jquery.tablesorter.min.js"></script>
 <link href="/css/debian.css" rel="stylesheet" type="text/css">
 <link href="/css/udd.css" rel="stylesheet" type="text/css">
-<link href="/css/bugs.css" rel="stylesheet" type="text/css">
 <title>Debian Bugs Search @ UDD</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 </head>
@@ -22,9 +21,9 @@
   <div id="navbar">
     <p class="hidecss"><a href="#content">Skip Quicknav</a></p>
     <ul>
-       <li><a href="/">Ultimate Database</a></li>
-       <li><a href="/bugs2.cgi">Bugs search</a></li>
-       <li><a href="/dmd/">Maintainer dashboard</a></li>
+        <li><a href="/">Ultimate Database</a></li>
+        <li><a href="/bugs/">Bugs search</a></li>
+        <li><a href="/dmd/">Maintainer dashboard</a></li>
     </ul>
   </div> <!-- end navbar -->
   <p id="breadcrumbs">&nbsp;Bugs search</p>
@@ -39,7 +38,7 @@
     <a href='#filters'>Filters</a> /
     <a href='#types'>Types</a> /
     <a href='#sort'>Sort</a> /
-    <a href='#info'>Info</a> /
+    <a href='#fields'>Fields</a> /
     <a href='#format'>Format</a> /
     <a href="javascript:f=document.getElementById('searchform');removeBlankFields(f);f.submit();">Search</a>
     <% if bugs %>/ <a href='#results'>Results</a><% end %>
@@ -49,15 +48,15 @@
 <h3 id='queries'>Useful queries</h3>
 <div>
     <ul>
-    <li><a href="bugs2.cgi?release=jessie_and_sid&patch=ign&merged=ign&done=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&ctags=1&ctags=1&cdeferred=1#results"><b>Bug squasher view:</b> Affecting sid and jessie, not marked as done, not tagged patch; those need to be fixed, probably by a patch+upload</a></li>
-    <li><a href="bugs2.cgi?release=jessie_and_sid&patch=only&merged=ign&done=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&chints=1&ctags=1&cdeferred=1#results"><b>Sponsor view:</b> Affecting sid and jessie, not marked as done, tagged 'patch'; those need a DD to sponsor an upload</a></li>
-    <li><a href="bugs2.cgi?release=jessie_and_sid&merged=ign&done=only&fnewerval=7&rc=1&sortby=id&sorto=asc&ctags=1&cdeferred=1&caffected=1#results"><b>Cleaner view:</b> Affecting sid and jessie, but marked as done; why is it still affecting unstable? fixed only in experimental? missing binaries? wrong changelog?</a></li>
-    <li><a href="bugs2.cgi?release=jessie_not_sid&merged=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&chints=1&ctags=1&cdeferred=1&crttags=1#results"><b>Release Team view:</b> Affecting jessie, but not sid. Help the fix migrate to jessie!</a></li>
+    <li><a href="bugs/?release=jessie_and_sid&patch=ign&merged=ign&done=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&ctags=1&ctags=1&cdeferred=1#results"><b>Bug squasher view:</b> Affecting sid and jessie, not marked as done, not tagged patch; those need to be fixed, probably by a patch+upload</a></li>
+    <li><a href="/bugs/?release=jessie_and_sid&patch=only&merged=ign&done=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&chints=1&ctags=1&cdeferred=1#results"><b>Sponsor view:</b> Affecting sid and jessie, not marked as done, tagged 'patch'; those need a DD to sponsor an upload</a></li>
+    <li><a href="/bugs/?release=jessie_and_sid&merged=ign&done=only&fnewerval=7&rc=1&sortby=id&sorto=asc&ctags=1&cdeferred=1&caffected=1#results"><b>Cleaner view:</b> Affecting sid and jessie, but marked as done; why is it still affecting unstable? fixed only in experimental? missing binaries? wrong changelog?</a></li>
+    <li><a href="/bugs/?release=jessie_not_sid&merged=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&chints=1&ctags=1&cdeferred=1&crttags=1#results"><b>Release Team view:</b> Affecting jessie, but not sid. Help the fix migrate to jessie!</a></li>
     </ul>
 </div>
 
 
-<form id='searchform' action="bugs2.cgi#results" method="get" onsubmit="removeBlankFields(this);">
+<form id='searchform' action="/bugs/#results" method="get" onsubmit="removeBlankFields(this);">
 
 <h3 id='distribution'>Distribution<sup>[<a href="#ftn.distro">1</a>]</sup></h3>
 <div class='indent'>
@@ -69,29 +68,29 @@
 
 
 <h3 id='filters'>Filters</h3>
-<div>
+<div class='indent'>
     <table>
-    <tr><th>not considered</th><th>only</th><th>ignore</th><th>type</th></tr>
+    <tr><th>off</th><th>only</th><th>ignore</th><th>type</th></tr>
 
       <% FILTERS.each do |r| %>
       <tr>
-      <td style='text-align: center;'><input type='radio' name='<%= r[0] %>' value='' <%= filters[r[0]]==''?'CHECKED=\'1\'':'' %>/></td>
-      <td style='text-align: center;'><input type='radio' name='<%= r[0] %>' value='only' <%= filters[r[0]]=='only'?'CHECKED=\'1\'':'' %>/></td>
-      <td style='text-align: center;'><input type='radio' name='<%= r[0] %>' value='ign' <%= filters[r[0]]=='ign'?'CHECKED=\'1\'':'' %>/></td>
+      <td><input type='radio' name='<%= r[0] %>' value='' <%= filters[r[0]]==''?'CHECKED=\'1\'':'' %>/></td>
+      <td><input type='radio' name='<%= r[0] %>' value='only' <%= filters[r[0]]=='only'?'CHECKED=\'1\'':'' %>/></td>
+      <td><input type='radio' name='<%= r[0] %>' value='ign' <%= filters[r[0]]=='ign'?'CHECKED=\'1\'':'' %>/></td>
       <td><%= r[1] %></td>
       </tr>
       <% end %>
 
       <tr>
-      <td style='text-align: center;'><input type='radio' name='fnewer' value='' <%= fnewer==''?'CHECKED=\'1\'':'' %>/></td>
-      <td style='text-align: center;'><input type='radio' name='fnewer' value='only' <%= fnewer=='only'?'CHECKED=\'1\'':'' %>/></td>
-      <td style='text-align: center;'><input type='radio' name='fnewer' value='ign' <%= fnewer=='ign'?'CHECKED=\'1\'':'' %>/></td>
+      <td><input type='radio' name='fnewer' value='' <%= fnewer==''?'CHECKED=\'1\'':'' %>/></td>
+      <td><input type='radio' name='fnewer' value='only' <%= fnewer=='only'?'CHECKED=\'1\'':'' %>/></td>
+      <td><input type='radio' name='fnewer' value='ign' <%= fnewer=='ign'?'CHECKED=\'1\'':'' %>/></td>
       <td>newer than <input type='text' size='3' name='fnewerval' value='<%= fnewerval %>'/> days</td>
       </tr>
       <tr>
-      <td style='text-align: center;'><input type='radio' name='flastmod' value='' <%= flastmod==''?'CHECKED=\'1\'':'' %>/></td>
-      <td style='text-align: center;'><input type='radio' name='flastmod' value='only' <%= flastmod=='only'?'CHECKED=\'1\'':'' %>/></td>
-      <td style='text-align: center;'><input type='radio' name='flastmod' value='ign' <%= flastmod=='ign'?'CHECKED=\'1\'':'' %>/></td>
+      <td><input type='radio' name='flastmod' value='' <%= flastmod==''?'CHECKED=\'1\'':'' %>/></td>
+      <td><input type='radio' name='flastmod' value='only' <%= flastmod=='only'?'CHECKED=\'1\'':'' %>/></td>
+      <td><input type='radio' name='flastmod' value='ign' <%= flastmod=='ign'?'CHECKED=\'1\'':'' %>/></td>
       <td>modified in the last <input type='text' size='3' name='flastmodval' value='<%= flastmodval %>'/> days</td>
       </tr>
     </table>
@@ -121,7 +120,7 @@
 </div>
   
 
-<h3 id='info'>Additional information</h3>
+<h3 id='fields'>Additional fields</h3>
 <div class="indent">
 <% COLUMNS.each do |r| %>
 <% checked = cols[r[0]] ? 'checked':'' %>
@@ -144,24 +143,28 @@
     <h3 id='results'><%= bugs.length %> bugs found</h3>
     <table class="table table-bordered tablesorter">
     <thead>
-    <tr><th>bug#</th>
-    <th>package</th><th>title</th>
-    <% if cols['cpopcon'] %><th>popcon</th><% end %>
-    <% if cols['cseverity'] %><th>severity</th><% end %>
-    <% if cols['chints'] %><th>hints</th><% end %>
-    <% if cols['cclaimed'] %><th>claimed by</th><% end %>
-    <% if cols['cdeferred'] %><th>deferred</th><% end %>
-    <% if cols['crttags'] %><th>RT tag</th><% end %>
-    <th>last&nbsp;modified</th></tr>
+        <tr>
+        <th>bug#</th>
+        <% if cols['ctags'] %><th>tags</th><% end %>
+        <% if cols['caffected'] %><th>releases</th><% end %>
+        <th>package</th>
+        <th>title</th>
+        <% if cols['cpopcon'] %><th>popcon</th><% end %>
+        <% if cols['cseverity'] %><th>severity</th><% end %>
+        <% if cols['chints'] %><th>hints</th><% end %>
+        <% if cols['cclaimed'] %><th>claimed by</th><% end %>
+        <% if cols['cdeferred'] %><th>deferred</th><% end %>
+        <% if cols['crttags'] %><th>RT</th><% end %>
+        <th>modified</th></tr>
     </thead>
     <tbody>
 
     <% bugs.each do |r| %>
-        <tr><td style='text-align: left;'><a href="http://bugs.debian.org/<%= r['id'] %>">#<%= r['id'] %></a>
-        <% if cols['ctags'] %><%= r['ctags'] %><% end %>
-        <% if cols['caffected'] %><%= r['caffected'] %><% end %>
-        </td>
-        <td style='text-align: center;'>        
+        <tr>
+        <td><a href="http://bugs.debian.org/<%= r['id'] %>">#<%= r['id'] %></a></td>
+        <% if cols['ctags'] %><td><%= r['ctags'] %> &nbsp;</td><% end %>
+        <% if cols['caffected'] %><td><%= r['caffected'] %> &nbsp;</td><% end %>
+        <td>        
         <% srcs = r['source'].split(/,\s*/) %>
         <% bins = r['package'].split(/,\s*/) %>
         <% if bins.length == 1 %>
@@ -183,7 +186,7 @@
         <% if cols['crttags'] %><td><%= r['crttags'] %> &nbsp;</td><% end %>
         <% d = r['last_modified'] %>
         <% d = Date::new(d.year, d.month, d.day) %>
-        <td style='text-align: center;'><%= d %></td></tr>
+        <td><%= d %></td></tr>
     <% end %>
     
     </tbody>
@@ -198,13 +201,22 @@
 
 </div>
 
-<%= render 'templates/footer.erb' %>
+<div id="footer">
+    <div id="fineprint">
+        <p><sup>[<a name="ftn.distro">1</a>] </sup>This already uses release tags ('sid', 'jessie') and xxx-ignore ('jessie-ignore') to include/exclude bugs</p>
+        <p>
+        Ultimate Debian Database:
+        <a href="https://wiki.debian.org/UltimateDebianDatabase/"> hacking / bug reporting / contact information</a><br />
+        Debian is a registered trademark of <a href="http://www.spi-inc.org/">Software in the Public Interest</a>
+        </p>
+    </div>
+</div>
+
 
 <script type="text/javascript">
 $(document).ready(function() {
     $("table.tablesorter").tablesorter();
 });
-
 
 function removeBlankFields(form) {
     var inputs = form.getElementsByTagName("input");
