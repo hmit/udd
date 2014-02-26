@@ -44,7 +44,9 @@ h2 {
     color: #555;
     background-color: #fff;
     font-size: 0.9em;
-    border-bottom-left-radius: 5px;
+}
+table td {
+    border-top: 0;
 }
 .table {
     font-size: 0.875em;
@@ -117,4 +119,8 @@ table.tablesorter thead tr .headerSortDown {
 }
 table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSortUp {
     background-color: #ddd;
+}
+.btn-lg {
+    padding: 6px 14px;
+    margin-top: 3px;
 }

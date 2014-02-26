@@ -3,7 +3,7 @@
 <script type="text/javascript" src="js/jquery.min.js"></script>
 <script type="text/javascript" src="js/jquery.tablesorter.min.js"></script>
 <link href="/css/debian.css" rel="stylesheet" type="text/css">
-<link href="/css/dmd.css" rel="stylesheet" type="text/css">
+<link href="/css/udd.css" rel="stylesheet" type="text/css">
 <link href="/css/bugs.css" rel="stylesheet" type="text/css">
 <title>Debian Bugs Search @ UDD</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
@@ -24,6 +24,7 @@
     <ul>
        <li><a href="/">Ultimate Database</a></li>
        <li><a href="/bugs2.cgi">Bugs search</a></li>
+       <li><a href="/dmd/">Maintainer dashboard</a></li>
     </ul>
   </div> <!-- end navbar -->
   <p id="breadcrumbs">&nbsp;Bugs search</p>
@@ -44,13 +45,14 @@
     <% if bugs %>/ <a href='#results'>Results</a><% end %>
 </div>
 
+<h1>Bugs search</h1>
 <h3 id='queries'>Useful queries</h3>
 <div>
     <ul>
-    <li><a href="bugs.cgi?release=jessie_and_sid&patch=ign&merged=ign&done=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&ctags=1&ctags=1&cdeferred=1"><b>Bug squasher view:</b> Affecting sid and jessie, not marked as done, not tagged patch; those need to be fixed, probably by a patch+upload</a></li>
-    <li><a href="bugs.cgi?release=jessie_and_sid&patch=only&merged=ign&done=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&chints=1&ctags=1&cdeferred=1"><b>Sponsor view:</b> Affecting sid and jessie, not marked as done, tagged 'patch'; those need a DD to sponsor an upload</a></li>
-    <li><a href="bugs.cgi?release=jessie_and_sid&merged=ign&done=only&fnewerval=7&rc=1&sortby=id&sorto=asc&ctags=1&cdeferred=1&caffected=1"><b>Cleaner view:</b> Affecting sid and jessie, but marked as done; why is it still affecting unstable? fixed only in experimental? missing binaries? wrong changelog?</a></li>
-    <li><a href="bugs.cgi?release=jessie_not_sid&merged=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&chints=1&ctags=1&cdeferred=1&crttags=1"><b>Release Team view:</b> Affecting jessie, but not sid. Help the fix migrate to jessie!</a></li>
+    <li><a href="bugs2.cgi?release=jessie_and_sid&patch=ign&merged=ign&done=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&ctags=1&ctags=1&cdeferred=1#results"><b>Bug squasher view:</b> Affecting sid and jessie, not marked as done, not tagged patch; those need to be fixed, probably by a patch+upload</a></li>
+    <li><a href="bugs2.cgi?release=jessie_and_sid&patch=only&merged=ign&done=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&chints=1&ctags=1&cdeferred=1#results"><b>Sponsor view:</b> Affecting sid and jessie, not marked as done, tagged 'patch'; those need a DD to sponsor an upload</a></li>
+    <li><a href="bugs2.cgi?release=jessie_and_sid&merged=ign&done=only&fnewerval=7&rc=1&sortby=id&sorto=asc&ctags=1&cdeferred=1&caffected=1#results"><b>Cleaner view:</b> Affecting sid and jessie, but marked as done; why is it still affecting unstable? fixed only in experimental? missing binaries? wrong changelog?</a></li>
+    <li><a href="bugs2.cgi?release=jessie_not_sid&merged=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&chints=1&ctags=1&cdeferred=1&crttags=1#results"><b>Release Team view:</b> Affecting jessie, but not sid. Help the fix migrate to jessie!</a></li>
     </ul>
 </div>
 
@@ -134,7 +136,7 @@
 <label><input type='radio' name='format' value='yaml'/>YAML</label>
 </div>
 
-<p><input type='submit' value='Search'/></p>
+<p><input type='submit' value='Search' class='btn-lg'/></p>
 </form>
 
 
@@ -195,10 +197,8 @@
 <% end %>
 
 </div>
-<div id="footer">
-    <p><sup>[<a name="ftn.distro">1</a>] </sup>This already uses release tags ('sid', 'jessie') and xxx-ignore ('jessie-ignore') to include/exclude bugs</p>
-    <p><a href="https://wiki.debian.org/UltimateDebianDatabase/Hacking">hacking / bug reporting / contact information</a> - <a href="http://anonscm.debian.org/gitweb/?p=collab-qa/udd.git;a=blob_plain;f=web/bugs.cgi">source code</a></p>
-</div>
+
+<%= render 'templates/footer.erb' %>
 
 <script type="text/javascript">
 $(document).ready(function() {

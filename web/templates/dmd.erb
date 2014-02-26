@@ -3,7 +3,7 @@
 <title>Debian Maintainer Dashboard</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <link href="/css/debian.css" rel="stylesheet" type="text/css">
-<link href="/css/dmd.css" rel="stylesheet" type="text/css">
+<link href="/css/udd.css" rel="stylesheet" type="text/css">
 <script type="text/javascript" src="/js/jquery.min.js"></script>
 <script type="text/javascript" src="/js/jquery.tablesorter.min.js"></script>
 <script type="text/javascript" src="/js/jquery-ui.custom.min.js"></script>
@@ -24,7 +24,8 @@
     <p class="hidecss"><a href="#content">Skip Quicknav</a></p>
     <ul>
        <li><a href="/">Ultimate Database</a></li>
-       <li><a href="#dashboard">Maintainer search</a></li>
+       <li><a href="/bugs2.cgi">Bugs search</a></li>
+       <li><a href="/dmd/">Maintainer search</a></li>
     </ul>
   </div> <!-- end navbar -->
   <p id="breadcrumbs">&nbsp;Maintainer Dashboard</p> 
@@ -35,9 +36,9 @@
     <% if uddd %>
       <div id='quicknav'>
        <b>Navigation</b>:
-       <a href="#todo">Todo list</a>
-       <a href="#versions">Versions</a>
-       <a href="#bugs">Bugs</a>
+       <a href="#todo">Todo list</a> /
+       <a href="#versions">Versions</a> /
+       <a href="#bugs">Bugs</a> /
        <a href="#ubuntu">Ubuntu</a>
      </div>
    <% end %>
@@ -87,7 +88,7 @@
         <th>
         </th>
         <td>
-            <input type='submit' value='Go' onsubmit="removeBlankFields(this);"/>
+            <input type='submit' value='Search' onsubmit="removeBlankFields(this);" class='btn-lg'/>
         </td>
     </tr>
 </form>
