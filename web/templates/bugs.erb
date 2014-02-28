@@ -2,8 +2,10 @@
 <head>
 <script type="text/javascript" src="/js/jquery.min.js"></script>
 <script type="text/javascript" src="/js/jquery.tablesorter.min.js"></script>
+<script type="text/javascript" src="/js/twocols.js"></script>
 <link href="/css/debian.css" rel="stylesheet" type="text/css">
 <link href="/css/udd.css" rel="stylesheet" type="text/css">
+<link href="/css/twocols.css" rel="stylesheet" type="text/css">
 <title>Debian Bugs Search @ UDD</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 </head>
@@ -34,11 +36,11 @@
 
 <div id='quicknav'>
     <b>Navigation</b>:
-    <a href='#distribution'>Distribution</a> /
+    <a href='#suites'>Suites</a> /
     <a href='#filters'>Filters</a> /
     <a href='#types'>Types</a> /
-    <a href='#sort'>Sort</a> /
     <a href='#fields'>Fields</a> /
+    <a href='#sort'>Sort</a> /
     <a href='#format'>Format</a> /
     <a href="javascript:f=document.getElementById('searchform');removeBlankFields(f);f.submit();">Search</a>
     <% if bugs %>/ <a href='#results'>Results</a><% end %>
@@ -48,91 +50,91 @@
 <h3 id='queries'>Useful queries</h3>
 <div>
     <ul>
-    <li><a href="bugs/?release=jessie_and_sid&patch=ign&merged=ign&done=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&ctags=1&ctags=1&cdeferred=1#results"><b>Bug squasher view:</b> Affecting sid and jessie, not marked as done, not tagged patch; those need to be fixed, probably by a patch+upload</a></li>
-    <li><a href="/bugs/?release=jessie_and_sid&patch=only&merged=ign&done=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&chints=1&ctags=1&cdeferred=1#results"><b>Sponsor view:</b> Affecting sid and jessie, not marked as done, tagged 'patch'; those need a DD to sponsor an upload</a></li>
-    <li><a href="/bugs/?release=jessie_and_sid&merged=ign&done=only&fnewerval=7&rc=1&sortby=id&sorto=asc&ctags=1&cdeferred=1&caffected=1#results"><b>Cleaner view:</b> Affecting sid and jessie, but marked as done; why is it still affecting unstable? fixed only in experimental? missing binaries? wrong changelog?</a></li>
-    <li><a href="/bugs/?release=jessie_not_sid&merged=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&chints=1&ctags=1&cdeferred=1&crttags=1#results"><b>Release Team view:</b> Affecting jessie, but not sid. Help the fix migrate to jessie!</a></li>
+    <li>Bug squasher view: <a href="bugs/?release=jessie_and_sid&patch=ign&merged=ign&done=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&ctags=1&ctags=1&cdeferred=1#results">Affecting sid and jessie, not marked as done, not tagged patch; those need to be fixed, probably by a patch+upload</a></li>
+    <li>Sponsor view: <a href="/bugs/?release=jessie_and_sid&patch=only&merged=ign&done=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&chints=1&ctags=1&cdeferred=1#results">Affecting sid and jessie, not marked as done, tagged 'patch'; those need a DD to sponsor an upload</a></li>
+    <li>Cleaner view: <a href="/bugs/?release=jessie_and_sid&merged=ign&done=only&fnewerval=7&rc=1&sortby=id&sorto=asc&ctags=1&cdeferred=1&caffected=1#results">Affecting sid and jessie, but marked as done; why is it still affecting unstable? fixed only in experimental? missing binaries? wrong changelog?</a></li>
+    <li>Release Team view: <a href="/bugs/?release=jessie_not_sid&merged=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&chints=1&ctags=1&cdeferred=1&crttags=1#results">Affecting jessie, but not sid. Help the fix migrate to jessie!</a></li>
     </ul>
 </div>
 
 
 <form id='searchform' action="/bugs/#results" method="get" onsubmit="removeBlankFields(this);">
 
-<h3 id='distribution'>Distribution<sup>[<a href="#ftn.distro">1</a>]</sup></h3>
+<h3 id='suites'>Suites<sup>[<a href="#ftn.distro">1</a>]</sup></h3>
 <div class='indent'>
+  <ul class="twocols">
   <% RELEASE_RESTRICT.each do |r| %>
   <% checked = (release == r[0] ? 'CHECKED=\'1\'':'') %>
-  <label><input type='radio' name='release' value='<%= r[0] %>' <%= checked %>/> <%= r[1] %></label><br/>
+  <li><label><input type='radio' name='release' value='<%= r[0] %>' <%= checked %>/> <%= r[1] %></label></li>
    <% end %>
+   </ul>
 </div>
-
 
 <h3 id='filters'>Filters</h3>
 <div class='indent'>
-    <table>
-    <tr><th>off</th><th>only</th><th>ignore</th><th>type</th></tr>
-
+    <i>Ignore / include / exclude</i>
+    <ul class="threecols">
       <% FILTERS.each do |r| %>
-      <tr>
-      <td><input type='radio' name='<%= r[0] %>' value='' <%= filters[r[0]]==''?'CHECKED=\'1\'':'' %>/></td>
-      <td><input type='radio' name='<%= r[0] %>' value='only' <%= filters[r[0]]=='only'?'CHECKED=\'1\'':'' %>/></td>
-      <td><input type='radio' name='<%= r[0] %>' value='ign' <%= filters[r[0]]=='ign'?'CHECKED=\'1\'':'' %>/></td>
-      <td><%= r[1] %></td>
-      </tr>
+      <li><input type='radio' name='<%= r[0] %>' value='' <%= filters[r[0]]==''?'CHECKED=\'1\'':'' %>/>
+      <input type='radio' name='<%= r[0] %>' value='only' <%= filters[r[0]]=='only'?'CHECKED=\'1\'':'' %>/>
+      <input type='radio' name='<%= r[0] %>' value='ign' <%= filters[r[0]]=='ign'?'CHECKED=\'1\'':'' %>/>
+      <%= r[1] %></li>
       <% end %>
 
-      <tr>
-      <td><input type='radio' name='fnewer' value='' <%= fnewer==''?'CHECKED=\'1\'':'' %>/></td>
-      <td><input type='radio' name='fnewer' value='only' <%= fnewer=='only'?'CHECKED=\'1\'':'' %>/></td>
-      <td><input type='radio' name='fnewer' value='ign' <%= fnewer=='ign'?'CHECKED=\'1\'':'' %>/></td>
-      <td>newer than <input type='text' size='3' name='fnewerval' value='<%= fnewerval %>'/> days</td>
-      </tr>
-      <tr>
-      <td><input type='radio' name='flastmod' value='' <%= flastmod==''?'CHECKED=\'1\'':'' %>/></td>
-      <td><input type='radio' name='flastmod' value='only' <%= flastmod=='only'?'CHECKED=\'1\'':'' %>/></td>
-      <td><input type='radio' name='flastmod' value='ign' <%= flastmod=='ign'?'CHECKED=\'1\'':'' %>/></td>
-      <td>modified in the last <input type='text' size='3' name='flastmodval' value='<%= flastmodval %>'/> days</td>
-      </tr>
-    </table>
+      <li><input type='radio' name='fnewer' value='' <%= fnewer==''?'CHECKED=\'1\'':'' %>/>
+      <input type='radio' name='fnewer' value='only' <%= fnewer=='only'?'CHECKED=\'1\'':'' %>/>
+      <input type='radio' name='fnewer' value='ign' <%= fnewer=='ign'?'CHECKED=\'1\'':'' %>/>
+      newer than <input type='text' size='3' name='fnewerval' value='<%= fnewerval %>'/> days</li>
+
+      <li><input type='radio' name='flastmod' value='' <%= flastmod==''?'CHECKED=\'1\'':'' %>/>
+      <input type='radio' name='flastmod' value='only' <%= flastmod=='only'?'CHECKED=\'1\'':'' %>/>
+      <input type='radio' name='flastmod' value='ign' <%= flastmod=='ign'?'CHECKED=\'1\'':'' %>/>
+      modified in the last <input type='text' size='3' name='flastmodval' value='<%= flastmodval %>'/> days</li>
+    </ul>
 </div>
 
 <h3 id="types">Bug types</h3>
 <div class="indent">
-    <table>
+    <ul class="twocols">
       <% TYPES.each do |t| %>
       <% checked = types[t[0]]?" checked='1'":"" %>
-      <tr><td><input type='checkbox' id='<%= t[0] %>' name='<%= t[0] %>' value='1'<%= checked %>/></td><td><label for='<%= t[0] %>'><%= t[1] %></label></td></tr>
+      <li><input type='checkbox' id='<%= t[0] %>' name='<%= t[0] %>' value='1'<%= checked %>/><label for='<%= t[0] %>'><%= t[1] %></label></li>
       <% end %>  
-    </table>
+    </ul>
+</div>
+
+<h3 id='fields'>Additional fields</h3>
+<div class="indent">
+    <ul class="twocols">
+    <% COLUMNS.each do |r| %>
+    <% checked = cols[r[0]] ? 'checked':'' %>
+    <li><label><input type='checkbox' name='<%= r[0] %>' value='1' <%= checked %>/><%= r[1] %></label></li>>
+    <% end %>
+    </ul>
 </div>
 
 <h3 id='sort'>Sort</h3>
 <div class="indent">
-<% SORTS.each do |r| %>
-<% checked = (sortby == r[0] ? 'CHECKED=\'1\'':'') %>
-<label><input type='radio' name='sortby' value='<%= r[0] %>' <%= checked %>/><%= r[1] %></label><br/>
-<% end %>
-<br/>
-<% [['asc', 'ascending'],[ 'desc', 'decreasing']].each do |r| %>
-<% checked = (sorto == r[0] ? 'CHECKED=\'1\'':'') %>
-<label><input type='radio' name='sorto' value='<%= r[0] %>' <%= checked %>/><%= r[1] %></label><br/>
-<% end %>
-</div>
-  
+    <ul class='threecols'>
+    <% SORTS.each do |r| %>
+    <% checked = (sortby == r[0] ? 'CHECKED=\'1\'':'') %>
+    <li><label><input type='radio' name='sortby' value='<%= r[0] %>' <%= checked %>/><%= r[1] %></label></li>
+    <% end %>
 
-<h3 id='fields'>Additional fields</h3>
-<div class="indent">
-<% COLUMNS.each do |r| %>
-<% checked = cols[r[0]] ? 'checked':'' %>
-<label><input type='checkbox' name='<%= r[0] %>' value='1' <%= checked %>/><%= r[1] %></label><br/>
-<% end %>
+    <% [['asc', 'ascending'],[ 'desc', 'decreasing']].each do |r| %>
+    <% checked = (sorto == r[0] ? 'CHECKED=\'1\'':'') %>
+    <li><label><input type='radio' name='sorto' value='<%= r[0] %>' <%= checked %>/><%= r[1] %></label></li>
+    <% end %>
+    </ul>
 </div>
 
 <h3 id='format'>Format</h3>
 <div class="indent">
-<label><input type='radio' name='format' value='html' checked='1'/>HTML</label><br/>
-<label><input type='radio' name='format' value='json'/>JSON</label><br />
-<label><input type='radio' name='format' value='yaml'/>YAML</label>
+    <ul class="threecols">
+    <li><label><input type='radio' name='format' value='html' checked='1'/>HTML</label></li>
+    <li><label><input type='radio' name='format' value='json'/>JSON</label></li>
+    <li><label><input type='radio' name='format' value='yaml'/>YAML</label></li>
+    </ul>
 </div>
 
 <p><input type='submit' value='Search' class='btn-lg'/></p>
@@ -235,6 +237,10 @@ $(window).scroll(function(){
             $("#quicknav").css("top",Math.max(0,85-$(this).scrollTop()));
             });
 $("#quicknav").css("top",Math.max(0,85-$(this).scrollTop()));
+
+allTwoCols('twocols');
+allThreeCols('threecols');
+
 </script>
 
 </body>
