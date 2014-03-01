@@ -1,17 +1,13 @@
 #!/usr/bin/ruby
-
 require 'cgi'
 require 'uri'
 require 'yaml'
 
 STDERR.reopen(STDOUT) # makes live debugging much easier
 
-puts "Content-type: text/html\n\n"
-
 require File.expand_path(File.dirname(__FILE__))+'/inc/dmd-data'
 require File.expand_path(File.dirname(__FILE__))+'/inc/dmd-feed'
 require File.expand_path(File.dirname(__FILE__))+'/inc/page'
-
 
 cgi = CGI::new
 tstart = Time::now
@@ -90,13 +86,10 @@ if cgi.params != {}
     end
   end
 
-
   $uddd.dmd_todos.each do |t|
     pkg = t[:source]
     t[:reason] = src_reason(pkg)
   end
-
-  
 
   $uddd.sources.each do |s|
     h = Hash.new
@@ -235,7 +228,6 @@ if cgi.params != {}
 
 end # cgi.params
 
-
 page = Page.new({ :title => 'Debian Maintainer Dashboard',
                   :default_packages => default_packages,
                   :default_bin2src => default_bin2src,
@@ -249,5 +241,5 @@ page = Page.new({ :title => 'Debian Maintainer Dashboard',
                   :feed => '/dmd/feed/?' + URI.encode_www_form(cgi.params),
                   :tstart => tstart })
 
+puts "Content-type: text/html\n\n"
 puts page.render("templates/dmd.erb")
-
