@@ -253,13 +253,14 @@ if cgi.params != {}
     if q2 != ""
       q += "AND (#{q2})\n"
     else
-      puts "<p><b>Must select at least one bug type!</b></p>"
+      error = "Must select at least one bug type!"
       q += "AND FALSE\n"
     end
     q += "order by #{sortby} #{sorto}"
 
     load = IO::read('/proc/loadavg').split[1].to_f
     if load > 20
+      puts "Content-type: text/html\n\n"
       puts "<p><b>Current system load (#{load}) is too high. Please retry later!</b></p>"
       puts "<pre>#{q}</pre>"
       exit(0)
@@ -270,6 +271,7 @@ if cgi.params != {}
       sth.execute
       rows = sth.fetch_all
     rescue DBI::ProgrammingError => e
+      puts "Content-type: text/html\n\n"
       puts "<p>The query generated an error, please report it to lucas@debian.org: #{e.message}</p>"
       puts "<pre>#{q}</pre>"
       exit(0)
@@ -301,7 +303,7 @@ if cgi.params != {}
       return '' if tags.nil?
       tags.sort!
       texttags = tags.map do |tag|
-        puts "unknowntag: #{tag}" if $TagsSingleLetter[tag].nil?
+        error = "unknowntag: #{tag}" if $TagsSingleLetter[tag].nil?
         "<abbr title='#{tag}'>#{$TagsSingleLetter[tag]}</abbr>"
       end
       return '[' + texttags.join('|') + ']'
@@ -476,6 +478,7 @@ else
                   :bugs => bugs,
                   :r2 => r2,
                   :q => q,
+                  :error => error,
                   :timegen => timegen })
     puts "Content-type: text/html\n\n"
     puts page.render("templates/bugs.erb")
