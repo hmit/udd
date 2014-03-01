@@ -2,10 +2,9 @@
 <head>
 <script type="text/javascript" src="/js/jquery.min.js"></script>
 <script type="text/javascript" src="/js/jquery.tablesorter.min.js"></script>
-<script type="text/javascript" src="/js/twocols.js"></script>
+<script type="text/javascript" src="/js/columns.js"></script>
 <link href="/css/debian.css" rel="stylesheet" type="text/css">
 <link href="/css/udd.css" rel="stylesheet" type="text/css">
-<link href="/css/twocols.css" rel="stylesheet" type="text/css">
 <title>Debian Bugs Search @ UDD</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 </head>
@@ -62,7 +61,7 @@
 
 <h3 id='suites'>Suites<sup>[<a href="#ftn.distro">1</a>]</sup></h3>
 <div class='indent'>
-  <ul class="twocols">
+  <ul class="columns2">
   <% RELEASE_RESTRICT.each do |r| %>
   <% checked = (release == r[0] ? 'CHECKED=\'1\'':'') %>
   <li><label><input type='radio' name='release' value='<%= r[0] %>' <%= checked %>/> <%= r[1] %></label></li>
@@ -72,8 +71,8 @@
 
 <h3 id='filters'>Filters</h3>
 <div class='indent'>
-    <i>Ignore / include / exclude</i>
-    <ul class="threecols">
+    <i>off / include / exclude</i>
+    <ul class="columns3">
       <% FILTERS.each do |r| %>
       <li><input type='radio' name='<%= r[0] %>' value='' <%= filters[r[0]]==''?'CHECKED=\'1\'':'' %>/>
       <input type='radio' name='<%= r[0] %>' value='only' <%= filters[r[0]]=='only'?'CHECKED=\'1\'':'' %>/>
@@ -95,7 +94,7 @@
 
 <h3 id="types">Bug types</h3>
 <div class="indent">
-    <ul class="twocols">
+    <ul class="columns2">
       <% TYPES.each do |t| %>
       <% checked = types[t[0]]?" checked='1'":"" %>
       <li><input type='checkbox' id='<%= t[0] %>' name='<%= t[0] %>' value='1'<%= checked %>/><label for='<%= t[0] %>'><%= t[1] %></label></li>
@@ -105,7 +104,7 @@
 
 <h3 id='fields'>Additional fields</h3>
 <div class="indent">
-    <ul class="twocols">
+    <ul class="columns2">
     <% COLUMNS.each do |r| %>
     <% checked = cols[r[0]] ? 'checked':'' %>
     <li><label><input type='checkbox' name='<%= r[0] %>' value='1' <%= checked %>/><%= r[1] %></label></li>>
@@ -115,7 +114,7 @@
 
 <h3 id='sort'>Sort</h3>
 <div class="indent">
-    <ul class='threecols'>
+    <ul class='columns3'>
     <% SORTS.each do |r| %>
     <% checked = (sortby == r[0] ? 'CHECKED=\'1\'':'') %>
     <li><label><input type='radio' name='sortby' value='<%= r[0] %>' <%= checked %>/><%= r[1] %></label></li>
@@ -130,7 +129,7 @@
 
 <h3 id='format'>Format</h3>
 <div class="indent">
-    <ul class="threecols">
+    <ul class="columns3">
     <li><label><input type='radio' name='format' value='html' checked='1'/>HTML</label></li>
     <li><label><input type='radio' name='format' value='json'/>JSON</label></li>
     <li><label><input type='radio' name='format' value='yaml'/>YAML</label></li>
@@ -237,9 +236,6 @@ $(window).scroll(function(){
             $("#quicknav").css("top",Math.max(0,85-$(this).scrollTop()));
             });
 $("#quicknav").css("top",Math.max(0,85-$(this).scrollTop()));
-
-allTwoCols('twocols');
-allThreeCols('threecols');
 
 </script>
 
