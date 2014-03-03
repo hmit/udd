@@ -2,7 +2,7 @@
  * to equal length columns.
  *
  * Copyright 2014 Christophe Siraut - Licensed under GNU Public License 2.1 or later
- * @source: http://git.domainepublic.net/?p=columns.js.git
+ * @source: http://git.domainepublic.net/?p=columnsjs.git
  */
 
 function columns(src, nb) {
