@@ -72,6 +72,7 @@ TYPES = [
   ['lfs', 'release goal: Large File Support', 'id in (select id from bugs_tags where tag=\'lfs\')', false ],
   ['boot', 'release goal: boot performance (init.d dependencies)', 'id in (select id from bugs_usertags where email = \'initscripts-ng-devel@lists.alioth.debian.org\')', false],
   ['oldgnome', 'release goal: remove obsolete GNOME libraries', 'id in (select id from bugs_usertags where email = \'pkg-gnome-maintainers@lists.alioth.debian.org\' and tag=\'oldlibs\')', false],
+  ['d-i', 'installer bugs', "bugs.source in (select source from sources where maintainer ~ 'debian-boot@lists.debian.org') OR package like '%-udeb'"],
   ['ruby', 'Ruby bugs', "bugs.source in (select source from sources where maintainer ~ 'ruby' or uploaders ~ 'ruby')\nOR bugs.package in (select source from packages where (package ~ 'ruby' or depends ~ 'ruby') and source != 'subversion')\nOR title ~ 'ruby'"],
   ['systemd', 'pkg-systemd bugs', "bugs.source in (select source from sources where maintainer ~ 'pkg-systemd-maintainers@lists.alioth.debian.org')"],
   ['php', 'PHP bugs', "bugs.source in (select source from packages_summary where package in (select package from debtags where tag = 'implemented-in::php'))"],
