@@ -30,7 +30,7 @@ $YAML::Syck::ImplicitTyping = 1;
 our $t;
 our $timing = 0;
 my %pkgsrc = %{getpkgsrc()};
-our @archs = grep {  !/(^m68k$|^kfreebsd|^hurd)/ } @{$config{default_architectures}};
+our @archs = grep {  !/(^m68k$|^sparc|^hurd)/ } @{$config{default_architectures}};
 
 # Return the list of usernames
 sub get_bugs_users {
