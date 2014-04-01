@@ -10,8 +10,11 @@ require 'pp'
 require 'digest/md5'
 
 OFILE='/srv/udd.debian.org/udd/web/how-can-i-help.json.gz'
+#if `hostname`.chomp == 'grep'
+#  OFILE='/tmp/how-can-i-help.json.gz'
+#end
 
-$dbh = DBI::connect('DBI:Pg:dbname=udd;port=5452', 'udd')
+$dbh = DBI::connect('DBI:Pg:dbname=udd;port=5452;host=localhost', 'guest')
 
 def dbget(q, *args)
   if $debug
@@ -89,6 +92,36 @@ dbget("""select distinct packages_summary.source, package, sync
     'package' => r['package']
   }
 end
+
+dbget("""select source, version, bugs, removal_time from testing_autoremovals").each do |r|
+  hash = Digest::MD5.hexdigest("testing-autorm #{r['source']} #{r['version']} #{r['removal_time']}")
+  helpitems << {
+    'type' => 'testing-autorm',
+    'hash' => hash,
+    'source' => r['source'],
+    'packages' => srcs[r['source']],
+    'removal_time' => r['removal_time'],
+    'bugs' => r['bugs'].nil? ? [] : r['bugs'].split(',')
+  }
+end
+
+dbget(" select distinct ss.id, ss.source, ss.version, ss.title
+        from sponsorship_requests ss, sources_uniq su
+        where su.release = 'sid'
+        and ss.source = su.source
+        and su.version < ss.version").each do |r|
+  hash = Digest::MD5.hexdigest("rfs #{r['source']} #{r['version']} #{r['id']}")
+  helpitems << {
+    'type' => 'rfs',
+    'hash' => hash,
+    'source' => r['source'],
+    'packages' => srcs[r['source']],
+    'version' => r['version'],
+    'title' => r['title'],
+    'id' => r['id']
+  }
+end
+
 
 fd = File::new(OFILE+'.1', 'w')
 JSON::dump(helpitems, fd)

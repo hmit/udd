@@ -135,7 +135,7 @@ $gSpamMaxThreads = $gMaxThreads = 40;
 
 $gPackageVersionRe = q([A-Za-z0-9:+\.~-]+);
 
-@gDefaultArchitectures = qw(i386 powerpc mips mipsel sparc amd64 alpha m68k arm armel s390 ia64 kfreebsd-i386 kfreebsd-amd64 hppa);
+@gDefaultArchitectures = qw(amd64 armel armhf hurd-i386 i386 kfreebsd-amd64 kfreebsd-i386 mips mipsel powerpc s390x sparc);
 
 @gDistributions = qw(oldstable stable testing unstable experimental);
 

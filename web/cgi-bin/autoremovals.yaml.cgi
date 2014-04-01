@@ -26,12 +26,20 @@ for row in rows:
   entry = {}
   entry['source'] = row['source']
   entry['version'] = row['version']
-  entry['bugs'] = row['bugs'].split(",")
+  if row['bugs'] == "":
+    entry['bugs'] = []
+    entry['dependencies_only'] = True
+  else:
+    entry['bugs'] = row['bugs'].split(",")
+    entry['dependencies_only'] = False
+  if row['rdeps'] != "":
+    entry['rdeps'] = row['rdeps'].split(",")
+  if row['buggy_deps'] != "":
+    entry['buggy_dependencies'] = row['buggy_deps'].split(",")
+  if row['bugs_deps'] != "":
+    entry['bugs_dependencies'] = row['bugs_deps'].split(",")
   entry['last_checked'] = datetime.utcfromtimestamp(row['last_checked'])
-  first_seen = datetime.utcfromtimestamp(row['first_seen'])
-  # in the initial stage, the autoremovals happen after 15 days instead of 10
-  removal_date = first_seen + timedelta(15)
-  entry['removal_date'] = removal_date
+  entry['removal_date'] = datetime.utcfromtimestamp(row['removal_time'])
   data[row['source']] = entry
 
 print yaml.dump(data, default_flow_style=False)

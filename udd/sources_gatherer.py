@@ -207,4 +207,4 @@ class sources_gatherer(gatherer):
 
   def print_warnings(self):
     for key in self.warned_about:
-      print "[Sources] Unknown key %s appeared %d times" % (key, self.warned_about[key])
+      aux.print_debug("[Sources] Unknown key %s appeared %d times" % (key, self.warned_about[key]))

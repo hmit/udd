@@ -6,6 +6,7 @@
 
 UAR=/srv/udd.debian.org/udd/update-and-run.sh
 
+$UAR bibref
 $UAR ftpnew
 $UAR blends-prospective
 # $UAR blends-metadata

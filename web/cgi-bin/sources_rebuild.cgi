@@ -11,7 +11,7 @@ $archs = {}
 ENV['http_proxy=http://proxy:3128/']
 pas = `wget -q -O - "http://anonscm.debian.org/gitweb/?p=mirror/packages-arch-specific.git;a=blob_plain;f=Packages-arch-specific;hb=HEAD"`
 if $? != 0
-  puts "Proxy failed"
+  puts "unable to fetch Packages-arch-specific from anonscm (maybe proxy failed)"
   exit 1
 end
 arr = pas.split(/\n/).grep(/^%?[a-z0-9]/).map { |l| l.gsub(/\s*#.*$/,'') }

@@ -1,0 +1,247 @@
+<html>
+<head>
+<script type="text/javascript" src="/js/jquery.min.js"></script>
+<script type="text/javascript" src="/js/jquery.tablesorter.min.js"></script>
+<script type="text/javascript" src="/js/columns.js"></script>
+<link href="/css/debian.css" rel="stylesheet" type="text/css">
+<link href="/css/udd.css" rel="stylesheet" type="text/css">
+<title>Debian Bugs Search</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+</head>
+<body>
+
+<div id="header">
+  <div id="wikisection">
+    <p class="section"><a href="/" title="Ultimate Debian Database">UDD</a></p>
+  </div>
+  <div id="upperheader">
+    <div id="logo">
+        <a href="http://www.debian.org" title="Debian Home"><img src="/img/openlogo-50.png" alt="Debian" width="50" height="61"></a>
+    </div>
+  </div> <!-- end upperheader -->
+  <div id="navbar">
+    <p class="hidecss"><a href="#content">Skip Quicknav</a></p>
+    <ul>
+        <li><a href="/">Ultimate Database</a></li>
+        <li><a href="/bugs/">Bugs search</a></li>
+        <li><a href="/dmd/">Maintainer dashboard</a></li>
+    </ul>
+  </div> <!-- end navbar -->
+  <p id="breadcrumbs">&nbsp;Bugs search</p>
+</div> <!-- end header -->
+
+<div id="content">
+
+<div id='quicknav'>
+    <b>Navigation</b>:
+    <a href='#suites'>Suites</a> /
+    <a href='#filters'>Filters</a> /
+    <a href='#types'>Types</a> /
+    <a href='#fields'>Fields</a> /
+    <a href='#sort'>Sort</a> /
+    <a href='#format'>Format</a> /
+    <a href="javascript:f=document.getElementById('searchform');removeBlankFields(f);f.submit();">Search</a>
+    <% if bugs %>/ <a href='#results'>Results</a><% end %>
+</div>
+
+<h1>Bugs search</h1>
+
+<h3 id='queries'>Useful queries</h3>
+<div>
+    <ul>
+    <li>Bug squasher view: <a href="bugs/?release=jessie_and_sid&patch=ign&merged=ign&done=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&ctags=1&ctags=1&cdeferred=1#results">Affecting sid and jessie, not marked as done, not tagged patch; those need to be fixed, probably by a patch+upload</a></li>
+    <li>Sponsor view: <a href="/bugs/?release=jessie_and_sid&patch=only&merged=ign&done=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&chints=1&ctags=1&cdeferred=1#results">Affecting sid and jessie, not marked as done, tagged 'patch'; those need a DD to sponsor an upload</a></li>
+    <li>Cleaner view: <a href="/bugs/?release=jessie_and_sid&merged=ign&done=only&fnewerval=7&rc=1&sortby=id&sorto=asc&ctags=1&cdeferred=1&caffected=1#results">Affecting sid and jessie, but marked as done; why is it still affecting unstable? fixed only in experimental? missing binaries? wrong changelog?</a></li>
+    <li>Release Team view: <a href="/bugs/?release=jessie_not_sid&merged=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&chints=1&ctags=1&cdeferred=1&crttags=1#results">Affecting jessie, but not sid. Help the fix migrate to jessie!</a></li>
+    </ul>
+</div>
+
+<form id='searchform' action="/bugs/#results" method="get" onsubmit="removeBlankFields(this);">
+
+<h3 id='suites'>Suites<sup>[<a href="#ftn.distro">1</a>]</sup></h3>
+<div class='indent'>
+  <ul class="columns2">
+  <% RELEASE_RESTRICT.each do |r| %>
+  <% checked = (release == r[0] ? 'CHECKED=\'1\'':'') %>
+  <li><label><input type='radio' name='release' value='<%= r[0] %>' <%= checked %>/> <%= r[1] %></label></li>
+   <% end %>
+   </ul>
+</div>
+
+<h3 id='filters'>Filters</h3>
+<div class='indent'>
+    <i>off / include / exclude</i>
+    <ul class="columns3">
+      <% FILTERS.each do |r| %>
+      <li><input type='radio' name='<%= r[0] %>' value='' <%= filters[r[0]]==''?'CHECKED=\'1\'':'' %>/>
+      <input type='radio' name='<%= r[0] %>' value='only' <%= filters[r[0]]=='only'?'CHECKED=\'1\'':'' %>/>
+      <input type='radio' name='<%= r[0] %>' value='ign' <%= filters[r[0]]=='ign'?'CHECKED=\'1\'':'' %>/>
+      <%= r[1] %></li>
+      <% end %>
+
+      <li><input type='radio' name='fnewer' value='' <%= fnewer==''?'CHECKED=\'1\'':'' %>/>
+      <input type='radio' name='fnewer' value='only' <%= fnewer=='only'?'CHECKED=\'1\'':'' %>/>
+      <input type='radio' name='fnewer' value='ign' <%= fnewer=='ign'?'CHECKED=\'1\'':'' %>/>
+      newer than <input type='text' size='3' name='fnewerval' value='<%= fnewerval %>'/> days</li>
+
+      <li><input type='radio' name='flastmod' value='' <%= flastmod==''?'CHECKED=\'1\'':'' %>/>
+      <input type='radio' name='flastmod' value='only' <%= flastmod=='only'?'CHECKED=\'1\'':'' %>/>
+      <input type='radio' name='flastmod' value='ign' <%= flastmod=='ign'?'CHECKED=\'1\'':'' %>/>
+      modified in the last <input type='text' size='3' name='flastmodval' value='<%= flastmodval %>'/> days</li>
+    </ul>
+</div>
+
+<h3 id="types">Bug types</h3>
+<div class="indent">
+    <ul class="columns2">
+      <% TYPES.each do |t| %>
+      <% checked = types[t[0]]?" checked='1'":"" %>
+      <li><input type='checkbox' id='<%= t[0] %>' name='<%= t[0] %>' value='1'<%= checked %>/><label for='<%= t[0] %>'><%= t[1] %></label></li>
+      <% end %>  
+    </ul>
+</div>
+
+<h3 id='fields'>Additional fields</h3>
+<div class="indent">
+    <ul class="columns2">
+    <% COLUMNS.each do |r| %>
+    <% checked = cols[r[0]] ? 'checked':'' %>
+    <li><label><input type='checkbox' name='<%= r[0] %>' value='1' <%= checked %>/><%= r[1] %></label></li>>
+    <% end %>
+    </ul>
+</div>
+
+<h3 id='sort'>Sort</h3>
+<div class="indent">
+    <ul class='columns3'>
+    <% SORTS.each do |r| %>
+    <% checked = (sortby == r[0] ? 'CHECKED=\'1\'':'') %>
+    <li><label><input type='radio' name='sortby' value='<%= r[0] %>' <%= checked %>/><%= r[1] %></label></li>
+    <% end %>
+
+    <% [['asc', 'ascending'],[ 'desc', 'decreasing']].each do |r| %>
+    <% checked = (sorto == r[0] ? 'CHECKED=\'1\'':'') %>
+    <li><label><input type='radio' name='sorto' value='<%= r[0] %>' <%= checked %>/><%= r[1] %></label></li>
+    <% end %>
+    </ul>
+</div>
+
+<h3 id='format'>Format</h3>
+<div class="indent">
+    <ul class="columns3">
+    <li><label><input type='radio' name='format' value='html' checked='1'/>HTML</label></li>
+    <li><label><input type='radio' name='format' value='json'/>JSON</label></li>
+    <li><label><input type='radio' name='format' value='yaml'/>YAML</label></li>
+    </ul>
+</div>
+
+<p><input type='submit' value='Search' class='btn-lg'/></p>
+</form>
+
+<% if error %>
+    <p><b>Error :</b> <%= error %></p>
+<% end %>
+
+<% if bugs %>
+    <h3 id='results'><%= bugs.length %> bugs found</h3>
+    <table class="table table-bordered tablesorter">
+    <thead>
+        <tr>
+        <th>bug#</th>
+        <% if cols['ctags'] %><th>tags</th><% end %>
+        <% if cols['caffected'] %><th>releases</th><% end %>
+        <th>package</th>
+        <th>title</th>
+        <% if cols['cpopcon'] %><th>popcon</th><% end %>
+        <% if cols['cseverity'] %><th>severity</th><% end %>
+        <% if cols['chints'] %><th>hints</th><% end %>
+        <% if cols['cclaimed'] %><th>claimed by</th><% end %>
+        <% if cols['cdeferred'] %><th>deferred</th><% end %>
+        <% if cols['crttags'] %><th>RT</th><% end %>
+        <th>modified</th></tr>
+    </thead>
+    <tbody>
+
+    <% bugs.each do |r| %>
+        <tr>
+        <td><a href="http://bugs.debian.org/<%= r['id'] %>">#<%= r['id'] %></a></td>
+        <% if cols['ctags'] %><td><%= r['ctags'] %> &nbsp;</td><% end %>
+        <% if cols['caffected'] %><td><%= r['caffected'] %> &nbsp;</td><% end %>
+        <td>        
+        <% srcs = r['source'].split(/,\s*/) %>
+        <% bins = r['package'].split(/,\s*/) %>
+        <% if bins.length == 1 %>
+          <!-- link to source package if there is only 1 package -->
+          <a href="http://packages.qa.debian.org/<%= srcs[0] %>"><%= bins[0] %></a>
+        <% else %>
+          <!-- if there is more than 1, we don't know which package is from which -->
+          <!-- source, so link the the package and let the PTS sort it out -->
+          <!-- strip 'src:' from the package, as the PTS doesn't do this for us -->
+          <%= bins.map { |b| "<a href=\"http://packages.qa.debian.org/#{b.sub('src:','')}\">#{b}</a>" }.join(', ') %>
+        <% end %>
+        </td>
+        <td><%= CGI::escapeHTML(r['title']) %></td>
+        <% if cols['cpopcon'] %><td><%= r['popcon'] %></td><% end %>
+        <% if cols['cseverity'] %><td><%= r['severity'] %></td><% end %>
+        <% if cols['chints'] %><td><%= r['chints'] %> &nbsp;</td><% end %>
+        <% if cols['cclaimed'] %><td><%= r['cclaimed'] %> &nbsp;</td><% end %>
+        <% if cols['cdeferred'] %><td><%= r['cdeffered'] %> &nbsp;</td><% end %>
+        <% if cols['crttags'] %><td><%= r['crttags'] %> &nbsp;</td><% end %>
+        <% d = r['last_modified'] %>
+        <% d = Date::new(d.year, d.month, d.day) %>
+        <td><%= d %></td></tr>
+    <% end %>
+    
+    </tbody>
+    </table>
+
+<p><b>Generated in <%= timegen %> seconds. Last data update: <%= r2[0][0] %>
+<%= "(%.1f hours ago)" % ((Time::now - Time::parse(r2[0][0].to_s)) / 3600) %>
+</b></p>
+<pre><%= q %></pre>
+
+<% end %>
+
+</div>
+
+<div id="footer">
+    <div id="fineprint">
+        <p><sup>[<a name="ftn.distro">1</a>] </sup>This already uses release tags ('sid', 'jessie') and xxx-ignore ('jessie-ignore') to include/exclude bugs</p>
+        <p>
+        Ultimate Debian Database:
+        <a href="https://wiki.debian.org/UltimateDebianDatabase/"> hacking / bug reporting / contact information</a><br />
+        Debian is a registered trademark of <a href="http://www.spi-inc.org/">Software in the Public Interest</a>
+        </p>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+$(document).ready(function() {
+    $("table.tablesorter").tablesorter();
+});
+
+function removeBlankFields(form) {
+    var inputs = form.getElementsByTagName("input");
+    var removeList = new Array();
+    for (var i=0; i<inputs.length; i++) {
+	    if (inputs[i].value == "") {
+		    removeList.push(inputs[i]);
+	    }
+    }
+    for (x in removeList) {
+	    removeList[x].parentNode.removeChild(removeList[x]);
+    }
+}
+
+<% if bugs %>
+    location.hash = "#results";
+<% end %>
+
+$(window).scroll(function(){
+    $("#quicknav").css("top",Math.max(0,85-$(this).scrollTop()));
+});
+$("#quicknav").css("top",Math.max(0,85-$(this).scrollTop()));
+</script>
+</body>
+</html>

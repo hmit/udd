@@ -320,3 +320,11 @@ ALTER TABLE key_packages ADD COLUMN reason text;
 GRANT SELECT ON bugs_stamps TO PUBLIC;
 GRANT SELECT ON archived_bugs_stamps TO PUBLIC;
 
+-- 2013-11-28 autoremovals with rdeps
+
+ALTER TABLE testing_autoremovals ADD COLUMN removal_time bigint;
+ALTER TABLE testing_autoremovals ADD COLUMN rdeps text;
+ALTER TABLE testing_autoremovals ADD COLUMN buggy_deps text;
+ALTER TABLE testing_autoremovals ADD COLUMN bugs_deps text;
+ALTER TABLE testing_autoremovals ADD COLUMN rdeps_popcon bigint;
+

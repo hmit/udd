@@ -120,12 +120,16 @@ EOF
 
   def summarize_unknown
     if not @sources_unknown.empty?
-      puts "Unknown fields in Sources:"
-      pp @sources_unknown
+      if DEBUG
+        puts "Unknown fields in Sources:"
+        pp @sources_unknown
+      end
     end
     if not @packages_unknown.empty?
-      puts "Unknown fields in Packages:"
-      pp @packages_unknown
+      if DEBUG
+        puts "Unknown fields in Packages:"
+        pp @packages_unknown
+      end
     end
   end
 
@@ -177,7 +181,7 @@ EOF
         u['component'] = d['component']
         u['release'] = d['release']
         if d['uploaders'] =~ />,/
-          d['uploaders'].split(/>,\s*/).each do |upl|
+          d['uploaders'].split(/>\s*,\s*/).each do |upl|
             upl =~ /^\s*(.*) <([^>]*)(>)?$/ or raise
             u['email'] = $2
             u['name'] = $1.gsub('"', '')

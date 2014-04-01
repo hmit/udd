@@ -1,0 +1,274 @@
+<html>
+<head>
+<title>Debian Maintainer Dashboard</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<link href="/css/debian.css" rel="stylesheet" type="text/css">
+<link href="/css/udd.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="/js/jquery.min.js"></script>
+<script type="text/javascript" src="/js/jquery.tablesorter.min.js"></script>
+<script type="text/javascript" src="/js/jquery-ui.custom.min.js"></script>
+<script type="text/javascript" src="/js/jquery.cookie.min.js"></script>
+<script type="text/javascript" src="/js/dmd.js"></script>
+</head>
+<body>
+<div id="header">
+  <div id="wikisection">
+    <p class="section"><a href="/" title="Ultimate Debian Database">UDD</a></p>
+  </div>
+  <div id="upperheader">
+    <div id="logo">
+        <a href="http://www.debian.org" title="Debian Home"><img src="/img/openlogo-50.png" alt="Debian" width="50" height="61"></a>
+    </div>
+  </div> <!-- end upperheader -->
+  <div id="navbar">
+    <p class="hidecss"><a href="#content">Skip Quicknav</a></p>
+    <ul>
+       <li><a href="/">Ultimate Database</a></li>
+       <li><a href="/bugs/">Bugs search</a></li>
+       <li><a href="/dmd/">Maintainer dashboard</a></li>
+    </ul>
+  </div> <!-- end navbar -->
+  <p id="breadcrumbs">&nbsp;Maintainer Dashboard</p> 
+</div> <!-- end header -->
+
+<div id="content">
+    <h1 id='dashboard'>Maintainer dashboard</h1>
+    <% if uddd %>
+      <div id='quicknav'>
+       <b>Navigation</b>:
+       <a href="#todo">Todo list</a> /
+       <a href="#versions">Versions</a> /
+       <a href="#bugs">Bugs</a> /
+       <a href="#ubuntu">Ubuntu</a>
+     </div>
+   <% end %>
+    <p> The maintainer dashboard exposes information about teams or maintainers' packages. It intends to help answering the question “I have a few hours for Debian, what should I do now?”. Fill in one or more email addresses in the form below to check it out; for example here is <a href="/dmd/?email1=debian-accessibility%40lists.debian.org#todo">the accessibility team todo list</a>.</p>
+    
+<table>
+<tbody>
+<div>
+<form id="searchForm" action="/dmd/#todo" method="get">
+  <% ['1','2','3'].each do |i| %>
+    <tr>
+    <th>
+        <label for="email<%= i %>">Maintainer / team</label>
+    </th>
+    <td>
+    <div id="autocompletecontainer<%= i %>" class="autocompletecontainer"></div>
+    <input id="email<%= i %>" type='text' size='32' name='email<%= i %>' value='<%= defaults['email'][i]%>' placeholder="email address">
+    &nbsp;&nbsp;ignore:
+    <input id="nouploader<%= i %>" name="nouploader<%= i %>" type="checkbox" <%= defaults['nouploader'][i] != '' ? 'checked':'' %>/>
+    <label for="nouploader<%= i %>">co-maintained</label>
+    <input id="nosponsor<%= i %>" name="nosponsor<%= i %>" type="checkbox" <%= defaults['nosponsor'][i] != '' ? 'checked' : '' %>/>
+    <label for="nosponsor<%= i %>">sponsored / NMUed</label>
+    </td>
+    </tr>
+  <% end %>
+    <tr>
+        <th>
+            <label for="packages">Additional packages</label>
+        </th>
+        <td>
+            <input id="packages" name="packages" size="32" placeholder="space-separated list" value="<%= default_packages %>"/>
+            &nbsp;<input id="bin2src" name="bin2src" type="checkbox" <%= default_bin2src != '' ? 'checked' : '' %>/>
+            <label for="bin2src">Packages are binary, convert to source packages</label>
+        </td>
+    </tr>
+    <tr>
+    <th>
+        <label for="ignpackages">Packages to ignore</label>
+    </th>
+    <td>
+        <input id="ignpackages" name="ignpackages" size="32" placeholder="space-separated list" value="<%= default_ignpackages %>"/>
+        &nbsp;<input id="ignbin2src" name="ignbin2src" type="checkbox" <%= default_ignbin2src != '' ? 'checked' : '' %>/>
+        <label for="ignbin2src">Packages are binary, convert to source packages</label>
+    </td>
+    </tr>
+    <tr>
+        <th>
+        </th>
+        <td>
+            <input type='submit' value='Search' onsubmit="removeBlankFields(this);" class='btn-lg'/>
+        </td>
+    </tr>
+</form>
+</tbody>
+</table>
+
+
+<% if uddd %>
+<h2 id='todo'>Todo list</h2>
+<table class="tablesorter table table-bordered">
+<thead>
+<tr>
+    <th>type</th>
+    <th>source</th>
+    <th>description</th>
+    <th>hide</th>
+</tr>
+</thead>
+<tbody class='todos'>
+    <% uddd.dmd_todos.each do |t| %>
+    <tr id="<%= t[:shortname] %>">
+        <td><%= t[:type] %></td>
+        <td>
+            <span title="<%= t[:reason] %>">
+            <a href="http://packages.qa.debian.org/<%= t[:source] %>"><%= t[:source] %></a>
+            </span>
+        </td>
+        <% if t[:link] %>
+            <td><%= t[:description] %>: <a href="<%= t[:link] %>"><%= t[:details] %></a></td>
+        <% else %>
+            <td><%= t[:description] %>: <%= t[:details] %></td>
+        <% end %>
+        <td><a href="#" onclick="hide_todo('<%= t[:shortname] %>'); return false;">hide</a></td>
+    </tr>
+    <% end %>
+</tbody></table>
+<p><a href="<%= feed %>">Get RSS feed</a> -
+<small><a href="#todo" onclick="reset_todos()">Show all todos</a></small></p> 
+
+
+<h2 id='versions'>Versions</h2>
+<table class="tablesorter table table-bordered">
+<thead>
+<tr>
+    <th>source</th>
+    <th>squeeze</th>
+    <th>wheezy</th>
+    <th>jessie</th>
+    <th>sid</th>
+    <th>experimental</th>
+    <th>vcs</th>
+    <th>upstream</th>
+</tr>
+</thead>
+<tbody>
+<% uddd.sources.sort.each do |src,h| %>
+    <% next if not $uddd.versions.include?(src) %>
+    <% next if not $uddd.versions[src].include?('debian') %>
+    <tr><td><a href="http://packages.qa.debian.org/<%= src %>" title="<%= h[:reason] %>"><%= src %></a></td>
+
+    <% h[:versions].each do |v| %>
+      <% if v[:count] == 1 %>
+       <td>
+      <% else %>
+        <td colspan="<%= v[:count] %>" class="center">
+      <% end %>
+      <%= v[:value] %> &nbsp;
+      </td>
+    <% end %>
+
+    <td>
+    <% up = $uddd.versions[src]['upstream'] %>
+    <% if up %>
+      <% if up[:status] == :error %>
+        <span class="prio_high" title="uscan returned an error">error</a>
+      <% elsif up[:status] == :up_to_date %>
+         <%= up[:version] %>
+      <% elsif up[:status] == :newer_in_debian %>
+          <span class="prio_high" title="Debian version newer than upstream version. debian/watch bug?"><%= up[:version] %></a>
+      <% elsif up[:status] == :out_of_date %>
+          <span class="prio_high" title="Newer upstream version available"><%= up[:version] %></a>
+      <% elsif up[:status] == :out_of_date_in_unstable %>
+          <span class="prio_med" title="Newer upstream version available (already packaged in experimental)"><%= up[:version] %></a>
+      <% else %>
+          "Unhandled case!"
+      <% end %>
+  <% end %>
+      &nbsp;
+    </td>
+    </tr>
+<% end %>
+</tbody>
+</table>
+
+
+<h2 id='bugs'>Bugs</h2>
+<table class="buglist tablesorter table table-bordered">
+<thead>
+<tr>
+    <th>source</th>
+    <th>all</th>
+    <th>RC</th>
+    <th>with patch</th>
+    <th>pending</th>
+</tr>
+</thead>
+<tbody>
+  <% bc = $uddd.bugs_count %>
+  <% bc.keys.sort.each do |src| %>
+    <% b = bc[src] %>
+    <% next if b[:all] == 0 %>
+    <tr><td><a href="http://packages.qa.debian.org/<%= src %>" title=""><%= src %></a></td>
+    <td class="center"><a href="http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=<%= src %>"><%= b[:all] > 0 ? b[:all] : '' %></a></td>
+    <td class="center"><a href="http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=<%= src %>&sev-inc=critical&sev-inc=grave&sev-inc=serious"><%= b[:rc] > 0 ? b[:rc] : '' %></a></td>
+    <td class="center"><a href="http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=<%= src %>&include=tags:patch"><%= b[:patch] > 0 ? b[:patch] : '' %></a></td>
+    <td class="center"><a href="http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=<%= src %>&pend-inc=pending-fixed&pend-inc=fixed"><%= b[:pending] > 0 ? b[:pending] : '' %></a></td></tr>
+  <% end %>
+</tbody>
+</table>
+
+
+<h2 id='ubuntu'>Ubuntu</h2>
+<table class="buglist tablesorter table table-bordered">
+<thead>
+<tr>
+    <th>source</th>
+    <th>bugs</th>
+    <th>patches</th>
+    <th><%= USTB %> (stable)</th>
+    <th><%= UDEV %> (devel)</th>
+    <th>sid</th>
+    <th>links</th>
+</tr>
+</thead>
+<tbody>
+
+<% ubuntu.each do |p| %>
+    <tr><td><%= p[:src] %>&nbsp;</td>
+    <% if p[:bugs] > 0 %>
+        <td class="center"><a href="<%= p[:launchpad] %>"><%= p[:bugs] %></a></td>
+    <% else %>
+      <td>&nbsp;</td>
+    <% end %>
+    <% if p[:patches] > 0 %>
+        <td class="center"><a href="<%= p[:launchpad] %>/+patches"><%= p[:patches] %></a></td>
+    <% else %>
+      <td>&nbsp;</td>
+    <% end %>
+
+    <% p[:values].each do |v| %>
+      <% if v[:count] == 1 %>
+        <td>
+      <% else %>
+          <td colspan="<%= v[:count] %>" class="center">
+      <% end %>
+          <%= v[:value] %>&nbsp;
+      </td>
+    <% end %>
+    <td><a href="<%= p[:pts] %>">PTS</a>&nbsp;<a href="<%= p[:launchpad] %>">LP</a></td>
+    </tr>
+<% end %>
+
+</tbody>
+</table>
+
+<p>Packages with the same version in <i><%= UDEV %></i> and <i>Debian sid</i>, no bugs and no patches are not listed.</p>
+
+<small>Generated in <%= sprintf "%.2f", Time::now - tstart %> seconds.</b></small>
+
+<% end %><!-- end if uddd -->
+<br />
+<br />
+</div><!-- end content -->
+<%= render 'templates/footer.erb' %>
+<script type="text/javascript">
+$(window).scroll(function(){
+     $("#quicknav").css("top",Math.max(0,85-$(this).scrollTop()));
+});
+$("#quicknav").css("top",Math.max(0,85-$(this).scrollTop()));
+</script>
+
+</body>
+</html>
