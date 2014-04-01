@@ -364,6 +364,9 @@ blends-all: &blends-conf
 blend-med:
   <<: *blends-conf
 
+blend-3dprinter:
+  <<: *blends-conf
+
 blend-accessibility:
   <<: *blends-conf
 
