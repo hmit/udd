@@ -226,9 +226,12 @@ if cgi.params != {}
     $udev = UDEV
   end
 
-end # cgi.params
+  data = $uddd.dmd_todos
+end
 
-page = Page.new({ :title => 'Debian Maintainer Dashboard',
+format = cgi.params['format'][0]
+page = Page.new(data, format, "templates/dmd.erb",
+                { :title => 'Debian Maintainer Dashboard',
                   :default_packages => default_packages,
                   :default_bin2src => default_bin2src,
                   :default_ignpackages => default_ignpackages,
@@ -240,6 +243,4 @@ page = Page.new({ :title => 'Debian Maintainer Dashboard',
                   :UDEV => $udev,
                   :feed => '/dmd/feed/?' + URI.encode_www_form(cgi.params),
                   :tstart => tstart })
-
-puts "Content-type: text/html\n\n"
-puts page.render("templates/dmd.erb")
+page.render()

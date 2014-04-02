@@ -6,7 +6,6 @@ require 'pp'
 require 'cgi'
 require 'time'
 require 'yaml'
-require 'oj'
 require File.expand_path(File.dirname(__FILE__))+'/inc/page'
 
 #STDERR.reopen(STDOUT)
@@ -220,7 +219,6 @@ TYPES.each do |t|
     end
   end
 end
-format = cgi.params['format'][0]
 
 if cgi.params != {}
     # Generate and execute query
@@ -454,16 +452,9 @@ if cgi.params != {}
     timegen = sprintf "%.3f", Time::now - tstart
 end
 
-
-if format == 'json'
-    puts "Content-type: application/json\n\n"
-    puts Oj.dump(bugs)
-elsif format == 'yaml'
-    puts "Content-type: application/x-yaml\n\n"
-    # ruby encoding is too hard, use oj to do the work
-    puts Oj.load(Oj.dump(bugs)).to_yaml
-else
-    page = Page.new({ :release => release,
+format = cgi.params['format'][0]
+page = Page.new(bugs, format, "templates/bugs.erb",
+                { :release => release,
                   :RELEASE_RESTRICT => RELEASE_RESTRICT,
                   :FILTERS => FILTERS,
                   :filters => filters,
@@ -481,6 +472,4 @@ else
                   :q => q,
                   :error => error,
                   :timegen => timegen })
-    puts "Content-type: text/html\n\n"
-    puts page.render("templates/bugs.erb")
-end
+page.render()
