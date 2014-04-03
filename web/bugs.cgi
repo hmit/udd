@@ -61,6 +61,7 @@ FILTERS = [
  ['rtjessie-no-auto-remove', 'RT tag for jessie: no-auto-remove', "id in (select id from bugs_usertags where email='release.debian.org@packages.debian.org' and tag='jessie-no-auto-remove')"],
  ['unblock-hint', 'RT unblock hint', "bugs.source in (select hints.source from hints where type in ('approve','unblock'))"],
  ['keypackages', 'key packages', 'bugs.source in (select source from key_packages)'],
+ ['pseudopackages', 'pseudo packages', 'package in (select package from pseudo_packages)'],
  ['autoremovals', 'packages marked for autoremoval', 'bugs.source in (select source from testing_autoremovals)'],
  ['closedinftpnew', 'closed in packages in new', 'bugs.id in (select id from potential_bug_closures where origin=\'ftpnew\')'],
 ]
