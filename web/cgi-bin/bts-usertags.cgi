@@ -154,6 +154,7 @@ def by_user(user):
     r = query("""SELECT tag, COUNT(*) AS count
                  FROM bugs_usertags INNER JOIN bugs USING (id)
                  WHERE email = %s GROUP BY tag
+                 ORDER BY tag
               """, ('tag', 'count'), user)
     head('User %s' % strip_tags(user))
     thead('Tag', 'Bugs')
@@ -172,6 +173,7 @@ def tagged_bugs(user, tag):
     r = query("""SELECT id, package, source, title, done != '' AS done
                    FROM bugs INNER JOIN bugs_usertags USING (id)
                    WHERE bugs_usertags.email = %s AND bugs_usertags.tag = %s
+                   ORDER BY id
               """, ('id', 'package', 'source', 'title', 'done'), user, tag)
     head('Tagged %(tag)s by <a href="?%(params)s">%(user)s</a>'
          % {
@@ -202,6 +204,7 @@ def search_result(user, tag):
     r = query("""SELECT email, tag, COUNT(*) AS count
                  FROM bugs_usertags INNER JOIN bugs USING (id)
                  WHERE email LIKE %s AND tag LIKE %s GROUP BY email, tag
+                 ORDER BY email, tag
               """, ('email', 'tag', 'count'), user, tag)
     head('Search Result')
     thead('User', 'Tag', 'Bugs')
@@ -221,8 +224,11 @@ def search_result(user, tag):
 
 
 def by_bug(bug):
-    r = query("SELECT email, tag FROM bugs_usertags WHERE id = %s",
-              ('email', 'tag'), bug)
+    r = query("""SELECT email, tag
+                 FROM bugs_usertags
+                 WHERE id = %s
+                 ORDER BY email, tag
+              """, ('email', 'tag'), bug)
     head('Bug <a href="http://bugs.debian.org/%(bug)i">#%(bug)i</a>'
          % {'bug': bug})
     thead('User', 'Tag')
@@ -241,9 +247,10 @@ def by_bug(bug):
 
 def user_list():
     r = query("""SELECT email, COUNT(*) AS count
-              FROM bugs_usertags INNER JOIN bugs USING (id)
-              GROUP BY email""",
-              ('email', 'count'))
+                 FROM bugs_usertags INNER JOIN bugs USING (id)
+                 GROUP BY email
+                 ORDER BY email
+              """, ('email', 'count'))
     head('User List')
     thead('User', 'Bugs')
     for result in r:
