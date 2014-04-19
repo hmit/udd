@@ -632,7 +632,7 @@ sub main {
 		} elsif ($source eq "bugs-modified") {
 			run_modified($config, $source, $dbh);
 		} elsif ($source eq "bugs") {
-			run_modified($config, $source, $dbh);
+			#run_modified($config, $source, $dbh);
 			run($config, $source, $dbh);
 		} else {
 			run($config, $source, $dbh);

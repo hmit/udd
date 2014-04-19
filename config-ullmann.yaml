@@ -188,7 +188,7 @@ hints:
   update-command: /srv/udd.debian.org/udd/scripts/update-hints
 
 bugs:
-  limit: 5000
+  limit: 10000
   type: bugs
   archived: false
   table: bugs
