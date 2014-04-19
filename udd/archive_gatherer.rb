@@ -134,7 +134,12 @@ EOF
   end
 
   def process_sources(f, release, component)
-    fd = Zlib::GzipReader::open(f)
+    begin
+      fd = Zlib::GzipReader::open(f)
+    rescue Zlib::GzipFile::Error => gziperror
+      puts "error opening gzip file #{f}: #{gziperror}"
+      return
+    end
     s = fd.read
     fd.close
 
@@ -205,7 +210,12 @@ EOF
   end
 
   def process_packages(f, release, component, architecture)
-    fd = Zlib::GzipReader::open(f)
+    begin
+      fd = Zlib::GzipReader::open(f)
+    rescue Zlib::GzipFile::Error => gziperror
+      puts "error opening gzip file #{f}: #{gziperror}"
+      return
+    end
     s = fd.read
     fd.close
 
