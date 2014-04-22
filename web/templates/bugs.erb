@@ -214,33 +214,17 @@
 
 <script type="text/javascript" src="/js/jquery.min.js"></script>
 <script type="text/javascript" src="/js/jquery.tablesorter.min.js"></script>
+<script type="text/javascript" src="/js/removeblankfields.js"></script>
 <script type="text/javascript" src="/js/columns.js"></script>
+<script type="text/javascript" src="/js/quicknav.js"></script>
 <script type="text/javascript">
 $(document).ready(function() {
     $("table.tablesorter").tablesorter();
 });
 
-function removeBlankFields(form) {
-    var inputs = form.getElementsByTagName("input");
-    var removeList = new Array();
-    for (var i=0; i<inputs.length; i++) {
-	    if (inputs[i].value == "") {
-		    removeList.push(inputs[i]);
-	    }
-    }
-    for (x in removeList) {
-	    removeList[x].parentNode.removeChild(removeList[x]);
-    }
-}
-
 <% if bugs %>
     location.hash = "#results";
 <% end %>
-
-$(window).scroll(function(){
-    $("#quicknav").css("top",Math.max(0,85-$(this).scrollTop()));
-});
-$("#quicknav").css("top",Math.max(0,85-$(this).scrollTop()));
 </script>
 </body>
 </html>

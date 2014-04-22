@@ -20,7 +20,6 @@ function columns(src, nb) {
       cols[i].setAttribute('style', 'float:left; margin:0 32px 0 0; padding:0px; list-style: none;');
       container.appendChild(cols[i]);
       n--;
-      console.log(items.length);
   }
   container.style.overflow = "hidden";
   origList.parentNode.replaceChild(container, origList);
