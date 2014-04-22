@@ -49,14 +49,14 @@
 <h3 id='queries'>Useful queries</h3>
 <div>
     <ul>
-    <li>Bug squasher view: <a href="bugs/?release=jessie_and_sid&patch=ign&merged=ign&done=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&ctags=1&ctags=1&cdeferred=1#results">Affecting sid and jessie, not marked as done, not tagged patch; those need to be fixed, probably by a patch+upload</a></li>
-    <li>Sponsor view: <a href="/bugs/?release=jessie_and_sid&patch=only&merged=ign&done=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&chints=1&ctags=1&cdeferred=1#results">Affecting sid and jessie, not marked as done, tagged 'patch'; those need a DD to sponsor an upload</a></li>
-    <li>Cleaner view: <a href="/bugs/?release=jessie_and_sid&merged=ign&done=only&fnewerval=7&rc=1&sortby=id&sorto=asc&ctags=1&cdeferred=1&caffected=1#results">Affecting sid and jessie, but marked as done; why is it still affecting unstable? fixed only in experimental? missing binaries? wrong changelog?</a></li>
-    <li>Release Team view: <a href="/bugs/?release=jessie_not_sid&merged=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&chints=1&ctags=1&cdeferred=1&crttags=1#results">Affecting jessie, but not sid. Help the fix migrate to jessie!</a></li>
+    <li>Bug squasher view: <a href="bugs/?release=jessie_and_sid&patch=ign&merged=ign&done=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&ctags=1&ctags=1&cdeferred=1">Affecting sid and jessie, not marked as done, not tagged patch; those need to be fixed, probably by a patch+upload</a></li>
+    <li>Sponsor view: <a href="/bugs/?release=jessie_and_sid&patch=only&merged=ign&done=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&chints=1&ctags=1&cdeferred=1">Affecting sid and jessie, not marked as done, tagged 'patch'; those need a DD to sponsor an upload</a></li>
+    <li>Cleaner view: <a href="/bugs/?release=jessie_and_sid&merged=ign&done=only&fnewerval=7&rc=1&sortby=id&sorto=asc&ctags=1&cdeferred=1&caffected=1">Affecting sid and jessie, but marked as done; why is it still affecting unstable? fixed only in experimental? missing binaries? wrong changelog?</a></li>
+    <li>Release Team view: <a href="/bugs/?release=jessie_not_sid&merged=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&chints=1&ctags=1&cdeferred=1&crttags=1">Affecting jessie, but not sid. Help the fix migrate to jessie!</a></li>
     </ul>
 </div>
 
-<form id='searchform' action="/bugs/#results" method="get" onsubmit="removeBlankFields(this);">
+<form id='searchform' action="/bugs/" method="get" onsubmit="removeBlankFields(this);">
 
 <h3 id='suites'>Suites<sup>[<a href="#ftn.distro">1</a>]</sup></h3>
 <div class='indent'>
