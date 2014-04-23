@@ -6,7 +6,6 @@ require 'yaml'
 STDERR.reopen(STDOUT) # makes live debugging much easier
 
 require File.expand_path(File.dirname(__FILE__))+'/inc/dmd-data'
-require File.expand_path(File.dirname(__FILE__))+'/inc/dmd-feed'
 require File.expand_path(File.dirname(__FILE__))+'/inc/page'
 
 cgi = CGI::new
@@ -62,14 +61,10 @@ if cgi.params != {}
   $uddd.get_dmd_todos
   $uddd.get_ubuntu_bugs
 
-  if cgi.params['feed'][0] == 'todo' 
-    todos = []
-    $uddd.dmd_todos.each do |t|
-    todos.push({:link  => "%s" % t[:link],
+  feeditems = []
+  $uddd.dmd_todos.each do |t|
+  feeditems.push({:link  => "%s" % t[:link],
                 :title => "%s: %s: %s" % [t[:source], t[:description], t[:details]]})
-    end
-    TodoFeed.new(todos)
-    exit
   end
 
   def src_reason(pkg)
@@ -230,9 +225,8 @@ if cgi.params != {}
 end
 
 format = cgi.params['format'][0]
-page = Page.new(data, format, "templates/dmd.erb",
-                { :title => 'Debian Maintainer Dashboard',
-                  :default_packages => default_packages,
+page = Page.new(data, format, 'templates/dmd.erb',
+                { :default_packages => default_packages,
                   :default_bin2src => default_bin2src,
                   :default_ignpackages => default_ignpackages,
                   :default_ignbin2src => default_ignbin2src,
@@ -241,6 +235,6 @@ page = Page.new(data, format, "templates/dmd.erb",
                   :ubuntu => $ubuntu,
                   :USTB => $ustb,
                   :UDEV => $udev,
-                  :feed => '/dmd/feed/?' + URI.encode_www_form(cgi.params),
-                  :tstart => tstart })
+                  :tstart => tstart },
+               'Debian Maintainer Dashboard', feeditems)
 page.render()

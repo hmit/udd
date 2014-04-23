@@ -1,19 +1,21 @@
 #!/usr/bin/ruby
-
 require "erb"
 require 'oj'
 require 'yaml'
+require File.expand_path(File.dirname(__FILE__))+'/feed'
 
 class Page
-  attr_accessor :data, :format, :template
+  attr_accessor :data, :format, :template, :title, :feeditems
 
-  def initialize(data, format, template, hash)
+  def initialize(data, format, template, hash, title='UDD', feeditems=[])
     @data = data
     @format = format
     @template = template
     hash.each do |key, value|
       singleton_class.send(:define_method, key) { value }
     end 
+    @title = title
+    @feeditems = feeditems
   end
 
   def render
@@ -24,6 +26,8 @@ class Page
       puts "Content-type: application/x-yaml\n\n"
       # ruby encoding is too hard, use oj to do the work
       puts Oj.load(Oj.dump(@data)).to_yaml
+    elsif @format == 'rss'
+      TodoFeed.new(@feeditems, @title)
     else
       content = File.read(File.expand_path(@template))
       t = ERB.new(content)

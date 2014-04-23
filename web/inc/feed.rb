@@ -2,11 +2,11 @@
 require "rss"
 
 class TodoFeed
-    def initialize(items)
+    def initialize(items, title)
         rss = RSS::Maker.make("2.0") do |maker|
-          maker.channel.title = "Maintainer Todo List"
-          maker.channel.description = "Debian Maintainer Dashboard Todo List"
-          maker.channel.link = "http://udd.debian.org/dmd/"
+          maker.channel.title = title
+          maker.channel.description = '%s feed' % title
+          maker.channel.link = "http://udd.debian.org/"
           maker.channel.updated = Time.now.to_s
 
           items.each do |e|

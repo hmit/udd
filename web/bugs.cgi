@@ -451,10 +451,17 @@ if cgi.params != {}
     sth2.execute
     r2 = sth2.fetch_all
     timegen = sprintf "%.3f", Time::now - tstart
+
+  feeditems = []
+  bugs.each do |b|
+  feeditems.push({:link  => "http://bugs.debian.org/%s" % b['id'],
+                :title => "%s: %s" % [b['package'], b['title']]})
+  end
+
 end
 
 format = cgi.params['format'][0]
-page = Page.new(bugs, format, "templates/bugs.erb",
+page = Page.new(bugs, format, 'templates/bugs.erb',
                 { :release => release,
                   :RELEASE_RESTRICT => RELEASE_RESTRICT,
                   :FILTERS => FILTERS,
@@ -472,5 +479,6 @@ page = Page.new(bugs, format, "templates/bugs.erb",
                   :r2 => r2,
                   :q => q,
                   :error => error,
-                  :timegen => timegen })
+                  :timegen => timegen },
+                'Bugs search', feeditems)
 page.render()
