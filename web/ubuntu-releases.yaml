@@ -1,4 +1,4 @@
 --- 
-lts: precise
-stable: saucy
-devel: trusty
+lts: trusty
+stable: trusty
+devel: utopic
