@@ -35,4 +35,14 @@ class Page
       puts t.result(binding)
     end
   end
+
+  def gentags(tags)
+      return '' if tags.nil?
+      tags.sort!
+      texttags = tags.map do |tag|
+        error = "unknowntag: #{tag}" if TagsSingleLetter[tag].nil?
+        "<abbr title='#{tag}'>#{TagsSingleLetter[tag]}</abbr>".force_encoding("ASCII-8BIT")
+      end
+      return '[' + texttags.join('|') + ']'
+  end
 end

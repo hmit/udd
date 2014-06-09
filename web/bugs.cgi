@@ -111,7 +111,7 @@ COLUMNS = [
 ]
 
 # copied from /org/bugs.debian.org/etc/config
-$TagsSingleLetter = {
+TagsSingleLetter = {
   'patch' => '+',
   'wontfix' => '☹',
   'moreinfo' => 'M',
@@ -277,7 +277,7 @@ if cgi.params != {}
       exit(0)
     end
 
-    def genhints(source, hints, unblockreq, tags, type)
+    def genhints(source, hints, unblockreq, type)
       s = ''
       if not hints.nil?
         hints.each do |h|
@@ -293,20 +293,22 @@ if cgi.params != {}
 	      else
 	      	s += "req"
 	      end
-          s += ":<a href=\"http://bugs.debian.org/#{u}\">##{u}</a>#{gentags(tags[u])} "
+          s += ":<a href=\"http://bugs.debian.org/#{u}\">##{u}</a>"
         end
       end
       s
     end
 
-    def gentags(tags)
-      return '' if tags.nil?
-      tags.sort!
-      texttags = tags.map do |tag|
-        error = "unknowntag: #{tag}" if $TagsSingleLetter[tag].nil?
-        "<abbr title='#{tag}'>#{$TagsSingleLetter[tag]}</abbr>"
-      end
-      return '[' + texttags.join('|') + ']'
+    def genhintstags(unblockreq, unblockreqtags)
+       if not unblockreq.nil?
+          a = []
+          unblockreq.each do |u|
+            if not unblockreqtags[u].nil?
+              a += unblockreqtags[u]
+            end
+          end
+          a
+       end
     end
 
     def genaffected(r)
@@ -369,7 +371,8 @@ if cgi.params != {}
         end
 
         bugs.each do |r|
-           r['chints'] = genhints(r['source'], hints[r['source']], unblockreq[r['source']], unblockreqtags, unblockreqtype)
+           r['chints'] = genhints(r['source'], hints[r['source']], unblockreq[r['source']], unblockreqtype)
+           r['chints_tags'] = genhintstags(unblockreq[r['source']], unblockreqtags)
         end
       end
 
@@ -385,7 +388,7 @@ if cgi.params != {}
         end
 
         bugs.each do |r|
-          r['ctags'] = gentags(tags[r['id']]).force_encoding("ASCII-8BIT")
+          r['ctags'] = tags[r['id']]
         end
       end
 
