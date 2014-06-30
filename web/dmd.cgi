@@ -64,7 +64,8 @@ if cgi.params != {}
   feeditems = []
   $uddd.dmd_todos.each do |t|
   feeditems.push({:link  => "%s" % t[:link],
-                :title => "%s: %s: %s" % [t[:source], t[:description], t[:details]]})
+                :title => "%s: %s: %s" % [t[:source], t[:description], t[:details]],
+                :updated => t[:updated] })
   end
 
   def src_reason(pkg)
