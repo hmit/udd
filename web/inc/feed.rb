@@ -1,5 +1,6 @@
 #!/usr/bin/ruby
 require "rss"
+require 'date'
 
 class TodoFeed
     def initialize(items, title)
@@ -13,7 +14,7 @@ class TodoFeed
               maker.items.new_item do |item|
                 item.link = e[:link]
                 item.title = e[:title]
-                d = e[:updated] || Time.now
+                d = e[:updated] || Date::today.to_time
                 date = d if d > date
                 item.updated = d.to_s
               end
