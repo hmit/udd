@@ -361,28 +361,32 @@ and source not in (select source from upload_history where date > (current_date 
                         :source => bug['source'],
                         :link => "http://bugs.debian.org/#{id}",
                         :description => "RC bug marked as done but still affects unstable",
-                        :details =>" ##{id}: #{bug['title']}" }
+                        :details =>" ##{id}: #{bug['title']}",
+                        :updated => bug['last_modified'].to_time }
       elsif (not @bugs_tags[id].include?('rt_affects_unstable')) and @bugs_tags[id].include?('rt_affects_testing')
         testing_rc_bugs << { :shortname => "rc_testing_#{h}",
                              :type => 'RC bug',
                              :source => bug['source'],
                              :link => "http://bugs.debian.org/#{id}",
                              :description => "RC bug affecting testing only (ensure the package migrates)",
-                             :details => "##{id}: #{bug['title']}" }
+                             :details => "##{id}: #{bug['title']}",
+                             :updated => bug['last_modified'].to_time }
       elsif @bugs_tags[id].include?('rt_affects_unstable') or @bugs_tags[id].include?('rt_affects_testing')
         @dmd_todos << { :shortname => "rc_std_#{h}",
                         :type => 'RC bug',
                         :source => bug['source'],
                         :link => "http://bugs.debian.org/#{id}",
                         :description => "RC bug needs fixing",
-                        :details => "##{id}: #{bug['title']}" }
+                        :details => "##{id}: #{bug['title']}",
+                        :updated => bug['last_modified'].to_time }
       elsif @bugs_tags[id].include?('rt_affects_stable')
         stable_rc_bugs << { :shortname => "rc_stable_#{h}",
                             :type => 'RC bug (stable)',
                             :source => bug['source'],
                             :link => "http://bugs.debian.org/#{id}",
                             :description => "RC bug affecting stable",
-                            :details => "##{id}: #{bug['title']}" }
+                            :details => "##{id}: #{bug['title']}",
+                            :updated => bug['last_modified'].to_time }
       end
     end
     @dmd_todos.concat(testing_rc_bugs)
@@ -396,7 +400,8 @@ and source not in (select source from upload_history where date > (current_date 
                         :source => src,
                         :link => "https://buildd.debian.org/status/package.php?p=#{src}",
                         :description => "Missing build on #{arch['architecture']}",
-                        :details => " state <i>#{arch['state']}</i> since #{arch['state_change'].to_date.to_s}" }
+                        :details => " state <i>#{arch['state']}</i> since #{arch['state_change'].to_date.to_s}",
+                        :updated => arch['state_change'].to_time }
       end
     end
 
