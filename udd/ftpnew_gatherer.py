@@ -67,7 +67,9 @@ if DEBUG == 0:
                               'Ruby-Versions',
                               'Testsuite',
                               'Ghc-Package',
-                              'Kernel-Version'
+                              'Kernel-Version',
+                              'XB-Original-Source-Maintainer',
+                              'Tag'
                              )
 else:
     IGNORED_UNKNOWN_FIELDS = ()
