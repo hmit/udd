@@ -80,7 +80,7 @@ class blends_prospective_gatherer(gatherer):
     find_itp_re = re.compile('(initial|ITP)', flags=re.IGNORECASE|re.MULTILINE)
     # might need enhancement (see http://www.debian.org/doc/manuals/developers-reference/pkgs.html#upload-bugfix)
     # --> /closes:\s*(?:bug)?\#\s*\d+(?:,\s*(?:bug)?\#\s*\d+)*/ig
-    parse_itp_re = re.compile('^([A-Z]+): ([^\s]+) -- (.+)$')
+    parse_itp_re = re.compile('^([A-Z]+): *([^\s]+) *-- *(.+)$')
     vcs_type_re = re.compile('Vcs-(Svn|Git|Bzr|Darcs|Hg|Cvs|Arch|Mtn)')
     
     cur.execute('TRUNCATE %s' % my_config['table'])
