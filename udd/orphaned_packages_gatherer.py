@@ -17,7 +17,7 @@ class orphaned_packages_gatherer(gatherer):
     gatherer.__init__(self, connection, config, source)
     self.assert_my_config('bugs-path', 'table', 'unarchived-table')
 
-  title_re = re.compile('^(ITA|RFA|RFH|O): ([^\s]*)([ ]+[-]+[ ]+(.*))?$')
+  title_re = re.compile('^(ITA|RFA|RFH|O): *([^\s]*)([ ]*[-]+[ ]*(.*))?$')
   otime_re = re.compile('^<!-- time:([0-9]+) ')
   chtitle_re = re.compile('^<strong>Changed Bug title to `O:.*$')
 
