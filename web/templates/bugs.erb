@@ -233,7 +233,10 @@ $(document).ready(function() {
 });
 
 <% if bugs %>
-    location.hash = "#results";
+    function position() {
+        window.location.hash = "#results";
+    }
+    window.addEventListener('load', position, false);
 <% end %>
 </script>
 </body>
