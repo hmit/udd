@@ -134,14 +134,18 @@ EOF
   end
 
   def process_sources(f, release, component)
-    begin
-      fd = Zlib::GzipReader::open(f)
-    rescue Zlib::GzipFile::Error => gziperror
-      puts "error opening gzip file #{f}: #{gziperror}"
-      return
+    if File::stat(f).size == 0
+      s = ""
+    else
+      begin
+        fd = Zlib::GzipReader::open(f)
+      rescue Zlib::GzipFile::Error => gziperror
+        puts "error opening gzip file #{f}: #{gziperror}"
+        return
+      end
+      s = fd.read
+      fd.close
     end
-    s = fd.read
-    fd.close
 
     @db.exec("DELETE FROM #{@tabprefix}sources WHERE distribution=$1 AND release=$2 AND component=$3",
                     [ @conf['distribution'], release, component])
@@ -210,14 +214,18 @@ EOF
   end
 
   def process_packages(f, release, component, architecture)
-    begin
-      fd = Zlib::GzipReader::open(f)
-    rescue Zlib::GzipFile::Error => gziperror
-      puts "error opening gzip file #{f}: #{gziperror}"
-      return
+    if File::stat(f).size == 0
+      s = ""
+    else
+      begin
+        fd = Zlib::GzipReader::open(f)
+      rescue Zlib::GzipFile::Error => gziperror
+        puts "error opening gzip file #{f}: #{gziperror}"
+        return
+      end
+      s = fd.read
+      fd.close
     end
-    s = fd.read
-    fd.close
 
     ds = Deb822::parse(s, {:downcase => true})
     ds.each do |d|
