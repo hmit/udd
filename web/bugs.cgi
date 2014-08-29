@@ -83,7 +83,7 @@ TYPES = [
   ['games', 'Games team', "bugs.source in (select source from sources where maintainer ~ 'pkg-games-devel@lists.alioth.debian.org')\n"],
   ['multimedia', 'Multimedia team', "bugs.source in (select source from sources where maintainer ~ 'pkg-multimedia-maintainers@lists.alioth.debian.org')"],
   ['otr', 'pkg-otr-team bugs', "bugs.source in (select source from sources where maintainer ~ 'pkg-otr-team@lists.alioth.debian.org' or uploaders ~ 'pkg-otr-team@lists.alioth.debian.org')"],
-  ['aa-profiles', 'pkg-aa-profiles-team bugs', "bugs.source in (select source from sources where maintainer ~ 'pkg-aa-profiles-team@lists.alioth.debian.org' or uploaders ~ 'pkg-aa-profiles-team@lists.alioth.debian.org')"],
+  ['apparmor', 'AppArmor team', "bugs.source in (select source from sources where maintainer ~ 'pkg-apparmor-team@lists.alioth.debian.org' or uploaders ~ 'pkg-apparmor-team@lists.alioth.debian.org')"],
   ['kfreebsd', 'GNU/kFreeBSD bugs', 'id in (select id from bugs_usertags where email = \'debian-bsd@lists.debian.org\' and tag=\'kfreebsd\')', false],
   ['hurd', 'GNU/Hurd bugs', 'id in (select id from bugs_usertags where email = \'debian-hurd@lists.debian.org\' and tag=\'hurd\')', false],
   ['gift', 'bugs tagged <a href="https://wiki.debian.org/qa.debian.org/GiftTag">Gift</a>', 'id in (select id from bugs_usertags where email = \'debian-qa@lists.debian.org\' and tag=\'gift\')', false],
