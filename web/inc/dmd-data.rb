@@ -214,17 +214,17 @@ and s2.version > s1.version);
     end
     
     # vcs versions
-    q = "select source, team, version, distribution from vcs where source in (select source from mysources)"
+    q = "select * from vcswatch where source in (select source from mysources)"
     rows = dbget(q)
     rows.each do |r|
-      @versions[r['source']]['vcs'] = { :team => r['team'], :version => r['version'], :distribution => r['distribution'] }
+      @versions[r['source']]['vcs'] = { :version => r['changelog_version'], :distribution => r['changelog_distribution'] }
     end
 
     q = <<-EOF
-select source, team, version from vcs
+select source, changelog_version, browser from vcswatch
 where source in (select source from mysources)
 and source in (select source from sources_uniq where release in ('sid', 'experimental'))
-and distribution!='UNRELEASED' and version > coalesce((select max(version) from sources_uniq where release in ('sid','experimental') and sources_uniq.source = vcs.source), 0::debversion)
+and changelog_distribution!='UNRELEASED' and changelog_version > coalesce((select max(version) from sources_uniq where release in ('sid','experimental') and sources_uniq.source = vcswatch.source), 0::debversion)
 EOF
     dbget(q).each do |r|
       @ready_for_upload[r['source']] = r.to_h
@@ -439,11 +439,11 @@ and source not in (select source from upload_history where date > (current_date 
     end
 
     @ready_for_upload.each_pair do |src, v|
-      h = Digest::MD5.hexdigest("#{src}_#{v['version']}_#{v['distribution']}")
+      h = Digest::MD5.hexdigest("#{src}_#{v['changelog_version']}_#{v['changelog_distribution']}")
       @dmd_todos << { :shortname => "vcs_#{h}",
                       :type => 'vcs',
                       :source => src,
-                      :link => "http://pet.debian.net/#{v['team']}/pet.cgi",
+                      :link => v['browser'],
                       :description => "New version",
                       :details => "#{v['version']} ready for upload" }
     end
