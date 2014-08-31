@@ -1958,7 +1958,7 @@ CREATE INDEX testing_autoremovals_source_idx ON testing_autoremovals (source);
 
 CREATE TABLE vcswatch
   (source text primary key,
-   version text,
+   version debversion,
    vcs text,
    url text,
    branch text,
@@ -1967,7 +1967,7 @@ CREATE TABLE vcswatch
    next_scan timestamptz DEFAULT now(),
    status text DEFAULT 'TODO',
    debian_dir boolean DEFAULT true, -- debian/changelog or changelog
-   changelog_version text, -- or debversion
+   changelog_version debversion,
    changelog_distribution text,
    changelog text,
    error text
