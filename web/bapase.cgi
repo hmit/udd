@@ -313,7 +313,7 @@ res.each do |r|
   n += 1
   pkg = r['source']
   puts "<tr><td>#{n}</td>"
-  puts "<td><a href=\"http://packages.qa.debian.org/#{pkg}\">#{pkg}</a>"
+  puts "<td><a href=\"http://tracker.debian.org/#{pkg}\">#{pkg}</a>"
   # FIXME removals
   if $actions[pkg]
     if $actions[pkg].act_todo
