@@ -35,7 +35,7 @@ puts "Packages you are uploader for but are not subscribed to:<br/><pre>"
 (upload - pts).sort.each { |s| puts "subscribe #{s} #{cgi['email']}" }
 puts "</pre>"
 end
-puts 'To be sent in the body of a mail to pts@qa.debian.org. See <a href="http://www.debian.org/doc/developers-reference/resources.html#pts-commands">Developers Reference</a> for more info.<br/>If you are a DD, you can also connect to master and feed those commands to /org/packages.qa.debian.org/bin/pts'
+puts 'To be sent in the body of a mail to pts@qa.debian.org. See <a href="https://www.debian.org/doc/developers-reference/resources.html#pts-commands">Developers Reference</a> for more info.<br/>If you are a DD, you can also connect to packages.qa.debian.org via ssh and feed those commands to /srv/packages.qa.debian.org/bin/pts'
 else
 puts <<-EOF
 
