@@ -1,4 +1,4 @@
 --- 
 lts: trusty
-stable: trusty
-devel: utopic
+stable: utopic
+devel: vivid
