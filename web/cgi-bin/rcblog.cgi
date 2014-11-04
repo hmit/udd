@@ -32,6 +32,7 @@ AND NOT (id IN (SELECT id FROM bugs_merged_with WHERE id > merged_with))
 AND (severity >= 'serious')
 EOF
 tot = getcount(q)
+
 q = <<-EOF
 SELECT count(id) FROM bugs
 WHERE id IN (SELECT id FROM bugs_rt_affects_testing)
@@ -47,6 +48,7 @@ AND NOT (id IN (SELECT id FROM bugs_merged_with WHERE id > merged_with))
 AND (severity >= 'serious')
 EOF
 jessie_sid = getcount(q)
+
 q = <<-EOF
 SELECT count(id) FROM bugs
 WHERE id IN (SELECT id FROM bugs_rt_affects_testing) AND id NOT IN (SELECT id FROM bugs_rt_affects_unstable)
