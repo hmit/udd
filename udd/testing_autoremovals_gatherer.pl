@@ -423,10 +423,6 @@ WHERE   b.severity >= 'serious'
                      AND b2.title LIKE ('%unblock: ' || b.source || '/%')
                  LIMIT 1
             )
-        AND b.id NOT IN ( -- Bug not fixed in new
-                 SELECT pbc.id FROM potential_bug_closures pbc
-                 WHERE origin = 'ftpnew'
-            )
         AND b.arrival < CURRENT_TIMESTAMP - INTERVAL '14 days'
         AND b.id = s.id
 GROUP BY b.source, b.id, b4.source, b4.bugs_unstable
