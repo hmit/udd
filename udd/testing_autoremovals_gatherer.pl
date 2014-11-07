@@ -378,7 +378,8 @@ SELECT  b.source,
         EXTRACT(epoch FROM b.arrival) AS arrival,
         EXTRACT(epoch FROM b.last_modified) AS last_modified,
         min(s.db_updated) AS last_check,
-        b4.bugs_unstable
+        b4.bugs_unstable,
+        b5.id AS unblock_request
 FROM    bugs_stamps s,
         bugs b
         LEFT JOIN
@@ -391,7 +392,18 @@ FROM    bugs_stamps s,
                 AND b3.affects_testing = false
             GROUP BY b3.source
         ) b4
-ON b.source = b4.source
+        ON b.source = b4.source
+        LEFT JOIN
+        -- unblock requests
+        (
+             SELECT array_to_string(regexp_matches(title,'unblock: ([^ /]*)/'),'') AS source,
+             id FROM bugs b2
+             WHERE b2.source = 'release.debian.org'
+                 AND b2.done != 'done'
+                 -- Find (?:pre-approve )?unblock: <src>/.*
+                 AND b2.title LIKE ('%unblock: %/%')
+        ) b5
+        ON b.source = b5.source
 WHERE   b.severity >= 'serious'
         AND b.affects_testing = true
         AND b.source IN ( -- in testing
@@ -415,17 +427,9 @@ WHERE   b.severity >= 'serious'
                           OR ut.tag = '$testing-no-auto-remove'
                          )
             )
-        AND 0 = ( -- No open unblock bugs 
-                 SELECT COUNT(1) FROM bugs b2
-                 WHERE b2.source = 'release.debian.org'
-                     AND b2.done != 'done'
-                     -- Find (?:pre-approve )?unblock: <src>/.*
-                     AND b2.title LIKE ('%unblock: ' || b.source || '/%')
-                 LIMIT 1
-            )
         AND b.arrival < CURRENT_TIMESTAMP - INTERVAL '14 days'
         AND b.id = s.id
-GROUP BY b.source, b.id, b4.source, b4.bugs_unstable
+GROUP BY b.source, b.id, b4.source, b4.bugs_unstable, b5.source, b5.id
 
 ";
 
@@ -444,7 +448,9 @@ GROUP BY b.source, b.id, b4.source, b4.bugs_unstable
 					$buggy->{$pkg}->{$bug}->{"arrival"} + 14*24*3600;
 			}
 
-			unless ($pg->{"affects_unstable"}) {
+			# during the freeze, we only whitelist bugs fixed in unstable if
+			# there is an unblock request
+			if (!$pg->{"affects_unstable"} && $pg->{"unblock_request"}) {
 				unless ($pg->{"bugs_unstable"}) {
 					# if the bug is fixed in unstable, but not (yet) in
 					# testing and there are no other bugs affecting the
@@ -455,6 +461,7 @@ GROUP BY b.source, b.id, b4.source, b4.bugs_unstable
 					# migration of the fix to testing), the counter is NOT
 					# reset, and the package can still be autoremoved
 					$buggy->{$pkg}->{$bug}->{"last_modified"} = $now;
+					print "reset counter for $pkg\n" if $debug;
 				}
 			}
         }
