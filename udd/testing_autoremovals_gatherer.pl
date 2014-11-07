@@ -140,7 +140,10 @@ sub update_autoremovals {
 	my $skipped = 0;
 	foreach my $buggy_src (sort keys %$buggy) {
 		# If it is not in testing, ignore it.
-		next unless $needs->{$buggy_src};
+		unless ($needs->{$buggy_src}) {
+			print "skip $buggy_src: not in testing" if $debug;
+			next;
+		}
 
 		# all rdeps for $buggy_src, recursively
 		my $my_rdeps = {};
@@ -208,6 +211,7 @@ sub update_autoremovals {
 				$autoremovals->{$buggy_src}->{"rdeps_popcon"} = $totalpopcon||0;
 			} else {
 				print "$buggy_src (".$popcon->{$buggy_src}."): skipped, total popcon of non-buggy rdeps: $totalpopcon\n\n" if $debug;
+				print Dumper $my_rdeps;
 				$skipped++;
 				next;
 			}
@@ -400,15 +404,15 @@ WHERE   b.severity >= 'serious'
             )
         AND b.id NOT IN ( -- Not <release>-ignore
                  SELECT t.id FROM bugs_tags t WHERE t.id = b.id AND
-                        t.tag = 'jessie-ignore'
+                        t.tag = '$testing-ignore'
             )
         AND b.id NOT IN ( -- Not <release>-{is-blocker,will-remove...} ...
                  SELECT ut.id FROM bugs_usertags ut
                  WHERE ut.email = 'release.debian.org\@packages.debian.org'
                      AND ut.id = b.id AND
-                         (   ut.tag = 'jessie-can-defer'
-                          OR ut.tag = 'jessie-is-blocker'
-                          OR ut.tag = 'jessie-no-auto-remove'
+                         (   ut.tag = '$testing-can-defer'
+                          OR ut.tag = '$testing-is-blocker'
+                          OR ut.tag = '$testing-no-auto-remove'
                          )
             )
         AND 0 = ( -- No open unblock bugs 
@@ -442,7 +446,6 @@ GROUP BY b.source, b.id, b4.source, b4.bugs_unstable
 				# we only start counting from 14 days after the bug was filed
 				$buggy->{$pkg}->{$bug}->{"last_modified"} =
 					$buggy->{$pkg}->{$bug}->{"arrival"} + 14*24*3600;
-
 			}
 
 			unless ($pg->{"affects_unstable"}) {
