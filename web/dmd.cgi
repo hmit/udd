@@ -136,11 +136,11 @@ if cgi.params != {}
       t = UDDData.compare_versions(sid, vcs[:version])
       te = UDDData.compare_versions(exp, vcs[:version])
       if (t == -1 or te == -1) and t != 0 and te != 0 and ['unstable', 'experimental'].include?(vcs[:distribution])
-        t_vcs += "<a href=\"http://pet.debian.net/#{vcs[:team]}/pet.cgi\"><span class=\"prio_high\" title=\"Ready for upload to #{vcs[:distribution]}\">#{vcs[:version]}</span></a>"
+        t_vcs += "<a href=\"https://qa.debian.org/cgi-bin/vcswatch?package=#{s}\"><span class=\"prio_high\" title=\"Ready for upload to #{vcs[:distribution]}\">#{vcs[:version]}</span></a>"
       elsif (t == -1 or te == -1) and t != 0 and te != 0
-        t_vcs += "<a href=\"http://pet.debian.net/#{vcs[:team]}/pet.cgi\"><span class=\"prio_med\" title=\"Work in progress\">#{vcs[:version]}</span></a>"
+        t_vcs += "<a href=\"https://qa.debian.org/cgi-bin/vcswatch?package=#{s}\"><span class=\"prio_med\" title=\"Work in progress\">#{vcs[:version]}</span></a>"
       elsif t == 1 and te == 1
-        t_vcs += "<a href=\"http://pet.debian.net/#{vcs[:team]}/pet.cgi\"><span class=\"prio_high\" title=\"Version in archive newer than version in VCS\">#{vcs[:version]}</span></a>"
+        t_vcs += "<a href=\"https://qa.debian.org/cgi-bin/vcswatch?package=#{s}\"><span class=\"prio_high\" title=\"Version in archive newer than version in VCS\">#{vcs[:version]}</span></a>"
       else
         t_vcs += "#{vcs[:version]}"
       end
