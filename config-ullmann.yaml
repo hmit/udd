@@ -51,7 +51,7 @@ general:
     mipsel, powerpc, ppc64, s390, s390x, sparc, all, any, lpia, m32r, s390x, sh3,
     sh3eb, sh4, sh4eb, sh, knetbsd-i386, netbsd-alpha, sparc64,
     netbsd-i386, hurd-powerpc, kfreebsd-powerpc, netbsd-powerpc, hurd-sparc,
-    kfreebsd-sparc, netbsd-sparc, darwin-i386, freebsd-i386, openbsd-i386, darwin-powerpc]
+    kfreebsd-sparc, netbsd-sparc, darwin-i386, freebsd-i386, openbsd-i386, darwin-powerpc, arm64, ppc64el]
 
 #### NEW ARCHIVE GATHERER
 archive-ubuntu:
@@ -422,7 +422,7 @@ wannabuild:
   wbdb: "service=wanna-build"
   archs: [alpha, amd64, arm, armel, armhf, hppa, hurd-i386,
     i386, ia64, kfreebsd-amd64, kfreebsd-i386, mips,
-    mipsel, powerpc, s390, s390x, sparc]
+    mipsel, powerpc, s390, s390x, sparc, arm64, ppc64el]
 
 removals:
   type: removals
