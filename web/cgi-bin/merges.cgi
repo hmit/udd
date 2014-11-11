@@ -84,7 +84,7 @@ rows.each do |r|
    puts "<td>#{r['component']}</td>"
    puts "<td>#{r['source']} "
    puts "<a href=\"https://launchpad.net/ubuntu/+source/#{r['source']}\">LP</a> "
-   puts "<a href=\"http://packages.qa.debian.org/#{r['source']}\">PTS</a> "
+   puts "<a href=\"http://tracker.debian.org/#{r['source']}\">PTS</a> "
    puts "<a href=\"http://bugs.debian.org/src:#{r['source']}\">BTS</a> "
    puts "</td>"
    puts "<td>#{r['dversion']}</td>"

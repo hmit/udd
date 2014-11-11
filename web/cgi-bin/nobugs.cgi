@@ -314,7 +314,7 @@ if rows.length > 0
 
   rows.each do |r|
     print "<tr>"
-	print "<td><a href=\"http://packages.qa.debian.org/#{r['source']}\">#{r['source']}</a></td>"
+	print "<td><a href=\"http://tracker.debian.org/#{r['source']}\">#{r['source']}</a></td>"
 	print "<td><a href=\"http://qa.debian.org/developer.php?login=#{r['maintainer_email']}\">#{r['maintainer_name']}</a></td>"
     puts "<td>#{r['popcon']}</td>" if cols['cpopcon']
 	if cols['firstupload']

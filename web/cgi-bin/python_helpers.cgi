@@ -67,7 +67,7 @@ print('''<h1>Packages build-depending on python-support</h1>
 </tr>''')
 for row in packages:
     print('<tr>')
-    print('<td><a href="http://packages.qa.debian.org/%s">%s</a></td>' %
+    print('<td><a href="http://tracker.debian.org/%s">%s</a></td>' %
        (row[0], row[0]))
     print('<td>%s</td>' % row[1])
     print('<td>%s</td>' % row[2])

@@ -150,7 +150,7 @@ result_template = """
 table_template = """
         <tr class="%(class)s">
             <td><a href="http://bugs.debian.org/%(id)s">%(id)s</a></td>
-            <td><a href="http://packages.qa.debian.org/%(source)s">%(source)s</a></td>
+            <td><a href="http://tracker.debian.org/%(source)s">%(source)s</a></td>
             <td>%(status)s</td>
             <td class="severity-%(severity)s">%(severity)s</td>
             <td>%(title)s</td>

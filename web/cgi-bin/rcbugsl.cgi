@@ -54,7 +54,7 @@ puts "<tr><th>bug</th><th>package</th><th>source</th><th>popcon</th><th>title</t
 rows.each do |r|
    puts "<tr><td><a href=\"http://bugs.debian.org/#{r['id']}\">#{r['id']}</a></td>"
    puts "<td>#{r['package']}</td>"
-   puts "<td><a href=\"http://packages.qa.debian.org/#{r['source']}\">#{r['source']}</a></td>"
+   puts "<td><a href=\"http://tracker.debian.org/#{r['source']}\">#{r['source']}</a></td>"
    puts "<td>#{r['insts']}</td>"
    puts "<td>#{r['title']}</td>"
 end
@@ -71,7 +71,7 @@ puts "<tr><th>bug</th><th>package</th><th>source</th><th>popcon</th><th>title</t
 rows.each do |r|
    puts "<tr><td><a href=\"http://bugs.debian.org/#{r['id']}\">#{r['id']}</a></td>"
    puts "<td>#{r['package']}</td>"
-   puts "<td><a href=\"http://packages.qa.debian.org/#{r['source']}\">#{r['source']}</a></td>"
+   puts "<td><a href=\"http://tracker.debian.org/#{r['source']}\">#{r['source']}</a></td>"
    puts "<td>#{r['insts']}</td>"
    puts "<td>#{r['title']}</td>"
 end
@@ -88,7 +88,7 @@ sth.execute ; rows = sth.fetch_all
 rows.each do |r|
    puts "<tr><td><a href=\"http://bugs.debian.org/#{r['id']}\">#{r['id']}</a></td>"
    puts "<td>#{r['package']}</td>"
-   puts "<td><a href=\"http://packages.qa.debian.org/#{r['source']}\">#{r['source']}</a> <a href=\"https://launchpad.net/ubuntu/#{URELEASE}/+source/#{r['source']}/+changelog\">UbCh</a></td>"
+   puts "<td><a href=\"http://tracker.debian.org/#{r['source']}\">#{r['source']}</a> <a href=\"https://launchpad.net/ubuntu/#{URELEASE}/+source/#{r['source']}/+changelog\">UbCh</a></td>"
    puts "<td>#{r['dversion']} / #{r['uversion']}</td>"
    puts "<td>#{r['insts']}</td>"
    puts "<td>#{r['title']}</td>"

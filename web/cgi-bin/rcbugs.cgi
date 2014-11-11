@@ -58,7 +58,7 @@ rows.each do |r|
   unless csvflag
     puts "<tr><td><a href=\"http://bugs.debian.org/#{r['id']}\">#{r['id']}</a></td>"
     puts "<td>#{r['package']}</td>"
-    puts "<td><a href=\"http://packages.qa.debian.org/#{r['source']}\">#{r['source']}</a></td>"
+    puts "<td><a href=\"http://tracker.debian.org/#{r['source']}\">#{r['source']}</a></td>"
     puts "<td>#{r['insts']}</td>"
     puts "<td>#{r['title']}</td>"
   else
@@ -88,7 +88,7 @@ rows.each do |r|
   unless csvflag
     puts "<tr><td><a href=\"http://bugs.debian.org/#{r['id']}\">#{r['id']}</a></td>"
     puts "<td>#{r['package']}</td>"
-    puts "<td><a href=\"http://packages.qa.debian.org/#{r['source']}\">#{r['source']}</a> <a href=\"https://launchpad.net/ubuntu/#{URELEASE}/+source/#{r['source']}/+changelog\">UbCh</a></td>"
+    puts "<td><a href=\"http://tracker.debian.org/#{r['source']}\">#{r['source']}</a> <a href=\"https://launchpad.net/ubuntu/#{URELEASE}/+source/#{r['source']}/+changelog\">UbCh</a></td>"
     puts "<td>#{r['dversion']} / #{r['uversion']}</td>"
     puts "<td>#{r['insts']}</td>"
     puts "<td>#{r['title']}</td>"
@@ -117,7 +117,7 @@ rows.each do |r|
   unless csvflag
     puts "<tr><td><a href=\"http://bugs.debian.org/#{r['id']}\">#{r['id']}</a></td>"
     puts "<td>#{r['package']}</td>"
-    puts "<td><a href=\"http://packages.qa.debian.org/#{r['source']}\">#{r['source']}</a></td>"
+    puts "<td><a href=\"http://tracker.debian.org/#{r['source']}\">#{r['source']}</a></td>"
     puts "<td>#{r['insts']}</td>"
     puts "<td>#{r['title']}</td>"
   else

@@ -188,7 +188,7 @@ def tagged_bugs(user, tag):
             attrs['class'] = 'done'
         tr('<a href="http://bugs.debian.org/%(id)s">#%(id)s</a>'
            % {'id': result.id},
-           '<a href="http://packages.qa.debian.org/%(source)s">%(target)s</a>'
+           '<a href="http://tracker.debian.org/%(source)s">%(target)s</a>'
            % {'source': result.source,
                'target': ('src:' if result.source == result.package else '')
                          + result.package,

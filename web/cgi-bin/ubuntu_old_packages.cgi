@@ -33,7 +33,7 @@ and insts < #{mpc}
 order by insts asc")
 sth.execute
 sth.fetch_all.each do |r|
-  puts "<a href=\"http://packages.ubuntu.com/search?searchon=sourcenames&keywords=#{r['source']}\">#{r['source']}</a> #{r['version']} #{r['insts']} <a href=\"http://packages.qa.debian.org/#{r['source']}\">PTS</a><br>"
+  puts "<a href=\"http://packages.ubuntu.com/search?searchon=sourcenames&keywords=#{r['source']}\">#{r['source']}</a> #{r['version']} #{r['insts']} <a href=\"http://tracker.debian.org/#{r['source']}\">PTS</a><br>"
 end
 
 puts "### was NOT in etch | lenny<br>"
@@ -51,5 +51,5 @@ and insts < #{mpc}
 order by insts asc")
 sth.execute
 sth.fetch_all.each do |r|
-  puts "<a href=\"http://packages.ubuntu.com/search?searchon=sourcenames&keywords=#{r['source']}\">#{r['source']}</a> #{r['version']} #{r['insts']} <a href=\"http://packages.qa.debian.org/#{r['source']}\">PTS</a><br>"
+  puts "<a href=\"http://packages.ubuntu.com/search?searchon=sourcenames&keywords=#{r['source']}\">#{r['source']}</a> #{r['version']} #{r['insts']} <a href=\"http://tracker.debian.org/#{r['source']}\">PTS</a><br>"
 end
