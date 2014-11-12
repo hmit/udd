@@ -67,7 +67,9 @@ dbget("select * from orphaned_packages").each do |r|
   }
 end
 
-pseudopkg = IO::read('/srv/bugs.debian.org/pseudopackages/pseudo-packages.description').scan(/^([^\s]+)\s.*/).flatten
+pseudopkg = dbget("select package from pseudo_packages").map { |r| r['package'] }
+pseudopkg -= ['mirrors', 'base', 'cdrom', 'wnpp', 'installation-reports', 'tech-ctte', 'general', 'project', 'spam', 'press', 'release-notes', 'upgrade-reports']
+
 dbget("select id, source, package, title from bugs where id in (select id from bugs_usertags where email='debian-qa@lists.debian.org' and tag='gift') and status != 'done'").each do |r|
   hash = Digest::MD5.hexdigest("gift #{r['id']}")
   helpitems << {
