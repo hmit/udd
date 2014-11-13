@@ -97,7 +97,7 @@ def showrow(r, fa)
   puts
   else
   puts "<tr><td>#{r['source']} #{fa['version']} 
-  <a href=\"http://tracker.debian.org/#{r['source']}\">PTS</a>
+  <a href=\"http://packages.qa.debian.org/#{r['source']}\">PTS</a>
   <a href=\"http://bugs.debian.org/src:#{r['source']}\">BTS</a>
   <a href=\"https://launchpad.net/ubuntu/+source/#{r['source']}\">LP</a>
   </td><td>#{r['component']}</td>"

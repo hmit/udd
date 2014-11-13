@@ -37,7 +37,7 @@ puts "<ul>"
 rows.each do |r|
   next if not ['RFP', 'ITP'].include?(r['type'])
   next if not sources.include?(r['source'])
-  puts "<li>#{r['source']}: <a href=\"http://bugs.debian.org/#{r['id']}\">##{r['id']} (#{r['type']})</a> <a href=\"http://tracker.debian.org/#{r['source']}\">PTS</a> <a href=\"http://tracker.debian.org/#{r['source']}\">tracker</a></li>"
+  puts "<li>#{r['source']}: <a href=\"http://bugs.debian.org/#{r['id']}\">##{r['id']} (#{r['type']})</a> <a href=\"http://packages.qa.debian.org/#{r['source']}\">PTS</a> <a href=\"http://tracker.debian.org/#{r['source']}\">tracker</a></li>"
 end
 puts "</ul>"
 
@@ -47,7 +47,7 @@ puts "<ul>"
 rows.each do |r|
   next if not ['ITA', 'RFA', 'RFH', 'O'].include?(r['type'])
   next if sources.include?(r['source'])
-  puts "<li>#{r['source']}: <a href=\"http://bugs.debian.org/#{r['id']}\">##{r['id']} (#{r['type']})</a> <a href=\"http://tracker.debian.org/#{r['source']}\">PTS</a> <a href=\"http://tracker.debian.org/#{r['source']}\">tracker</a></li>"
+  puts "<li>#{r['source']}: <a href=\"http://bugs.debian.org/#{r['id']}\">##{r['id']} (#{r['type']})</a> <a href=\"http://packages.qa.debian.org/#{r['source']}\">PTS</a> <a href=\"http://tracker.debian.org/#{r['source']}\">tracker</a></li>"
 end
 puts "</ul>"
 
@@ -56,7 +56,7 @@ puts "<p>Should probably be merged.</p>"
 puts "<ul>"
 rows.group_by { |r| r['source'] }.each_pair do |src, bugs|
   next if bugs.length < 2
-  puts "<li>#{src} (<a href=\"http://tracker.debian.org/#{src}\">PTS</a> <a href=\"http://tracker.debian.org/#{src}\">tracker</a>):<ul>"
+  puts "<li>#{src} (<a href=\"http://packages.qa.debian.org/#{src}\">PTS</a> <a href=\"http://tracker.debian.org/#{src}\">tracker</a>):<ul>"
   bugs.each do |r|
     puts "<li><a href=\"http://bugs.debian.org/#{r['id']}\">##{r['id']} (#{r['type']})</a> #{r['title']}</li>"
   end
@@ -82,24 +82,24 @@ puts "As a list of bts commands:<pre>"
 puts retitles.join("\n")
 puts "</pre>"
 
-puts "<h2>Packages maintained by tracker.debian.org without a corresponding ITA or O bug</h2>"
+puts "<h2>Packages maintained by packages@qa.debian.org without a corresponding ITA or O bug</h2>"
 puts "<p>Also listing the first QA upload.</p>"
 puts "<p>A WNPP bug should probably be opened.</p>"
 ita_o = rows.select { |r| ['ITA', 'O'].include?(r['type']) }.map { |r| r['source'] }
 
-qasrcs = dbget("select source from sources_uniq where release in ('sid', 'experimental') and maintainer_email = 'tracker.debian.org' order by source")
+qasrcs = dbget("select source from sources_uniq where release in ('sid', 'experimental') and maintainer_email = 'packages@qa.debian.org' order by source")
 puts "<ul>"
 qasrcs.each do |s|
   src = s['source']
   next if ita_o.include?(src)
-  last = dbget("select * from upload_history where source='#{src}' and maintainer LIKE '%tracker.debian.org%' order by date asc limit 1")
+  last = dbget("select * from upload_history where source='#{src}' and maintainer LIKE '%packages@qa.debian.org%' order by date asc limit 1")
   if last.length == 1
     last = last.first
     s = "(since #{last['version']} ; #{last['date']} ; #{last['changed_by_name']} &lt;#{last['changed_by_email']}&gt;)"
   else
     s = ""
   end
-  puts "<li>#{src}: <a href=\"http://tracker.debian.org/#{src}\">PTS</a> <a href=\"http://tracker.debian.org/#{src}\">tracker</a> #{s}</li>"
+  puts "<li>#{src}: <a href=\"http://packages.qa.debian.org/#{src}\">PTS</a> <a href=\"http://tracker.debian.org/#{src}\">tracker</a> #{s}</li>"
 end
 puts "</ul>"
 

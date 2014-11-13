@@ -37,7 +37,7 @@ sth.execute
 puts "<table border=\"1\">"
 n = 0
 sth.fetch_all.each do |r|
-  puts "<tr><td><a href=\"http://tracker.debian.org/#{r[0]}\">#{r[0]}</a></td>"
+  puts "<tr><td><a href=\"http://packages.qa.debian.org/#{r[0]}\">#{r[0]}</a></td>"
   puts "<td><a href=\"http://packages.debian.org/#{r[1]}\">#{r[1]}</a></td>"
   puts "<td><a href=\"http://bugs.debian.org/#{r[2]}\">#{r[2]}</a></td></tr>"
   n += 1

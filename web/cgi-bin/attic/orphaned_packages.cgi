@@ -20,7 +20,7 @@ and date(b.last_modified) < '2008-07-24'")
 sth.execute
 puts "<table>"
 sth.fetch_all.each do |r|
-  puts "<tr><td><a href=\"http://tracker.debian.org/#{r[0]}\">#{r[0]}</a></td><td>#{r[1]}</td><td>#{r[2]}</td><td><a href=\"http://bugs.debian.org/#{r[4]}\">#{r[3]}</a></td></tr>"
+  puts "<tr><td><a href=\"http://packages.qa.debian.org/#{r[0]}\">#{r[0]}</a></td><td>#{r[1]}</td><td>#{r[2]}</td><td><a href=\"http://bugs.debian.org/#{r[4]}\">#{r[3]}</a></td></tr>"
 end
 puts "</table>"
 sth.finish

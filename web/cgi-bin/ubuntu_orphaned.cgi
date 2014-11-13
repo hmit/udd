@@ -53,7 +53,7 @@ print '''Content-Type: text/html\n\n
 
 for row in rows:
     print '<tr><td>%s</td>' % row[0]
-    print ('<td><a href="http://tracker.debian.org/%s">%s</a></td>' %
+    print ('<td><a href="http://packages.qa.debian.org/%s">%s</a></td>' %
            (row[0], row[1]))
     print ('<td><a href="http://launchpad.net/ubuntu/+source/%s">%s</a></td>' %
            (row[0], row[2]))

@@ -168,12 +168,12 @@
         <% bins = r['package'].split(/,\s*/) %>
         <% if bins.length == 1 %>
           <!-- link to source package if there is only 1 package -->
-          <a href="http://tracker.debian.org/<%= srcs[0] %>"><%= bins[0] %></a>
+          <a href="http://packages.qa.debian.org/<%= srcs[0] %>"><%= bins[0] %></a>
         <% else %>
           <!-- if there is more than 1, we don't know which package is from which -->
           <!-- source, so link the the package and let the PTS sort it out -->
           <!-- strip 'src:' from the package, as the PTS doesn't do this for us -->
-          <%= bins.map { |b| "<a href=\"http://tracker.debian.org/#{b.sub('src:','')}\">#{b}</a>" }.join(', ') %>
+          <%= bins.map { |b| "<a href=\"http://packages.qa.debian.org/#{b.sub('src:','')}\">#{b}</a>" }.join(', ') %>
         <% end %>
         </td>
         <td><%= CGI::escapeHTML(r['title']) %></td>

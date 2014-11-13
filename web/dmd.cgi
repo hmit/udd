@@ -214,7 +214,7 @@ if cgi.params != {}
     $ubuntu.push({:src => src,
                   :bugs => bugs,
                   :patches => patches,
-                  :pts => "http://tracker.debian.org/#{src}",
+                  :pts => "http://packages.qa.debian.org/#{src}",
                   :launchpad => "https://bugs.launchpad.net/ubuntu/+source/#{src}",
                   :values => values
     })

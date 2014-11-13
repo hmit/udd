@@ -69,7 +69,7 @@ for r in rows:
         bold = ''
         nobold = ''
     print '<tr>\n<td>%s' % bold
-    print '<a href="http://tracker.debian.org/%s">%s</a>' % (r[0], r[0])
+    print '<a href="http://packages.qa.debian.org/%s">%s</a>' % (r[0], r[0])
     print '%s</td><td>%s' % (nobold, bold)
     print '<a href="http://bugs.debian.org/%s">%s</a>' % (r[1], r[1])
     print '%s</td><td>%s' % (nobold, bold)

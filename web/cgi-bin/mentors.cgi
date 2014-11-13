@@ -156,7 +156,7 @@ pkgs.each do |l|
   puts status
   puts "</td>"
   puts "<td>"
-  puts "<a href=\"http://tracker.debian.org/#{l['name']}\">PTS</a>"
+  puts "<a href=\"http://packages.qa.debian.org/#{l['name']}\">PTS</a>"
   puts "<a href=\"http://mentors.debian.net/package/#{l['name']}\">mentors</a>"
   puts "</td>"
   puts "</tr>"

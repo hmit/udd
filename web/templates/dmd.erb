@@ -117,7 +117,7 @@
         <td><%= t[:type] %></td>
         <td>
             <span title="<%= t[:reason] %>">
-            <a href="http://tracker.debian.org/<%= t[:source] %>"><%= t[:source] %></a>
+            <a href="http://packages.qa.debian.org/<%= t[:source] %>"><%= t[:source] %></a>
             </span>
         </td>
         <% if t[:link] %>
@@ -150,7 +150,7 @@
 <% uddd.sources.sort.each do |src,h| %>
     <% next if not $uddd.versions.include?(src) %>
     <% next if not $uddd.versions[src].include?('debian') %>
-    <tr><td><a href="http://tracker.debian.org/<%= src %>" title="<%= h[:reason] %>"><%= src %></a></td>
+    <tr><td><a href="http://packages.qa.debian.org/<%= src %>" title="<%= h[:reason] %>"><%= src %></a></td>
 
     <% h[:versions].each do |v| %>
       <% if v[:count] == 1 %>
@@ -203,7 +203,7 @@
   <% bc.keys.sort.each do |src| %>
     <% b = bc[src] %>
     <% next if b[:all] == 0 %>
-    <tr><td><a href="http://tracker.debian.org/<%= src %>" title=""><%= src %></a></td>
+    <tr><td><a href="http://packages.qa.debian.org/<%= src %>" title=""><%= src %></a></td>
     <td class="center"><a href="http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=<%= src %>"><%= b[:all] > 0 ? b[:all] : '' %></a></td>
     <td class="center"><a href="http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=<%= src %>&sev-inc=critical&sev-inc=grave&sev-inc=serious"><%= b[:rc] > 0 ? b[:rc] : '' %></a></td>
     <td class="center"><a href="http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=<%= src %>&include=tags:patch"><%= b[:patch] > 0 ? b[:patch] : '' %></a></td>
