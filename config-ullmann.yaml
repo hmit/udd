@@ -377,6 +377,9 @@ blend-ezgo:
 blend-gis:
   <<: *blends-conf      
 
+blend-hamradio:
+  <<: *blends-conf      
+
 blend-junior:
   <<: *blends-conf
 
