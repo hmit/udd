@@ -70,7 +70,7 @@ end
 pseudopkg = dbget("select package from pseudo_packages").map { |r| r['package'] }
 pseudopkg -= ['mirrors', 'base', 'cdrom', 'wnpp', 'installation-reports', 'tech-ctte', 'general', 'project', 'spam', 'press', 'release-notes', 'upgrade-reports']
 
-dbget("select id, source, package, title from bugs where id in (select id from bugs_usertags where email='debian-qa@lists.debian.org' and tag='gift') and status != 'done'").each do |r|
+dbget("select id, source, package, title from bugs where (id in (select id from bugs_usertags where email='debian-qa@lists.debian.org' and tag='gift') or id in (select id from bugs_tags where tag='newcomer')) and status != 'done';").each do |r|
   hash = Digest::MD5.hexdigest("gift #{r['id']}")
   helpitems << {
     'type' => 'gift',
