@@ -173,6 +173,8 @@ sub run_usertags {
 			map { $dbh->do("INSERT INTO $table (email, tag, id) VALUES ($user, $qtag, $_)") or die $! } @{$tags{$tag}};
 		}
 	}
+	# importing usertags for merged bugs
+	$dbh->do("insert into bugs_usertags (email, tag, id) select email, tag, merged_with from bugs_usertags bu, bugs_merged_with bmw where bu.id = bmw.id and (email, tag, merged_with) not in (select email, tag, id from bugs_usertags)") or die $!;
 	print "Inserting usertags: ",(time() - $t),"s\n" if $timing;
 }
 
