@@ -87,7 +87,7 @@ TYPES = [
   ['apparmor', 'AppArmor team', "bugs.source in (select source from sources where maintainer ~ 'pkg-apparmor-team@lists.alioth.debian.org' or uploaders ~ 'pkg-apparmor-team@lists.alioth.debian.org')"],
   ['kfreebsd', 'GNU/kFreeBSD bugs', 'id in (select id from bugs_usertags where email = \'debian-bsd@lists.debian.org\' and tag=\'kfreebsd\')', false],
   ['hurd', 'GNU/Hurd bugs', 'id in (select id from bugs_usertags where email = \'debian-hurd@lists.debian.org\' and tag=\'hurd\')', false],
-  ['gift', 'bugs tagged <a href="https://wiki.debian.org/qa.debian.org/GiftTag">Gift</a>', 'id in (select id from bugs_usertags where email = \'debian-qa@lists.debian.org\' and tag=\'gift\')', false],
+  ['gift', 'bugs tagged newcomer or <a href="https://wiki.debian.org/qa.debian.org/GiftTag">Gift</a>', 'id in (select id from bugs_usertags where email = \'debian-qa@lists.debian.org\' and tag=\'gift\' union select id from bugs_tags where tag=\'newcomer\')', false],
   ['allbugs', 'All bugs', 'true', false],
 ]
 
