@@ -147,11 +147,11 @@ Help make a first step towards resolution!
 <p>How do we compare to the Squeeze release cycle?</p>
 <table border=1>
 <tr><th>Week</th> <th>Squeeze</th>        <th>Wheezy</th>         <th>Jessie</th></tr>
-<tr><td>43</td>   <td>284 (213+71)</td>   <td>468 (332+136)</td>  <td></td></tr>
-<tr><td>44</td>   <td>261 (201+60)</td>   <td>408 (265+143)</td>  <td></td></tr>
-<tr><td>45</td>   <td>261 (205+56)</td>   <td>425 (291+134)</td>  <td></td></tr>
-<tr><td>46</td>   <td>271 (200+71)</td>   <td>401 (258+143)</td>  <td></td></tr>
-<tr><td>47</td>   <td>283 (209+74)</td>   <td>366 (221+145)</td>  <td></td></tr>
+<tr><td>43</td>   <td>284 (213+71)</td>   <td>468 (332+136)</td>  <td>319 (240+79)</td></tr>
+<tr><td>44</td>   <td>261 (201+60)</td>   <td>408 (265+143)</td>  <td>274 (224+50)</td></tr>
+<tr><td>45</td>   <td>261 (205+56)</td>   <td>425 (291+134)</td>  <td>295 (229+66)</td></tr>
+<tr><td>46</td>   <td>271 (200+71)</td>   <td>401 (258+143)</td>  <td>427 (313+114)</td></tr>
+<tr><td>47</td>   <td>283 (209+74)</td>   <td>366 (221+145)</td>  <td>342 (260+82)</td></tr>
 <tr><td>48</td>   <td>256 (177+79)</td>   <td>378 (230+148)</td>  <td></td></tr>
 <tr><td>49</td>   <td>256 (180+76)</td>   <td>360 (216+155)</td>  <td></td></tr>
 <tr><td>50</td>   <td>204 (148+56)</td>   <td>339 (195+144)</td>  <td></td></tr>
