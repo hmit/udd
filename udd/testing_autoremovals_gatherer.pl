@@ -435,7 +435,7 @@ WHERE   b.severity >= 'serious'
                           OR ut.tag = '$testing-no-auto-remove'
                          )
             )
-        AND b.arrival < CURRENT_TIMESTAMP - INTERVAL '14 days'
+        AND b.arrival < CURRENT_TIMESTAMP - INTERVAL '7 days'
         AND b.id = s.id
 GROUP BY
         b.source,
