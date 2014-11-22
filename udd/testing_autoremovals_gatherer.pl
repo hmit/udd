@@ -379,7 +379,8 @@ SELECT  b.source,
         EXTRACT(epoch FROM b.last_modified) AS last_modified,
         min(s.db_updated) AS last_check,
         b4.bugs_unstable,
-        b5.id AS unblock_request
+        b5.id AS unblock_request,
+        count(ub.source) as unblock_hints
 FROM    bugs_stamps s,
         bugs b
         LEFT JOIN
@@ -404,6 +405,13 @@ FROM    bugs_stamps s,
                  AND b2.title LIKE ('%unblock: %/%')
         ) b5
         ON b.source = b5.source
+        LEFT JOIN
+        -- unblock hints
+        (
+            SELECT * FROM hints
+            WHERE type = 'unblock'
+        ) ub
+        ON b.source = ub.source
 WHERE   b.severity >= 'serious'
         AND b.affects_testing = true
         AND b.source IN ( -- in testing
@@ -429,7 +437,13 @@ WHERE   b.severity >= 'serious'
             )
         AND b.arrival < CURRENT_TIMESTAMP - INTERVAL '14 days'
         AND b.id = s.id
-GROUP BY b.source, b.id, b4.source, b4.bugs_unstable, b5.source, b5.id
+GROUP BY
+        b.source,
+        b.id,
+        b4.source,
+        b4.bugs_unstable,
+        b5.source,
+        b5.id
 
 ";
 
@@ -449,8 +463,11 @@ GROUP BY b.source, b.id, b4.source, b4.bugs_unstable, b5.source, b5.id
 			}
 
 			# during the freeze, we only whitelist bugs fixed in unstable if
-			# there is an unblock request
-			if (!$pg->{"affects_unstable"} && $pg->{"unblock_request"}) {
+			# there is an unblock request or an unblock hint
+			if (!$pg->{"affects_unstable"} && (
+					$pg->{"unblock_request"} ||
+					$pg->{"unblock_hints"}
+				)) {
 				unless ($pg->{"bugs_unstable"}) {
 					# if the bug is fixed in unstable, but not (yet) in
 					# testing and there are no other bugs affecting the
