@@ -400,7 +400,7 @@ FROM    bugs_stamps s,
              SELECT array_to_string(regexp_matches(title,'unblock: ([^ /]*)/'),'') AS source,
              id FROM bugs b2
              WHERE b2.source = 'release.debian.org'
-                 AND b2.done != 'done'
+                 AND b2.status != 'done'
                  -- Find (?:pre-approve )?unblock: <src>/.*
                  AND b2.title LIKE ('%unblock: %/%')
         ) b5
