@@ -307,7 +307,9 @@ sub _calculate_rdeps {
         foreach my $el (keys %{$needs->{$src}}) {
             next if $el eq '_version';
             # skip build-deps for now, because britney ignores them
-            next if $el eq '_BD';
+            # during the freeze, build-deps can't come back, so we don't
+            # ignore them
+            #next if $el eq '_BD';
             foreach my $dep (keys %{$needs->{$src}->{$el}}) {
                 my $providers = $bin2src->{$dep};
                 #print STDERR "N: $src ($el) -> $prov_src ($dep)\n" if $prov_src;
@@ -379,7 +381,8 @@ SELECT  b.source,
         EXTRACT(epoch FROM b.last_modified) AS last_modified,
         min(s.db_updated) AS last_check,
         b4.bugs_unstable,
-        b5.id AS unblock_request
+        b5.id AS unblock_request,
+        count(ub.source) as unblock_hints
 FROM    bugs_stamps s,
         bugs b
         LEFT JOIN
@@ -399,11 +402,18 @@ FROM    bugs_stamps s,
              SELECT array_to_string(regexp_matches(title,'unblock: ([^ /]*)/'),'') AS source,
              id FROM bugs b2
              WHERE b2.source = 'release.debian.org'
-                 AND b2.done != 'done'
+                 AND b2.status != 'done'
                  -- Find (?:pre-approve )?unblock: <src>/.*
                  AND b2.title LIKE ('%unblock: %/%')
         ) b5
         ON b.source = b5.source
+        LEFT JOIN
+        -- unblock hints
+        (
+            SELECT * FROM hints
+            WHERE type = 'unblock'
+        ) ub
+        ON b.source = ub.source
 WHERE   b.severity >= 'serious'
         AND b.affects_testing = true
         AND b.source IN ( -- in testing
@@ -427,9 +437,15 @@ WHERE   b.severity >= 'serious'
                           OR ut.tag = '$testing-no-auto-remove'
                          )
             )
-        AND b.arrival < CURRENT_TIMESTAMP - INTERVAL '14 days'
+        AND b.arrival < CURRENT_TIMESTAMP - INTERVAL '7 days'
         AND b.id = s.id
-GROUP BY b.source, b.id, b4.source, b4.bugs_unstable, b5.source, b5.id
+GROUP BY
+        b.source,
+        b.id,
+        b4.source,
+        b4.bugs_unstable,
+        b5.source,
+        b5.id
 
 ";
 
@@ -449,8 +465,11 @@ GROUP BY b.source, b.id, b4.source, b4.bugs_unstable, b5.source, b5.id
 			}
 
 			# during the freeze, we only whitelist bugs fixed in unstable if
-			# there is an unblock request
-			if (!$pg->{"affects_unstable"} && $pg->{"unblock_request"}) {
+			# there is an unblock request or an unblock hint
+			if (!$pg->{"affects_unstable"} && (
+					$pg->{"unblock_request"} ||
+					$pg->{"unblock_hints"}
+				)) {
 				unless ($pg->{"bugs_unstable"}) {
 					# if the bug is fixed in unstable, but not (yet) in
 					# testing and there are no other bugs affecting the

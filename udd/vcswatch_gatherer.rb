@@ -34,7 +34,9 @@ class VcswatchGatherer
     @db.exec("SET CONSTRAINTS ALL DEFERRED")
     @db.exec("DELETE FROM vcswatch")
     fd = Zlib::GzipReader::open('/srv/udd.debian.org/mirrors/qa.debian.org-vcswatch')
-    d = JSON::parse(fd.read)
+    s = fd.read
+    s.force_encoding('utf-8')
+    d = JSON::parse(s)
     fd.close
     d.each do |pkg|
       @db.exec_prepared('vcswatch_insert', ['package', 'package_version', 'vcs', 'url', 'branch', 'browser', 'last_scan', 'next_scan', 'status', 'debian_dir', 'changelog_version', 'changelog_distribution', 'changelog', 'error'].map { |e| pkg[e] } )
