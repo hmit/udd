@@ -53,7 +53,7 @@
     </ul>
 </div>
 
-<form id='searchform' action="/bugs/" method="get" onsubmit="removeBlankFields(this);">
+<form id='searchform' action="/bugs/#results" method="get" onsubmit="removeBlankFields(this);">
 
 <h3 id='suites'>Suites<sup>[<a href="#ftn.distro">1</a>]</sup></h3>
 <div class='indent'>
@@ -103,7 +103,7 @@
     <ul class="columns2">
     <% COLUMNS.each do |r| %>
     <% checked = cols[r[0]] ? 'checked':'' %>
-    <li><label><input type='checkbox' name='<%= r[0] %>' value='1' <%= checked %>/><%= r[1] %></label></li>>
+    <li><label><input type='checkbox' name='<%= r[0] %>' value='1' <%= checked %>/><%= r[1] %></label></li>
     <% end %>
     </ul>
 </div>
