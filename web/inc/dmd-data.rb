@@ -188,7 +188,7 @@ and s2.version > s1.version);
         st = case r['status']
              when 'up to date' then :up_to_date
              when 'Debian version newer than remote site' then :newer_in_debian
-             when 'Newer version available' then :out_of_date_in_unstable
+             when 'Newer version available' then :out_of_date
              when 'error' then :error
              else nil
              end
