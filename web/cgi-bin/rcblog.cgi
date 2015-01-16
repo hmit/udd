@@ -158,8 +158,8 @@ Help make a first step towards resolution!
 <tr><td>51</td>   <td>178 (124+54)</td>   <td>323 (190+133)</td>  <td>189 (134+55)</td></tr>
 <tr><td>52</td>   <td>115 (78+37)</td>    <td>289 (190+99)</td>   <td>147 (112+35)</td></tr>
 <tr><td>1</td>    <td>93 (60+33)</td>     <td>287 (171+116)</td>  <td>140 (104+36)</td></tr>
-<tr><td>2</td>    <td>82 (46+36)</td>     <td>271 (162+109)</td>  <td></td></tr>
-<tr><td>3</td>    <td>25 (15+10)</td>     <td>249 (165+84)</td>   <td></td></tr>
+<tr><td>2</td>    <td>82 (46+36)</td>     <td>271 (162+109)</td>  <td>157 (124+33)</td></tr>
+<tr><td>3</td>    <td>25 (15+10)</td>     <td>249 (165+84)</td>   <td>172 (128+44)</td></tr>
 <tr><td>4</td>    <td>14 (8+6)</td>       <td>244 (176+68)</td>   <td></td></tr>
 <tr><td>5</td>    <td>2 (0+2)</td>        <td>224 (132+92)</td>   <td></td></tr>
 <tr><td>6</td>    <td>release!</td>       <td>212 (129+83)</td>   <td></td></tr>
