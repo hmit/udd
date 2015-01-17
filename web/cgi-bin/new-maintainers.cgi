@@ -61,7 +61,7 @@ sth.execute ; rows = sth.fetch_all
 
 unless csvflag
   puts "<h2>New Debian maintainers</h2>"
-  puts "This page lists the first upload of each maintainer (identified by his name and email), together with its sponsor."
+  puts "This page lists the first upload of each maintainer (identified by their name and email), together with its sponsor."
 
 
   puts "<table>"
