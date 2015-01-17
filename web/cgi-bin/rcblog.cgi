@@ -144,7 +144,7 @@ Help make a first step towards resolution!
  </li>
 </ul>
 
-<p>How do we compare to the Squeeze release cycle?</p>
+<p>How do we compare to the Squeeze and Wheezy release cycles?</p>
 <table border=1>
 <tr><th>Week</th> <th>Squeeze</th>        <th>Wheezy</th>         <th>Jessie</th></tr>
 <tr><td>43</td>   <td>284 (213+71)</td>   <td>468 (332+136)</td>  <td>319 (240+79)</td></tr>
