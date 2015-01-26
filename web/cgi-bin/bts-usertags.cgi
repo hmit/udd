@@ -175,7 +175,7 @@ def tagged_bugs(user, tag):
                    WHERE bugs_usertags.email = %s AND bugs_usertags.tag = %s
                    ORDER BY id
               """, ('id', 'package', 'source', 'title', 'done'), user, tag)
-    head('Tagged %(tag)s by <a href="?%(params)s">%(user)s</a>'
+    head('Tagged %(tag)s by %(user)s'
          % {
             'tag': strip_tags(tag),
             'user': strip_tags(user),
