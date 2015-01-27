@@ -193,7 +193,7 @@ def tagged_bugs(user, tag):
                'target': ('src:' if result.source == result.package else '')
                          + result.package,
               },
-           result.title,
+           cgi.escape(result.title),
            '<a href="?bug=%s">list usertags</a>' % result.id,
            attrs=attrs)
     tfoot()
