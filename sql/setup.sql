@@ -1974,3 +1974,12 @@ CREATE TABLE vcswatch
 );
 
 GRANT SELECT ON vcswatch TO PUBLIC;
+
+CREATE TABLE reproducible
+  (source text primary key,
+   version debversion,
+   release text,
+   status text
+);
+
+GRANT SELECT ON reproducible TO PUBLIC;
