@@ -4,6 +4,7 @@ general:
   types:
     archive: exec ruby /srv/udd.debian.org/udd/udd/archive_gatherer.rb
     mentors: exec ruby /srv/udd.debian.org/udd/udd/mentors_gatherer.rb
+    reproducible: exec ruby /srv/udd.debian.org/udd/udd/reproducible_gatherer.rb
     vcswatch: exec ruby /srv/udd.debian.org/udd/udd/vcswatch_gatherer.rb
     sources: module udd.sources_gatherer
     packages: module udd.packages_gatherer
@@ -462,3 +463,6 @@ mentors:
 vcswatch:
   update-command: /srv/udd.debian.org/udd/scripts/sync-vcswatch
   type: vcswatch
+
+reproducible:
+  type: reproducible
