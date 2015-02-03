@@ -2,41 +2,36 @@
 require 'cgi'
 require 'uri'
 require 'yaml'
+$LOAD_PATH.unshift File.dirname(__FILE__) + '/inc'
+require 'dmd-data'
+require 'page'
 
 STDERR.reopen(STDOUT) # makes live debugging much easier
-
-require File.expand_path(File.dirname(__FILE__))+'/inc/dmd-data'
-require File.expand_path(File.dirname(__FILE__))+'/inc/page'
 
 cgi = CGI::new
 tstart = Time::now
 
-default_packages = ''
-default_packages = CGI.escapeHTML(cgi.params['packages'][0]) if cgi.params['packages'][0]
-default_bin2src = ''
-default_bin2src = CGI.escapeHTML(cgi.params['bin2src'][0]) if cgi.params['bin2src'][0]
-
-default_ignpackages = ''
-default_ignpackages = CGI.escapeHTML(cgi.params['ignpackages'][0]) if cgi.params['ignpackages'][0]
-default_ignbin2src = ''
-default_ignbin2src = CGI.escapeHTML(cgi.params['ignbin2src'][0]) if cgi.params['ignbin2src'][0]
-
-defaults = {}
-defaults['nosponsor'] = {}
-defaults['nouploader'] = {}
-defaults['email'] = {}
-['1','2','3'].each do |i|
-  ['nosponsor', 'nouploader','email'].each do |s|
-    if cgi.params[s+i][0]
-      defaults[s][i] = CGI.escapeHTML(cgi.params[s+i][0])
-    else
-      defaults[s][i] = ''
-    end
+three = {'1' => '', '2' => '', '3' => ''}
+params = {'email'       => three.clone,
+          'nosponsor'   => three.clone,
+          'nouploader'  => three.clone,
+          'packages'    => '',
+          'bin2src'     => '',
+          'ignpackages' => '',
+          'ignbin2src'  => ''}
+['email', 'nosponsor', 'nouploader'].each do |s|
+  params[s].each do |k, v|
+    p = cgi.params[s + k][0]
+    params[s][k] = CGI.escapeHTML(p) if p
   end
 end
+['packages', 'bin2src', 'ignpackages', 'ignbin2src'].each do |s|
+  p = cgi.params[s][0]
+  params[s] = CGI.escapeHTML(p) if p
+end
+
 
 if cgi.params != {}
-
   emails = {}
 
   # for compatibility purposes
@@ -50,10 +45,10 @@ if cgi.params != {}
       types = [ :maintainer, :uploader, :sponsor ]
       types.delete(:uploader) if cgi.params["nouploader#{i}"][0] == 'on'
       types.delete(:sponsor) if cgi.params["nosponsor#{i}"][0] == 'on'
-      emails[em] = types
+      parsed_emails[email] = types
     end
   end
-  $uddd = UDDData::new(emails, cgi.params["packages"][0] || "", cgi.params["bin2src"][0] == 'on', cgi.params["ignpackages"][0] || "", cgi.params["ignbin2src"][0] == 'on')
+  $uddd = UDDData::new(parsed_emails, cgi.params["packages"][0] || "", cgi.params["bin2src"][0] == 'on', cgi.params["ignpackages"][0] || "", cgi.params["ignbin2src"][0] == 'on')
 
   $uddd.get_sources
   $uddd.get_sources_status
@@ -227,15 +222,11 @@ end
 
 format = cgi.params['format'][0]
 page = Page.new(data, format, 'templates/dmd.erb',
-                { :default_packages => default_packages,
-                  :default_bin2src => default_bin2src,
-                  :default_ignpackages => default_ignpackages,
-                  :default_ignbin2src => default_ignbin2src,
-                  :defaults => defaults,
-                  :uddd => $uddd,
-                  :ubuntu => $ubuntu,
-                  :USTB => $ustb,
-                  :UDEV => $udev,
-                  :tstart => tstart },
+                {:params => params,
+                 :uddd => $uddd,
+                 :ubuntu => $ubuntu,
+                 :USTB => $ustb,
+                 :UDEV => $udev,
+                 :tstart => tstart },
                'Debian Maintainer Dashboard', feeditems)
 page.render()

@@ -2,8 +2,9 @@
 require "erb"
 require 'oj'
 require 'yaml'
-require File.expand_path(File.dirname(__FILE__))+'/feed'
-require File.expand_path(File.dirname(__FILE__))+'/cal'
+$LOAD_PATH.unshift File.dirname(__FILE__)
+require 'feed'
+require 'cal'
 
 class Page
   attr_accessor :data, :format, :template, :title, :feeditems
