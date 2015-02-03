@@ -17,9 +17,9 @@ end
 
 class UDDData
   attr_accessor :debug
-  attr_reader :sources, :versions, :all_bugs, :bugs_tags, :bugs_count, :migration, :buildd, :dmd_todos, :ubuntu_bugs, :autoremovals, :qa
+  attr_reader :sources, :versions, :all_bugs, :bugs_tags, :bugs_count, :migration, :buildd, :dmd_todos, :ubuntu_bugs, :autoremovals, :qa, :ubuntu, :ustb, :udev
 
-  def initialize(emails = {}, addsources = "", bin2src = false, ignsources = "", ignbin2src = false)
+  def initialize(emails={}, addsources="", bin2src=false, ignsources="", ignbin2src=false)
     @debug = false
     @emails = emails
     @addsources = addsources
@@ -36,9 +36,22 @@ class UDDData
       puts "</pre>"
       exit(0)
     end
+
+    get_sources
+    get_sources_versions
+    get_sources_bugs
+    get_migration
+    get_buildd
+    get_qa
+    get_sources_dirty
+    get_autoremovals
+    get_dmd_todos
+    get_ubuntu_bugs
+    get_ubuntu_dirty
   end
 
   def get_sources
+    @sources = {}
     dbget("create temporary table mysources(source text)")
 
     dbget <<-EOF
@@ -141,6 +154,19 @@ and s2.version > s1.version);
 
     if not srcs.empty?
       dbget("insert into mysources values (#{srcs.keys.map { |e| quote(e) }.join('),(')})")
+    end
+
+    srcs.each do |k, v|
+      if v[0] == :manually_listed
+        r = "Manually listed"
+      elsif v[0] == :maintainer
+        r = "Maintained by #{v[1]}"
+      elsif v[0] == :uploader
+        r = "Co-maintained by #{v[1]}"
+      elsif v[0] == :sponsor
+        r = "Was uploaded by #{v[1]}"
+      end
+      srcs[k].push(r)
     end
 
     @sources = srcs
@@ -347,6 +373,77 @@ group by package) tpatches on tbugs.package = tpatches.package order by package 
       @bugs_count[src] = { :rc => rc_bugs, :all => openbugs.count, :patch => patches, :pending => pending }
     end
   end
+
+  def get_ubuntu_dirty
+      @ubuntu = Array.new
+      ur = YAML::load(IO::read('ubuntu-releases.yaml'))
+      @ustb = ur['stable']
+      @udev = ur['devel']
+      @sources.keys.sort.each do |src|
+        next if not versions.include?(src)
+        next if (not versions[src].include?('debian') or not versions[src].include?('ubuntu'))
+
+        ub = ubuntu_bugs[src]
+        if ub.nil?
+          bugs = 0
+          patches = 0
+        else
+          bugs = ub[:bugs]
+          patches = ub[:patches]
+        end
+
+        dv = versions[src]['debian']
+        if dv['sid']
+          sid = dv['sid'][:version]
+        else
+          sid = ''
+        end
+
+        du = versions[src]['ubuntu']
+        ustb = ''
+        udev = ''
+        if not du.nil?
+          ustb = du[@ustb][:version] if du[@ustb]
+          ustb += "<br>sec:&nbsp;#{du["#{@ustb}-security"][:version]}" if du["#{@ustb}-security"]
+          ustb += "<br>upd:&nbsp;#{du["#{@ustb}-updates"][:version]}" if du["#{@ustb}-updates"]
+          ustb += "<br>prop:&nbsp;#{du["#{@ustb}-proposed"][:version]}" if du["#{@ustb}-proposed"]
+          ustb += "<br>bpo:&nbsp;#{du["#{@ustb}-backports"][:version]}" if du["#{@ustb}-backports"]
+
+          udev = du[@udev][:version] if du[@udev]
+          if udev == sid
+            if bugs == 0 and patches == 0
+              next
+            end
+          elsif sid != ''
+            if UDDData.compare_versions(udev, sid) == -1
+              if udev =~ /ubuntu/
+                udev = "<a href=\"http://ubuntudiff.debian.net/?query=-FPackage+#{src}\"><span class=\"prio_high\" title=\"Outdated version in Ubuntu, with an Ubuntu patch\">#{udev}</span></a>"
+              else
+                udev = "<span class=\"prio_med\" title=\"Outdated version in Ubuntu\">#{udev}</span>"
+              end
+            elsif UDDData.compare_versions(udev, sid) == 1
+              udevnb = udev.gsub(/build\d+$/,'')
+              if UDDData.compare_versions(udevnb, sid) == 1
+                udev = "<a href=\"http://ubuntudiff.debian.net/?query=-FPackage+#{src}\"><span class=\"prio_high\" title=\"Newer version in Ubuntu\">#{udev}</span></a>"
+              end
+            end
+          end
+          udev += "<br>sec:&nbsp;#{du["#{@udev}-security"][:version]}" if du["#{@udev}-security"]
+          udev += "<br>upd:&nbsp;#{du["#{@udev}-updates"][:version]}" if du["#{@udev}-updates"]
+          udev += "<br>prop:&nbsp;#{du["#{@udev}-proposed"][:version]}" if du["#{@udev}-proposed"]
+          udev += "<br>bpo:&nbsp;#{du["#{@udev}-backports"][:version]}" if du["#{@udev}-backports"]
+        end
+
+        values = UDDData.group_values(ustb, udev, sid)
+        @ubuntu.push({:src => src,
+                      :bugs => bugs,
+                      :patches => patches,
+                      :pts => "https://tracker.debian.org/#{src}",
+                      :launchpad => "https://bugs.launchpad.net/ubuntu/+source/#{src}",
+                      :values => values
+        })
+        end
+  end
   
   def get_migration
     @migration = {}
@@ -391,13 +488,69 @@ and source not in (select source from upload_history where date > (current_date 
     end
   end
 
-  def get_sources_status
-    get_sources_versions
-    get_sources_bugs
-    get_migration
-    #@debug = true
-    get_buildd
-    get_qa
+  def get_sources_dirty
+    @sources.each do |s|
+        h = Hash.new
+        src = s[0]
+        #reason = src_reason(src)
+        h[src] = Hash.new
+        h[src][:reason] = s[1][2]
+
+        next if not versions[src]
+        dv = versions[src]['debian']
+        t_oldstable = t_stable = t_testing = t_unstable = t_experimental = t_vcs = ''
+
+        t_oldstable += dv['squeeze'][:version] if dv['squeeze']
+        t_oldstable += "<br>sec: #{dv['squeeze-security'][:version]}" if dv['squeeze-security']
+        t_oldstable += "<br>upd: #{dv['squeeze-updates'][:version]}" if dv['squeeze-updates']
+        t_oldstable += "<br>pu: #{dv['squeeze-proposed-updates'][:version]}" if dv['squeeze-proposed-updates']
+        t_oldstable += "<br>bpo: #{dv['squeeze-backports'][:version]}" if dv['squeeze-backports']
+        t_oldstable += "<br>bpo-sl: #{dv['squeeze-backports-sloppy'][:version]}" if dv['squeeze-backports-sloppy']
+
+        t_stable += dv['wheezy'][:version] if dv['wheezy']
+        t_stable += "<br>sec: #{dv['wheezy-security'][:version]}" if dv['wheezy-security']
+        t_stable += "<br>upd: #{dv['wheezy-updates'][:version]}" if dv['wheezy-updates']
+        t_stable += "<br>pu: #{dv['wheezy-proposed-updates'][:version]}" if dv['wheezy-proposed-updates']
+        t_stable += "<br>bpo: #{dv['wheezy-backports'][:version]}" if dv['wheezy-backports']
+        t_stable += "<br>bpo-sl: #{dv['wheezy-backports-sloppy'][:version]}" if dv['wheezy-backports-sloppy']
+
+        t_testing += dv['jessie'][:version] if dv['jessie']
+        t_testing += "<br>sec: #{dv['jessie-security'][:version]}" if dv['jessie-security']
+        t_testing += "<br>upd: #{dv['jessie-updates'][:version]}" if dv['jessie-updates']
+        t_testing += "<br>pu: #{dv['jessie-proposed-updates'][:version]}" if dv['jessie-proposed-updates']
+
+        if dv['sid']
+          t_unstable += dv['sid'][:version]
+          sid = dv['sid'][:version]
+        else
+          sid = ''
+        end
+
+        if dv['experimental']
+          t_experimental += dv['experimental'][:version]
+          exp = dv['experimental'][:version]
+        else
+          exp = ''
+        end
+
+        vcs = versions[src]['vcs']
+        if vcs
+          t = UDDData.compare_versions(sid, vcs[:version])
+          te = UDDData.compare_versions(exp, vcs[:version])
+          if (t == -1 or te == -1) and t != 0 and te != 0 and ['unstable', 'experimental'].include?(vcs[:distribution])
+            t_vcs += "<a href=\"https://qa.debian.org/cgi-bin/vcswatch?package=#{src}\"><span class=\"prio_high\" title=\"Ready for upload to #{vcs[:distribution]}\">#{vcs[:version]}</span></a>"
+          elsif (t == -1 or te == -1) and t != 0 and te != 0
+            t_vcs += "<a href=\"https://qa.debian.org/cgi-bin/vcswatch?package=#{src}\"><span class=\"prio_med\" title=\"Work in progress\">#{vcs[:version]}</span></a>"
+          elsif t == 1 and te == 1
+            t_vcs += "<a href=\"https://qa.debian.org/cgi-bin/vcswatch?package=#{src}\"><span class=\"prio_high\" title=\"Version in archive newer than version in VCS\">#{vcs[:version]}</span></a>"
+          else
+            t_vcs += "#{vcs[:version]}"
+          end
+        end
+
+      h[src][:versions] = UDDData.group_values(t_oldstable, t_stable, t_testing, t_unstable, t_experimental, t_vcs)
+      @sources[src] = h[src]
+      end
   end
 
   def get_dmd_todos
@@ -542,6 +695,11 @@ and source not in (select source from upload_history where date > (current_date 
         :description => "Testing auto-removal",
         :details => "on #{Time.at(v['removal_time']).to_date.to_s}#{bugs}"
       }
+    end
+
+    @dmd_todos.map do |t|
+      t[:reason] = @sources[t[:source]][:reason]
+      t
     end
 
     @dmd_todos

@@ -150,8 +150,8 @@
 </thead>
 <tbody>
 <% uddd.sources.sort.each do |src,h| %>
-    <% next if not $uddd.versions.include?(src) %>
-    <% next if not $uddd.versions[src].include?('debian') %>
+    <% next if not uddd.versions.include?(src) %>
+    <% next if not uddd.versions[src].include?('debian') %>
     <tr><td><a href="https://tracker.debian.org/<%= src %>" title="<%= h[:reason] %>"><%= src %></a></td>
 
     <% h[:versions].each do |v| %>
@@ -165,7 +165,7 @@
     <% end %>
 
     <td>
-    <% up = $uddd.versions[src]['upstream'] %>
+    <% up = uddd.versions[src]['upstream'] %>
     <% if up %>
       <% if up[:status] == :error %>
         <span class="prio_high" title="uscan returned an error">error</a>
@@ -201,7 +201,7 @@
 </tr>
 </thead>
 <tbody>
-  <% bc = $uddd.bugs_count %>
+  <% bc = uddd.bugs_count %>
   <% bc.keys.sort.each do |src| %>
     <% b = bc[src] %>
     <% next if b[:all] == 0 %>
@@ -222,15 +222,15 @@
     <th>source</th>
     <th>bugs</th>
     <th>patches</th>
-    <th><%= USTB %> (stable)</th>
-    <th><%= UDEV %> (devel)</th>
+    <th><%= uddd.ustb %> (stable)</th>
+    <th><%= uddd.udev %> (devel)</th>
     <th>sid</th>
     <th>links</th>
 </tr>
 </thead>
 <tbody>
 
-<% ubuntu.each do |p| %>
+<% uddd.ubuntu.each do |p| %>
     <tr><td><%= p[:src] %>&nbsp;</td>
     <% if p[:bugs] > 0 %>
         <td class="center"><a href="<%= p[:launchpad] %>"><%= p[:bugs] %></a></td>
@@ -259,7 +259,7 @@
 </tbody>
 </table>
 
-<p>Packages with the same version in <i><%= UDEV %></i> and <i>Debian sid</i>, no bugs and no patches are not listed.</p>
+<p>Packages with the same version in <i><%= uddd.udev %></i> and <i>Debian sid</i>, no bugs and no patches are not listed.</p>
 
 <h2 id='qa'>Quality Assurance Checks</h2>
 <table class="buglist tablesorter table table-bordered">
