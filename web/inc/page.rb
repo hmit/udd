@@ -3,6 +3,7 @@ require "erb"
 require 'oj'
 require 'yaml'
 require File.expand_path(File.dirname(__FILE__))+'/feed'
+require File.expand_path(File.dirname(__FILE__))+'/cal'
 
 class Page
   attr_accessor :data, :format, :template, :title, :feeditems
@@ -28,6 +29,8 @@ class Page
       puts Oj.load(Oj.dump(@data)).to_yaml
     elsif @format == 'rss'
       TodoFeed.new(@feeditems, @title)
+    elsif @format == 'ics'
+      TodoCalendar.new(@feeditems, @title)
     else
       content = File.read(File.expand_path(@template))
       t = ERB.new(content)
