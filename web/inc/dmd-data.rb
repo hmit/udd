@@ -240,7 +240,14 @@ EOF
     rows.each do |r|
       @qa[r['source']] ||= {}
       @qa[r['source']]['reproducible'] = r.to_h
-      @qa[r['source']]['reproducible_text'] = "<a href=\"https://reproducible.debian.net/rb-pkg/#{r['source']}.html\" title=\"tested version: #{r['version']} (#{r['release']})\"><span class=\"prio_high\">#{r['status']}</span></a>"
+      if r['status'] == 'reproducible'
+        prio = ''
+        eprio = ''
+      else
+        prio = '<span class=\"prio_high\">'
+        eprio = '</span>'
+      end
+      @qa[r['source']]['reproducible_text'] = "<a href=\"https://reproducible.debian.net/rb-pkg/#{r['source']}.html\" title=\"tested version: #{r['version']} (#{r['release']})\">#{prio}#{r['status']}#{eprio}</a>"
     end
   end
 
