@@ -273,6 +273,14 @@ EOF
       @qa[r['source']]['lintian']['maintainer'] = maint[r['source']]
       @qa[r['source']]['lintian'][r['tag_type']] = r['count'].to_i
     end
+    # piuparts
+    q = "select source, section, status from piuparts_status where source in (select source from mysources) and status = 'fail'"
+    rows = dbget(q)
+    rows.each do |r|
+      @qa[r['source']] ||= {}
+      @qa[r['source']]['piuparts'] ||= []
+      @qa[r['source']]['piuparts'] << r['section']
+    end
   end
 
   def get_ubuntu_bugs

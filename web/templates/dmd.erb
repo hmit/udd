@@ -268,6 +268,7 @@
     <th rowspan="2">source</th>
     <th colspan="6">lintian</th>
     <th rowspan="2">reproducible</th>
+    <th rowspan="2">piuparts</th>
 </tr>
 <tr>
   <th>E</th>
@@ -295,6 +296,16 @@
     <% end %>
     <% if checks['reproducible_text'] %>
       <td><%= checks['reproducible_text'] %></td>
+    <% else %>
+      <td></td>
+    <% end %>
+    <% if checks['piuparts'] %>
+      <td>
+        <% checks['piuparts'].each do |ch| %>
+          <!-- FIXME pkg[0] won't work for libraries... -->
+          <a href="https://piuparts.debian.org/<%= ch %>/source/<%=pkg[0] + '/' + pkg %>.html"><%=ch %></a>
+        <% end %>
+      </td>
     <% else %>
       <td></td>
     <% end %>
