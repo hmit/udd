@@ -1,6 +1,14 @@
 #!/usr/bin/ruby
-require 'vpim/icalendar'
-require 'vpim/vtodo'
+
+# Hack: the wheezy version of vpim is broken (it does not support ruby1.9)
+# so we just add the 1.8 path to the load path
+$:.unshift '/usr/lib/ruby/1.8/vpim/'
+# those paths are actually relative to vim/
+require 'icalendar'
+require 'vtodo'
+# </hack>
+$:.delete!('/usr/lib/ruby/1.8/vpim/')
+
 require 'date'
 
 # Note:
