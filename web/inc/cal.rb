@@ -6,7 +6,7 @@ $:.unshift '/usr/lib/ruby/1.8/'
 require 'vpim/icalendar'
 require 'vpim/vtodo'
 # </hack>
-$:.delete!('/usr/lib/ruby/1.8/')
+$:.delete('/usr/lib/ruby/1.8/')
 
 require 'date'
 
