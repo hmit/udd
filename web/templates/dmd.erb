@@ -265,14 +265,34 @@
 <table class="buglist tablesorter table table-bordered">
 <thead>
 <tr>
-    <th>source</th>
-    <th>reproducible</th>
+    <th rowspan="2">source</th>
+    <th colspan="6">lintian</th>
+    <th rowspan="2">reproducible</th>
+</tr>
+<tr>
+  <th>E</th>
+  <th>W</th>
+  <th>I</th>
+  <th>P</th>
+  <th>X</th>
+  <th>O</th>
 </tr>
 </thead>
 <tbody>
 
 <% uddd.qa.each_pair do |pkg, checks| %>
-  <tr><td><%= pkg %>&nbsp;</td>
+  <tr>
+      <td><%= pkg %></td>
+    <% if checks['lintian'] %>
+      <td><a href="https://lintian.debian.org/full/<%= checks['lintian']['maintainer'] %>.html#<%= pkg %>"><%= checks['lintian']['error'] || '' %></a></td>
+      <td><a href="https://lintian.debian.org/full/<%= checks['lintian']['maintainer'] %>.html#<%= pkg %>"><%= checks['lintian']['warning'] || '' %></a></td>
+      <td><a href="https://lintian.debian.org/full/<%= checks['lintian']['maintainer'] %>.html#<%= pkg %>"><%= checks['lintian']['information'] || '' %></a></td>
+      <td><a href="https://lintian.debian.org/full/<%= checks['lintian']['maintainer'] %>.html#<%= pkg %>"><%= checks['lintian']['pedantic'] || '' %></a></td>
+      <td><a href="https://lintian.debian.org/full/<%= checks['lintian']['maintainer'] %>.html#<%= pkg %>"><%= checks['lintian']['experimental'] || '' %></a></td>
+      <td><a href="https://lintian.debian.org/full/<%= checks['lintian']['maintainer'] %>.html#<%= pkg %>"><%= checks['lintian']['overriden'] || '' %></a></td>
+    <% else %>
+      <td></td> <td></td> <td></td> <td></td> <td></td> <td></td>
+    <% end %>
     <% if checks['reproducible_text'] %>
       <td><%= checks['reproducible_text'] %></td>
     <% else %>

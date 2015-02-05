@@ -249,6 +249,30 @@ EOF
       end
       @qa[r['source']]['reproducible_text'] = "<a href=\"https://reproducible.debian.net/rb-pkg/#{r['source']}.html\" title=\"tested version: #{r['version']} (#{r['release']})\">#{prio}#{r['status']}#{eprio}</a>"
     end
+    # lintian
+    ## get maintainer email for each source. needed for lintian urls
+    q = "select distinct source, maintainer_email from sources_uniq where release in ('sid', 'experimental')"
+    rows = dbget(q)
+    maint = {}
+    rows.each do |r|
+      maint[r['source']] = r['maintainer_email']
+    end
+    ## get real lintian data
+    q = <<-EOF
+select source, tag_type, count(*) as count from
+(
+select package as source, tag_type, tag, information from lintian where package_type='source' and package in (select source from mysources)
+UNION
+select distinct ps.source as source, tag_type, tag, information from lintian, packages_summary ps where package_type='source' and ps.package = lintian.package and ps.release in ('sid', 'experimental') and ps.source in (select source from mysources)) t
+group by source, tag_type;
+EOF
+    rows = dbget(q)
+    rows.each do |r|
+      @qa[r['source']] ||= {}
+      @qa[r['source']]['lintian'] ||= {}
+      @qa[r['source']]['lintian']['maintainer'] = maint[r['source']]
+      @qa[r['source']]['lintian'][r['tag_type']] = r['count'].to_i
+    end
   end
 
   def get_ubuntu_bugs
