@@ -244,7 +244,7 @@ EOF
         prio = ''
         eprio = ''
       else
-        prio = '<span class=\"prio_high\">'
+        prio = '<span class="prio_high">'
         eprio = '</span>'
       end
       @qa[r['source']]['reproducible_text'] = "<a href=\"https://reproducible.debian.net/rb-pkg/#{r['source']}.html\" title=\"tested version: #{r['version']} (#{r['release']})\">#{prio}#{r['status']}#{eprio}</a>"
