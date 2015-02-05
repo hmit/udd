@@ -17,7 +17,7 @@ end
 
 class UDDData
   attr_accessor :debug
-  attr_reader :sources, :versions, :all_bugs, :bugs_tags, :bugs_count, :migration, :buildd, :dmd_todos, :ubuntu_bugs, :autoremovals
+  attr_reader :sources, :versions, :all_bugs, :bugs_tags, :bugs_count, :migration, :buildd, :dmd_todos, :ubuntu_bugs, :autoremovals, :qa
 
   def initialize(emails = {}, addsources = "", bin2src = false, ignsources = "", ignbin2src = false)
     @debug = false
@@ -231,6 +231,19 @@ EOF
     end
   end
 
+  def get_qa
+    @qa = {}
+    return if @sources.empty?
+    # reproducible
+    q = "select source, version, release, status from reproducible where source in (select source from mysources)"
+    rows = dbget(q)
+    rows.each do |r|
+      @qa[r['source']] ||= {}
+      @qa[r['source']]['reproducible'] = r.to_h
+      @qa[r['source']]['reproducible_text'] = "<a href=\"https://reproducible.debian.net/rb-pkg/#{r['source']}.html\" title=\"tested version: #{r['version']} (#{r['release']})\"><span class=\"prio_high\">#{r['status']}</span></a>"
+    end
+  end
+
   def get_ubuntu_bugs
     @ubuntu_bugs = {}
     return @ubuntu_bugs if @sources.empty?
@@ -345,6 +358,7 @@ and source not in (select source from upload_history where date > (current_date 
     get_migration
     #@debug = true
     get_buildd
+    get_qa
   end
 
   def get_dmd_todos
