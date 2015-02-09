@@ -38,7 +38,7 @@
        <a href="#qa">QA Checks</a>
      </div>
    <% end %>
-    <p> The maintainer dashboard exposes information about teams or maintainers' packages. It intends to help answering the question “I have a few hours for Debian, what should I do now?”. Fill in one or more email addresses in the form below to check it out; for example here is <a href="/dmd/?email1=debian-accessibility%40lists.debian.org#todo">the accessibility team todo list</a>.</p>
+   <p> The maintainer dashboard exposes information about teams or maintainers' packages. It intends to help answering the question <i>I have a few hours for Debian, what should I do now?</i>. Fill in one or more email addresses in the form below to check it out; for example here is <a href="/dmd/?email1=debian-accessibility%40lists.debian.org#todo">the accessibility team todo list</a>.</p>
     
 <table>
 <tbody>
@@ -47,7 +47,7 @@
   <% ['1','2','3'].each do |i| %>
     <tr>
     <th>
-        <label for="email<%= i %>">Maintainer / team</label>
+        <label for="email<%= i %>">Contributor / team</label>
     </th>
     <td>
     <div id="autocompletecontainer<%= i %>" class="autocompletecontainer"></div>
