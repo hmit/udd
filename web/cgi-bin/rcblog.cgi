@@ -161,9 +161,9 @@ Help make a first step towards resolution!
 <tr><td>2</td>    <td>82 (46+36)</td>     <td>271 (162+109)</td>  <td>157 (124+33)</td></tr>
 <tr><td>3</td>    <td>25 (15+10)</td>     <td>249 (165+84)</td>   <td>172 (128+44)</td></tr>
 <tr><td>4</td>    <td>14 (8+6)</td>       <td>244 (176+68)</td>   <td>187 (132+55)</td></tr>
-<tr><td>5</td>    <td>2 (0+2)</td>        <td>224 (132+92)</td>   <td></td></tr>
-<tr><td>6</td>    <td>release!</td>       <td>212 (129+83)</td>   <td></td></tr>
-<tr><td>7</td>    <td>release+1</td>      <td>194 (128+66)</td>   <td></td></tr>
+<tr><td>5</td>    <td>2 (0+2)</td>        <td>224 (132+92)</td>   <td>175 (124+51)</td></tr>
+<tr><td>6</td>    <td>release!</td>       <td>212 (129+83)</td>   <td>161 (109+52)</td></tr>
+<tr><td>7</td>    <td>release+1</td>      <td>194 (128+66)</td>   <td></td>147 (106+41)</tr>
 <tr><td>8</td>    <td>release+2</td>      <td>206 (144+62)</td>   <td></td></tr>
 <tr><td>9</td>    <td>release+3</td>      <td>174 (105+69)</td>   <td></td></tr>
 <tr><td>10</td>   <td>release+4</td>      <td>120 (72+48)</td>    <td></td></tr>
