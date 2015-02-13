@@ -34,10 +34,11 @@
        <a href="#todo">Todo list</a> /
        <a href="#versions">Versions</a> /
        <a href="#bugs">Bugs</a> /
-       <a href="#derivatives">Derivatives</a>
+       <a href="#derivatives">Derivatives</a> /
+       <a href="#qa">QA Checks</a>
      </div>
    <% end %>
-    <p> The maintainer dashboard exposes information about teams or maintainers' packages. It intends to help answering the question “I have a few hours for Debian, what should I do now?”. Fill in one or more email addresses in the form below to check it out; for example here is <a href="/dmd/?email1=debian-accessibility%40lists.debian.org#todo">the accessibility team todo list</a>.</p>
+   <p> The maintainer dashboard exposes information about teams or maintainers' packages. It intends to help answering the question <i>I have a few hours for Debian, what should I do now?</i>. Fill in one or more email addresses in the form below to check it out; for example here is <a href="/dmd/?email1=debian-accessibility%40lists.debian.org#todo">the accessibility team todo list</a>.</p>
     
 <table>
 <tbody>
@@ -46,15 +47,15 @@
   <% ['1','2','3'].each do |i| %>
     <tr>
     <th>
-        <label for="email<%= i %>">Maintainer / team</label>
+        <label for="email<%= i %>">Contributor / team</label>
     </th>
     <td>
     <div id="autocompletecontainer<%= i %>" class="autocompletecontainer"></div>
-    <input id="email<%= i %>" type='text' size='32' name='email<%= i %>' value='<%= defaults['email'][i]%>' placeholder="email address">
+    <input id="email<%= i %>" type='text' size='32' name='email<%= i %>' value='<%= params['email'][i]%>' placeholder="email address">
     &nbsp;&nbsp;ignore:
-    <input id="nouploader<%= i %>" name="nouploader<%= i %>" type="checkbox" <%= defaults['nouploader'][i] != '' ? 'checked':'' %>/>
+    <input id="nouploader<%= i %>" name="nouploader<%= i %>" type="checkbox" <%= params['nouploader'][i] != '' ? 'checked':'' %>/>
     <label for="nouploader<%= i %>">co-maintained</label>
-    <input id="nosponsor<%= i %>" name="nosponsor<%= i %>" type="checkbox" <%= defaults['nosponsor'][i] != '' ? 'checked' : '' %>/>
+    <input id="nosponsor<%= i %>" name="nosponsor<%= i %>" type="checkbox" <%= params['nosponsor'][i] != '' ? 'checked' : '' %>/>
     <label for="nosponsor<%= i %>">sponsored / NMUed</label>
     </td>
     </tr>
@@ -64,8 +65,8 @@
             <label for="packages">Additional packages</label>
         </th>
         <td>
-            <input id="packages" name="packages" size="32" placeholder="space-separated list" value="<%= default_packages %>"/>
-            &nbsp;<input id="bin2src" name="bin2src" type="checkbox" <%= default_bin2src != '' ? 'checked' : '' %>/>
+            <input id="packages" name="packages" size="32" placeholder="space-separated list" value="<%= params['packages'] %>"/>
+            &nbsp;<input id="bin2src" name="bin2src" type="checkbox" <%= params['bin2src'] != '' ? 'checked' : '' %>/>
             <label for="bin2src">Packages are binary, convert to source packages</label>
         </td>
     </tr>
@@ -74,8 +75,8 @@
         <label for="ignpackages">Packages to ignore</label>
     </th>
     <td>
-        <input id="ignpackages" name="ignpackages" size="32" placeholder="space-separated list" value="<%= default_ignpackages %>"/>
-        &nbsp;<input id="ignbin2src" name="ignbin2src" type="checkbox" <%= default_ignbin2src != '' ? 'checked' : '' %>/>
+        <input id="ignpackages" name="ignpackages" size="32" placeholder="space-separated list" value="<%= params['ignpackages'] %>"/>
+        &nbsp;<input id="ignbin2src" name="ignbin2src" type="checkbox" <%= params['ignbin2src'] != '' ? 'checked' : '' %>/>
         <label for="ignbin2src">Packages are binary, convert to source packages</label>
     </td>
     </tr>
@@ -86,6 +87,7 @@
          <label><input type='radio' name='format' value='json'/> JSON</label>
          <label><input type='radio' name='format' value='yaml'/> YAML</label>
          <label><input type='radio' name='format' value='rss'/> RSS</label>
+         <label><input type='radio' name='format' value='ics'/> iCalendar</label>
         </td>
     </tr>
     <tr>
@@ -148,8 +150,8 @@
 </thead>
 <tbody>
 <% uddd.sources.sort.each do |src,h| %>
-    <% next if not $uddd.versions.include?(src) %>
-    <% next if not $uddd.versions[src].include?('debian') %>
+    <% next if not uddd.versions.include?(src) %>
+    <% next if not uddd.versions[src].include?('debian') %>
     <tr><td><a href="https://tracker.debian.org/<%= src %>" title="<%= h[:reason] %>"><%= src %></a></td>
 
     <% h[:versions].each do |v| %>
@@ -163,7 +165,7 @@
     <% end %>
 
     <td>
-    <% up = $uddd.versions[src]['upstream'] %>
+    <% up = uddd.versions[src]['upstream'] %>
     <% if up %>
       <% if up[:status] == :error %>
         <span class="prio_high" title="uscan returned an error">error</a>
@@ -199,7 +201,7 @@
 </tr>
 </thead>
 <tbody>
-  <% bc = $uddd.bugs_count %>
+  <% bc = uddd.bugs_count %>
   <% bc.keys.sort.each do |src| %>
     <% b = bc[src] %>
     <% next if b[:all] == 0 %>
@@ -220,15 +222,15 @@
     <th>source</th>
     <th>bugs</th>
     <th>patches</th>
-    <th><%= USTB %> (stable)</th>
-    <th><%= UDEV %> (devel)</th>
+    <th><%= uddd.ustb %> (stable)</th>
+    <th><%= uddd.udev %> (devel)</th>
     <th>sid</th>
     <th>links</th>
 </tr>
 </thead>
 <tbody>
 
-<% ubuntu.each do |p| %>
+<% uddd.ubuntu.each do |p| %>
     <tr><td><%= p[:src] %>&nbsp;</td>
     <% if p[:bugs] > 0 %>
         <td class="center"><a href="<%= p[:launchpad] %>"><%= p[:bugs] %></a></td>
@@ -257,7 +259,67 @@
 </tbody>
 </table>
 
-<p>Packages with the same version in <i><%= UDEV %></i> and <i>Debian sid</i>, no bugs and no patches are not listed.</p>
+<p>Packages with the same version in <i><%= uddd.udev %></i> and <i>Debian sid</i>, no bugs and no patches are not listed.</p>
+
+<h2 id='qa'>Quality Assurance Checks</h2>
+<table class="buglist tablesorter table table-bordered">
+<thead>
+<tr>
+    <th rowspan="2">source</th>
+    <th colspan="6">lintian</th>
+    <th rowspan="2">reproducible</th>
+    <th rowspan="2">piuparts</th>
+</tr>
+<tr>
+  <th>E</th>
+  <th>W</th>
+  <th>I</th>
+  <th>P</th>
+  <th>X</th>
+  <th>O</th>
+</tr>
+</thead>
+<tbody>
+
+<% uddd.qa.each_pair do |pkg, checks| %>
+  <tr>
+      <td><%= pkg %></td>
+    <% if checks['lintian'] %>
+      <td><a href="https://lintian.debian.org/full/<%= checks['lintian']['maintainer'] %>.html#<%= pkg %>"><%= checks['lintian']['error'] || '' %></a></td>
+      <td><a href="https://lintian.debian.org/full/<%= checks['lintian']['maintainer'] %>.html#<%= pkg %>"><%= checks['lintian']['warning'] || '' %></a></td>
+      <td><a href="https://lintian.debian.org/full/<%= checks['lintian']['maintainer'] %>.html#<%= pkg %>"><%= checks['lintian']['information'] || '' %></a></td>
+      <td><a href="https://lintian.debian.org/full/<%= checks['lintian']['maintainer'] %>.html#<%= pkg %>"><%= checks['lintian']['pedantic'] || '' %></a></td>
+      <td><a href="https://lintian.debian.org/full/<%= checks['lintian']['maintainer'] %>.html#<%= pkg %>"><%= checks['lintian']['experimental'] || '' %></a></td>
+      <td><a href="https://lintian.debian.org/full/<%= checks['lintian']['maintainer'] %>.html#<%= pkg %>"><%= checks['lintian']['overriden'] || '' %></a></td>
+    <% else %>
+      <td></td> <td></td> <td></td> <td></td> <td></td> <td></td>
+    <% end %>
+    <% if checks['reproducible_text'] %>
+      <td><%= checks['reproducible_text'] %></td>
+    <% else %>
+      <td>&nbsp;</td>
+    <% end %>
+    <% if checks['piuparts'] %>
+      <td>
+        <% checks['piuparts'].each do |ch| %>
+          <!-- FIXME pkg[0] won't work for libraries... -->
+          <% 
+          if pkg =~ /^lib/
+            pooldir = pkg[0..3]
+          else
+            pooldir = pkg[0]
+          end
+          %>
+          <a href="https://piuparts.debian.org/<%= ch %>/source/<%=pooldir + '/' + pkg %>.html"><%=ch %></a>
+        <% end %>
+      </td>
+    <% else %>
+      <td>&nbsp;</td>
+    <% end %>
+  </tr>
+<% end %>
+</tbody>
+</table>
 
 <small>Generated in <%= sprintf "%.2f", Time::now - tstart %> seconds.</b></small>
 

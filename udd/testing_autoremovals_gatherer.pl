@@ -211,7 +211,7 @@ sub update_autoremovals {
 				$autoremovals->{$buggy_src}->{"rdeps_popcon"} = $totalpopcon||0;
 			} else {
 				print "$buggy_src (".$popcon->{$buggy_src}."): skipped, total popcon of non-buggy rdeps: $totalpopcon\n\n" if $debug;
-				print Dumper $my_rdeps;
+				print Dumper $my_rdeps if $debug;
 				$skipped++;
 				next;
 			}

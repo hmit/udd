@@ -11,8 +11,10 @@ use Data::Dumper;
 $Data::Dumper::Sortkeys = 1;
 
 my $EXC_SRC = [
+	'boost1.54',
 ];
 my $INC_SRC = [
+	'puppet',
 	'debian-installer',
 	'piuparts',
 	'debian-cd',
