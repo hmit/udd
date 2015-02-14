@@ -296,7 +296,7 @@ class blends_prospective_gatherer(gatherer):
             sprosp['maintainer']       = sprosp['maintainer_name'] + ' ' + sprosp['maintainer_email']
 
           # make sure we get a component field in any case even if section field is missing
-          # sprosp['component'] = ''
+          sprosp['component'] = ''
           for prop in ('homepage', 'priority', 'section', 'uploaders', ):
             if src.has_key(prop):
               if prop == 'section':
