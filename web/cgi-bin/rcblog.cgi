@@ -164,7 +164,7 @@ Help make a first step towards resolution!
 <tr><td>5</td>    <td>2 (0+2)</td>        <td>224 (132+92)</td>   <td>175 (124+51)</td></tr>
 <tr><td>6</td>    <td>release!</td>       <td>212 (129+83)</td>   <td>161 (109+52)</td></tr>
 <tr><td>7</td>    <td>release+1</td>      <td>194 (128+66)</td>   <td>147 (106+41)</td></tr>
-<tr><td>8</td>    <td>release+2</td>      <td>206 (144+62)</td>   <td></td></tr>
+<tr><td>8</td>    <td>release+2</td>      <td>206 (144+62)</td>   <td>147 (96+51)</td></tr>
 <tr><td>9</td>    <td>release+3</td>      <td>174 (105+69)</td>   <td></td></tr>
 <tr><td>10</td>   <td>release+4</td>      <td>120 (72+48)</td>    <td></td></tr>
 <tr><td>11</td>   <td>release+5</td>      <td>115 (74+41)</td>    <td></td></tr>
