@@ -1,0 +1,8 @@
+#!/bin/bash
+
+set -x
+set -e
+SUDO="sudo -u postgres"
+$SUDO dropdb udd
+$SUDO createdb -T template0 -E SQL_ASCII udd
+echo 'CREATE EXTENSION debversion' | $SUDO psql udd
