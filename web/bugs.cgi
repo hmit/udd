@@ -449,6 +449,10 @@ if cgi.params != {}
           r['caffected'] = genaffected(r).force_encoding("ASCII-8BIT")
         end
       end
+
+      bugs.each do |r|
+        r['last_modified_string'] = r['last_modified'].to_s
+      end
     end
 
     sth2 = dbh.prepare("select max(start_time) from timestamps where source = 'bugs' and command = 'run'")
