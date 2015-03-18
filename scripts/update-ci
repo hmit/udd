@@ -1,0 +1,26 @@
+#!/usr/bin/ruby
+
+require 'pg'
+require 'pp'
+require 'json'
+require 'open-uri'
+
+db = PG.connect({ :dbname => 'udd', :port => 5452})
+
+db.exec('BEGIN')
+# FIXME there might be more suites at some point
+packages = JSON::parse(open('http://ci.debian.net/data/status/unstable/amd64/packages.json').read)
+db.exec('DELETE FROM ci')
+db.prepare('ci_insert', 'INSERT INTO ci (suite, arch, source, version, date, run_id, status, blame, previous_status, duration, message) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)')
+packages.each do |pkg|
+  pkg['suite'] = 'unstable'
+  pkg['arch'] = 'amd64'
+  pkg['date'] = Time::parse(pkg['date'])
+  pkg['blame'] = pkg['blame'].inspect.to_s
+  pkg['duration_seconds'] = pkg['duration_seconds'].to_i
+  db.exec_prepared('ci_insert', 
+     ['suite', 'arch', 'package', 'version', 'date', 'run_id', 'status', 'blame',
+      'previous_status', 'duration_seconds', 'message'].map { |e| pkg[e] }
+                  )
+end
+db.exec("COMMIT")

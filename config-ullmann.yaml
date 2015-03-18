@@ -15,6 +15,7 @@ general:
     testing-migrations: module udd.testing_migrations_gatherer
     testing-autoremovals: exec perl /srv/udd.debian.org/udd/udd/testing_autoremovals_gatherer.pl 
     upstream: exec /srv/udd.debian.org/udd/scripts/update-upstream-status
+    ci: exec /srv/udd.debian.org/udd/scripts/update-ci
     key-packages: exec /srv/udd.debian.org/udd/scripts/update-key-packages.pl
     vcs: exec /srv/udd.debian.org/udd/scripts/update-vcs-status
     upload-history: module udd.upload_history_gatherer
@@ -159,11 +160,15 @@ upstream:
   schema: upstream
   table: upstream
 
+ci:
+  type: ci
+  schema: ci
+  table: ci
+
 key-packages:
   type: key-packages
   schema: key-packages
   table: key-packages
-
 
 vcs:
   type: vcs

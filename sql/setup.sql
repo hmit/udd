@@ -1939,3 +1939,20 @@ CREATE TABLE reproducible
 );
 
 GRANT SELECT ON reproducible TO PUBLIC;
+
+-- ci.debian.net
+CREATE TABLE ci (
+  suite text NOT NULL,
+  arch text NOT NULL,
+  source text NOT NULL,
+  version debversion,
+  date timestamp,
+  run_id text,
+  status text,
+  blame text,
+  previous_status text,
+  duration integer,
+  message text,
+  primary key(suite,arch,source)
+);
+GRANT SELECT ON ci TO PUBLIC;
