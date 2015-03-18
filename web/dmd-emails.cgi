@@ -1,7 +1,6 @@
 #!/usr/bin/ruby
-
-require 'cgi'
-require 'json'
+$LOAD_PATH.unshift File.dirname(__FILE__) + '/inc'
+require 'dmd-data'
 
 STDERR.reopen(STDOUT) # makes live debugging much easier
 puts "Content-type: text/json\n\n"

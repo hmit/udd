@@ -1,5 +1,10 @@
 #!/usr/bin/ruby
+require 'cgi'
+require 'uri'
+require 'yaml'
+require 'page'
 require 'dbi'
+require 'json'
 require 'pp'
 require 'time'
 require 'debian'
@@ -766,7 +771,12 @@ where release in ('sid', 'experimental', 'jessie')
 WHERE label ~* ?
     EOF
     r = dbget(q, ".*#{email}.*")
-    return r.map { |r| r.to_h }
+    return r.map do |r|
+      r = r.to_h
+      r['value'].encode!('UTF-8', :undef => :replace, :invalid => :replace, :replace => "")
+      r['label'].encode!('UTF-8', :undef => :replace, :invalid => :replace, :replace => "")
+      r
+    end
   end
 
   def UDDData.compare_versions(v1, v2)

@@ -1,11 +1,7 @@
 #!/usr/bin/ruby
 $LOAD_PATH.unshift File.dirname(__FILE__) + '/inc'
 #STDERR.reopen(STDOUT) #makes live debugging easier
-require 'cgi'
-require 'uri'
-require 'yaml'
 require 'dmd-data'
-require 'page'
 
 now = Time::now
 cgi = CGI::new
