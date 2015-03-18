@@ -14,7 +14,3 @@ Short explanation of the files in this directory:
 -------------------------------------------------
 
 setup.sql contains the code to generate a pristine UDD db from scratch.
-upgrade.sql lists the commands needed to upgrade a running UDD db. You
-can't run it, but you can copy-paste from it.
-Under the current scheme, there should be no other files, so all your
-SQL code should go into setup.sql and upgrade.sql.
