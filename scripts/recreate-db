@@ -6,3 +6,12 @@ SUDO="sudo -u postgres"
 $SUDO dropdb udd
 $SUDO createdb -T template0 -E SQL_ASCII udd
 echo 'CREATE EXTENSION debversion' | $SUDO psql udd
+set +x
+ts=$(date --iso-8601=s | sed -e 's/://g' | cut -d '+' -f 1)
+echo "
+To re-import data, do:
+  ssh -t udd.debian.org sudo -u udd pg_dump --no-owner -p 5452 -Fc -v -T 'archived_bugs*' -f /run/shm/udd-$ts.dump udd && \\
+  rsync -avP udd.debian.org:/run/shm/udd-$ts.dump . && \\
+  pg_restore -j 8 -v -d udd udd-$ts.dump && \\
+  ssh -t udd.debian.org sudo -u udd rm /run/shm/udd-$ts.dump
+(It takes 10 mins on a recent machine with a 100 Mbps internet link)"
