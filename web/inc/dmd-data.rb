@@ -281,11 +281,12 @@ EOF
       if r['status'] == 'reproducible'
         prio = ''
         eprio = ''
+        @qa[r['source']]['reproducible_text'] = '' # we don't display anything for successful tests
       else
         prio = '<span class="prio_high">'
         eprio = '</span>'
+        @qa[r['source']]['reproducible_text'] = "<a href=\"https://reproducible.debian.net/rb-pkg/#{r['source']}.html\" title=\"tested version: #{r['version']} (#{r['release']})\">#{prio}#{r['status']}#{eprio}</a>"
       end
-      @qa[r['source']]['reproducible_text'] = "<a href=\"https://reproducible.debian.net/rb-pkg/#{r['source']}.html\" title=\"tested version: #{r['version']} (#{r['release']})\">#{prio}#{r['status']}#{eprio}</a>"
     end
     # lintian
     ## get maintainer email for each source. needed for lintian urls
