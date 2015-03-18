@@ -255,6 +255,13 @@ EOF
     dbget(q).each do |r|
       @ready_for_upload[r['source']] = r.to_h
     end
+
+    # mentors.d.n versions
+    q = "select mp.name, mpv.version, mpv.distribution, mpv.uploaded from mentors_raw_packages mp inner join mentors_most_recent_package_versions mpv on (mp.id = mpv.package_id) where mp.name in (select source from mysources)"
+    rows = dbget(q)
+    rows.each do |r|
+      @versions[r['name']]['mentors'] = { :version => r['version'], :distribution => r['distribution'], :uploaded => r['uploaded'] }
+    end
   end
 
   def get_qa
@@ -674,6 +681,19 @@ and source not in (select source from upload_history where date > (current_date 
                         :details => "#{v['upstream'][:version]} (already in experimental, but not in unstable)" }
       end
     end
+
+    @versions.each_pair do |src, v|
+      next if not v.has_key?('mentors')
+      v = v['mentors']
+      h = Digest::MD5.hexdigest("#{src}_#{v[:version]}#{v[:uploaded]}")
+      @dmd_todos << { :shortname => "mentors_#{h}",
+                      :type => 'mentors',
+                      :source => src,
+                      :link => "http://mentors.debian.net/package/#{src}",
+                      :description => "New version available on mentors",
+                      :details => "#{v[:version]} (uploaded on #{v[:uploaded]})" }
+    end
+
 
     @autoremovals.each_pair do |src, v|
       if v['bugs'] != nil

@@ -146,6 +146,7 @@
     <th>experimental</th>
     <th>vcs</th>
     <th>upstream</th>
+    <th>mentors</th>
 </tr>
 </thead>
 <tbody>
@@ -183,6 +184,14 @@
   <% end %>
       &nbsp;
     </td>
+    <td>
+    <% ment = uddd.versions[src]['mentors'] %>
+    <% if ment %>
+      <a href="http://mentors.debian.net/package/<%= src %>"><span class="prio_high" title="uploaded <%= ment[:uploaded] %>, for <%= ment[:distribution] %>"><%= ment[:version] %></span></a>
+    <% end %>
+      &nbsp;
+    </td>
+
     </tr>
 <% end %>
 </tbody>
