@@ -1,7 +1,8 @@
+<!DOCTYPE html>
 <html>
 <head>
 <title>Debian Maintainer Dashboard</title>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link href="/css/debian.css" rel="stylesheet" type="text/css">
 <link href="/css/udd.css" rel="stylesheet" type="text/css">
 </head>
@@ -40,10 +41,9 @@
    <% end %>
    <p> The maintainer dashboard exposes information about teams or maintainers' packages. It intends to help answering the question <i>I have a few hours for Debian, what should I do now?</i>. Fill in one or more email addresses in the form below to check it out; for example here is <a href="/dmd/?email1=debian-accessibility%40lists.debian.org#todo">the accessibility team todo list</a>.</p>
     
+<form id="searchForm" action="/dmd/#todo" method="get">
 <table>
 <tbody>
-<div>
-<form id="searchForm" action="/dmd/#todo" method="get">
   <% ['1','2','3'].each do |i| %>
     <tr>
     <th>
@@ -83,11 +83,11 @@
     <tr>
         <th>Format</th>
         <td>
-         <label><input type='radio' name='format' value='html' checked='1'/> HTML</label>
-         <label><input type='radio' name='format' value='json'/> JSON</label>
-         <label><input type='radio' name='format' value='yaml'/> YAML</label>
-         <label><input type='radio' name='format' value='rss'/> RSS</label>
-         <label><input type='radio' name='format' value='ics'/> iCalendar</label>
+         <label><input type='radio' name='format' value='html' checked> HTML</label>
+         <label><input type='radio' name='format' value='json'> JSON</label>
+         <label><input type='radio' name='format' value='yaml'> YAML</label>
+         <label><input type='radio' name='format' value='rss'> RSS</label>
+         <label><input type='radio' name='format' value='ics'> iCalendar</label>
         </td>
     </tr>
     <tr>
@@ -97,9 +97,9 @@
             <input type='submit' value='Search' onsubmit="removeBlankFields(this);" class='btn-lg'/>
         </td>
     </tr>
-</form>
 </tbody>
 </table>
+</form>
 
 
 <% if uddd %>
@@ -131,7 +131,7 @@
     </tr>
     <% end %>
 </tbody></table>
-<small><a href="#todo" onclick="reset_todos()">Show all todos</a></small></p> 
+<p><small><a href="#todo" onclick="reset_todos()">Show all todos</a></small></p> 
 
 
 <h2 id='versions'>Versions</h2>
@@ -169,15 +169,15 @@
     <% up = uddd.versions[src]['upstream'] %>
     <% if up %>
       <% if up[:status] == :error %>
-        <span class="prio_high" title="uscan returned an error">error</a>
+        <span class="prio_high" title="uscan returned an error">error</span>
       <% elsif up[:status] == :up_to_date %>
          <%= up[:version] %>
       <% elsif up[:status] == :newer_in_debian %>
-          <span class="prio_high" title="Debian version newer than upstream version. debian/watch bug?"><%= up[:version] %></a>
+          <span class="prio_high" title="Debian version newer than upstream version. debian/watch bug?"><%= up[:version] %></span>
       <% elsif up[:status] == :out_of_date %>
-          <span class="prio_high" title="Newer upstream version available"><%= up[:version] %></a>
+          <span class="prio_high" title="Newer upstream version available"><%= up[:version] %></span>
       <% elsif up[:status] == :out_of_date_in_unstable %>
-          <span class="prio_med" title="Newer upstream version available (already packaged in experimental)"><%= up[:version] %></a>
+          <span class="prio_med" title="Newer upstream version available (already packaged in experimental)"><%= up[:version] %></span>
       <% else %>
           "Unhandled case!"
       <% end %>
@@ -216,9 +216,9 @@
     <% next if b[:all] == 0 %>
     <tr><td><a href="https://tracker.debian.org/<%= src %>" title=""><%= src %></a></td>
     <td class="center"><a href="http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=<%= src %>"><%= b[:all] > 0 ? b[:all] : '' %></a></td>
-    <td class="center"><a href="http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=<%= src %>&sev-inc=critical&sev-inc=grave&sev-inc=serious"><%= b[:rc] > 0 ? b[:rc] : '' %></a></td>
-    <td class="center"><a href="http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=<%= src %>&include=tags:patch"><%= b[:patch] > 0 ? b[:patch] : '' %></a></td>
-    <td class="center"><a href="http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=<%= src %>&pend-inc=pending-fixed&pend-inc=fixed"><%= b[:pending] > 0 ? b[:pending] : '' %></a></td></tr>
+    <td class="center"><a href="http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=<%= src %>&amp;sev-inc=critical&amp;sev-inc=grave&amp;sev-inc=serious"><%= b[:rc] > 0 ? b[:rc] : '' %></a></td>
+    <td class="center"><a href="http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=<%= src %>&amp;include=tags:patch"><%= b[:patch] > 0 ? b[:patch] : '' %></a></td>
+    <td class="center"><a href="http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=<%= src %>&amp;pend-inc=pending-fixed&amp;pend-inc=fixed"><%= b[:pending] > 0 ? b[:pending] : '' %></a></td></tr>
   <% end %>
 </tbody>
 </table>
@@ -330,7 +330,9 @@
 </tbody>
 </table>
 
-<small>Generated in <%= sprintf "%.2f", Time::now - tstart %> seconds.</b></small>
+<br />
+<br />
+<small><b>Generated in <%= sprintf "%.2f", Time::now - tstart %> seconds.</b></small>
 
 <% end %><!-- end if uddd -->
 <br />
