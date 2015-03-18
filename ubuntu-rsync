@@ -1,8 +1,0 @@
-#!/bin/sh
-
-if [ $# != 2 ]; then
-  echo "Usage: $0 <dist> <dest>"
-  exit 1
-fi
-
-rsync -rdv --include "Packages.gz" --include "Sources.gz" --include "**/" --exclude "*" "archive.ubuntu.com::ubuntu/dists/$1/" $2/$1
