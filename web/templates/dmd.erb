@@ -169,7 +169,7 @@
     <% up = uddd.versions[src]['upstream'] %>
     <% if up %>
       <% if up[:status] == :error %>
-        <span class="prio_high" title="uscan returned an error">error</span>
+        <span class="prio_high" title="uscan returned an error: <%= up[:warnings] %><%= [:errors] %>">error</span>
       <% elsif up[:status] == :up_to_date %>
          <%= up[:version] %>
       <% elsif up[:status] == :newer_in_debian %>

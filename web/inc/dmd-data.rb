@@ -189,7 +189,7 @@ and s2.version > s1.version);
     end
 
     # upstream versions
-    q = "select source, distribution, release, upstream_version, status from upstream where source in (select source from mysources) and status is not null"
+    q = "select source, distribution, release, upstream_version, status, warnings, errors from upstream where source in (select source from mysources) and status is not null"
     rows = dbget(q)
     rows.group_by { |r| r['source'] }.each_pair do |k, v|
       unst = v.select { |l| l['release'] == 'sid' }.first
@@ -208,7 +208,7 @@ and s2.version > s1.version);
         else
           st = :out_of_date
         end
-        @versions[unst['source']]['upstream'] = { :status => st, :version => unst['upstream_version'] }
+        @versions[unst['source']]['upstream'] = { :status => st, :version => unst['upstream_version'], :warnings => CGI.escape_html(unst['warnings']), :errors => CGI.escape_html(unst['errors']) }
       elsif unst.nil? and exp != nil
         r = exp
         st = case r['status']
@@ -218,7 +218,7 @@ and s2.version > s1.version);
              when 'error' then :error
              else nil
              end
-        @versions[r['source']]['upstream'] = { :status => st, :version => r['upstream_version'] }
+        @versions[r['source']]['upstream'] = { :status => st, :version => r['upstream_version'], :warnings => CGI.escape_html(r['warnings']), :errors => CGI.escape_html(r['errors']) }
       elsif unst != nil and exp == nil
         r = unst
         st = case r['status']
@@ -228,7 +228,7 @@ and s2.version > s1.version);
              when 'error' then :error
              else nil
              end
-        @versions[r['source']]['upstream'] = { :status => st, :version => r['upstream_version'] }
+        @versions[r['source']]['upstream'] = { :status => st, :version => r['upstream_version'], :warnings => CGI.escape_html(r['warnings']), :errors => CGI.escape_html(r['errors']) }
       else
         puts "ERROR"
         p v
