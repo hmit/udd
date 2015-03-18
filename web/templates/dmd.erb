@@ -278,14 +278,18 @@
     <th colspan="6">lintian</th>
     <th rowspan="2">reproducible</th>
     <th rowspan="2">piuparts</th>
+    <th>ci.debian.net</th>
 </tr>
 <tr>
+  <!-- lintian -->
   <th>E</th>
   <th>W</th>
   <th>I</th>
   <th>P</th>
   <th>X</th>
   <th>O</th>
+  <!-- ci -->
+  <th>unstable/amd64</th>
 </tr>
 </thead>
 <tbody>
@@ -322,6 +326,11 @@
           <a href="https://piuparts.debian.org/<%= ch %>/source/<%=pooldir + '/' + pkg %>.html"><%=ch %></a>
         <% end %>
       </td>
+    <% else %>
+      <td>&nbsp;</td>
+    <% end %>
+    <% if checks['ci'] %>
+      <td><%= checks['ci']['unstable/amd64'][:html] %></td>
     <% else %>
       <td>&nbsp;</td>
     <% end %>

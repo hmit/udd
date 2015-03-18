@@ -314,6 +314,32 @@ EOF
       @qa[r['source']]['piuparts'] ||= []
       @qa[r['source']]['piuparts'] << r['section']
     end
+    # ci.debian.net
+    q = "select suite, arch, source, status, message from ci where source in (select source from mysources)"
+    rows = dbget(q)
+    rows.each do |r|
+      @qa[r['source']] ||= {}
+      @qa[r['source']]['ci'] ||= {}
+      if r['source'] =~ /^lib/
+        poold = r['source'][0..3]
+      else
+        poold = r['source'][0]
+      end
+      if r['status'] == 'pass'
+        prio = ''
+        eprio = ''
+      elsif r['status'] == 'fail'
+        prio = '<span class="prio_high">'
+        eprio = '</span>'
+      elsif r['status'] == 'tmpfail'
+        prio = '<span class="prio_med">'
+        eprio = '</span>'
+      else
+        raise 'Unhandled case'
+      end
+      text = "<a href=\"http://ci.debian.net/packages/#{poold}/#{r['source']}/#{r['suite']}/#{r['arch']}/\" title=\"#{r['message']}\">#{prio}#{r['status']}#{eprio}</a>"
+      @qa[r['source']]['ci'][r['suite']+'/'+r['arch']] = { :status => r['status'], :message => r['message'], :html => text }
+    end
   end
 
   def get_ubuntu_bugs
