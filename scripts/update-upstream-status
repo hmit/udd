@@ -146,15 +146,16 @@ def get_status(source, version, watch_file)
       :errors => d.root.elements['errors'].text,
       :warnings => nil
     }
-  elsif d.root.elements['warnings']
+  elsif not (['debian-uversion', 'debian-mangled-uversion', 'upstream-version', 'upstream-url', 'status'] - d.root.elements.to_a.map { |e| e.name }).empty?
+    # At least one of the required fields is missing. Count as error.
     return {
-      :debian_uversion => nil,
-      :debian_mangled_uversion => nil,
-      :upstream_version => nil,
-      :upstream_url => nil,
+      :debian_uversion => (e = d.root.elements['debian-uversion']) ? e.text : nil,
+      :debian_mangled_uversion => (e = d.root.elements['debian-mangled-uversion']) ? e.text : nil,
+      :upstream_version => (e = d.root.elements['upstream-version']) ? e.text : nil,
+      :upstream_url => (e = d.root.elements['upstream-url']) ? e.text : nil,
       :status => 'error',
       :errors => nil,
-      :warnings => d.root.elements['warnings'].text
+      :warnings => (e = d.root.elements['warnings']) ? e.text : nil
     }
   else
     return {
@@ -164,7 +165,7 @@ def get_status(source, version, watch_file)
       :upstream_url => d.root.elements['upstream-url'].text,
       :status => d.root.elements['status'].text,
       :errors => nil,
-      :warnings => nil
+      :warnings => (e = d.root.elements['warnings']) ? e.text : nil
     }
   end
 end
