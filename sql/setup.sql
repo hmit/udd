@@ -9,7 +9,7 @@ CREATE TABLE sources
     vcs_url text, vcs_browser text,
     python_version text, ruby_versions text, checksums_sha1 text, checksums_sha256 text,
     original_maintainer text, dm_upload_allowed boolean,
-    testsuite text, autobuild text, extra_source_only text,
+    testsuite text, autobuild text, extra_source_only boolean,
     PRIMARY KEY (source, version, distribution, release, component));
 
 GRANT SELECT ON sources TO PUBLIC;
@@ -65,9 +65,9 @@ CREATE TABLE packages
     installed_size int, homepage text, size int,
     build_essential text, origin text, sha1 text, replaces text, section text,
     md5sum text, bugs text, priority text, tag text, task text, python_version text,
-    ruby_versions text, multi_arch text,
+    ruby_versions text, 
     provides text, conflicts text, sha256 text, original_maintainer text,
-    distribution text, release text, component text,
+    distribution text, release text, component text, multi_arch text,
   PRIMARY KEY (package, version, architecture, distribution, release, component),
   FOREIGN KEY (package, version, distribution, release, component) REFERENCES packages_summary DEFERRABLE);
 
@@ -90,7 +90,7 @@ CREATE TABLE ubuntu_sources
     vcs_url text, vcs_browser text,
     python_version text, ruby_versions text, checksums_sha1 text, checksums_sha256 text,
     original_maintainer text, dm_upload_allowed boolean,
-    testsuite text, autobuild text, extra_source_only text,
+    testsuite text, autobuild text, extra_source_only boolean,
     PRIMARY KEY (source, version, distribution, release, component));
 
 CREATE INDEX ubuntu_sources_distrelcomp_idx on ubuntu_sources(distribution, release, component);
@@ -121,9 +121,9 @@ CREATE TABLE ubuntu_packages
     installed_size int, homepage text, size int,
     build_essential text, origin text, sha1 text, replaces text, section text,
     md5sum text, bugs text, priority text, tag text, task text, python_version text,
-    ruby_versions text, multi_arch text,
+    ruby_versions text, 
     provides text, conflicts text, sha256 text, original_maintainer text,
-    distribution text, release text, component text,
+    distribution text, release text, component text, multi_arch text,
   PRIMARY KEY (package, version, architecture, distribution, release, component),
   FOREIGN KEY (package, version, distribution, release, component) REFERENCES ubuntu_packages_summary DEFERRABLE);
 
@@ -146,7 +146,7 @@ CREATE TABLE derivatives_sources
     vcs_url text, vcs_browser text,
     python_version text, ruby_versions text, checksums_sha1 text, checksums_sha256 text,
     original_maintainer text, dm_upload_allowed boolean,
-    testsuite text, autobuild text, extra_source_only text,
+    testsuite text, autobuild text, extra_source_only boolean,
     PRIMARY KEY (source, version, distribution, release, component));
 
 CREATE INDEX derivatives_sources_distrelcomp_idx on derivatives_sources(distribution, release, component);
@@ -177,9 +177,9 @@ CREATE TABLE derivatives_packages
     installed_size int, homepage text, size int,
     build_essential text, origin text, sha1 text, replaces text, section text,
     md5sum text, bugs text, priority text, tag text, task text, python_version text,
-    ruby_versions text, multi_arch text,
+    ruby_versions text, 
     provides text, conflicts text, sha256 text, original_maintainer text,
-    distribution text, release text, component text,
+    distribution text, release text, component text, multi_arch text,
   PRIMARY KEY (package, version, architecture, distribution, release, component),
   FOREIGN KEY (package, version, distribution, release, component) REFERENCES derivatives_packages_summary DEFERRABLE);
 
@@ -203,7 +203,7 @@ CREATE TABLE archived_sources
     vcs_url text, vcs_browser text,
     python_version text, ruby_versions text, checksums_sha1 text, checksums_sha256 text,
     original_maintainer text, dm_upload_allowed boolean,
-    testsuite text, autobuild text, extra_source_only text,
+    testsuite text, autobuild text, extra_source_only boolean,
     PRIMARY KEY (source, version, distribution, release, component));
 
 CREATE INDEX archived_sources_distrelcomp_idx on archived_sources(distribution, release, component);
@@ -234,9 +234,9 @@ CREATE TABLE archived_packages
     installed_size int, homepage text, size int,
     build_essential text, origin text, sha1 text, replaces text, section text,
     md5sum text, bugs text, priority text, tag text, task text, python_version text,
-    ruby_versions text, multi_arch text,
+    ruby_versions text, 
     provides text, conflicts text, sha256 text, original_maintainer text,
-    distribution text, release text, component text,
+    distribution text, release text, component text, multi_arch text,
   PRIMARY KEY (package, version, architecture, distribution, release, component),
   FOREIGN KEY (package, version, distribution, release, component) REFERENCES archived_packages_summary DEFERRABLE);
 
@@ -780,6 +780,8 @@ CREATE TABLE description_imports (
     PRIMARY KEY (distribution, release, component, language)
 );
 
+GRANT SELECT ON description_imports TO PUBLIC;
+
 CREATE TABLE ubuntu_description_imports (
     distribution         text not null,
     release              text not null,
@@ -790,6 +792,8 @@ CREATE TABLE ubuntu_description_imports (
     import_date          timestamp default now(),
     PRIMARY KEY (distribution, release, component, language)
 );
+
+GRANT SELECT ON ubuntu_description_imports TO PUBLIC;
 
 -- active_dds view
 CREATE VIEW active_dds AS
@@ -888,6 +892,7 @@ CREATE TABLE timestamps (
   PRIMARY KEY (id)
 );
 GRANT SELECT ON timestamps TO public;
+GRANT SELECT ON SEQUENCE timestamps_id_seq TO PUBLIC;
 
 -- views
 -- bugs_count
@@ -1013,6 +1018,25 @@ CREATE TABLE upstream (
 
 GRANT SELECT ON upstream TO PUBLIC;
 
+CREATE TABLE upstream_status (
+    source text,
+    version debversion,
+    distribution text,
+    release text,
+    component text,
+    watch_file text,
+    debian_uversion text,
+    debian_mangled_uversion text,
+    upstream_version text,
+    upstream_url text,
+    errors text,
+    warnings text,
+    status text,
+    last_check timestamp without time zone
+);
+
+GRANT SELECT ON upstream_status TO PUBLIC;
+
 CREATE TABLE vcs (
 source text,
 team text,
@@ -1057,45 +1081,23 @@ PRIMARY KEY(package)
 
 GRANT SELECT ON pseudo_packages TO PUBLIC;
 
+CREATE TABLE releases (
+    release text NOT NULL,
+    releasedate date,
+    role text,
+    releaseversion text,
+    distribution text,
+    sort integer,
+PRIMARY KEY (release)
+);
+
+GRANT SELECT ON releases TO PUBLIC;
 
 -- wnpp view
 CREATE VIEW wnpp AS
 SELECT id, SUBSTRING(title from '^([A-Z]{1,3}): .*') as type, SUBSTRING(title from '^[A-Z]{1,3}: ([^ ]+)(?: -- .*)') as source, title FROM bugs WHERE package='wnpp' AND status!='done';
 
 GRANT SELECT ON wnpp TO PUBLIC;
-
-
--- 2012-07-01 addition of upstream gatherer
-
-CREATE TABLE upstream (
-   source text,
-   version debversion,
-   distribution text,
-   release text,
-   component text,
-   watch_file text,
-   debian_uversion text,
-   debian_mangled_uversion text,
-   upstream_version text,
-   upstream_url text,
-   errors text,
-   warnings text,
-   status text,
-   last_check timestamp,
-   primary key (source, version, distribution, release, component)
-);
-
-GRANT SELECT ON upstream TO PUBLIC;
-
-CREATE TABLE vcs (
-source text,
-team text,
-version debversion,
-distribution text,
-primary key(source)
-);
-
-GRANT SELECT ON vcs TO PUBLIC;
 
 -- content of array_accum.sql
 /******************************************************************************
@@ -1167,7 +1169,7 @@ CREATE OR REPLACE FUNCTION versions_archs_component (text) RETURNS SETOF RECORD 
           ) p
 	  JOIN releases ON releases.release = p.release
 	  ORDER BY releases.sort, version;
- $$ LANGUAGE 'SQL';
+ $$ LANGUAGE SQL;
 
 /***********************************************************************************
  * Example of usage: Package seaview which has versions is in different components *
@@ -1183,10 +1185,6 @@ CREATE OR REPLACE FUNCTION versions_archs_component (text) RETURNS SETOF RECORD 
 
 -- content of screenshots.sql
 -- http://screenshots.debian.net/json/screenshots
-
-BEGIN;
-
-DROP TABLE IF EXISTS screenshots CASCADE;
 
 CREATE TABLE screenshots (
 	package			text NOT NULL,
@@ -1204,28 +1202,10 @@ CREATE TABLE screenshots (
 
 GRANT SELECT ON screenshots TO PUBLIC;
 
-COMMIT;
-
--- 'name'       --> 'package'
--- 'section'
--- 'maintainer' --> 'maintainer_name'
--- 'maintainer_email'
--- 'version'
--- 'homepage'
--- 'description'
--- 'url'	--> 'screenshot_url'
--- 'large_image_url'
--- 'small_image_url'
-
--- content of bibref.sql
 
 /************************************************************************************
  * Storing and handling publication references maintained in debian/upstream files  *
  ************************************************************************************/
-
-BEGIN;
-
-DROP TABLE IF EXISTS bibref CASCADE;
 
 CREATE TABLE bibref (
 	source	text NOT NULL,
@@ -1350,18 +1330,8 @@ SELECT package, source, bibkey, description FROM (
 ;
 $$;
 
-COMMIT;
-
 -- content of ftpnew.sql
 -- http://ftp-master.debian.org/new.822
-
-BEGIN;
-
-DROP TABLE IF EXISTS new_sources CASCADE;
-DROP TABLE IF EXISTS new_packages CASCADE;
-
-DROP VIEW IF EXISTS new_sources_madison;
-DROP VIEW IF EXISTS new_packages_madison;
 
 -- Sources
 CREATE TABLE new_sources (
@@ -1432,9 +1402,6 @@ new_packages;
 GRANT SELECT ON new_sources_madison TO PUBLIC;
 GRANT SELECT ON new_packages_madison TO PUBLIC;
 
-COMMIT;
-
-
 -- content of blends-query-packages.sql
 /************************************************************************************
  * Obtain all needed information of a package mentioned in a Blends task            *
@@ -1443,10 +1410,9 @@ COMMIT;
 -- strip '+bX' for binary only uploads which is not interesting in the Blends scope
 CREATE OR REPLACE FUNCTION strip_binary_upload(text) RETURNS debversion AS $$
        SELECT CAST(regexp_replace(regexp_replace($1, E'\\+b[0-9]+$', ''), E'^[0-9]+:', '') AS debversion) ;
-$$  LANGUAGE 'SQL';
+$$  LANGUAGE SQL;
 
 -- drop the function which did not query for enhances
-DROP FUNCTION IF EXISTS blends_query_packages(text[]);
 CREATE OR REPLACE FUNCTION blends_query_packages(text[],text[]) RETURNS SETOF RECORD AS $$
   SELECT DISTINCT
          p.package, p.distribution, p.release, p.component, p.version,
@@ -1646,10 +1612,7 @@ CREATE OR REPLACE FUNCTION blends_query_packages(text[],text[]) RETURNS SETOF RE
     LEFT OUTER JOIN bibref bibpages   ON p.source = bibpages.source   AND bibpages.rank = 0   AND bibpages.key   = 'pages'   AND bibpages.package = ''
     LEFT OUTER JOIN bibref bibeprint  ON p.source = bibeprint.source  AND bibeprint.rank = 0  AND bibeprint.key  = 'eprint'  AND bibeprint.package = ''
     ORDER BY p.package
- $$ LANGUAGE 'SQL';
-
--- drop the old unperformat function which returns a much larger set than needed
-DROP FUNCTION IF EXISTS ddtp_unique(text);
+ $$ LANGUAGE SQL;
 
 -- Select unique DDTP translation for highest package version for a given language
 -- ATTENTION: The execution of this query is quite slow and should be optimized
@@ -1665,7 +1628,7 @@ CREATE OR REPLACE FUNCTION ddtp_unique(text, text[]) RETURNS SETOF RECORD AS $$
     -- (the last one)
     ) duvr ON duvr.package = d.package AND duvr.release = d.release
     WHERE language = $1 AND d.package = ANY ($2)
- $$ LANGUAGE 'SQL';
+ $$ LANGUAGE SQL;
 
 CREATE OR REPLACE FUNCTION blends_metapackage_translations (text[]) RETURNS SETOF RECORD AS $$
   SELECT
@@ -1714,9 +1677,7 @@ CREATE OR REPLACE FUNCTION blends_metapackage_translations (text[]) RETURNS SETO
     LEFT OUTER JOIN (SELECT * FROM ddtp_unique('zh_CN', $1) AS (package text, description_zh_CN text, long_description_zh_CN text)) zh_CN ON zh_CN.package = p.package
     LEFT OUTER JOIN (SELECT * FROM ddtp_unique('zh_TW', $1) AS (package text, description_zh_TW text, long_description_zh_TW text)) zh_TW ON zh_TW.package = p.package
     WHERE p.package = ANY ($1)
- $$ LANGUAGE 'SQL';
-
-DROP TABLE IF EXISTS blends_prospectivepackages CASCADE;
+ $$ LANGUAGE SQL;
 
 CREATE TABLE blends_prospectivepackages
   (blend text,
@@ -1749,7 +1710,6 @@ CREATE TABLE blends_prospectivepackages
 
 GRANT SELECT ON blends_prospectivepackages TO PUBLIC;
 
-DROP TABLE IF EXISTS blends_metadata CASCADE;
 CREATE TABLE blends_metadata (
   -- fieldname   type,   --  example value
      blend       TEXT,   --  'debian-med'   (== the source package name)
@@ -1773,7 +1733,6 @@ CREATE TABLE blends_metadata (
 
 GRANT SELECT ON blends_metadata TO PUBLIC;
 
-DROP TABLE IF EXISTS blends_tasks;
 CREATE TABLE blends_tasks (
   -- fieldname        type,    --  example value
      blend            TEXT REFERENCES blends_metadata,
@@ -1793,7 +1752,6 @@ CREATE TABLE blends_tasks (
 
 GRANT SELECT ON blends_tasks TO PUBLIC;
 
-DROP TABLE IF EXISTS blends_dependencies;
 CREATE TABLE blends_dependencies (
   -- fieldname    type,
      blend        TEXT REFERENCES blends_metadata,
@@ -1810,7 +1768,6 @@ GRANT SELECT ON blends_dependencies TO PUBLIC;
 
 -- For Blends bugs pages in web sentinel we need some priorisation of the dependency relations to make sure we get the
 -- proper relation for more than one binary package from a single source package with different dependency relation.
-DROP TABLE IF EXISTS blends_dependencies_priorities;
 CREATE TABLE blends_dependencies_priorities (
      dependency   CHARACTER(1) CHECK (dependency IN ('d', 'i', 'r', 's', 'a')), -- Depends / Ignore / Recommends / Suggests / Avoid
      priority     int
@@ -1828,7 +1785,6 @@ INSERT INTO blends_dependencies_priorities (dependency, priority) VALUES ('i', 5
 -- Tasksel doesn't allow boolean(eg OR : |) comparisons in dependencies such as package1 | package2. 
 -- In these cases we need to know which packages, from the blends_dependencies table, are the alternatives between them
 -- in order to include only one package (the first available) from a group of alternatives in the task-description file.
-DROP TABLE IF EXISTS blends_dependencies_alternatives;
 CREATE TABLE blends_dependencies_alternatives (
   -- fieldname    type,
      blend              TEXT REFERENCES blends_metadata,
