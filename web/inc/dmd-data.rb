@@ -208,7 +208,7 @@ and s2.version > s1.version);
         else
           st = :out_of_date
         end
-        @versions[unst['source']]['upstream'] = { :status => st, :version => unst['upstream_version'], :warnings => CGI.escape_html(unst['warnings']), :errors => CGI.escape_html(unst['errors']) }
+        @versions[unst['source']]['upstream'] = { :status => st, :version => unst['upstream_version'], :warnings => CGI.escape_html(unst['warnings'] || ''), :errors => CGI.escape_html(unst['errors'] || '') }
       elsif unst.nil? and exp != nil
         r = exp
         st = case r['status']
@@ -218,7 +218,7 @@ and s2.version > s1.version);
              when 'error' then :error
              else nil
              end
-        @versions[r['source']]['upstream'] = { :status => st, :version => r['upstream_version'], :warnings => CGI.escape_html(r['warnings']), :errors => CGI.escape_html(r['errors']) }
+        @versions[r['source']]['upstream'] = { :status => st, :version => r['upstream_version'], :warnings => CGI.escape_html(r['warnings'] || ''), :errors => CGI.escape_html(r['errors'] || '') }
       elsif unst != nil and exp == nil
         r = unst
         st = case r['status']
@@ -228,7 +228,7 @@ and s2.version > s1.version);
              when 'error' then :error
              else nil
              end
-        @versions[r['source']]['upstream'] = { :status => st, :version => r['upstream_version'], :warnings => CGI.escape_html(r['warnings']), :errors => CGI.escape_html(r['errors']) }
+        @versions[r['source']]['upstream'] = { :status => st, :version => r['upstream_version'], :warnings => CGI.escape_html(r['warnings'] || ''), :errors => CGI.escape_html(r['errors'] || '') }
       else
         puts "ERROR"
         p v
