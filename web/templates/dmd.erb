@@ -35,8 +35,8 @@
        <a href="#todo">Todo list</a> /
        <a href="#versions">Versions</a> /
        <a href="#bugs">Bugs</a> /
-       <a href="#derivatives">Derivatives</a> /
-       <a href="#qa">QA Checks</a>
+       <a href="#qa">QA Checks</a> /
+       <a href="#derivatives">Derivatives</a>
      </div>
    <% end %>
    <p> The maintainer dashboard exposes information about teams or maintainers' packages. It intends to help answering the question <i>I have a few hours for Debian, what should I do now?</i>. Fill in one or more email addresses in the form below to check it out; for example here is <a href="/dmd/?email1=debian-accessibility%40lists.debian.org#todo">the accessibility team todo list</a>.</p>
@@ -224,52 +224,6 @@
 </table>
 
 
-<h2 id='derivatives'>Derivatives</h2>
-<table class="buglist tablesorter table table-bordered">
-<thead>
-<tr>
-    <th>source</th>
-    <th>bugs</th>
-    <th>patches</th>
-    <th><%= uddd.ustb %> (stable)</th>
-    <th><%= uddd.udev %> (devel)</th>
-    <th>sid</th>
-    <th>links</th>
-</tr>
-</thead>
-<tbody>
-
-<% uddd.ubuntu.each do |p| %>
-    <tr><td><%= p[:src] %>&nbsp;</td>
-    <% if p[:bugs] > 0 %>
-        <td class="center"><a href="<%= p[:launchpad] %>"><%= p[:bugs] %></a></td>
-    <% else %>
-      <td>&nbsp;</td>
-    <% end %>
-    <% if p[:patches] > 0 %>
-        <td class="center"><a href="<%= p[:launchpad] %>/+patches"><%= p[:patches] %></a></td>
-    <% else %>
-      <td>&nbsp;</td>
-    <% end %>
-
-    <% p[:values].each do |v| %>
-      <% if v[:count] == 1 %>
-        <td>
-      <% else %>
-          <td colspan="<%= v[:count] %>" class="center">
-      <% end %>
-          <%= v[:value] %>&nbsp;
-      </td>
-    <% end %>
-    <td><a href="<%= p[:pts] %>">PTS</a>&nbsp;<a href="<%= p[:launchpad] %>">LP</a></td>
-    </tr>
-<% end %>
-
-</tbody>
-</table>
-
-<p>Packages with the same version in <i><%= uddd.udev %></i> and <i>Debian sid</i>, no bugs and no patches are not listed.</p>
-
 <h2 id='qa'>Quality Assurance Checks</h2>
 <table class="buglist tablesorter table table-bordered">
 <thead>
@@ -338,6 +292,53 @@
 <% end %>
 </tbody>
 </table>
+
+<h2 id='derivatives'>Derivatives</h2>
+<table class="buglist tablesorter table table-bordered">
+<thead>
+<tr>
+    <th>source</th>
+    <th>bugs</th>
+    <th>patches</th>
+    <th><%= uddd.ustb %> (stable)</th>
+    <th><%= uddd.udev %> (devel)</th>
+    <th>sid</th>
+    <th>links</th>
+</tr>
+</thead>
+<tbody>
+
+<% uddd.ubuntu.each do |p| %>
+    <tr><td><%= p[:src] %>&nbsp;</td>
+    <% if p[:bugs] > 0 %>
+        <td class="center"><a href="<%= p[:launchpad] %>"><%= p[:bugs] %></a></td>
+    <% else %>
+      <td>&nbsp;</td>
+    <% end %>
+    <% if p[:patches] > 0 %>
+        <td class="center"><a href="<%= p[:launchpad] %>/+patches"><%= p[:patches] %></a></td>
+    <% else %>
+      <td>&nbsp;</td>
+    <% end %>
+
+    <% p[:values].each do |v| %>
+      <% if v[:count] == 1 %>
+        <td>
+      <% else %>
+          <td colspan="<%= v[:count] %>" class="center">
+      <% end %>
+          <%= v[:value] %>&nbsp;
+      </td>
+    <% end %>
+    <td><a href="<%= p[:pts] %>">PTS</a>&nbsp;<a href="<%= p[:launchpad] %>">LP</a></td>
+    </tr>
+<% end %>
+
+</tbody>
+</table>
+
+<p>Packages with the same version in <i><%= uddd.udev %></i> and <i>Debian sid</i>, no bugs and no patches are not listed.</p>
+
 
 <br />
 <br />
