@@ -191,8 +191,8 @@
             <%= r['severity'] %></td>
         <% end %>
         <% if cols['chints'] %><td><%= r['chints'] %> <%= gentags(r['chints_tags']) %> &nbsp;</td><% end %>
-        <% if cols['cclaimed'] %><td><%= r['cclaimed'] %> &nbsp;</td><% end %>
-        <% if cols['cdeferred'] %><td><%= r['cdeffered'] %> &nbsp;</td><% end %>
+        <% if cols['cclaimed'] %><td><%= r['claimed'] %> &nbsp;</td><% end %>
+        <% if cols['cdeferred'] %><td><%= r['deffered_text'] %> &nbsp;</td><% end %>
         <% if cols['crttags'] %><td><%= r['crttags'] %> &nbsp;</td><% end %>
         <td><%= r['last_modified'] %></td></tr>
     <% end %>

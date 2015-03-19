@@ -404,7 +404,7 @@ if cgi.params != {}
         claimedbugs[r['id']] << r['tag']
       end
       bugs.each do |r|
-        r['cclaimed'] = claimedbugs[r['id']]
+        r['claimed'] = claimedbugs[r['id']] if claimedbugs[r['id']]
       end
     end
 
@@ -431,10 +431,14 @@ if cgi.params != {}
       deferredbugs = {}
       rowsd.each do |r|
         d = r['du'].to_i
-        deferredbugs[r['id']] = "#{r['version']} (#{d} day#{d==1?'':'s'})"
+        deferredbugs[r['id']] = { :version => r['version'], :days => d }
       end
       bugs.each do |r|
-        r['cdeferred'] = deferredbugs[r['id']]
+        if deferredbugs[r['id']]
+          t = deferredbugs[r['id']]
+          r['deferred'] = t
+          r['deferred_text'] = "#{t[:version]} (#{t[:days]} day#{t[:days]==1?'':'s'})"
+        end
       end
     end
 
