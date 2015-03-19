@@ -71,6 +71,15 @@ table td {
 .table tbody + tbody {
     border-top: 2px solid #c5c5c5;
 }
+.table-contour {
+    border-collapse: separate;
+    border-color: #c5c5c5;
+    border-image: none;
+    border-radius: 4px 4px 4px 4px;
+    border-style: solid solid solid solid;
+    border-width: 1px 1px 1px 1px;
+    padding-left: 8px;
+}
 .table-bordered {
     border-collapse: separate;
     border-color: #c5c5c5;

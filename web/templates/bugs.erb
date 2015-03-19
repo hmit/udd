@@ -88,7 +88,7 @@
     </ul>
 </div>
 
-<h3 id="types">Bug types</h3>
+<h3 id="types">Bugs or packages selection</h3>
 <div class="indent">
     <ul class="columns2">
       <% TYPES.each do |t| %>
@@ -96,6 +96,13 @@
       <li><input type='checkbox' id='<%= t[0] %>' name='<%= t[0] %>' value='1'<%= checked %>/><label for='<%= t[0] %>'><%= t[1] %></label></li>
       <% end %>  
     </ul>
+    <br/>
+    <input type='checkbox' id='dmd' name='dmd' value='1'<%= dmd ? ' checked=\'1\'':'' %>/><label for='dmd'>Package selection using the <a href="/dmd/">Debian Maintainer Dashboard</a> form:</label>
+    <div class="indent">
+  <table class="table-contour"><tbody>
+  <%= ERB.new(File.read(File.expand_path('templates/dmd-form.erb')), nil, nil, '_erbout01').result(binding) %>
+  </tbody></table>
+    </div>
 </div>
 
 <h3 id='fields'>Additional fields</h3>
@@ -222,9 +229,11 @@
 
 <script type="text/javascript" src="/js/jquery.min.js"></script>
 <script type="text/javascript" src="/js/jquery.tablesorter.min.js"></script>
+<script type="text/javascript" src="/js/jquery-ui.custom.min.js"></script>
 <script type="text/javascript" src="/js/removeblankfields.js"></script>
 <script type="text/javascript" src="/js/columns.js"></script>
 <script type="text/javascript" src="/js/quicknav.js"></script>
+<script type="text/javascript" src="/js/dmd.js"></script>
 <script type="text/javascript">
 $(document).ready(function() {
     $("table.tablesorter").tablesorter();
