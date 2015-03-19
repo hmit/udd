@@ -1,0 +1,37 @@
+  <% ['1','2','3'].each do |i| %>
+    <tr>
+    <th>
+        <label for="email<%= i %>">Contributor / team</label>
+    </th>
+    <td>
+    <div id="autocompletecontainer<%= i %>" class="autocompletecontainer"></div>
+    <input id="email<%= i %>" type='text' size='32' name='email<%= i %>' value='<%= params['email'][i]%>' placeholder="email address">
+    &nbsp;&nbsp;ignore:
+    <input id="nouploader<%= i %>" name="nouploader<%= i %>" type="checkbox" <%= params['nouploader'][i] != '' ? 'checked':'' %>/>
+    <label for="nouploader<%= i %>">co-maintained</label>
+    <input id="nosponsor<%= i %>" name="nosponsor<%= i %>" type="checkbox" <%= params['nosponsor'][i] != '' ? 'checked' : '' %>/>
+    <label for="nosponsor<%= i %>">sponsored / NMUed</label>
+    </td>
+    </tr>
+  <% end %>
+    <tr>
+        <th>
+            <label for="packages">Additional packages</label>
+        </th>
+        <td>
+            <input id="packages" name="packages" size="32" placeholder="space-separated list" value="<%= params['packages'] %>"/>
+            &nbsp;<input id="bin2src" name="bin2src" type="checkbox" <%= params['bin2src'] != '' ? 'checked' : '' %>/>
+            <label for="bin2src">Packages are binary, convert to source packages</label>
+        </td>
+    </tr>
+    <tr>
+    <th>
+        <label for="ignpackages">Packages to ignore</label>
+    </th>
+    <td>
+        <input id="ignpackages" name="ignpackages" size="32" placeholder="space-separated list" value="<%= params['ignpackages'] %>"/>
+        &nbsp;<input id="ignbin2src" name="ignbin2src" type="checkbox" <%= params['ignbin2src'] != '' ? 'checked' : '' %>/>
+        <label for="ignbin2src">Packages are binary, convert to source packages</label>
+    </td>
+    </tr>
+
