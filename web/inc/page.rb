@@ -41,7 +41,7 @@ class Page
   end
 
   def gentags(tags)
-      return '' if tags.nil?
+      return '' if tags.nil? or tags.empty?
       tags.sort!
       texttags = tags.map do |tag|
         error = "unknowntag: #{tag}" if TagsSingleLetter[tag].nil?
