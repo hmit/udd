@@ -222,6 +222,51 @@ TYPES.each do |t|
   end
 end
 
+def genhints(source, hints, unblockreq, type)
+  s = ''
+  if not hints.nil?
+    hints.each do |h|
+      v = h['version'] ? h['version'] + ' ' : ''
+      t = h['type'] == 'age-days' ? "age/#{h['argument']}" : h['type']
+      s += "<a href=\"http://release.debian.org/britney/hints/#{h['file']}\" title=\"#{v}#{h['file']} #{h['comment']}\">#{t}</a> "
+    end
+  end
+  if not unblockreq.nil?
+    unblockreq.each do |u|
+      if (type[u] != "unblock")
+        s += " #{type[u]}";
+      else
+        s += "req"
+      end
+      s += ":<a href=\"http://bugs.debian.org/#{u}\">##{u}</a>"
+    end
+  end
+  s
+end
+
+def genhintstags(unblockreq, unblockreqtags)
+  if not unblockreq.nil?
+    a = []
+    unblockreq.each do |u|
+      if not unblockreqtags[u].nil?
+        a += unblockreqtags[u]
+      end
+    end
+    a
+  end
+end
+
+def genaffected(r)
+  s = ""
+  s += "<abbr title='affects stable'>S</abbr>" if r['affects_stable']
+  s += "<abbr title='affects testing'>T</abbr>" if r['affects_testing']
+  s += "<abbr title='affects unstable'>U</abbr>" if r['affects_unstable']
+  s += "<abbr title='affects experimental'>E</abbr>" if r['affects_experimental']
+  s += "<abbr title='in experimental, but not affected'><b>ē</b></abbr>" if $sources_in_experimental.include?(r['source']) and not r['affects_experimental']
+  return "" if s == ""
+  return "("+s+")"
+end
+
 if cgi.params != {}
   # Generate and execute query
   tstart = Time::now
@@ -276,51 +321,6 @@ if cgi.params != {}
     puts "<p>The query generated an error, please report it to lucas@debian.org: #{e.message}</p>"
     puts "<pre>#{q}</pre>"
     exit(0)
-  end
-
-  def genhints(source, hints, unblockreq, type)
-    s = ''
-    if not hints.nil?
-      hints.each do |h|
-        v = h['version'] ? h['version'] + ' ' : ''
-        t = h['type'] == 'age-days' ? "age/#{h['argument']}" : h['type']
-        s += "<a href=\"http://release.debian.org/britney/hints/#{h['file']}\" title=\"#{v}#{h['file']} #{h['comment']}\">#{t}</a> "
-      end
-    end
-    if not unblockreq.nil?
-      unblockreq.each do |u|
-        if (type[u] != "unblock")
-          s += " #{type[u]}";
-        else
-          s += "req"
-        end
-        s += ":<a href=\"http://bugs.debian.org/#{u}\">##{u}</a>"
-      end
-    end
-    s
-  end
-
-  def genhintstags(unblockreq, unblockreqtags)
-    if not unblockreq.nil?
-      a = []
-      unblockreq.each do |u|
-        if not unblockreqtags[u].nil?
-          a += unblockreqtags[u]
-        end
-      end
-      a
-    end
-  end
-
-  def genaffected(r)
-    s = ""
-    s += "<abbr title='affects stable'>S</abbr>" if r['affects_stable']
-    s += "<abbr title='affects testing'>T</abbr>" if r['affects_testing']
-    s += "<abbr title='affects unstable'>U</abbr>" if r['affects_unstable']
-    s += "<abbr title='affects experimental'>E</abbr>" if r['affects_experimental']
-    s += "<abbr title='in experimental, but not affected'><b>ē</b></abbr>" if $sources_in_experimental.include?(r['source']) and not r['affects_experimental']
-    return "" if s == ""
-    return "("+s+")"
   end
 
   bugs = []
