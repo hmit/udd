@@ -285,7 +285,7 @@ EOF
       else
         prio = '<span class="prio_high">'
         eprio = '</span>'
-        @qa[r['source']]['reproducible_text'] = "<a href=\"https://reproducible.debian.net/rb-pkg/#{r['source']}.html\" title=\"tested version: #{r['version']} (#{r['release']})\">#{prio}#{r['status']}#{eprio}</a>"
+        @qa[r['source']]['reproducible_text'] = "<a href=\"https://reproducible.debian.net/#{r['source']}\" title=\"tested version: #{r['version']} (#{r['release']})\">#{prio}#{r['status']}#{eprio}</a>"
       end
     end
     # lintian
