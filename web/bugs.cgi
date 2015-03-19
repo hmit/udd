@@ -389,7 +389,7 @@ if cgi.params != {}
       end
 
       bugs.each do |r|
-        r['tags'] = tags[r['id']]
+        r['tags'] = tags[r['id']] if tags[r['id']]
       end
     end
 
@@ -419,7 +419,7 @@ if cgi.params != {}
         rttags[r['id']] << r['tag']
       end
       bugs.each do |r|
-        r['crttags'] = ((rttags[r['id']]||[]).join(" "))
+        r['rttags'] = rttags[r['id']] if rttags[r['id']]
       end
     end
 

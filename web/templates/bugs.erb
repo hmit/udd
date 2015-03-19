@@ -161,7 +161,7 @@
     <% bugs.each do |r| %>
         <tr>
         <td><a href="http://bugs.debian.org/<%= r['id'] %>">#<%= r['id'] %></a></td>
-        <% if cols['ctags'] %><td><%= gentags(r['tags']) %> &nbsp;</td><% end %>
+        <% if cols['ctags'] %><td><%= gentags(r['tags'] || []) %> &nbsp;</td><% end %>
         <% if cols['caffected'] %><td><%= r['affected_html'] %> &nbsp;</td><% end %>
         <td>        
         <% srcs = r['source'].split(/,\s*/) %>
@@ -193,7 +193,7 @@
         <% if cols['chints'] %><td><%= r['chints'] %> <%= gentags(r['chints_tags']) %> &nbsp;</td><% end %>
         <% if cols['cclaimed'] %><td><%= r['claimed'] %> &nbsp;</td><% end %>
         <% if cols['cdeferred'] %><td><%= r['deffered_text'] %> &nbsp;</td><% end %>
-        <% if cols['crttags'] %><td><%= r['crttags'] %> &nbsp;</td><% end %>
+        <% if cols['crttags'] %><td><%= (r['rttags'] || []).join(' ') %> &nbsp;</td><% end %>
         <td><%= r['last_modified'] %></td></tr>
     <% end %>
     
