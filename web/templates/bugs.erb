@@ -190,7 +190,7 @@
             <% end %>
             <%= r['severity'] %></td>
         <% end %>
-        <% if cols['chints'] %><td><%= r['chints'] %> <%= gentags(r['chints_tags']) %> &nbsp;</td><% end %>
+        <% if cols['chints'] %><td><%= gen_hints_unblocks(r['rt-hints'] || [], r['unblock-requests'] || []) %> &nbsp;</td><% end %>
         <% if cols['cclaimed'] %><td><%= r['claimed'] %> &nbsp;</td><% end %>
         <% if cols['cdeferred'] %><td><%= r['deffered_text'] %> &nbsp;</td><% end %>
         <% if cols['crttags'] %><td><%= (r['rttags'] || []).join(' ') %> &nbsp;</td><% end %>

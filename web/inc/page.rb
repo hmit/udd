@@ -49,4 +49,23 @@ class Page
       end
       return '[' + texttags.join('|') + ']'
   end
+
+  def gen_hints_unblocks(hints, unblocks)
+    s = ''
+    hints.each do |h|
+      v = h['version'] ? h['version'] + ' ' : ''
+      t = h['type'] == 'age-days' ? "age/#{h['argument']}" : h['type']
+      s += "<a href=\"http://release.debian.org/britney/hints/#{h['file']}\" title=\"#{v}#{h['file']} #{h['comment']}\">#{t}</a> "
+    end
+    unblocks.each do |u|
+      if (u['type'] != "unblock")
+        s += " #{u['type']}";
+      else
+        s += "req"
+      end
+      s += ":<a href=\"http://bugs.debian.org/#{u['id']}\">##{u['id']}</a> "
+      s += gentags(u['tags'])
+    end
+    s
+  end
 end

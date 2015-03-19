@@ -222,40 +222,6 @@ TYPES.each do |t|
   end
 end
 
-def genhints(source, hints, unblockreq, type)
-  s = ''
-  if not hints.nil?
-    hints.each do |h|
-      v = h['version'] ? h['version'] + ' ' : ''
-      t = h['type'] == 'age-days' ? "age/#{h['argument']}" : h['type']
-      s += "<a href=\"http://release.debian.org/britney/hints/#{h['file']}\" title=\"#{v}#{h['file']} #{h['comment']}\">#{t}</a> "
-    end
-  end
-  if not unblockreq.nil?
-    unblockreq.each do |u|
-      if (type[u] != "unblock")
-        s += " #{type[u]}";
-      else
-        s += "req"
-      end
-      s += ":<a href=\"http://bugs.debian.org/#{u}\">##{u}</a>"
-    end
-  end
-  s
-end
-
-def genhintstags(unblockreq, unblockreqtags)
-  if not unblockreq.nil?
-    a = []
-    unblockreq.each do |u|
-      if not unblockreqtags[u].nil?
-        a += unblockreqtags[u]
-      end
-    end
-    a
-  end
-end
-
 def genaffected(r)
   s = ""
   s += "<abbr title='affects stable'>S</abbr>" if r['affects_stable']
@@ -339,7 +305,7 @@ if cgi.params != {}
       hints = {}
       rowsh.each do |r|
         hints[r['source']] ||= []
-        hints[r['source']] << r
+        hints[r['source']] << r.to_h
       end
       sthh = dbh.prepare("select distinct bugs_usertags.id as id, bugs_usertags.tag as tag, bugs.title as title from bugs_usertags, bugs where bugs.id = bugs_usertags.id and bugs_usertags.email in ('release.debian.org@packages.debian.org','ftp.debian.org@packages.debian.org') and bugs_usertags.tag in ('unblock','rm','remove') and bugs.status = 'pending'")
       sthh.execute
@@ -372,8 +338,10 @@ if cgi.params != {}
       end
 
       bugs.each do |r|
-        r['chints'] = genhints(r['source'], hints[r['source']], unblockreq[r['source']], unblockreqtype)
-        r['chints_tags'] = genhintstags(unblockreq[r['source']], unblockreqtags)
+        r['rt-hints'] = hints[r['source']]
+        if unblockreq[r['source']]
+          r['unblock-requests'] = unblockreq[r['source']].map { |e| { "type" => unblockreqtype[e], "id" => e, "tags" => unblockreqtags[e] } }
+        end
       end
     end
 
