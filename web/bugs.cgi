@@ -9,6 +9,7 @@ require 'yaml'
 require File.expand_path(File.dirname(__FILE__))+'/inc/page'
 
 #STDERR.reopen(STDOUT)
+#puts "Content-type: text/plain\n\n"
 
 UREL=YAML::load(IO::read('ubuntu-releases.yaml'))
 
