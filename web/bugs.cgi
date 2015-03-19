@@ -423,7 +423,6 @@ if cgi.params != {}
       end
     end
 
-
     if cols['cdeferred']
       ids = rows.map { |r| r['id'] }.join(',')
       sthd = dbh.prepare("select id, deferred.source, deferred.version, extract (day from delay_remaining) as du from deferred, deferred_closes where deferred.source = deferred_closes.source and deferred.version = deferred_closes.version and deferred_closes.id in (#{ids})")
@@ -465,7 +464,6 @@ if cgi.params != {}
     feeditems.push({:link  => "http://bugs.debian.org/%s" % b['id'],
                     :title => "%s: %s" % [b['package'], b['title']]})
   end
-
 end
 
 format = cgi.params['format'][0]
