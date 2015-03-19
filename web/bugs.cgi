@@ -338,7 +338,7 @@ if cgi.params != {}
       end
 
       bugs.each do |r|
-        r['rt-hints'] = hints[r['source']]
+        r['rt-hints'] = hints[r['source']] if hints[r['source']]
         if unblockreq[r['source']]
           r['unblock-requests'] = unblockreq[r['source']].map { |e| { "type" => unblockreqtype[e], "id" => e, "tags" => unblockreqtags[e] } }
         end
