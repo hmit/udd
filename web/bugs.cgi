@@ -6,6 +6,8 @@ require 'pp'
 require 'cgi'
 require 'time'
 require 'yaml'
+$LOAD_PATH.unshift File.dirname(__FILE__) + '/inc'
+require 'dmd-data'
 require File.expand_path(File.dirname(__FILE__))+'/inc/page'
 
 #STDERR.reopen(STDOUT)
@@ -223,6 +225,12 @@ TYPES.each do |t|
   end
 end
 
+dmd = false
+if cgi.params['dmd'][0] == '1'
+  dmd = true
+end
+dmdparams = UDDData.parse_cgi_params(cgi.params)
+
 def genaffected(r)
   s = ""
   s += "<abbr title='affects stable'>S</abbr>" if r['affects_stable']
@@ -262,7 +270,19 @@ if cgi.params != {}
   elsif flastmod == 'ign'
     q += "and (current_timestamp - interval '#{flastmodval} days' > last_modified) \n"
   end
-  q2 = TYPES.select { |t| types[t[0]] }.map { |t| t[2] }.join("\n OR ")
+
+  if (not dmdparams['emails'].empty?) or dmdparams['packages'] != ''
+    uddd = UDDData.new(dmdparams['emails'],
+                       dmdparams['packages'],
+                       dmdparams['bin2src'] == 'on',
+                       dmdparams['ignpackages'],
+                       dmdparams['ignbin2src'] == 'on')
+    mysources = uddd.sources.keys.map { |e| "'#{e}'" }.join(', ')
+    qdmd = ["bugs.source in (#{mysources})"]
+  else
+    qdmd = []
+  end
+  q2 = (TYPES.select { |t| types[t[0]] }.map { |t| t[2] } + qdmd).join("\n OR ")
   if q2 != ""
     q += "AND (#{q2})\n"
   else
@@ -459,6 +479,8 @@ page = Page.new(bugs, format, 'templates/bugs.erb',
                   :r2 => r2,
                   :q => q,
                   :error => error,
-                  :timegen => timegen },
+                  :timegen => timegen,
+                  :params => dmdparams,
+                  :dmd => dmd},
                   'Bugs search', feeditems)
 page.render()
