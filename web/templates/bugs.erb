@@ -161,8 +161,8 @@
     <% bugs.each do |r| %>
         <tr>
         <td><a href="http://bugs.debian.org/<%= r['id'] %>">#<%= r['id'] %></a></td>
-        <% if cols['ctags'] %><td><%= gentags(r['ctags']) %> &nbsp;</td><% end %>
-        <% if cols['caffected'] %><td><%= r['caffected'] %> &nbsp;</td><% end %>
+        <% if cols['ctags'] %><td><%= gentags(r['tags']) %> &nbsp;</td><% end %>
+        <% if cols['caffected'] %><td><%= r['affected_html'] %> &nbsp;</td><% end %>
         <td>        
         <% srcs = r['source'].split(/,\s*/) %>
         <% bins = r['package'].split(/,\s*/) %>
@@ -194,9 +194,7 @@
         <% if cols['cclaimed'] %><td><%= r['cclaimed'] %> &nbsp;</td><% end %>
         <% if cols['cdeferred'] %><td><%= r['cdeffered'] %> &nbsp;</td><% end %>
         <% if cols['crttags'] %><td><%= r['crttags'] %> &nbsp;</td><% end %>
-        <% d = r['last_modified'] %>
-        <% d = Date::new(d.year, d.month, d.day) %>
-        <td><%= d %></td></tr>
+        <td><%= r['last_modified'] %></td></tr>
     <% end %>
     
     </tbody>

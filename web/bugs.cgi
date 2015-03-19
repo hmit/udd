@@ -389,7 +389,7 @@ if cgi.params != {}
       end
 
       bugs.each do |r|
-        r['ctags'] = tags[r['id']]
+        r['tags'] = tags[r['id']]
       end
     end
 
@@ -445,12 +445,13 @@ if cgi.params != {}
       rowsd = sthd.fetch_all
       $sources_in_experimental = rowsd.map { |r| r['source'] }
       bugs.each do |r|
-        r['caffected'] = genaffected(r).force_encoding("ASCII-8BIT")
+        r['affected_html'] = genaffected(r).force_encoding("ASCII-8BIT")
       end
     end
 
     bugs.each do |r|
-      r['last_modified_string'] = r['last_modified'].to_s
+      r['last_modified_full'] = r['last_modified'].to_s
+      r['last_modified'] = r['last_modified'].to_date.to_s
     end
   end
 
