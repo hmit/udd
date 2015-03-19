@@ -24,6 +24,35 @@ class UDDData
   attr_accessor :debug
   attr_reader :sources, :versions, :all_bugs, :bugs_tags, :bugs_count, :migration, :buildd, :dmd_todos, :ubuntu_bugs, :autoremovals, :qa, :ubuntu, :ustb, :udev
 
+  def UDDData.parse_cgi_params(cgiparams)
+    three = {'1' => '', '2' => '', '3' => ''}
+    params = {'email'       => three.clone,
+              'nosponsor'   => three.clone,
+              'nouploader'  => three.clone,
+              'emails'      => {},
+              'packages'    => '',
+              'bin2src'     => '',
+              'ignpackages' => '',
+              'ignbin2src'  => ''}
+    ['email', 'nosponsor', 'nouploader'].each do |s|
+      params[s].each do |k, v|
+        p = cgiparams[s + k][0]
+        params[s][k] = CGI.escapeHTML(p) if p
+      end
+    end
+    params['email'].each do |k, v|
+      roles = [:maintainer, :uploader, :sponsor]
+      roles.delete(:uploader) if params['nouploader'][k] == 'on'
+      roles.delete(:sponsor) if params['nosponsor'][k] == 'on'
+      params['emails'][v] = roles
+    end
+    ['packages', 'bin2src', 'ignpackages', 'ignbin2src'].each do |s|
+      p = cgiparams[s][0]
+      params[s] = CGI.escapeHTML(p) if p
+    end
+    params
+  end
+
   def initialize(emails={}, addsources="", bin2src=false, ignsources="", ignbin2src=false)
     @debug = false
     @emails = emails
@@ -43,6 +72,9 @@ class UDDData
     end
 
     get_sources
+  end
+
+  def get_all_data
     get_sources_versions
     get_sources_bugs
     get_migration
