@@ -431,13 +431,13 @@ if cgi.params != {}
       deferredbugs = {}
       rowsd.each do |r|
         d = r['du'].to_i
-        deferredbugs[r['id']] = { :version => r['version'], :days => d }
+        deferredbugs[r['id']] = { "version" => r['version'], "days" => d }
       end
       bugs.each do |r|
         if deferredbugs[r['id']]
           t = deferredbugs[r['id']]
           r['deferred'] = t
-          r['deferred_text'] = "#{t[:version]} (#{t[:days]} day#{t[:days]==1?'':'s'})"
+          r['deferred_text'] = "#{t['version']} (#{t['days']} day#{t['days']==1?'':'s'})"
         end
       end
     end
