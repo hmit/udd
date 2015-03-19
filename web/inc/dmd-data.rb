@@ -37,10 +37,11 @@ class UDDData
     ['email', 'nosponsor', 'nouploader'].each do |s|
       params[s].each do |k, v|
         p = cgiparams[s + k][0]
-        params[s][k] = CGI.escapeHTML(p) if p
+        params[s][k] = CGI.escapeHTML(p) if p and p != ''
       end
     end
     params['email'].each do |k, v|
+      next if v == ''
       roles = [:maintainer, :uploader, :sponsor]
       roles.delete(:uploader) if params['nouploader'][k] == 'on'
       roles.delete(:sponsor) if params['nosponsor'][k] == 'on'
