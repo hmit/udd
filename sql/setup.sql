@@ -1005,6 +1005,8 @@ CREATE TABLE upstream (
    release text,
    component text,
    watch_file text,
+   signing_key_pgp text,
+   signing_key_asc text,
    debian_uversion text,
    debian_mangled_uversion text,
    upstream_version text,
