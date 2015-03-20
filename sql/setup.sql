@@ -1932,10 +1932,11 @@ CREATE TABLE vcswatch
 GRANT SELECT ON vcswatch TO PUBLIC;
 
 CREATE TABLE reproducible
-  (source text primary key,
+  (source text,
    version debversion,
    release text,
-   status text
+   status text,
+  primary key(source, release)
 );
 
 GRANT SELECT ON reproducible TO PUBLIC;
