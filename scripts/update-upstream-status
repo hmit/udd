@@ -1,5 +1,6 @@
 #!/usr/bin/ruby
 
+require 'open3'
 DEB_MIRROR='/srv/mirrors/debian'
 
 ##### PEACH
@@ -119,13 +120,27 @@ def get_status(source, version, watch_file)
   File::open(f, 'w') do |fd|
     fd.print watch_file
   end
-#  p "uscan --dehs --no-download --watchfile #{f} --package #{source} --upstream-version #{version}"
   ENV['PERL_LWP_SSL_VERIFY_HOSTNAME']='0' 
-  r = `uscan --dehs --no-download --watchfile #{f} --package #{source} --upstream-version #{version}`
+  stdout, stderr, status = Open3.capture3("uscan --dehs --no-download --watchfile #{f} --package #{source} --upstream-version #{version}")
   FileUtils::rm(f)
-  d = REXML::Document::new(r)
-#  puts watch_file
-#  puts d
+  begin
+    d = REXML::Document::new(stdout)
+  rescue
+     return {
+      :debian_uversion => nil,
+      :debian_mangled_uversion => nil,
+      :upstream_version => nil,
+      :upstream_url => nil,
+      :status => 'error',
+      :errors => "failed to parse XML: #{stdout}",
+      :warnings => nil
+    }
+  end
+  if stderr != ''
+    stderr = "uscan output on stderr: #{stderr}\n"
+  else
+    stderr = nil
+  end
   if d.root.elements.count == 0
     return {
       :debian_uversion => nil,
@@ -133,8 +148,8 @@ def get_status(source, version, watch_file)
       :upstream_version => nil,
       :upstream_url => nil,
       :status => 'error',
-      :errors => nil,
-      :warnings => nil
+      :errors => stderr,
+      :warnings => 'uscan returned an empty output'
     }
   elsif d.root.elements['errors']
     return {
@@ -143,7 +158,7 @@ def get_status(source, version, watch_file)
       :upstream_version => nil,
       :upstream_url => nil,
       :status => 'error',
-      :errors => d.root.elements['errors'].text,
+      :errors => (stderr || '') + d.root.elements['errors'].text,
       :warnings => nil
     }
   elsif not (['debian-uversion', 'debian-mangled-uversion', 'upstream-version', 'upstream-url', 'status'] - d.root.elements.to_a.map { |e| e.name }).empty?
@@ -154,7 +169,7 @@ def get_status(source, version, watch_file)
       :upstream_version => (e = d.root.elements['upstream-version']) ? e.text : nil,
       :upstream_url => (e = d.root.elements['upstream-url']) ? e.text : nil,
       :status => 'error',
-      :errors => nil,
+      :errors => stderr,
       :warnings => (e = d.root.elements['warnings']) ? e.text : nil
     }
   else
@@ -164,7 +179,7 @@ def get_status(source, version, watch_file)
       :upstream_version => d.root.elements['upstream-version'].text,
       :upstream_url => d.root.elements['upstream-url'].text,
       :status => d.root.elements['status'].text,
-      :errors => nil,
+      :errors => stderr,
       :warnings => (e = d.root.elements['warnings']) ? e.text : nil
     }
   end
