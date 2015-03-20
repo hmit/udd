@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 <head>
 <link href="/css/debian.css" rel="stylesheet" type="text/css">
@@ -46,10 +47,10 @@
 <h3 id='queries'>Useful queries</h3>
 <div>
     <ul>
-    <li>Bug squasher view: <a href="bugs/?release=jessie_and_sid&patch=ign&merged=ign&done=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&ctags=1&ctags=1&cdeferred=1">Affecting sid and jessie, not marked as done, not tagged patch; those need to be fixed, probably by a patch+upload</a></li>
-    <li>Sponsor view: <a href="/bugs/?release=jessie_and_sid&patch=only&merged=ign&done=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&chints=1&ctags=1&cdeferred=1">Affecting sid and jessie, not marked as done, tagged 'patch'; those need a DD to sponsor an upload</a></li>
-    <li>Cleaner view: <a href="/bugs/?release=jessie_and_sid&merged=ign&done=only&fnewerval=7&rc=1&sortby=id&sorto=asc&ctags=1&cdeferred=1&caffected=1">Affecting sid and jessie, but marked as done; why is it still affecting unstable? fixed only in experimental? missing binaries? wrong changelog?</a></li>
-    <li>Release Team view: <a href="/bugs/?release=jessie_not_sid&merged=ign&fnewerval=7&rc=1&sortby=id&sorto=asc&chints=1&ctags=1&cdeferred=1&crttags=1">Affecting jessie, but not sid. Help the fix migrate to jessie!</a></li>
+    <li>Bug squasher view: <a href="bugs/?release=jessie_and_sid&amp;patch=ign&amp;merged=ign&amp;done=ign&amp;fnewerval=7&amp;rc=1&amp;sortby=id&amp;sorto=asc&amp;ctags=1&amp;ctags=1&amp;cdeferred=1">Affecting sid and jessie, not marked as done, not tagged patch; those need to be fixed, probably by a patch+upload</a></li>
+    <li>Sponsor view: <a href="/bugs/?release=jessie_and_sid&amp;patch=only&amp;merged=ign&amp;done=ign&amp;fnewerval=7&amp;rc=1&amp;sortby=id&amp;sorto=asc&amp;chints=1&amp;ctags=1&amp;cdeferred=1">Affecting sid and jessie, not marked as done, tagged 'patch'; those need a DD to sponsor an upload</a></li>
+    <li>Cleaner view: <a href="/bugs/?release=jessie_and_sid&amp;merged=ign&amp;done=only&amp;fnewerval=7&amp;rc=1&amp;sortby=id&amp;sorto=asc&amp;ctags=1&amp;cdeferred=1&amp;caffected=1">Affecting sid and jessie, but marked as done; why is it still affecting unstable? fixed only in experimental? missing binaries? wrong changelog?</a></li>
+    <li>Release Team view: <a href="/bugs/?release=jessie_not_sid&amp;merged=ign&amp;fnewerval=7&amp;rc=1&amp;sortby=id&amp;sorto=asc&amp;chints=1&amp;ctags=1&amp;cdeferred=1&amp;crttags=1">Affecting jessie, but not sid. Help the fix migrate to jessie!</a></li>
     </ul>
 </div>
 
@@ -59,7 +60,7 @@
 <div class='indent'>
   <ul class="columns2">
   <% RELEASE_RESTRICT.each do |r| %>
-  <% checked = (release == r[0] ? 'CHECKED=\'1\'':'') %>
+  <% checked = (release == r[0] ? 'CHECKED':'') %>
   <li><label><input type='radio' name='release' value='<%= r[0] %>' <%= checked %>/> <%= r[1] %></label></li>
    <% end %>
    </ul>
@@ -70,20 +71,20 @@
     <i>off / include / exclude</i>
     <ul class="columns3">
       <% FILTERS.each do |r| %>
-      <li><input type='radio' name='<%= r[0] %>' value='' <%= filters[r[0]]==''?'CHECKED=\'1\'':'' %>/>
-      <input type='radio' name='<%= r[0] %>' value='only' <%= filters[r[0]]=='only'?'CHECKED=\'1\'':'' %>/>
-      <input type='radio' name='<%= r[0] %>' value='ign' <%= filters[r[0]]=='ign'?'CHECKED=\'1\'':'' %>/>
+      <li><input type='radio' name='<%= r[0] %>' value='' <%= filters[r[0]]==''?'CHECKED':'' %>/>
+      <input type='radio' name='<%= r[0] %>' value='only' <%= filters[r[0]]=='only'?'CHECKED':'' %>/>
+      <input type='radio' name='<%= r[0] %>' value='ign' <%= filters[r[0]]=='ign'?'CHECKED':'' %>/>
       <%= r[1] %></li>
       <% end %>
 
-      <li><input type='radio' name='fnewer' value='' <%= fnewer==''?'CHECKED=\'1\'':'' %>/>
-      <input type='radio' name='fnewer' value='only' <%= fnewer=='only'?'CHECKED=\'1\'':'' %>/>
-      <input type='radio' name='fnewer' value='ign' <%= fnewer=='ign'?'CHECKED=\'1\'':'' %>/>
+      <li><input type='radio' name='fnewer' value='' <%= fnewer==''?'CHECKED':'' %>/>
+      <input type='radio' name='fnewer' value='only' <%= fnewer=='only'?'CHECKED':'' %>/>
+      <input type='radio' name='fnewer' value='ign' <%= fnewer=='ign'?'CHECKED':'' %>/>
       newer than <input type='text' size='3' name='fnewerval' value='<%= fnewerval %>'/> days</li>
 
-      <li><input type='radio' name='flastmod' value='' <%= flastmod==''?'CHECKED=\'1\'':'' %>/>
-      <input type='radio' name='flastmod' value='only' <%= flastmod=='only'?'CHECKED=\'1\'':'' %>/>
-      <input type='radio' name='flastmod' value='ign' <%= flastmod=='ign'?'CHECKED=\'1\'':'' %>/>
+      <li><input type='radio' name='flastmod' value='' <%= flastmod==''?'CHECKED':'' %>/>
+      <input type='radio' name='flastmod' value='only' <%= flastmod=='only'?'CHECKED':'' %>/>
+      <input type='radio' name='flastmod' value='ign' <%= flastmod=='ign'?'CHECKED':'' %>/>
       modified in the last <input type='text' size='3' name='flastmodval' value='<%= flastmodval %>'/> days</li>
     </ul>
 </div>
@@ -92,12 +93,12 @@
 <div class="indent">
     <ul class="columns2">
       <% TYPES.each do |t| %>
-      <% checked = types[t[0]]?" checked='1'":"" %>
+      <% checked = types[t[0]]?" checked":"" %>
       <li><input type='checkbox' id='<%= t[0] %>' name='<%= t[0] %>' value='1'<%= checked %>/><label for='<%= t[0] %>'><%= t[1] %></label></li>
       <% end %>  
     </ul>
     <br/>
-    <input type='checkbox' id='dmd' name='dmd' value='1'<%= dmd ? ' checked=\'1\'':'' %>/><label for='dmd'>Package selection using the <a href="/dmd/">Debian Maintainer Dashboard</a> form:</label>
+    <input type='checkbox' id='dmd' name='dmd' value='1'<%= dmd ? ' checked':'' %>/><label for='dmd'>Package selection using the <a href="/dmd/">Debian Maintainer Dashboard</a> form:</label>
     <div class="indent">
   <table class="table-contour"><tbody>
   <%= ERB.new(File.read(File.expand_path('templates/dmd-form.erb')), nil, nil, '_erbout01').result(binding) %>
@@ -119,12 +120,12 @@
 <div class="indent">
     <ul class='columns3'>
     <% SORTS.each do |r| %>
-    <% checked = (sortby == r[0] ? 'CHECKED=\'1\'':'') %>
+    <% checked = (sortby == r[0] ? 'CHECKED':'') %>
     <li><label><input type='radio' name='sortby' value='<%= r[0] %>' <%= checked %>/><%= r[1] %></label></li>
     <% end %>
 
     <% [['asc', 'ascending'],[ 'desc', 'decreasing']].each do |r| %>
-    <% checked = (sorto == r[0] ? 'CHECKED=\'1\'':'') %>
+    <% checked = (sorto == r[0] ? 'CHECKED':'') %>
     <li><label><input type='radio' name='sorto' value='<%= r[0] %>' <%= checked %>/><%= r[1] %></label></li>
     <% end %>
     </ul>
@@ -132,7 +133,7 @@
 
 <h3 id='format'>Format</h3>
 <div class="indent">
-    <label><input type='radio' name='format' value='html' checked='1'/> HTML</label>
+    <label><input type='radio' name='format' value='html' checked/> HTML</label>
     <label><input type='radio' name='format' value='json'/> JSON</label>
     <label><input type='radio' name='format' value='yaml'/> YAML</label>
     <label><input type='radio' name='format' value='rss'/> RSS</label>
@@ -218,7 +219,7 @@
 
 <div id="footer">
     <div id="fineprint">
-        <p><sup>[<a name="ftn.distro">1</a>] </sup>This already uses release tags ('sid', 'jessie') and xxx-ignore ('jessie-ignore') to include/exclude bugs</p>
+        <p><sup>[<a id="ftn.distro">1</a>] </sup>This already uses release tags ('sid', 'jessie') and xxx-ignore ('jessie-ignore') to include/exclude bugs</p>
         <p>
         Ultimate Debian Database:
         <a href="https://wiki.debian.org/UltimateDebianDatabase/"> hacking / bug reporting / contact information</a><br />
