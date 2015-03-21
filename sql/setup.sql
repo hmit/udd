@@ -1937,6 +1937,7 @@ CREATE TABLE reproducible
   (source text,
    version debversion,
    release text,
+   architecture text,
    status text,
   primary key(source, release)
 );

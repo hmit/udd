@@ -45,7 +45,7 @@ class ReproducibleGatherer
 #    @db.setnonblocking(true)
 
     @db.prepare 'users_insert', <<-EOF
-    INSERT INTO reproducible(source, version, release, status) VALUES ($1, $2, $3, $4)
+    INSERT INTO reproducible(source, version, release, architecture, status) VALUES ($1, $2, $3, $4, $5)
     EOF
   end
 
@@ -55,7 +55,7 @@ class ReproducibleGatherer
 
     @db.exec("DELETE FROM reproducible")
     res = JSON::parse(open(URL, 'rb').read)
-    res.each { |r| @db.exec_prepared('users_insert', [r['package'], r['version'], r['suite'], r['status']]) }
+    res.each { |r| @db.exec_prepared('users_insert', [r['package'], r['version'], r['suite'], r['architecture'], r['status']]) }
 
     @db.exec("COMMIT")
     @db.exec("ANALYSE reproducible")
