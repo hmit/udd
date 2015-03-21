@@ -5,6 +5,12 @@ span.prio_high {
     color: #ff0000;
     font-weight: bold;
 }
+
+span.prio_ok {
+    color: #007f00;
+    font-weight: bold;
+}
+
 span.prio_med {
     color: #ccaa00;
     font-weight: bold;

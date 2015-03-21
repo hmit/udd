@@ -358,8 +358,8 @@ EOF
         poold = r['source'][0]
       end
       if r['status'] == 'pass'
-        prio = ''
-        eprio = ''
+        prio = '<span class="prio_ok">'
+        eprio = '</span>'
       elsif r['status'] == 'fail'
         prio = '<span class="prio_high">'
         eprio = '</span>'
