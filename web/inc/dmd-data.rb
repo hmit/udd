@@ -306,7 +306,7 @@ EOF
     @qa = {}
     return if @sources.empty?
     # reproducible
-    q = "select source, version, release, status from reproducible where source in (select source from mysources)"
+    q = "select source, version, release, architecture, status from reproducible where source in (select source from mysources)"
     rows = dbget(q)
     rows.each do |r|
       @qa[r['source']] ||= {}

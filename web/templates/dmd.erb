@@ -195,7 +195,7 @@
 <tr>
     <th rowspan="2">source</th>
     <th colspan="6">lintian</th>
-    <th rowspan="2">reproducible</th>
+    <th rowspan="2">(un)reproducible</th>
     <th rowspan="2">piuparts</th>
     <th>ci.debian.net</th>
 </tr>
@@ -227,7 +227,16 @@
       <td></td> <td></td> <td></td> <td></td> <td></td> <td></td>
     <% end %>
     <% if checks['reproducible'] %>
-      <td><%= checks['reproducible'].select { |e| e['status'] != 'reproducible' }.map { |e| "<a href=\"https://reproducible.debian.net/#{e['source']}\" title=\"tested version: #{e['version']} (#{e['release']})\"><span class=\"prio_high\">#{e['status']}</span></a>" }.join(' ') %></td>
+      <td>
+        <%
+          checks['reproducible'].select { |e| e['status'] != 'reproducible' }.each do |e|
+            if e['status'] == 'unreproducible' %>
+            <%= "<a href=\"https://reproducible.debian.net/#{e['release']}/#{e['architecture']}/#{e['source']}\" title=\"tested version: #{e['version']}\"><span class=\"prio_high\">#{e['release']}/#{e['architecture']}</span></a>" %>
+         <% else %>
+            <%= "<a href=\"https://reproducible.debian.net/#{e['release']}/#{e['architecture']}/#{e['source']}\" title=\"tested version: #{e['version']}\"><span class=\"prio_high\">#{e['release']}/#{e['architecture']}:#{e['status']}</span></a>" %>
+          <% end 
+          end %>
+      </td>
     <% else %>
       <td>&nbsp;</td>
     <% end %>
