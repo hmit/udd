@@ -170,7 +170,7 @@
     <th colspan="6" class="center">lintian</th>
     <th rowspan="2" class="center">(un)reproducible</th>
     <th rowspan="2" class="center">piuparts</th>
-    <th class="center">ci.debian.net</th>
+    <th class="center">ci</th>
 </tr>
 <tr>
   <!-- bugs -->
@@ -186,7 +186,7 @@
   <th>X</th>
   <th>O</th>
   <!-- ci -->
-  <th>unstable/amd64</th>
+  <th>sid/amd64</th>
 </tr>
 </thead>
 <tbody>
@@ -198,10 +198,10 @@
   <% b = uddd.bugs_count[pkg] 
      buggraph = "<a href=\"https://qa.debian.org/data/bts/graphs/#{pooldir(pkg)}/#{pkg}.png\"><img src=\"/img/bug-graph.png\"></a>"
      if b.nil? or b[:all] == 0 %>
-      <td style="text-align: right;"><a href="http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=<%= pkg %>">0</a> <%= buggraph %></td>
+      <td style="text-align: right;" class="nowrap"><a href="http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=<%= pkg %>">0</a> <%= buggraph %></td>
       <td colspan="3">&nbsp;</td>
     <% else %>
-    <td style="text-align: right;"><a href="http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=<%= pkg %>"><%= b[:all] %></a> <%= buggraph %></td>
+    <td style="text-align: right;" class="nowrap"><a href="http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=<%= pkg %>"><%= b[:all] %></a> <%= buggraph %></td>
     <td class="center"><a href="http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=<%= pkg %>&amp;sev-inc=critical&amp;sev-inc=grave&amp;sev-inc=serious"><%= b[:rc] > 0 ? b[:rc] : '' %></a></td>
     <td class="center"><a href="http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=<%= pkg %>&amp;include=tags:patch"><%= b[:patch] > 0 ? b[:patch] : '' %></a></td>
     <td class="center"><a href="http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=<%= pkg %>&amp;pend-inc=pending-fixed&amp;pend-inc=fixed"><%= b[:pending] > 0 ? b[:pending] : '' %></a></td>
@@ -222,10 +222,14 @@
       <td>
         <%
           checks['reproducible'].select { |e| e['status'] != 'reproducible' }.each do |e|
+            # hacks to optimize horizontal space
+            e['drelease'] = e['release']
+            e['drelease'] = 'sid' if e['drelease'] == 'unstable'
+            e['drelease'] = 'exp' if e['drelease'] == 'experimental'
             if e['status'] == 'unreproducible' %>
-            <%= "<a href=\"https://reproducible.debian.net/#{e['release']}/#{e['architecture']}/#{e['source']}\" title=\"tested version: #{e['version']}\"><span class=\"prio_high_nobold\">#{e['release']}/#{e['architecture']}</span></a>" %>
+            <%= "<a href=\"https://reproducible.debian.net/#{e['release']}/#{e['architecture']}/#{e['source']}\" title=\"tested version: #{e['version']}\"><span class=\"prio_high_nobold\">#{e['drelease']}/#{e['architecture']}</span></a>" %>
          <% else %>
-            <%= "<a href=\"https://reproducible.debian.net/#{e['release']}/#{e['architecture']}/#{e['source']}\" title=\"tested version: #{e['version']}\"><span class=\"prio_high_nobold\">#{e['release']}/#{e['architecture']}:#{e['status']}</span></a>" %>
+            <%= "<a href=\"https://reproducible.debian.net/#{e['release']}/#{e['architecture']}/#{e['source']}\" title=\"tested version: #{e['version']}\"><span class=\"prio_high_nobold\">#{e['drelease']}/#{e['architecture']}:#{e['status']}</span></a>" %>
           <% end 
           end %>
       </td>
