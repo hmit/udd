@@ -71,6 +71,9 @@ class UDDData
       puts "</pre>"
       exit(0)
     end
+    if @debug
+      puts "Content-type: text/html\n\n"
+    end
 
     get_sources
   end
@@ -839,7 +842,8 @@ WHERE label ~* ?
   private
   def dbget(q, *args)
     if @debug
-      puts "<pre>#{q}</pre>"
+      t = Time::now
+      puts "<pre>at #{t}:\n#{q}</pre>"
       p args if not args.nil?
     end
     rows, sth = nil
@@ -848,7 +852,8 @@ WHERE label ~* ?
     rows = sth.fetch_all
     if @debug
       puts "<pre>"
-      puts DBI::Utils::TableFormatter.ascii(sth.column_names, rows)
+      puts "Query duration: #{Time::now - t}s"
+  #    puts DBI::Utils::TableFormatter.ascii(sth.column_names, rows)
       puts "</pre>"
     end
     return rows
