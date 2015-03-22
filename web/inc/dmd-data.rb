@@ -93,7 +93,7 @@ class UDDData
 
   def get_sources
     @sources = {}
-    dbget("create temporary table mysources(source text)")
+    dbget("create temporary table mysources(source text primary key)")
 
     dbget <<-EOF
 CREATE TEMPORARY VIEW sources_most_recent AS
