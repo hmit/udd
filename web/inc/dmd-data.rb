@@ -325,7 +325,7 @@ select source, tag_type, count(*) as count from
 (
 select package as source, tag_type, tag, information from lintian where package_type='source' and package in (select source from mysources)
 UNION
-select distinct ps.source as source, tag_type, tag, information from lintian, packages_summary ps where package_type='source' and ps.package = lintian.package and ps.release in ('sid', 'experimental') and ps.source in (select source from mysources)) t
+select distinct ps.source as source, tag_type, tag, information from lintian, packages_summary ps where package_type='binary' and ps.package = lintian.package and ps.release in ('sid', 'experimental') and ps.source in (select source from mysources)) t
 group by source, tag_type;
 EOF
     rows = dbget(q)
