@@ -274,9 +274,6 @@ and s2.version > s1.version);
       end
     end
 
-    rows.each do |r|
-    end
-    
     # vcs versions
     q = "select * from vcswatch where source in (select source from mysources)"
     rows = dbget(q)
@@ -737,6 +734,14 @@ and source not in (select source from upload_history where date > (current_date 
                         :link => nil,
                         :description => "New upstream version available",
                         :details => "#{v['upstream'][:version]} (already in experimental, but not in unstable)" }
+      elsif v['upstream'][:status] == :error
+        h = Digest::MD5.hexdigest("#{src}_#{v['upstream'][:version]}_error")
+        @dmd_todos << { :shortname => "scanerror_#{h}",
+                        :type => 'uscan error',
+                        :source => src,
+                        :link => nil,
+                        :description => "debian/watch: uscan returned an error",
+                        :details => "#{v['upstream'][:warnings]}#{v['upstream'][:errors]}".gsub(/uscan warning: In (watchfile )?\/dev\/shm\/[^,]+,/, 'uscan warning:') }
       end
     end
 
