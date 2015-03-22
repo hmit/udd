@@ -1,6 +1,7 @@
 #!/usr/bin/ruby
 
 require 'dbi'
+require 'cgi'
 
 puts "Content-type: text/html; charset=utf-8\n\n"
 
@@ -34,7 +35,8 @@ while row = sth.fetch do
   uploaders[row['login']][row['changed_by']] << [ row['source'], row['version'], row['nmu'] ]
 end
 
-puts "<html><body>"
+puts "<!DOCTYPE html><html><head><title>Sponsoring stats</title></head>"
+puts "<body>"
 puts "<h1>Sponsoring stats, powered by UDD!</h1>"
 puts "<p>Uploads in <b>bold</b> were NMUs.</p>"
 puts "<p>That excludes uploads done for people who are now DD, even if the upload was done while they were not DD.</p>"
@@ -48,7 +50,7 @@ uploaders.to_a.sort { |a,b| uploads[a[0]] <=> uploads[b[0]] }.reverse.each do |k
   puts "<li>#{rank}. #{k} -- #{names[k]} (#{uploads[k]} uploads)\n<ul>"
   v.to_a.sort { |a,b| a[1].length <=> b[1].length }.reverse.each do |k2|
     k2, v = k2
-    puts "<li>#{k2} (#{v.length} uploads)\n<ul>"
+    puts "<li>#{CGI.escapeHTML(k2)} (#{v.length} uploads)\n<ul>"
     v.each do |u|
       if u[2]
         puts "<li><b>#{u[0]} #{u[1]}</b></li>"
