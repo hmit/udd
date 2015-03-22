@@ -69,7 +69,7 @@
 
 <% if uddd %>
 <h2 id='todo'>Todo list</h2>
-<table class="tablesorter table table-bordered">
+<table class="tablesorter table table-bordered table-hover">
 <thead>
 <tr>
     <th>type</th>
@@ -81,8 +81,8 @@
 <tbody class='todos'>
     <% uddd.dmd_todos.each do |t| %>
     <tr id="<%= t[:shortname] %>">
-        <td><%= t[:type] %></td>
-        <td>
+        <td class="nowrap"><%= t[:type] %></td>
+        <td class="nowrap">
             <span title="<%= t[:reason] %>">
             <a href="https://tracker.debian.org/<%= t[:source] %>"><%= t[:source] %></a>
             </span>
@@ -100,7 +100,7 @@
 
 
 <h2 id='versions'>Versions</h2>
-<table class="tablesorter table table-bordered">
+<table class="tablesorter table table-bordered table-hover">
 <thead>
 <tr>
     <th>source</th>
@@ -164,7 +164,7 @@
 
 
 <h2 id='bugs'>Bugs</h2>
-<table class="buglist tablesorter table table-bordered">
+<table class="buglist tablesorter table table-bordered table-hover">
 <thead>
 <tr>
     <th>source</th>
@@ -190,7 +190,7 @@
 
 
 <h2 id='qa'>Quality Assurance Checks</h2>
-<table class="buglist tablesorter table table-bordered">
+<table class="buglist tablesorter table table-bordered table-hover">
 <thead>
 <tr>
     <th rowspan="2">source</th>

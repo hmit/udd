@@ -139,3 +139,9 @@ table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSo
     padding: 6px 14px;
     margin-top: 3px;
 }
+
+.nowrap { white-space: nowrap; }
+
+.table-hover tr:hover {
+  background-color: #fff5c7;
+}
