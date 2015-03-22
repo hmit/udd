@@ -322,7 +322,7 @@ EOF
 
     # lintian
     ## get maintainer email for each source. needed for lintian urls
-    q = "select distinct source, maintainer_email from sources_uniq where release in ('sid', 'experimental')"
+    q = "select distinct source, maintainer_email from sources_uniq where release in ('sid', 'experimental') and source in (select source from mysources)"
     rows = dbget(q)
     maint = {}
     rows.each do |r|
