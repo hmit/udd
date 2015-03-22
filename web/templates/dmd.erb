@@ -34,8 +34,7 @@
        <b>Navigation</b>:
        <a href="#todo">Todo list</a> /
        <a href="#versions">Versions</a> /
-       <a href="#bugs">Bugs</a> /
-       <a href="#qa">QA Checks</a> /
+       <a href="#bugs">Bugs and QA Checks</a> /
        <a href="#derivatives">Derivatives</a>
      </div>
    <% end %>
@@ -162,44 +161,23 @@
 </tbody>
 </table>
 
-
-<h2 id='bugs'>Bugs</h2>
+<h2 id='bugs'><a id='qa'></a>Bugs and Quality Assurance Checks</h2>
 <table class="buglist tablesorter table table-bordered table-hover">
 <thead>
 <tr>
-    <th>source</th>
-    <th>all</th>
-    <th>RC</th>
-    <th>with patch</th>
-    <th>pending</th>
-</tr>
-</thead>
-<tbody>
-  <% bc = uddd.bugs_count %>
-  <% bc.keys.sort.each do |src| %>
-    <% b = bc[src] %>
-    <% next if b[:all] == 0 %>
-    <tr><td><a href="https://tracker.debian.org/<%= src %>" title=""><%= src %></a></td>
-    <td class="center"><a href="http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=<%= src %>"><%= b[:all] > 0 ? b[:all] : '' %></a></td>
-    <td class="center"><a href="http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=<%= src %>&amp;sev-inc=critical&amp;sev-inc=grave&amp;sev-inc=serious"><%= b[:rc] > 0 ? b[:rc] : '' %></a></td>
-    <td class="center"><a href="http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=<%= src %>&amp;include=tags:patch"><%= b[:patch] > 0 ? b[:patch] : '' %></a></td>
-    <td class="center"><a href="http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=<%= src %>&amp;pend-inc=pending-fixed&amp;pend-inc=fixed"><%= b[:pending] > 0 ? b[:pending] : '' %></a></td></tr>
-  <% end %>
-</tbody>
-</table>
-
-
-<h2 id='qa'>Quality Assurance Checks</h2>
-<table class="buglist tablesorter table table-bordered table-hover">
-<thead>
-<tr>
-    <th rowspan="2">source</th>
-    <th colspan="6">lintian</th>
-    <th rowspan="2">(un)reproducible</th>
-    <th rowspan="2">piuparts</th>
-    <th>ci.debian.net</th>
+    <th rowspan="2" class="center">source</th>
+    <th colspan="4" class="center">bugs</th>
+    <th colspan="6" class="center">lintian</th>
+    <th rowspan="2" class="center">(un)reproducible</th>
+    <th rowspan="2" class="center">piuparts</th>
+    <th class="center">ci.debian.net</th>
 </tr>
 <tr>
+  <!-- bugs -->
+  <th>all</th>
+  <th>RC</th>
+  <th>patch</th>
+  <th>pending</th>
   <!-- lintian -->
   <th>E</th>
   <th>W</th>
@@ -213,9 +191,23 @@
 </thead>
 <tbody>
 
-<% uddd.qa.each_pair do |pkg, checks| %>
+<% uddd.sources.keys.sort.each do |pkg| %>
+  <% checks = uddd.qa[pkg] || {} %>
   <tr>
       <td><a href="https://tracker.debian.org/<%= pkg %>" title=""><%= pkg %></a></td>
+  <% b = uddd.bugs_count[pkg] 
+     buggraph = "<a href=\"https://qa.debian.org/data/bts/graphs/#{pooldir(pkg)}/#{pkg}.png\"><img src=\"/img/bug-graph.png\"></a>"
+     if b.nil? or b[:all] == 0 %>
+      <td style="text-align: right;"><a href="http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=<%= pkg %>">0</a> <%= buggraph %></td>
+      <td colspan="3">&nbsp;</td>
+    <% else %>
+    <td style="text-align: right;"><a href="http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=<%= pkg %>"><%= b[:all] %></a> <%= buggraph %></td>
+    <td class="center"><a href="http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=<%= pkg %>&amp;sev-inc=critical&amp;sev-inc=grave&amp;sev-inc=serious"><%= b[:rc] > 0 ? b[:rc] : '' %></a></td>
+    <td class="center"><a href="http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=<%= pkg %>&amp;include=tags:patch"><%= b[:patch] > 0 ? b[:patch] : '' %></a></td>
+    <td class="center"><a href="http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=<%= pkg %>&amp;pend-inc=pending-fixed&amp;pend-inc=fixed"><%= b[:pending] > 0 ? b[:pending] : '' %></a></td>
+  <% end %>
+
+
     <% if checks['lintian'] %>
       <td><a href="https://lintian.debian.org/full/<%= checks['lintian']['maintainer'] %>.html#<%= pkg %>"><%= checks['lintian']['error'] || '' %></a></td>
       <td><a href="https://lintian.debian.org/full/<%= checks['lintian']['maintainer'] %>.html#<%= pkg %>"><%= checks['lintian']['warning'] || '' %></a></td>
