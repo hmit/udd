@@ -215,7 +215,7 @@
 
 <% uddd.qa.each_pair do |pkg, checks| %>
   <tr>
-      <td><%= pkg %></td>
+      <td><a href="https://tracker.debian.org/<%= pkg %>" title=""><%= pkg %></a></td>
     <% if checks['lintian'] %>
       <td><a href="https://lintian.debian.org/full/<%= checks['lintian']['maintainer'] %>.html#<%= pkg %>"><%= checks['lintian']['error'] || '' %></a></td>
       <td><a href="https://lintian.debian.org/full/<%= checks['lintian']['maintainer'] %>.html#<%= pkg %>"><%= checks['lintian']['warning'] || '' %></a></td>
