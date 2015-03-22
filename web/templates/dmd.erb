@@ -259,19 +259,23 @@
 <table class="buglist tablesorter table table-bordered">
 <thead>
 <tr>
-    <th>source</th>
-    <th>bugs</th>
-    <th>patches</th>
-    <th><%= uddd.ustb %> (stable)</th>
-    <th><%= uddd.udev %> (devel)</th>
-    <th>sid</th>
-    <th>links</th>
+    <th rowspan="2">source</th>
+    <th colspan="5" class="center">Ubuntu</th>
+    <th rowspan="2" class="center">sid</th>
+</tr>
+<tr>
+    <th class="center">links</th>
+    <th class="center">bugs</th>
+    <th class="center">patches</th>
+    <th class="center"><%= uddd.ustb %> (stable)</th>
+    <th class="center"><%= uddd.udev %> (devel)</th>
 </tr>
 </thead>
 <tbody>
 
 <% uddd.ubuntu.each do |p| %>
-    <tr><td><%= p[:src] %>&nbsp;</td>
+  <td><a href="https://tracker.debian.org/<%= p[:src] %>" title=""><%= p[:src] %></a></td>
+    <td><a href="<%= p[:launchpad] %>">LP</a></td>
     <% if p[:bugs] > 0 %>
         <td class="center"><a href="<%= p[:launchpad] %>"><%= p[:bugs] %></a></td>
     <% else %>
@@ -285,14 +289,13 @@
 
     <% p[:values].each do |v| %>
       <% if v[:count] == 1 %>
-        <td>
+        <td class="center">
       <% else %>
           <td colspan="<%= v[:count] %>" class="center">
       <% end %>
           <%= v[:value] %>&nbsp;
       </td>
     <% end %>
-    <td><a href="<%= p[:pts] %>">PTS</a>&nbsp;<a href="<%= p[:launchpad] %>">LP</a></td>
     </tr>
 <% end %>
 
