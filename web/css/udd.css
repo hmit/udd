@@ -15,6 +15,20 @@ span.prio_med {
     color: #ccaa00;
     font-weight: bold;
 }
+
+span.prio_high_nobold {
+    color: #ff0000;
+}
+
+span.prio_ok_nobold {
+    color: #007f00;
+}
+
+span.prio_med_nobold {
+    color: #ccaa00;
+}
+
+
 a, a:link { text-decoration: none; }
 a:hover, a:link:hover { text-decoration: underline; }
 h2 {

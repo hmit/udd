@@ -355,13 +355,13 @@ EOF
         poold = r['source'][0]
       end
       if r['status'] == 'pass'
-        prio = '<span class="prio_ok">'
+        prio = '<span class="prio_ok_nobold">'
         eprio = '</span>'
       elsif r['status'] == 'fail'
-        prio = '<span class="prio_high">'
+        prio = '<span class="prio_high_nobold">'
         eprio = '</span>'
       elsif r['status'] == 'tmpfail'
-        prio = '<span class="prio_med">'
+        prio = '<span class="prio_med_nobold">'
         eprio = '</span>'
       else
         raise 'Unhandled case'
