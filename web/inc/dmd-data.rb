@@ -284,7 +284,7 @@ and s2.version > s1.version);
     end
 
     # vcs versions
-    q = "select * from vcswatch where source in (select source from mysources)"
+    q = "select source, changelog_version, changelog_distribution from vcswatch where source in (select source from mysources)"
     rows = dbget(q)
     rows.each do |r|
       @versions[r['source']]['vcs'] = { :version => r['changelog_version'], :distribution => r['changelog_distribution'] }
