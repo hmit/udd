@@ -73,6 +73,7 @@ class UDDData
     end
     if @debug
       puts "Content-type: text/html\n\n"
+      @totqtime = 0.0
     end
 
     get_sources
@@ -852,7 +853,9 @@ WHERE label ~* ?
     rows = sth.fetch_all
     if @debug
       puts "<pre>"
-      puts "Query duration: #{Time::now - t}s"
+      qtime = Time::now - t
+      @totqtime += qtime
+      puts "Query duration: #{qtime}s (total: #{@totqtime}s)"
   #    puts DBI::Utils::TableFormatter.ascii(sth.column_names, rows)
       puts "</pre>"
     end
