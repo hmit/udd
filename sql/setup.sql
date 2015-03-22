@@ -537,6 +537,7 @@ CREATE TABLE lintian (
   tag TEXT NOT NULL,
   information TEXT
 );
+CREATE INDEX lintian_package_idx ON lintian(package);
 
 GRANT SELECT ON lintian TO PUBLIC;
 
