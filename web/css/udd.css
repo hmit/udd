@@ -78,7 +78,7 @@ table td {
 .table th, .table td {
     border-top: 1px solid #c5c5c5;
     line-height: 21px;
-    padding: 2px 4px;
+    padding: 0px 4px;
 }
 .table th {
     font-weight: bold;
