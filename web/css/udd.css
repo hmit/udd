@@ -32,7 +32,7 @@ span.prio_med_nobold {
 a, a:link { text-decoration: none; }
 a:hover, a:link:hover { text-decoration: underline; }
 h2 {
-    margin: 8px 0;
+    margin: 16px 0;
 }
 #content {
     margin-top: 12px;
@@ -86,7 +86,7 @@ table td {
 .table thead th {
     vertical-align: bottom;
     padding: 4px;
-    padding-right: 30px;
+    padding-right: 20px;
 }
 .table tbody + tbody {
     border-top: 2px solid #c5c5c5;
