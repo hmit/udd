@@ -243,15 +243,7 @@
     <% if checks['piuparts'] %>
       <td>
         <% checks['piuparts'].each do |ch| %>
-          <!-- FIXME pkg[0] won't work for libraries... -->
-          <% 
-          if pkg =~ /^lib/
-            pooldir = pkg[0..3]
-          else
-            pooldir = pkg[0]
-          end
-          %>
-        <a href="https://piuparts.debian.org/<%= ch %>/source/<%=pooldir + '/' + pkg %>.html"><span class="prio_high_nobold"><%=ch %></a></a>
+        <a href="https://piuparts.debian.org/<%= ch %>/source/<%=pooldir(pkg) + '/' + pkg %>.html"><span class="prio_high_nobold"><%=ch %></a></a>
         <% end %>
       </td>
     <% else %>

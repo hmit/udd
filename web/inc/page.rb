@@ -68,4 +68,13 @@ class Page
     end
     s
   end
+
+  def pooldir(pkg)
+    if pkg =~ /^lib/
+      return pkg[0..3]
+    else
+      return pkg[0]
+    end
+  end
+
 end
