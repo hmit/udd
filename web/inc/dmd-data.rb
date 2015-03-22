@@ -741,7 +741,7 @@ and source not in (select source from upload_history where date > (current_date 
                         :source => src,
                         :link => nil,
                         :description => "debian/watch: uscan returned an error",
-                        :details => "#{v['upstream'][:warnings]}#{v['upstream'][:errors]}".gsub(/uscan warning: In (watchfile )?\/dev\/shm\/[^,]+,/, 'uscan warning:') }
+                        :details => "#{v['upstream'][:warnings]}#{v['upstream'][:errors]}".gsub(/uscan warning: In (watchfile )?(\/dev\/shm\/[^,]+|debian\/watch),/, 'uscan warning:') }
       end
     end
 
