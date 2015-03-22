@@ -13,7 +13,8 @@ if cgi.params != {}
       params['packages'],
       params['bin2src'] == 'on',
       params['ignpackages'],
-      params['ignbin2src'] == 'on')
+      params['ignbin2src'] == 'on',
+      cgi.params['debug'][0] != nil)
 
   uddd.get_all_data
 

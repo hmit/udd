@@ -54,8 +54,8 @@ class UDDData
     params
   end
 
-  def initialize(emails={}, addsources="", bin2src=false, ignsources="", ignbin2src=false)
-    @debug = false
+  def initialize(emails={}, addsources="", bin2src=false, ignsources="", ignbin2src=false, debug = false)
+    @debug = debug
     @emails = emails
     @addsources = addsources
     @bin2src = bin2src
