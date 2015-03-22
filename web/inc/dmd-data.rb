@@ -76,6 +76,10 @@ class UDDData
       @totqtime = 0.0
     end
 
+    ur = YAML::load(IO::read('ubuntu-releases.yaml'))
+    @ustb = ur['stable']
+    @udev = ur['devel']
+
     get_sources
   end
 
@@ -221,7 +225,8 @@ and s2.version > s1.version);
     # versions in archives
     q = "select source, version, distribution, release, component from sources_uniq where source in (select source from mysources)"
     rows = dbget(q)
-    q = "select source, version, distribution, release, component from ubuntu_sources where source in (select source from mysources)"
+    urels = ['', '-security', '-updates', '-backports', '-proposed'].inject([]) { |a, b| a + [ @ustb + b, @udev + b ] }.map { |e| "'#{e}'" }.join(',')
+    q = "select source, version, distribution, release, component from ubuntu_sources where source in (select source from mysources) and release in (#{urels})"
     rows += dbget(q)
 
     rows.each do |r|
@@ -442,9 +447,6 @@ group by package) tpatches on tbugs.package = tpatches.package order by package 
 
   def get_ubuntu_dirty
       @ubuntu = Array.new
-      ur = YAML::load(IO::read('ubuntu-releases.yaml'))
-      @ustb = ur['stable']
-      @udev = ur['devel']
       @sources.keys.sort.each do |src|
         next if not versions.include?(src)
         next if (not versions[src].include?('debian') or not versions[src].include?('ubuntu'))
