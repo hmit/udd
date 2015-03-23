@@ -196,7 +196,7 @@
   <tr>
       <td><a href="https://tracker.debian.org/<%= pkg %>" title=""><%= pkg %></a></td>
   <% b = uddd.bugs_count[pkg] 
-     buggraph = "<a href=\"https://qa.debian.org/data/bts/graphs/#{pooldir(pkg)}/#{pkg}.png\"><img src=\"/img/bug-graph.png\"></a>"
+     buggraph = "<a href=\"https://qa.debian.org/data/bts/graphs/#{pooldir(pkg)}/#{pkg}.png\"><img src=\"/img/bug-graph.png\" alt=\"bugs graph\"></a>"
      if b.nil? or b[:all] == 0 %>
       <td style="text-align: right;" class="nowrap"><a href="http://bugs.debian.org/cgi-bin/pkgreport.cgi?src=<%= pkg %>">0</a> <%= buggraph %></td>
       <td colspan="3">&nbsp;</td>
@@ -274,6 +274,7 @@
 <tbody>
 
 <% uddd.ubuntu.each do |p| %>
+  <tr>
   <td><a href="https://tracker.debian.org/<%= p[:src] %>" title=""><%= p[:src] %></a></td>
     <td><a href="<%= p[:launchpad] %>">LP</a></td>
     <% if p[:bugs] > 0 %>
