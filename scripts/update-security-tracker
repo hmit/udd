@@ -4,6 +4,7 @@ require 'dbi'
 require 'pp'
 require 'open-uri'
 require 'json'
+require 'openssl'
 
 module Kernel
   def suppress_warnings
