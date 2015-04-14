@@ -1,0 +1,40 @@
+#!/usr/bin/ruby
+
+require 'dbi'
+require 'pp'
+require 'open-uri'
+require 'json'
+
+dbh = DBI::connect('DBI:Pg:dbname=udd;port=5452', 'udd')
+dbh.do("BEGIN")
+dbh.do("SET CONSTRAINTS ALL DEFERRED")
+dbh.do("DELETE FROM security_issues")
+dbh.do("DELETE FROM security_issues_releases")
+
+sth_issues = dbh.prepare("insert into security_issues values (?,?,?,?,?)")
+sth_releases = dbh.prepare("insert into security_issues_releases values (?,?,?,?,?,?,?)")
+
+d = JSON::parse(open('https://security-tracker.debian.org/tracker/data/json').read)
+allinfokeys = []
+allrelinfokeys = []
+d.each_pair do |source, issues|
+  issues.each_pair do |issue, info|
+    allinfokeys << info.keys
+    sth_issues.execute(source, issue, info['description'], info['scope'], info['debianbug'])
+    info['releases'].each_pair do |release, relinfo|
+      allrelinfokeys << relinfo.keys
+      sth_releases.execute(source, issue, release, relinfo['fixed_version'], relinfo['status'], relinfo['urgency'], relinfo['nodsa'])
+    end
+  end
+end
+dbh.do("COMMIT")
+
+# Sanity checks
+unknowninfokeys = allinfokeys.flatten.uniq - ["releases", "description", "scope", "debianbug"]
+if not unknowninfokeys.empty?
+  raise "Unknown info key: #{unknowninfokeys}"
+end
+unknownrelinfokeys = allrelinfokeys.flatten.uniq - ["fixed_version", "repositories", "status", "urgency", "nodsa"]
+if not unknownrelinfokeys.empty?
+  raise "Unknown relinfo key: #{unknownrelinfokeys}"
+end

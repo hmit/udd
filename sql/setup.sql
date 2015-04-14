@@ -1961,3 +1961,30 @@ CREATE TABLE ci (
   primary key(suite,arch,source)
 );
 GRANT SELECT ON ci TO PUBLIC;
+
+-- security tracker
+CREATE TYPE security_issues_scope as ENUM('local', 'remote');
+CREATE TABLE security_issues (
+source text,
+issue text,
+description text,
+scope security_issues_scope,
+bug integer,
+primary key (source, issue)
+);
+
+CREATE TYPE security_issues_releases_status as ENUM('open', 'resolved', 'undetermined');
+CREATE TABLE security_issues_releases (
+source text,
+issue text,
+release text,
+fixed_version text,
+status security_issues_releases_status,
+urgency text,
+nodsa text,
+primary key (source, issue, release),
+foreign key (source, issue) references security_issues DEFERRABLE
+);
+
+GRANT SELECT ON security_issues TO PUBLIC;
+GRANT SELECT ON security_issues_releases TO PUBLIC;
