@@ -5,6 +5,20 @@ require 'pp'
 require 'open-uri'
 require 'json'
 
+module Kernel
+  def suppress_warnings
+    original_verbosity = $VERBOSE
+    $VERBOSE = nil
+    result = yield
+    $VERBOSE = original_verbosity
+    return result
+  end
+end
+
+suppress_warnings do
+  OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
+end
+
 dbh = DBI::connect('DBI:Pg:dbname=udd;port=5452', 'udd')
 dbh.do("BEGIN")
 dbh.do("SET CONSTRAINTS ALL DEFERRED")
